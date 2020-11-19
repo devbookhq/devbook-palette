@@ -13,15 +13,17 @@ const Content = styled.div`
 function Home() {
   const [problems, setProblems] = useState<Array<any>>([]);
 
-
   useIPCRenderer('problems', (event, { problems: currentProblems }: { problems: any }) => {
+    setProblems(currentProblems);
     console.log(currentProblems);
-    setProblems(currentProblems)
   });
 
   return (
     <Content>
-      {problems.length}
+      {problems.map(p => JSON.stringify({
+        message: p.diagnostic.message,
+        source: p.diagnostic.source,
+      }))}
     </Content>
   );
 }

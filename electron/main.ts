@@ -55,8 +55,8 @@ let onboardingWindow: OnboardingWindow | undefined = undefined;
 
 const vscodeManager = new VSCodeManager();
 
-vscodeManager.emitter.on('vscode-problems', (problems) => {
-  mainWindow?.webContents.send('vscode-problems', { problems });
+vscodeManager.emitter.on('problems', (problems) => {
+  mainWindow?.webContents.send('problems', { problems });
 });
 
 const store = new Store();
