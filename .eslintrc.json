@@ -1,0 +1,44 @@
+{
+  "extends": [
+    "react-app"
+  ],
+  "rules": {
+    "eol-last": "warn",
+    "object-curly-newline": [
+      "error",
+      {
+        "ObjectPattern": {
+          "multiline": true,
+          "minProperties": 3
+        },
+        "ImportDeclaration": {
+          "multiline": true,
+          "minProperties": 3
+        }
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.ts?(x)"
+      ],
+      "rules": {
+        "eol-last": "warn",
+        "object-curly-newline": [
+          "error",
+          {
+            "ObjectPattern": {
+              "multiline": true,
+              "minProperties": 3
+            },
+            "ImportDeclaration": {
+              "multiline": true,
+              "minProperties": 3
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

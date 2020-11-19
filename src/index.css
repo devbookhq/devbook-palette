@@ -1,0 +1,81 @@
+ @font-face {
+  font-family: 'Source Code Pro';
+  font-weight: 400;
+  src: local('SourceCodePro-Regular'), url(./fonts/SourceCodePro-Regular.ttf) format('truetype');
+ }
+
+ @font-face {
+  font-family: 'Source Code Pro';
+  font-weight: 500;
+  src: local('SourceCodePro-Medium'), url(./fonts/SourceCodePro-Medium.ttf) format('truetype');
+ }
+
+ @font-face {
+  font-family: 'Source Code Pro';
+  font-weight: 600;
+  src: local('SourceCodePro-SemiBold'), url(./fonts/SourceCodePro-SemiBold.ttf) format('truetype');
+ }
+
+* , *:before, *:after {
+  box-sizing: border-box;
+  outline: none;
+}
+
+html, body {
+  color: white;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background-color: #212122;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  margin: 0 auto;
+  height: 100%;
+  width: 100%;
+}
+
+*::-webkit-scrollbar {
+  /* width of the vertical scrollbar */
+  width: 15px;
+
+  /* height of the horizontal scrollbar */
+  height: 17px;
+}
+
+*::-webkit-scrollbar-track {
+  /* color of the tracking area */
+  background: rgba(29, 29, 29, 0.55);
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  /* padding and margin cannot be used in the scrollbar so this is the recommended workaround */
+  border: 4px solid transparent;
+  background-clip: padding-box;
+
+  /* color of the scroll thumb */
+  background-color: #6E7075;
+
+  /* roundness of the scroll thumb */
+  /* 'border-radius' is required for compatibility and is tagged as a problem when omitted */
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-corner {
+  /* background: transparent; */
+}
+
+* {
+  /* if you specify 'stroke 100ms ease' then the button icon will be affected,
+  but the speed is still not the same as with the text transition */
+  transition: background-color 100ms ease, color 100ms ease, fill 100ms ease, stroke 100ms ease;
+}
