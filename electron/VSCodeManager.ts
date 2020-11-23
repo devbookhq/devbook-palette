@@ -6,11 +6,8 @@ class VSCodeManager {
   private static PORT = 8019;
   private server: io.Server;
   private vscodeServer: io.Namespace
-  public emitter = new EventEmitter();
-
   private problems: { [socketID: string]: any } = {};
-
-  private terminalsData: { [terminaID: number]: string[] } = {};
+  public emitter = new EventEmitter();
 
   public constructor() {
     this.server = io();
@@ -22,12 +19,6 @@ class VSCodeManager {
         this.reportProblems();
       });
 
-      socket.on('terminal-data', ({ id, data }: { id: number, data: string }) => {
-        console.log('terminal data', id);
-        this.terminalsData[id] = (this.terminalsData[id] || []).concat(data);
-        this.reportTerminalData();
-      });
-
       socket.on('disconnect', () => {
         delete this.problems[socket.id];
         this.reportProblems();
@@ -37,19 +28,6 @@ class VSCodeManager {
     this.server.listen(VSCodeManager.PORT);
 
     console.debug(`VSCodeManager listening on port ${VSCodeManager.PORT}`);
-  }
-
-  private reportTerminalData() {
-    const aggregatedTerminalData = Object
-      .entries(this.terminalsData)
-      .map(([terminalID, data]) => {
-        return {
-          terminalID,
-          data,
-        };
-      });
-
-    this.emitter.emit('terminal-data', aggregatedTerminalData);
   }
 
   private reportProblems() {
