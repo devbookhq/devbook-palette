@@ -215,7 +215,6 @@ app.once('ready', async () => {
       store.set('openAtLogin', !currentVal);
       tray.setOpenAtLogin(!currentVal);
     },
-    onSignOutClick: () => mainWindow?.webContents.send('sign-out'),
     onQuitClick: () => app.quit(),
     shouldOpenAtLogin: store.get('openAtLogin', true),
   });

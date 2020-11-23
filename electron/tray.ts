@@ -3,7 +3,6 @@ import * as electron from 'electron';
 interface TrayOptions {
   onShowSidekickClick: () => void;
   onOpenAtLoginClick: () => void;
-  onSignOutClick: () => void;
   onQuitClick: () => void;
   shouldOpenAtLogin: boolean;
 }
@@ -43,10 +42,6 @@ class Tray {
         type: 'checkbox',
         label: 'Should open at login',
         checked: this.opts.shouldOpenAtLogin,
-      },
-      {
-        click: this.opts.onSignOutClick,
-        label: 'Sign Out',
       },
       {
         click: this.opts.onQuitClick,

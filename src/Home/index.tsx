@@ -12,16 +12,10 @@ const Content = styled.div`
 
 function Home() {
   const [problems, setProblems] = useState<Array<any>>([]);
-  const [terminalData, setTerminalData] = useState<Array<any>>([]);
 
   useIPCRenderer('problems', (event, currentProblems: any) => {
     setProblems(currentProblems);
     console.log('Problems: ', currentProblems);
-  });
-
-  useIPCRenderer('terminal-data', (event, currentTerminalData: any) => {
-    setTerminalData(currentTerminalData)
-    console.log('Terminal data:', currentTerminalData);
   });
 
   return (
@@ -31,9 +25,6 @@ function Home() {
           message: p.diagnostic.message,
           source: p.diagnostic.source,
         }))}
-      </>
-      <>
-        {terminalData.map(p => JSON.stringify(p))}
       </>
     </Content>
   );

@@ -70,6 +70,7 @@
     "electron:build-mac": "npm build && tsc -p electron && npx electron-builder build --mac"
   },
   "dependencies": {
+    "@octokit/rest": "^18.0.9",
     "electron-store": "^5.2.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
