@@ -1,7 +1,7 @@
 import * as electron from 'electron';
 
 interface TrayOptions {
-  onShowSidekickClick: () => void;
+  onShowDevbookClick: () => void;
   onOpenAtLoginClick: () => void;
   onQuitClick: () => void;
   shouldOpenAtLogin: boolean;
@@ -34,8 +34,8 @@ class Tray {
   private buildContextMenu() {
     this.contextMenu = electron.Menu.buildFromTemplate([
       {
-        click: this.opts.onShowSidekickClick,
-        label: 'Show Sidekick',
+        click: this.opts.onShowDevbookClick,
+        label: 'Show Devbook',
       },
       {
         click: this.opts.onOpenAtLoginClick,

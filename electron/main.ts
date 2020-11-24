@@ -8,10 +8,12 @@ import {
   app,
   ipcMain,
 } from 'electron';
+import keytar from 'keytar';
 
 import isdev from './isdev';
 import Tray from './tray';
 import OnboardingWindow from './OnboardingWindow';
+import OAuth from './OAuth';
 
 const PORT = 3000;
 
@@ -52,6 +54,19 @@ let tray: Tray;
 let mainWindow: BrowserWindow | undefined = undefined;
 let onboardingWindow: OnboardingWindow | undefined = undefined;
 
+const oauth = new OAuth(
+  () => mainWindow?.show(),
+  () => mainWindow?.hide(),
+);
+
+oauth.emitter.on('access-token', ({ accessToken }: { accessToken: string }) => {
+  mainWindow?.webContents.send('github-access-token', { accessToken });
+});
+
+oauth.emitter.on('error', () => {
+  mainWindow?.webContents.send('github-error');
+});
+
 const store = new Store();
 let isAppReady = false;
 
@@ -80,7 +95,7 @@ function createMainWindow() {
     alwaysOnTop: true,
     frame: false,
     fullscreenable: false,
-    skipTaskbar: true, // This makes sure that Sidekick window isn't shown on the bottom taskbar on Windows.
+    skipTaskbar: true, // This makes sure that Devbook window isn't shown on the bottom taskbar on Windows.
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
@@ -197,12 +212,12 @@ app.once('ready', async () => {
   const savedShortcut = store.get('globalShortcut');
   if (savedShortcut) {
     // TODO: Since we still don't offer for a user to change the shortcut after onboarding
-    // this might fail and user won't be able to show Sidekick through a shortcut ever again.
+    // this might fail and user won't be able to show Devbook through a shortcut ever again.
     trySetGlobalShortcut(savedShortcut);
   }
 
   tray = new Tray(trayIcon, {
-    onShowSidekickClick: toggleVisibilityOnMainWindow,
+    onShowDevbookClick: toggleVisibilityOnMainWindow,
     // TODO: What if the main window is undefined?
     onOpenAtLoginClick: () => {
       const currentVal = store.get('openAtLogin', true);
@@ -264,4 +279,12 @@ ipcMain.on('finish-onboarding', () => {
 ipcMain.on('register-default-shortcut', () => {
   const shortcut = store.get('globalShortcut', 'Alt+Space');
   trySetGlobalShortcut(shortcut);
+});
+
+ipcMain.on('github-oauth', (event, arg) => {
+  oauth.requestOAuth();
+});
+
+ipcMain.handle('github-access-token', () => {
+  return keytar.getPassword('github', 'default');
 });
