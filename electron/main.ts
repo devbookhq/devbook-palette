@@ -15,6 +15,7 @@ import Tray from './tray';
 import OnboardingWindow from './OnboardingWindow';
 import OAuth from './OAuth';
 
+
 const PORT = 3000;
 
 // Set up logs so logging from the main process can be seen in the browser.
@@ -59,8 +60,9 @@ const oauth = new OAuth(
   () => mainWindow?.hide(),
 );
 
-oauth.emitter.on('access-token', ({ accessToken }: { accessToken: string }) => {
+oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
   mainWindow?.webContents.send('github-access-token', { accessToken });
+  await keytar.setPassword('github', 'default', accessToken);
 });
 
 oauth.emitter.on('error', () => {
