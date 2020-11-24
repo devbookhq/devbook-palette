@@ -12,7 +12,6 @@ import {
 import isdev from './isdev';
 import Tray from './tray';
 import OnboardingWindow from './OnboardingWindow';
-import VSCodeManager from './VSCodeManager';
 
 const PORT = 3000;
 
@@ -52,12 +51,6 @@ if (isdev) {
 let tray: Tray;
 let mainWindow: BrowserWindow | undefined = undefined;
 let onboardingWindow: OnboardingWindow | undefined = undefined;
-
-const vscodeManager = new VSCodeManager();
-
-vscodeManager.emitter.on('problems', (problems) => {
-  mainWindow?.webContents.send('problems', { problems });
-});
 
 const store = new Store();
 let isAppReady = false;
