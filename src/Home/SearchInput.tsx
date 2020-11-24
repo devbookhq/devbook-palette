@@ -1,7 +1,4 @@
-import React, {
-  useState,
-  useRef,
-} from 'react';
+import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import useIPCRenderer from 'hooks/useIPCRenderer';
@@ -36,7 +33,7 @@ const FiltersWrapper = styled.div`
 `;
 
 const FilterButton = styled.button<{ selected?: boolean }>`
-  color: ${props => props.selected ? 'white' : '#BCBCBD'};
+  color: ${props => props.selected ? 'white' : '#909090'};
   font-size: 14px;
   font-weight: 600;
 
@@ -53,41 +50,61 @@ const FilterButton = styled.button<{ selected?: boolean }>`
   }
 `;
 
-enum Filter {
-  All,
-  StackOverflow,
-  GitHubCode,
+export enum FilterType {
+  All = 'All',
+  StackOverflow = 'StackOverflow',
+  GitHubCode = 'GitHubCode',
 }
 
 interface SearchInputProps {
   placeholder?: string;
   value: string;
   onChange: (e: any) => void;
+
+  activeFilter: FilterType;
+  onFilterSelect: (f: FilterType) => void;
 }
 
 function SearchInput({
   placeholder,
   value,
   onChange,
+  activeFilter,
+  onFilterSelect,
 }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   useIPCRenderer('did-show-main-window', () => {
     inputRef?.current?.focus();
   });
 
+  function handleContentMouseDown(e: any) {
+    // Prevent blur on the input element.
+    if (isInputFocused) e.preventDefault();
+  };
+
   return (
-    <Content>
+    <Content
+      onMouseDown={handleContentMouseDown}
+    >
       <Input
         ref={inputRef}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
+        onFocus={() => setIsInputFocused(true)}
+        onBlur={() => setIsInputFocused(false)}
       />
       <FiltersWrapper>
-        <FilterButton selected>All</FilterButton>
-        <FilterButton>StackOverflow</FilterButton>
-        <FilterButton>GitHub Code</FilterButton>
+        {Object.values(FilterType).map(f => (
+          <FilterButton
+            key={f}
+            selected={activeFilter === f}
+            onClick={() => onFilterSelect(f)}
+          >{f}
+          </FilterButton>
+        ))}
       </FiltersWrapper>
     </Content>
   );
