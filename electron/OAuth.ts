@@ -4,23 +4,9 @@ import { shell } from 'electron';
 import { EventEmitter } from 'events';
 import axios from 'axios';
 import querystring from 'querystring';
-
-const htmlRedirectPage = `
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <title>Devbook</title>
-</head>
-
-<body>
-  <script>
-    window.open('', '_parent', '');
-    window.close();
-  </script>
-</body>
-
-</html>`;
+import fs from 'fs';
+import path from 'path';
+import { app } from 'electron';
 
 function getRandomToken() {
   return crypto.randomBytes(48).toString('hex');
@@ -42,6 +28,7 @@ class OAuth {
     allow_signup: 'true',
   };
 
+  private redirectHTML = fs.readFileSync(path.join(app.getAppPath(), 'resources', 'OAuthRedirect.html'), 'utf8').toString();
   private stateTokens: { [state: string]: boolean } = {};
   private app = express();
 
@@ -55,7 +42,7 @@ class OAuth {
         try {
           const accessToken = await OAuth.getAccessToken(code, state);
           this.emitter.emit('access-token', { accessToken });
-          res.send(htmlRedirectPage);
+          res.send(this.redirectHTML);
         } catch (error) {
           console.error(error.message);
           this.emitter.emit('error', {});
