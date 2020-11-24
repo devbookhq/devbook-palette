@@ -1,5 +1,10 @@
-import React, { useState } from 'react';
+import React, {
+  useState,
+  useRef,
+} from 'react';
 import styled from 'styled-components';
+
+import useIPCRenderer from 'hooks/useIPCRenderer';
 
 const Content = styled.div`
   display: flex;
@@ -19,6 +24,10 @@ const Input = styled.input`
   background: #2B2D2F;
   border: 1px solid #404244;
   outline: none;
+
+  :focus {
+    border-color: #3897EE;
+  }
 `;
 
 const FiltersWrapper = styled.div`
@@ -61,10 +70,16 @@ function SearchInput({
   value,
   onChange,
 }: SearchInputProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useIPCRenderer('did-show-main-window', () => {
+    inputRef?.current?.focus();
+  });
 
   return (
     <Content>
       <Input
+        ref={inputRef}
         placeholder={placeholder}
         value={value}
         onChange={onChange}

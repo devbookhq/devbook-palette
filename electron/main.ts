@@ -165,6 +165,7 @@ function toggleVisibilityOnMainWindow() {
   } else {
     console.log('Main window is not visible. Will show main window.');
     mainWindow.show();
+    mainWindow.webContents?.send('did-show-main-window');
     onboardingWindow?.webContents?.send('did-show-main-window');
   }
 }
