@@ -112,7 +112,7 @@ function TrayPage(props: TrayPageProps) {
       <Titles>
         <Title>How it works</Title>
         <Subtitle>
-          You can access Sidekick from anywhere by hitting a shortcut on your keyboard. Try it now!
+          You can access Devbook from anywhere by hitting a shortcut on your keyboard. Try it now!
         </Subtitle>
       </Titles>
 
