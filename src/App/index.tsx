@@ -6,9 +6,9 @@ import {
   Route,
   Redirect,
 } from 'react-router-dom';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { hideMainWindow } from 'mainProcess';
-import useOnKeyPress from 'hooks/useOnKeyPress';
 import Onboarding from 'Onboarding';
 import Home from 'Home';
 
@@ -41,7 +41,7 @@ const AppDiv = styled.div`
 `;
 
 function App() {
-  useOnKeyPress(null, 'Escape', hideMainWindow);
+  useHotkeys('esc', () => hideMainWindow());
 
   return (
     <AppDiv>

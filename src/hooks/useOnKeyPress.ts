@@ -2,16 +2,18 @@ import { useEffect } from 'react';
 
 type Modifier = 'Alt' | 'Control' | null;
 
-function useOnKeyPress(modifier: Modifier, targetKey: string, handler: (event: any) => void) {
+function useOnKeyPress(modifier: Modifier, targetKeys: string | string[], handler: (event: any) => void, deps?: any[]) {
   useEffect(() => {
     function listener(event: any) {
       const { key }: { key: string } = event;
-      if (key === targetKey) {
+      if (key === targetKeys || Array.isArray(targetKeys) && targetKeys.includes(key)) {
         if (!modifier) {
           handler(event);
           return;
         }
 
+        console.log('MODIFIER', modifier);
+        console.log(event);
         if (modifier === 'Alt' && event.altKey) {
           handler(event);
           return;
@@ -26,7 +28,8 @@ function useOnKeyPress(modifier: Modifier, targetKey: string, handler: (event: a
 
     window.addEventListener('keydown', listener);
     return () => window.removeEventListener('keydown', listener);
-  }, [targetKey, handler, modifier]);
+  }, deps ? [targetKeys, handler, modifier, ...deps] : [targetKeys, handler, modifier]);
 }
 
 export default useOnKeyPress;
+

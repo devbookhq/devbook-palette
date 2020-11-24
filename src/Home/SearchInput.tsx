@@ -53,7 +53,7 @@ const FilterButton = styled.button<{ selected?: boolean }>`
 export enum FilterType {
   All = 'All',
   StackOverflow = 'StackOverflow',
-  GitHubCode = 'GitHubCode',
+  GitHubCode = 'Code',
 }
 
 interface SearchInputProps {
