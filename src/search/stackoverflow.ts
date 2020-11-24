@@ -1,7 +1,6 @@
 import axios from 'axios';
 
 const apiKey = 'AIzaSyBBVqZNSKc17L_BcNwhofYJKsUkTZ1MgaI';
-
 const stackOverflowSearchEngineID = 'a5f3989768bc8efd1';
 
 export interface SearchResult {
@@ -20,7 +19,6 @@ async function searchSite(query: string, searchEngineID: string, apiKey: string)
 }
 
 export async function search(query: string) {
-  console.log('query', query);
   const results = await searchSite(query, stackOverflowSearchEngineID, apiKey);
-  return results.slice(5);
+  return results;
 }

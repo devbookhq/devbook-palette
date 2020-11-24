@@ -3,7 +3,6 @@ import crypto from 'crypto';
 import { shell } from 'electron';
 import { EventEmitter } from 'events';
 import axios from 'axios';
-import keytar from 'keytar';
 import querystring from 'querystring';
 
 const htmlRedirectPage = `
@@ -55,17 +54,11 @@ class OAuth {
       if (this.stateTokens[state]) {
         try {
           const accessToken = await OAuth.getAccessToken(code, state);
-          this.emitter.emit('access-token', {
-            accessToken,
-          });
-
+          this.emitter.emit('access-token', { accessToken });
           res.send(htmlRedirectPage);
-          await keytar.setPassword('github', 'default', accessToken);
         } catch (error) {
           console.error(error.message);
-          this.emitter.emit('error', {
-
-          });
+          this.emitter.emit('error', {});
           res.status(500).send();
         } finally {
           delete this.stateTokens[state];
@@ -83,8 +76,8 @@ class OAuth {
       },
       params: {
         ...OAuth.GITHUB_CONFIG,
-        code,
         state,
+        code,
       },
     });
     return result.data.access_token;

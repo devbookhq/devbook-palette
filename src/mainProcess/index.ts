@@ -1,5 +1,9 @@
 const electron = window.require('electron') as typeof import('electron');
 
+export function connectGitHub() {
+  electron.ipcRenderer.send('github-oauth');
+}
+
 export function notifyViewReady() {
   electron.ipcRenderer.send('view-ready');
 }
@@ -14,6 +18,10 @@ export function userDidChangeShortcut(shortcut: string) {
 
 export function finishOnboarding() {
   electron.ipcRenderer.send('finish-onboarding');
+}
+
+export function getGitHubAccessToken(): Promise<string | null> {
+  return electron.ipcRenderer.invoke('github-access-token');
 }
 
 // So we see logs from the main process in the Chrome debug tools
