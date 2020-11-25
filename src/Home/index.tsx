@@ -19,8 +19,8 @@ function Home() {
     gitHub.init(accessToken);
   });
 
-  useIPCRenderer('github-error', () => {
-    console.log('gitHub error');
+  useIPCRenderer('github-error', (event, { message }: { message: string }) => {
+    console.log('gitHub error', message);
   });
 
   async function search(query: string) {

@@ -6,6 +6,9 @@ let octokit: Octokit | undefined;
 export async function init(accessToken?: string) {
   if (!accessToken) {
     const accessToken = await getGitHubAccessToken();
+    if (!accessToken) {
+      throw new Error('No access token found');
+    }
     octokit = new Octokit({
       auth: accessToken,
     });
@@ -30,10 +33,10 @@ export async function getUserInfo() {
 
 export async function searchCode(query: string, page?: number) {
   if (!octokit) {
-    throw new Error('GitHub is not initialized');
+    await init();
   }
 
-  const result = await octokit.search.code({
+  const result = await octokit!.search.code({
     q: query,
     page,
   });
@@ -43,10 +46,10 @@ export async function searchCode(query: string, page?: number) {
 
 export async function searchRepositories(query: string, page?: number) {
   if (!octokit) {
-    throw new Error('GitHub is not initialized');
+    await init();
   }
 
-  const result = await octokit.search.issuesAndPullRequests({
+  const result = await octokit!.search.issuesAndPullRequests({
     q: query,
     page,
   });
@@ -56,10 +59,10 @@ export async function searchRepositories(query: string, page?: number) {
 
 export async function searchIssues(query: string, page?: number) {
   if (!octokit) {
-    throw new Error('GitHub is not initialized');
+    await init();
   }
 
-  const result = await octokit.search.repos({
+  const result = await octokit!.search.repos({
     q: query,
     page,
   });
