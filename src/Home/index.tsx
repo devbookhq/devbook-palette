@@ -29,17 +29,17 @@ function Home() {
     console.log(debouncedQuery);
   }, [debouncedQuery]);
 
-  useHotkeys('alt+shift+1', e => {
+  useHotkeys('alt+shift+1', (e: any) => {
     setActiveFilter(FilterType.All);
     e.preventDefault();
   }, { filter: () => true });
 
-  useHotkeys('alt+shift+2', e => {
+  useHotkeys('alt+shift+2', (e: any) => {
     setActiveFilter(FilterType.StackOverflow);
     e.preventDefault();
   }, { filter: () => true });
 
-  useHotkeys('alt+shift+3', e => {
+  useHotkeys('alt+shift+3', (e: any) => {
     setActiveFilter(FilterType.GitHubCode);
     e.preventDefault();
   }, { filter: () => true });
