@@ -27,8 +27,8 @@ class OAuth {
     scope: '',
     allow_signup: 'true',
   };
+  private static redirectHTML = fs.readFileSync(path.join(app.getAppPath(), 'resources', 'OAuthRedirect.html'), 'utf8').toString();
 
-  private redirectHTML = fs.readFileSync(path.join(app.getAppPath(), 'resources', 'OAuthRedirect.html'), 'utf8').toString();
   private stateTokens: { [state: string]: boolean } = {};
   private app = express();
 
@@ -38,20 +38,24 @@ class OAuth {
     this.app.all('/', async (req, res) => {
       const code = req.query['code'] as string;
       const state = req.query['state'] as string;
-      if (this.stateTokens[state]) {
-        try {
-          const accessToken = await OAuth.getAccessToken(code, state);
-          this.emitter.emit('access-token', { accessToken });
-          res.send(this.redirectHTML);
-        } catch (error) {
-          console.error(error.message);
-          this.emitter.emit('error', { message: error.message });
-          res.status(500).send();
-        } finally {
-          delete this.stateTokens[state];
-          this.showApp();
-        }
+
+      if (!this.stateTokens[state]) {
+        return res.status(404).send();
       }
+
+      try {
+        const accessToken = await OAuth.getAccessToken(code, state);
+        this.emitter.emit('access-token', { accessToken });
+        res.send(OAuth.redirectHTML);
+      } catch (error) {
+        console.error(error.message);
+        this.emitter.emit('error', { message: error.message });
+        res.status(500).send();
+      } finally {
+        delete this.stateTokens[state];
+        this.showApp();
+      }
+
     });
     this.app.listen(OAuth.PORT);
   }

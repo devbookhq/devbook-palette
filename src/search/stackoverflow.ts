@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const apiKey = 'AIzaSyBBVqZNSKc17L_BcNwhofYJKsUkTZ1MgaI';
-const stackOverflowSearchEngineID = 'a5f3989768bc8efd1';
+// TODO: Don't expose API_KEY in the app.
+const API_KEY = 'AIzaSyBBVqZNSKc17L_BcNwhofYJKsUkTZ1MgaI';
+const STACKOVERFLOW_SEARCH_ENGINE_ID = 'a5f3989768bc8efd1';
 
 export interface SearchResult {
   title: string;
@@ -19,6 +20,6 @@ async function searchSite(query: string, searchEngineID: string, apiKey: string)
 }
 
 export async function search(query: string) {
-  const results = await searchSite(query, stackOverflowSearchEngineID, apiKey);
+  const results = await searchSite(query, STACKOVERFLOW_SEARCH_ENGINE_ID, API_KEY);
   return results;
 }
