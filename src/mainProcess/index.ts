@@ -1,6 +1,10 @@
 const electron = window.require('electron') as typeof import('electron');
 
-export function connectGitHub() {
+export function openLink(url: string) {
+  return electron.shell.openExternal(url);
+}
+
+export function connectGithub() {
   electron.ipcRenderer.send('github-oauth');
 }
 
@@ -20,7 +24,7 @@ export function finishOnboarding() {
   electron.ipcRenderer.send('finish-onboarding');
 }
 
-export function getGitHubAccessToken(): Promise<string | null> {
+export function getGithubAccessToken(): Promise<string | null> {
   return electron.ipcRenderer.invoke('github-access-token');
 }
 

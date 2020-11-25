@@ -1,26 +1,16 @@
-import { getGitHubAccessToken } from 'mainProcess';
+import { getGithubAccessToken } from 'mainProcess';
 import { Octokit } from '@octokit/rest';
 
 let octokit: Octokit | undefined;
 
 export async function init(accessToken?: string) {
-  if (!accessToken) {
-    const accessToken = await getGitHubAccessToken();
-    if (!accessToken) {
-      throw new Error('No access token found');
-    }
-    octokit = new Octokit({
-      auth: accessToken,
-    });
-  } else {
-    octokit = new Octokit({
-      auth: accessToken,
-    });
-  }
-}
+  const auth = accessToken || await getGithubAccessToken();
 
-export function isInitialized() {
-  return !!octokit;
+  if (!auth) {
+    throw new Error('No access token found');
+  }
+
+  octokit = new Octokit({ auth });
 }
 
 export async function getUserInfo() {
@@ -31,7 +21,7 @@ export async function getUserInfo() {
   };
 }
 
-export async function searchCode(query: string, page?: number) {
+export async function searchCode(query: string, pageSize?: number, page?: number) {
   if (!octokit) {
     await init();
   }
@@ -39,12 +29,13 @@ export async function searchCode(query: string, page?: number) {
   const result = await octokit!.search.code({
     q: query,
     page,
+    per_page: pageSize,
   });
 
   return result.data.items;
 }
 
-export async function searchRepositories(query: string, page?: number) {
+export async function searchRepositories(query: string, pageSize?: number, page?: number) {
   if (!octokit) {
     await init();
   }
@@ -52,12 +43,13 @@ export async function searchRepositories(query: string, page?: number) {
   const result = await octokit!.search.issuesAndPullRequests({
     q: query,
     page,
+    per_page: pageSize,
   });
 
   return result.data.items;
 }
 
-export async function searchIssues(query: string, page?: number) {
+export async function searchIssues(query: string, pageSize?: number, page?: number) {
   if (!octokit) {
     await init();
   }
@@ -65,6 +57,7 @@ export async function searchIssues(query: string, page?: number) {
   const result = await octokit!.search.repos({
     q: query,
     page,
+    per_page: pageSize,
   });
 
   return result.data.items;
