@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import useIPCRenderer from 'hooks/useIPCRenderer';
+import Hotkey, { ModifierKey } from 'components/Hotkey';
 
 const Content = styled.div`
   display: flex;
@@ -9,7 +10,7 @@ const Content = styled.div`
 `;
 
 const Input = styled.input`
-  width: 400px;
+  width: 650px;
   padding: 10px 13px;
 
   color: white;
@@ -28,8 +29,15 @@ const Input = styled.input`
 `;
 
 const FiltersWrapper = styled.div`
+  display: flex;
   margin-top: 10px;
   width: 100%;
+`;
+
+const Filter = styled.div`
+  margin-right: 20px;
+  display: flex;
+  align-items: center;
 `;
 
 const FilterButton = styled.button<{ selected?: boolean }>`
@@ -46,7 +54,7 @@ const FilterButton = styled.button<{ selected?: boolean }>`
   }
 
   :not(:last-child) {
-    margin-right: 5px;
+    margin-right: 2px;
   }
 `;
 
@@ -97,15 +105,22 @@ function SearchInput({
         onBlur={() => setIsInputFocused(false)}
       />
       <FiltersWrapper>
-        {Object.values(FilterType).map(f => (
-          <FilterButton
+        {Object.values(FilterType).map((f, idx) => (
+          <Filter
             key={f}
-            selected={activeFilter === f}
-            onClick={() => onFilterSelect(f)}
-          >{f}
-          </FilterButton>
+          >
+            <FilterButton
+              selected={activeFilter === f}
+              onClick={() => onFilterSelect(f)}
+            >{f}
+            </FilterButton>
+            <Hotkey
+              hotkey={[ModifierKey.Shift, ModifierKey.Alt, `${idx+1}`]}
+            />
+          </Filter>
         ))}
       </FiltersWrapper>
+
     </Content>
   );
 }

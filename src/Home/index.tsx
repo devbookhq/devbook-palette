@@ -32,17 +32,17 @@ function Home() {
   useHotkeys('alt+shift+1', e => {
     setActiveFilter(FilterType.All);
     e.preventDefault();
-  }, { enableOnTags: ['INPUT'] });
+  }, { filter: () => true });
 
   useHotkeys('alt+shift+2', e => {
     setActiveFilter(FilterType.StackOverflow);
     e.preventDefault();
-  }, { enableOnTags: ['INPUT'] });
+  }, { filter: () => true });
 
   useHotkeys('alt+shift+3', e => {
     setActiveFilter(FilterType.GitHubCode);
     e.preventDefault();
-  }, { enableOnTags: ['INPUT'] });
+  }, { filter: () => true });
 
   return (
     <Content>
