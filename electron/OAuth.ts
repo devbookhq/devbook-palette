@@ -20,7 +20,7 @@ class OAuth {
   private static PORT = 8020;
   private static GITHUB_CONFIG = {
     client_id: 'e9d91ad9a34c68cf2f7c',
-    // TODO: Change the flow so we don't expose CLIENT_SECRET in the app
+    // TODO: Don't expose CLIENT_SECRET in the app.
     client_secret: '74ed7cf4a8d7a69034ce7cda2e7e0b3dfac9ae8b',
     redirect_uri: `http://localhost:${OAuth.PORT}`,
     login: '',
@@ -45,7 +45,7 @@ class OAuth {
           res.send(this.redirectHTML);
         } catch (error) {
           console.error(error.message);
-          this.emitter.emit('error', {});
+          this.emitter.emit('error', { message: error.message });
           res.status(500).send();
         } finally {
           delete this.stateTokens[state];

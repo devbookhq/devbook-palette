@@ -10,11 +10,10 @@ import {
 } from 'electron';
 import keytar from 'keytar';
 
-import isdev from './isdev';
+import isdev from './isDev';
 import Tray from './tray';
 import OnboardingWindow from './OnboardingWindow';
 import OAuth from './OAuth';
-
 
 const PORT = 3000;
 
@@ -65,8 +64,8 @@ oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }
   await keytar.setPassword('github', 'default', accessToken);
 });
 
-oauth.emitter.on('error', () => {
-  mainWindow?.webContents.send('github-error');
+oauth.emitter.on('error', ({ message }: { message: string }) => {
+  mainWindow?.webContents.send('github-error', { message });
 });
 
 const store = new Store();
