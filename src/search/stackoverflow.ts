@@ -1,26 +1,29 @@
 import axios from 'axios';
 
-const apiKey = 'AIzaSyBBVqZNSKc17L_BcNwhofYJKsUkTZ1MgaI';
-
-const stackOverflowSearchEngineID = 'a5f3989768bc8efd1';
-
-export interface SearchResult {
-  title: string;
-  link: string;
-  displayLink: string;
-  snippet: string;
-  formattedUrl: string;
+// TODO: These types are also present in the `devbook-server` repository - move them into a shared library.
+interface StackOverflowComment {
+  html: string;
 }
 
-async function searchSite(query: string, searchEngineID: string, apiKey: string): Promise<SearchResult[]> {
-  const encodedQuery = encodeURI(query);
-  const url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineID}&q=${encodedQuery}`;
-  const result = await axios.get(url);
-  return result.data.items || [];
+interface StackOverflowQuestion {
+  html: string;
+  comments: StackOverflowComment[];
 }
 
-export async function search(query: string) {
-  console.log('query', query);
-  const results = await searchSite(query, stackOverflowSearchEngineID, apiKey);
-  return results.slice(5);
+interface StackOverflowAnswer {
+  html: string;
+  comments: StackOverflowComment[];
 }
+
+
+async function search(query: string) {
+  const url = `https://api.getsidekick.app/search/stackoverflow`;
+  const result = await axios.post(url, { query });
+
+  return result.data as {
+    question: StackOverflowQuestion,
+    answers: StackOverflowAnswer[],
+  };
+}
+
+export default search;
