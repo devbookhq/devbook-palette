@@ -1,16 +1,21 @@
 import React, { useRef, useState } from 'react';
 import styled from 'styled-components';
 
+import { connectGitHub } from 'mainProcess';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Hotkey, { ModifierKey } from 'components/Hotkey';
 
 const Content = styled.div`
+  width: 100%;
+  padding: 20px 10px 10px;
   display: flex;
   flex-direction: column;
+
+  border-bottom: 1px solid #373738;
 `;
 
 const Input = styled.input`
-  width: 650px;
+  width: 100%;
   padding: 10px 13px;
 
   color: white;
@@ -28,9 +33,17 @@ const Input = styled.input`
   }
 `;
 
-const FiltersWrapper = styled.div`
-  display: flex;
+const Menu = styled.div`
+  width: 100%;
   margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const FiltersWrapper = styled.div`
+  flex: 1;
+  display: flex;
   width: 100%;
 `;
 
@@ -55,6 +68,19 @@ const FilterButton = styled.button<{ selected?: boolean }>`
 
   :not(:last-child) {
     margin-right: 2px;
+  }
+`;
+
+const ConnectGitHubButton = styled.button`
+  color: #3897EE;
+  font-size: 14px;
+  font-weight: 600;
+
+  border: none;
+  background: none;
+  outline: none;
+  :hover {
+    cursor: pointer;
   }
 `;
 
@@ -104,23 +130,27 @@ function SearchInput({
         onFocus={() => setIsInputFocused(true)}
         onBlur={() => setIsInputFocused(false)}
       />
-      <FiltersWrapper>
-        {Object.values(FilterType).map((f, idx) => (
-          <Filter
-            key={f}
-          >
-            <FilterButton
-              selected={activeFilter === f}
-              onClick={() => onFilterSelect(f)}
-            >{f}
-            </FilterButton>
-            <Hotkey
-              hotkey={[ModifierKey.Shift, ModifierKey.Alt, `${idx+1}`]}
-            />
-          </Filter>
-        ))}
-      </FiltersWrapper>
-
+      <Menu>
+        <FiltersWrapper>
+          {Object.values(FilterType).map((f, idx) => (
+            <Filter
+              key={f}
+            >
+              <FilterButton
+                selected={activeFilter === f}
+                onClick={() => onFilterSelect(f)}
+              >{f}
+              </FilterButton>
+              <Hotkey
+                hotkey={[ModifierKey.Shift, ModifierKey.Alt, `${idx+1}`]}
+              />
+            </Filter>
+          ))}
+        </FiltersWrapper>
+        <ConnectGitHubButton onClick={() => connectGitHub()}>
+          Connect your GitHub account
+        </ConnectGitHubButton>
+      </Menu>
     </Content>
   );
 }

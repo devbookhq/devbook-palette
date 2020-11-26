@@ -1,9 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import { CodeResult } from 'search/gitHub';
+
 const Container = styled.div`
   width: 100%;
   height: 200px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -48,18 +51,18 @@ const CodeSnippet = styled.div`
 `;
 
 export interface GitHubCodeResultProps {
-
+  codeResult: CodeResult;
 }
 
-function GitHubCodeResult() {
+function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
   return (
     <Container>
       <Header>
         <FilePath>
-          path/to/the/file/in/repo.ts
+          {codeResult.filePath}
         </FilePath>
         <RepoName>
-          repo-owner/repo-name
+          {codeResult.repoFullName}
         </RepoName>
       </Header>
 
