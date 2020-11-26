@@ -15,7 +15,7 @@ interface StackOverflowAnswer {
   comments: StackOverflowComment[];
 }
 
-async function search(query: string) {
+export async function search(query: string) {
   const url = `https://api.getsidekick.app/search/stackoverflow`;
   const result = await axios.post(url, { query });
 
@@ -24,5 +24,3 @@ async function search(query: string) {
     answers: StackOverflowAnswer[],
   };
 }
-
-export default search;

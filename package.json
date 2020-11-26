@@ -65,7 +65,6 @@
     "build": "craco build",
     "eject": "craco eject",
     "postinstall": "electron-builder install-app-deps",
-    "electron:debug": "concurrently \"BROWSER=none npm start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && tsc -p electron && electron --inspect --js-flags=\"--expose_gc\" --enable-logging --enable-stack-dumping --trace-warnings .\"",
     "electron:dev": "concurrently \"BROWSER=none npm start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && tsc -p electron && electron --enable-logging .\"",
     "electron:build-mac": "npm build && tsc -p electron && npx electron-builder build --mac"
   },

@@ -19,9 +19,7 @@ function openLink(url: string) {
 class OAuth {
   private static PORT = 8020;
   private static GITHUB_CONFIG = {
-    client_id: 'e9d91ad9a34c68cf2f7c',
-    // TODO: Don't expose CLIENT_SECRET in the app.
-    client_secret: '74ed7cf4a8d7a69034ce7cda2e7e0b3dfac9ae8b',
+    client_id: 'edcfabd8a71a394620a0',
     redirect_uri: `http://localhost:${OAuth.PORT}`,
     login: '',
     scope: '',
@@ -61,17 +59,10 @@ class OAuth {
   }
 
   private static async getAccessToken(code: string, state: string) {
-    const result = await axios.post('https://github.com/login/oauth/access_token', null, {
-      headers: {
-        'Accept': 'application/json',
-      },
-      params: {
-        ...OAuth.GITHUB_CONFIG,
-        state,
-        code,
-      },
+    const result = await axios.post('https://api.getsidekick.app/getOAuthAccessToken', {
+      code,
     });
-    return result.data.access_token;
+    return result.data.accessToken;
   }
 
   public async requestOAuth() {
