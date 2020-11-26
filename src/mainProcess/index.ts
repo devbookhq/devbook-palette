@@ -4,7 +4,7 @@ export function openLink(url: string) {
   return electron.shell.openExternal(url);
 }
 
-export function connectGithub() {
+export function connectGitHub() {
   electron.ipcRenderer.send('github-oauth');
 }
 
@@ -35,3 +35,4 @@ electron.ipcRenderer.on('console', (event, args) => {
 });
 
 export default electron;
+

@@ -1,6 +1,15 @@
 import { getGithubAccessToken } from 'mainProcess';
 import { Octokit } from '@octokit/rest';
 
+export interface CodeResult {
+  name: string;
+  path: string;
+  text_matches: {
+    fragment: string;
+    matches: { indices: number[], text: string; }[];
+  }[];
+}
+
 let octokit: Octokit | undefined;
 
 export async function init(accessToken?: string) {
@@ -27,6 +36,9 @@ export async function searchCode(query: string, pageSize?: number, page?: number
   }
 
   const result = await octokit!.search.code({
+    headers: {
+      accept: 'application/vnd.github.v3.text-match+json',
+    },
     q: query,
     page,
     per_page: pageSize,
@@ -62,3 +74,4 @@ export async function searchIssues(query: string, pageSize?: number, page?: numb
 
   return result.data.items;
 }
+

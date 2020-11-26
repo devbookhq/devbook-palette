@@ -23,3 +23,4 @@ export async function search(query: string) {
   const results = await searchSite(query, STACKOVERFLOW_SEARCH_ENGINE_ID, API_KEY);
   return results;
 }
+
