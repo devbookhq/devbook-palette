@@ -7,7 +7,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 
 import useDebounce from 'hooks/useDebounce';
 import { connectGitHub } from 'mainProcess';
-import { search as searchStackOverflow } from 'search/stackoverflow';
+import { search as searchStackOverflow } from 'search/stackOverflow';
 import { searchCode as searchGitHubCode } from 'search/gitHub';
 
 import SearchInput, { FilterType } from './SearchInput';

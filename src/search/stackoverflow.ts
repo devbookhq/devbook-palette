@@ -15,7 +15,6 @@ interface StackOverflowAnswer {
   comments: StackOverflowComment[];
 }
 
-
 async function search(query: string) {
   const url = `https://api.getsidekick.app/search/stackoverflow`;
   const result = await axios.post(url, { query });
