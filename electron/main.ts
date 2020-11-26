@@ -169,17 +169,14 @@ function createMainWindow() {
 // or just calls .show() or .hide() on an existing instance.
 function toggleVisibilityOnMainWindow() {
   if (!mainWindow) {
-    console.log('Main window is undefined. Need to create new main window.');
     createMainWindow();
     onboardingWindow?.webContents?.send('did-show-main-window');
     return;
   }
 
   if (mainWindow.isVisible()) {
-    console.log('Main window is visible. Will hide main window.');
     mainWindow.hide();
   } else {
-    console.log('Main window is not visible. Will show main window.');
     mainWindow.show();
     mainWindow.webContents?.send('did-show-main-window');
     onboardingWindow?.webContents?.send('did-show-main-window');

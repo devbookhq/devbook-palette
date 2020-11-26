@@ -31,7 +31,7 @@ const Hotkey = styled.div`
 
   color: white;
   font-size: 13px;
-  font-weight: 400;
+  font-weight: 500;
 
   background: #2B2D2F;
   border-radius: 5px;
@@ -79,6 +79,7 @@ const FilePath = styled.div`
   text-overflow: ellipsis;
   white-space: nowrap;
   direction: rtl; // This so we can see the name of the file.
+  text-align: left;
 
   color: white;
   font-weight: 500;
@@ -114,18 +115,7 @@ function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
     function resizeListener(e: any) {
       if (!containerRef?.current) return;
       const style = window.getComputedStyle(containerRef.current);
-      /*
-      const widthMargin = parseInt(style.paddingLeft)
-        + parseInt(style.paddingRight)
-        + parseInt(style.borderTopWidth)
-        + parseInt(style.borderBottomWidth)
-        + parseInt(style.marginTop)
-        + parseInt(style.marginBottom);
-     */
-
-      // const noMarginHeight = uiContainerRef.current.offsetHeight - heightMargin;
-      const widthWithoutMargin = containerRef.current.offsetWidth;
-      setContainerWidth(widthWithoutMargin);
+      setContainerWidth(containerRef.current.offsetWidth);
     }
 
     window.addEventListener('resize', resizeListener);
