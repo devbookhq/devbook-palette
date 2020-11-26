@@ -6,11 +6,13 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import useDebounce from 'hooks/useDebounce';
+
 import { search as searchStackOverflow } from 'search/stackoverflow';
 import {
   searchCode as searchGitHubCode,
   CodeResult,
 } from 'search/gitHub';
+=======
 
 import SearchInput, { FilterType } from './SearchInput';
 import GitHubCodeResult from './GitHubCodeResult';
