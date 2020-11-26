@@ -8,9 +8,37 @@ const Container = styled.div`
   height: 200px;
   margin-bottom: 10px;
   display: flex;
+`;
+
+const Hotkeys = styled.div`
+  margin-right: 10px;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+`;
+
+const Hotkey = styled.div`
+  padding: 5px;
+  width: 100%;
+
+  color: white;
+  font-size: 13px;
+  font-weight: 400;
+
+  background: #2B2D2F;
+  border-radius: 5px;
+
+  :not(:last-child) {
+    margin-bottom: 10px;
+  }
+`;
+
+const Result = styled.div`
+  width: 100%;
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
-
   border-radius: 5px;
   border: 1px solid #404244;
 `;
@@ -20,7 +48,10 @@ const Header = styled.div`
   padding: 10px;
   display: flex;
   align-items: flex-end;
-  background: #3A3D3E;
+  background: #212122;
+
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
 `;
 
 const FilePath = styled.span`
@@ -38,11 +69,16 @@ const RepoName = styled.span`
   font-family: 'Source Code Pro';
 `;
 
-const Content = styled.div`
-  flex: 1;
+const CodeWrapper = styled.div`
+  width: 100%;
+  height: 100%;
   padding: 10px;
   background: #2B2D2F;
+
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
 `;
+
 
 const CodeSnippet = styled.div`
   :not(:last-child) {
@@ -57,19 +93,30 @@ export interface GitHubCodeResultProps {
 function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
   return (
     <Container>
-      <Header>
-        <FilePath>
-          {codeResult.filePath}
-        </FilePath>
-        <RepoName>
-          {codeResult.repoFullName}
-        </RepoName>
-      </Header>
+      <Hotkeys>
+        <Hotkey>
+          Open in browser
+        </Hotkey>
+        <Hotkey>
+          Copy code snippet
+        </Hotkey>
+      </Hotkeys>
 
-      <Content>
-        <CodeSnippet>
-        </CodeSnippet>
-      </Content>
+      <Result>
+        <Header>
+          <FilePath>
+            {codeResult.filePath}
+          </FilePath>
+          <RepoName>
+            {codeResult.repoFullName}
+          </RepoName>
+        </Header>
+
+        <CodeWrapper>
+          <CodeSnippet>
+          </CodeSnippet>
+        </CodeWrapper>
+     </Result>
     </Container>
   );
 }
