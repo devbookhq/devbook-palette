@@ -17,16 +17,15 @@ import SearchInput, { FilterType } from './SearchInput';
 import GitHubCodeResult from './GitHubCodeResult';
 
 const Content = styled.div`
-  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
 `;
 
 const SearchResults = styled.div`
   width: 100%;
+  height: 100%;
   padding: 10px 10px 0;
   overflow-y: auto;
 `;
