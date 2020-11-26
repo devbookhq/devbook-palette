@@ -91,7 +91,7 @@ function Home() {
       <SearchResults>
         {codeResults.map(cr => (
           <GitHubCodeResult
-            key={cr.filePath}
+            key={cr.repoFullName + cr.filePath}
             codeResult={cr}
           />
         ))}

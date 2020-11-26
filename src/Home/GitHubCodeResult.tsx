@@ -64,6 +64,10 @@ const Header = styled.div`
 const RepoName = styled.div`
   margin-bottom: 5px;
 
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
   color: #B0B1B2;
   font-weight: 400;
   font-size: 13px;
