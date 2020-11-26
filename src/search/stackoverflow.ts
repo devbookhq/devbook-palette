@@ -7,11 +7,16 @@ interface StackOverflowComment {
 
 interface StackOverflowQuestion {
   html: string;
+  timestamp: Date;
+  votes: number;
   comments: StackOverflowComment[];
 }
 
 interface StackOverflowAnswer {
   html: string;
+  votes: number;
+  isAccepted: boolean;
+  timestamp: Date;
   comments: StackOverflowComment[];
 }
 
