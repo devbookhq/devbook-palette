@@ -43,6 +43,9 @@ export async function searchCode(query: string, pageSize?: number, page?: number
     page,
     per_page: pageSize,
   });
+
+  console.log(result.data.items);
+
   return result.data.items.map(i => ({
     filePath: i.path,
     repoFullName: i.repository.full_name,

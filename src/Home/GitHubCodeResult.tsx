@@ -4,6 +4,8 @@ import React, {
   useRef,
 } from 'react';
 import styled from 'styled-components';
+import Highlight, { defaultProps } from 'prism-react-renderer';
+import dracula from 'prism-react-renderer/themes/dracula';
 
 import { CodeResult } from 'search/gitHub';
 
@@ -12,7 +14,6 @@ const hotkeysMarginRight = 10;
 const headerPadding = 10;
 
 const Container = styled.div`
-  height: 200px;
   margin-bottom: 10px;
   display: flex;
 `;
@@ -90,7 +91,7 @@ const FilePath = styled.div`
 const CodeWrapper = styled.div`
   width: 100%;
   height: 100%;
-  padding: 10px;
+  // padding: 2px 10px 10px;
   background: #2B2D2F;
 
   border-bottom-left-radius: 5px;
@@ -98,9 +99,40 @@ const CodeWrapper = styled.div`
 `;
 
 const CodeSnippet = styled.div`
+  /*
+  font-family: 'Source Code Pro';
+  font-size: 12px;
+  white-space: pre-line;
+  line-height: 20px;
+  */
+
   :not(:last-child) {
     border-bottom: 1px solid #404244;
   }
+`;
+
+const Pre = styled.pre`
+  height: 100%;
+  margin: 0;
+  padding: 0.5em;
+  text-align: left;
+  overflow: auto;
+`;
+
+const Line = styled.div`
+  display: table-row;
+`;
+
+const LineNo = styled.span`
+  display: table-cell;
+  text-align: right;
+  padding-right: 1em;
+  user-select: none;
+  opacity: 0.5;
+`;
+
+const LineContent = styled.span`
+  display: table-cell;
 `;
 
 export interface GitHubCodeResultProps {
@@ -133,6 +165,7 @@ function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
 
   return (
     <Container ref={containerRef}>
+      {/*
       <Hotkeys>
         <Hotkey>
           Open in browser
@@ -141,11 +174,13 @@ function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
           Copy code snippet
         </Hotkey>
       </Hotkeys>
+      */}
 
       <Result
         // 'headerPadding * 2' because padding is applied to both left and right.
         // The reason we set width to 100% when props.width is zero is so the Result div isn't shrinked on the initial render.
-        width={(containerWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
+        // width={(containerWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
+        width={containerWidth}
       >
         <Header>
           <RepoName>
@@ -158,6 +193,34 @@ function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
 
         <CodeWrapper>
           <CodeSnippet>
+            {/*{codeResult.textMatches[0].fragment.replace(/ /g, '\u00a0')}*/}
+            <Highlight
+              {...defaultProps}
+              code={codeResult.textMatches[0].fragment}
+              theme={dracula}
+              language="typescript" // TODO: Detect the fragment's language.
+            >
+              {({
+                className,
+                style,
+                tokens,
+                getLineProps,
+                getTokenProps
+              }) => (
+                <Pre className={className} style={style}>
+                  {tokens.map((line, i) => (
+                    <Line {...getLineProps({ line, key: i })}>
+                      <LineNo>{i + 1}</LineNo>
+                      <LineContent>
+                        {line.map((token, key) => (
+                          <span {...getTokenProps({ token, key })} />
+                        ))}
+                      </LineContent>
+                    </Line>
+                  ))}
+                </Pre>
+              )}
+            </Highlight>
           </CodeSnippet>
         </CodeWrapper>
      </Result>
