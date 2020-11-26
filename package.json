@@ -1,13 +1,13 @@
 {
-  "name": "context-search-palette",
+  "name": "devbook",
   "version": "0.0.1",
   "private": true,
   "homepage": ".",
   "description": "",
   "main": "build/electron/main.js",
   "build": {
-    "appId": "context.foundrylabs.com",
-    "productName": "Context search",
+    "appId": "devbook.foundrylabs.com",
+    "productName": "Devbook",
     "mac": {
       "icon": "./build/icon.png"
     },
@@ -70,20 +70,23 @@
     "electron:build-mac": "npm build && tsc -p electron && npx electron-builder build --mac"
   },
   "dependencies": {
+    "@octokit/rest": "^18.0.9",
+    "axios": "^0.21.0",
     "electron-store": "^5.2.0",
+    "express": "^4.17.1",
+    "keytar": "^7.2.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-hotkeys-hook": "^2.4.0",
     "react-router-dom": "^5.2.0",
-    "socket.io": "2.3.0",
     "styled-components": "^5.1.1"
   },
   "devDependencies": {
+    "@types/express": "^4.17.9",
     "@types/node": "^12.12.6",
     "@types/react": "^16.9.35",
     "@types/react-dom": "^16.9.8",
     "@types/react-router-dom": "^5.1.6",
-    "@types/socket.io": "^2.1.11",
     "@types/styled-components": "^5.1.0",
     "@types/webpack-env": "^1.15.2",
     "concurrently": "^5.2.0",

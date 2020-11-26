@@ -48,7 +48,7 @@ function TrayPage() {
       <Titles>
         <Title>How it works</Title>
         <Subtitle>
-          Sidekick runs in your tray bar in background.
+          Devbook runs in your tray bar in background.
         </Subtitle>
       </Titles>
 

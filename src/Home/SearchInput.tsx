@@ -35,7 +35,7 @@ const FiltersWrapper = styled.div`
 `;
 
 const Filter = styled.div`
-  margin-right: 20px;
+  margin-right: 10px;
   display: flex;
   align-items: center;
 `;
