@@ -12,7 +12,6 @@ import {
   searchCode as searchGitHubCode,
   CodeResult,
 } from 'search/gitHub';
-=======
 
 import SearchInput, { FilterType } from './SearchInput';
 import GitHubCodeResult from './GitHubCodeResult';
