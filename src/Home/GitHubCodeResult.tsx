@@ -1,5 +1,6 @@
 import React, {
   useLayoutEffect,
+  useEffect,
   useState,
   useRef,
   memo,
@@ -164,6 +165,10 @@ const GitHubCodeResult = memo(({
 
     return () => window.removeEventListener('resize', resizeListener);
   }, [containerRef, setContainerWidth]);
+
+  useEffect(() => {
+    if (isFocused) containerRef?.current?.scrollIntoView(false);
+  }, [isFocused]);
 
   return (
     <Container ref={containerRef}>
