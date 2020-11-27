@@ -32,7 +32,7 @@ const SearchResults = styled.div`
 
 function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore collection() where');
-  const debouncedQuery = useDebounce(searchQuery, 200);
+  const debouncedQuery = useDebounce(searchQuery, 500);
   const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.All);
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
 
@@ -43,8 +43,8 @@ function Home() {
     }
 
     async function searchCode(query: string) {
-      const results = await searchGitHubCode(query);
-      setCodeResults(results);
+      searchGitHubCode(query)
+      .then(setCodeResults);
     }
 
     if (!debouncedQuery) return;
@@ -61,7 +61,7 @@ function Home() {
         searchCode(debouncedQuery);
       break;
     }
-  }, [debouncedQuery]);
+  }, [activeFilter, debouncedQuery]);
 
   useHotkeys('alt+shift+1', (e: any) => {
     setActiveFilter(FilterType.All);
@@ -91,7 +91,7 @@ function Home() {
       <SearchResults>
         {codeResults.map(cr => (
           <GitHubCodeResult
-            key={cr.repoFullName + cr.filePath}
+            key={cr.full_name + cr.file_path}
             codeResult={cr}
           />
         ))}

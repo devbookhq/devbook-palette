@@ -2,11 +2,14 @@ import { getGithubAccessToken } from 'mainProcess';
 import { Octokit } from '@octokit/rest';
 
 export interface CodeResult {
-  filePath: string; // path
-  repoFullName: string; // repository -> full_name
-  textMatches: { // text_matches
+  file_path: string; // path
+  full_name: string; // repository -> full_name
+  text_matches: { // text_matches
     fragment: string;
     matches: { indices: number[], text: string; }[];
+    object_url: string;
+    property: string;
+    id: string;
   }[];
 }
 
@@ -35,7 +38,7 @@ export async function searchCode(query: string, pageSize?: number, page?: number
     await init();
   }
 
-  const result = await octokit!.search.code({
+  const result = await octokit!.request('GET /search/code', {
     headers: {
       accept: 'application/vnd.github.v3.text-match+json',
     },
@@ -44,12 +47,13 @@ export async function searchCode(query: string, pageSize?: number, page?: number
     per_page: pageSize,
   });
 
-  console.log(result.data.items);
-
+  // TODO: Return the same type that is returned by Octokit?
+  // Octokit isn't able to recognize that the returned type
+  // has a 'text_matches' field.
   return result.data.items.map(i => ({
-    filePath: i.path,
-    repoFullName: i.repository.full_name,
-    textMatches: (i as any).text_matches,
+    file_path: i.path,
+    full_name: i.repository.full_name,
+    text_matches: (i as any).text_matches,
   }) as CodeResult);
 }
 

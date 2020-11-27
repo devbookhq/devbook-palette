@@ -114,8 +114,11 @@ function SearchInput({
   });
 
   function handleContentMouseDown(e: any) {
-    // Prevent blur on the input element.
-    if (isInputFocused) e.preventDefault();
+    // Prevent blur when user is clicking on the filter buttons under the input element.
+    // This also makes sure that user can select text in the input field using their mouse.
+    if (!e.target.contains(inputRef?.current)) {
+      if (isInputFocused) e.preventDefault();
+    }
   };
 
   return (

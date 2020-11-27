@@ -146,7 +146,6 @@ function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
   useLayoutEffect(() => {
     function resizeListener(e: any) {
       if (!containerRef?.current) return;
-      const style = window.getComputedStyle(containerRef.current);
       setContainerWidth(containerRef.current.offsetWidth);
     }
 
@@ -184,43 +183,49 @@ function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
       >
         <Header>
           <RepoName>
-            {codeResult.repoFullName}
+            {codeResult.full_name}
           </RepoName>
           <FilePath>
-            {codeResult.filePath}
+            {codeResult.file_path}
           </FilePath>
         </Header>
 
         <CodeWrapper>
           <CodeSnippet>
-            {/*{codeResult.textMatches[0].fragment.replace(/ /g, '\u00a0')}*/}
-            <Highlight
-              {...defaultProps}
-              code={codeResult.textMatches[0].fragment}
-              theme={dracula}
-              language="typescript" // TODO: Detect the fragment's language.
-            >
-              {({
-                className,
-                style,
-                tokens,
-                getLineProps,
-                getTokenProps
-              }) => (
-                <Pre className={className} style={style}>
-                  {tokens.map((line, i) => (
-                    <Line {...getLineProps({ line, key: i })}>
-                      <LineNo>{i + 1}</LineNo>
-                      <LineContent>
-                        {line.map((token, key) => (
-                          <span {...getTokenProps({ token, key })} />
+            {codeResult.text_matches.map((m, idx) => (
+              /* This makes sure we don't show hits on file names for example. */
+              <React.Fragment key={idx}>
+                {m.property === 'content' && (
+                  <Highlight
+                    {...defaultProps}
+                    code={m.fragment}
+                    theme={dracula}
+                    language="typescript" // TODO: Detect the fragment's language.
+                  >
+                    {({
+                      className,
+                      style,
+                      tokens,
+                      getLineProps,
+                      getTokenProps
+                    }) => (
+                      <Pre className={className} style={style}>
+                        {tokens.map((line, i) => (
+                          <Line {...getLineProps({ line, key: i })}>
+                            <LineNo>{i + 1}</LineNo>
+                            <LineContent>
+                              {line.map((token, key) => (
+                                <span {...getTokenProps({ token, key })} />
+                              ))}
+                            </LineContent>
+                          </Line>
                         ))}
-                      </LineContent>
-                    </Line>
-                  ))}
-                </Pre>
-              )}
-            </Highlight>
+                      </Pre>
+                    )}
+                  </Highlight>
+                )}
+              </React.Fragment>
+            ))}
           </CodeSnippet>
         </CodeWrapper>
      </Result>
