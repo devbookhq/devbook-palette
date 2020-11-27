@@ -20,6 +20,7 @@ const Content = styled.div`
 `;
 
 const InputWrapper = styled.div<{ isFocused?: boolean }>`
+  min-height: 42px;
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -31,24 +32,6 @@ const InputWrapper = styled.div<{ isFocused?: boolean }>`
 `;
 
 const Input = styled.input`
-  /*
-  width: 100%;
-  padding: 10px 13px;
-
-  color: white;
-  font-family: 'Source Code Pro';
-  font-weight: 600;
-  font-size: 14px;
-
-  border-radius: 10px;
-  background: #2B2D2F;
-  border: 1px solid #404244;
-  outline: none;
-
-  :focus {
-    border-color: #5d9bd4;
-  }
-  */
   padding: 10px 13px;
   flex: 1;
 
