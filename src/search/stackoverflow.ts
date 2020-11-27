@@ -29,3 +29,4 @@ export async function search(query: string) {
     answers: StackOverflowAnswer[],
   };
 }
+

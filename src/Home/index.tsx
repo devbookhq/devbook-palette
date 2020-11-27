@@ -1,6 +1,7 @@
 import React, {
   useEffect,
   useState,
+  useCallback,
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -30,29 +31,52 @@ const SearchResults = styled.div`
   overflow-y: auto;
 `;
 
+const InfoMessage = styled.div`
+  margin: 50px auto 0;
+  color: #909090;
+  font-size: 16px;
+  font-weight: 600;
+`;
+
 function Home() {
-  const [searchQuery, setSearchQuery] = useState('firestore collection() where');
-  const debouncedQuery = useDebounce(searchQuery, 200);
+  //const [searchQuery, setSearchQuery] = useState('firestore collection() where');
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedQuery = useDebounce(searchQuery, 400);
   const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.All);
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
+
+  const [focusedIdx, setFocusedIdx] = useState(0);
+
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [hasEmptyResults, setHasEmptyResults] = useState(false);
 
   useEffect(() => {
     async function searchSO(query: string) {
       // const results = await searchStackOverflow(query);
       // console.log('StackOverflow', results);
+      setIsLoadingData(false);
     }
 
     async function searchCode(query: string) {
       const results = await searchGitHubCode(query);
+      setHasEmptyResults(results.length === 0);
       setCodeResults(results);
+      setIsLoadingData(false);
+    }
+
+    async function searchAll(query: string) {
+      const results = await searchGitHubCode(query);
+      setHasEmptyResults(results.length === 0);
+      setCodeResults(results);
+      setIsLoadingData(false);
     }
 
     if (!debouncedQuery) return;
 
+    setIsLoadingData(true);
     switch (activeFilter) {
       case FilterType.All:
-        searchSO(debouncedQuery);
-        searchCode(debouncedQuery);
+        searchAll(debouncedQuery);
       break;
       case FilterType.StackOverflow:
         searchSO(debouncedQuery);
@@ -61,7 +85,7 @@ function Home() {
         searchCode(debouncedQuery);
       break;
     }
-  }, [debouncedQuery]);
+  }, [activeFilter, debouncedQuery, setIsLoadingData]);
 
   useHotkeys('alt+shift+1', (e: any) => {
     setActiveFilter(FilterType.All);
@@ -78,24 +102,38 @@ function Home() {
     e.preventDefault();
   }, { filter: () => true });
 
+  useHotkeys('up', (e: any) => {
+    if (focusedIdx > 0) setFocusedIdx(idx => idx-1);
+  }, { filter: () => true }, [focusedIdx, setFocusedIdx]);
+
+  useHotkeys('down', (e: any) => {
+    if (focusedIdx < codeResults.length - 1) setFocusedIdx(idx => idx+1);
+  }, { filter: () => true }, [codeResults, focusedIdx, setFocusedIdx]);
+
   return (
     <Content>
       <SearchInput
         placeholder="Question or code"
         value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
+        onChange={e =>setSearchQuery(e.target.value)}
         activeFilter={activeFilter}
         onFilterSelect={f => setActiveFilter(f)}
+        isLoading={isLoadingData}
       />
 
-      <SearchResults>
-        {codeResults.map(cr => (
-          <GitHubCodeResult
-            key={cr.repoFullName + cr.filePath}
-            codeResult={cr}
-          />
-        ))}
-      </SearchResults>
+      {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
+      {searchQuery && hasEmptyResults && <InfoMessage>Nothing found</InfoMessage>}
+      {searchQuery && codeResults.length > 0 &&
+        <SearchResults>
+          {codeResults.map((cr, idx) => (
+            <GitHubCodeResult
+              key={cr.full_name + cr.file_path}
+              codeResult={cr}
+              isFocused={focusedIdx === idx}
+            />
+          ))}
+        </SearchResults>
+      }
     </Content>
   );
 }

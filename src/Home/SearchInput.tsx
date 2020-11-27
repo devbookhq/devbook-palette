@@ -1,9 +1,14 @@
-import React, { useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 
 import { connectGitHub } from 'mainProcess';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Hotkey, { ModifierKey } from 'components/Hotkey';
+import Loader from 'components/Loader';
 
 const Content = styled.div`
   width: 100%;
@@ -14,23 +19,35 @@ const Content = styled.div`
   border-bottom: 1px solid #373738;
 `;
 
-const Input = styled.input`
+const InputWrapper = styled.div<{ isFocused?: boolean }>`
+  min-height: 42px;
   width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border-radius: 10px;
+  background: #2B2D2F;
+  border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#404244'};
+`;
+
+const Input = styled.input`
   padding: 10px 13px;
+  flex: 1;
 
   color: white;
   font-family: 'Source Code Pro';
   font-weight: 600;
   font-size: 14px;
 
-  border-radius: 10px;
-  background: #2B2D2F;
-  border: 1px solid #404244;
+  border: none;
   outline: none;
+  background: transparent;
+`;
 
-  :focus {
-    border-color: #3897EE;
-  }
+const StyledLoader = styled(Loader)`
+  position: relative;
+  right: 2px;
 `;
 
 const Menu = styled.div`
@@ -97,6 +114,8 @@ interface SearchInputProps {
 
   activeFilter: FilterType;
   onFilterSelect: (f: FilterType) => void;
+
+  isLoading?: boolean;
 }
 
 function SearchInput({
@@ -105,6 +124,7 @@ function SearchInput({
   onChange,
   activeFilter,
   onFilterSelect,
+  isLoading,
 }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -114,22 +134,39 @@ function SearchInput({
   });
 
   function handleContentMouseDown(e: any) {
-    // Prevent blur on the input element.
-    if (isInputFocused) e.preventDefault();
+    // Prevent blur when user is clicking on the filter buttons under the input element.
+    // This also makes sure that user can select text in the input field using their mouse.
+    if (!e.target.contains(inputRef?.current)) {
+      if (isInputFocused) e.preventDefault();
+    }
   };
+
+  function handleInputKeyDown(e: any) {
+    // We want to prevent cursor from moving when the up or down arrow is pressed.
+    // The default behavior is that cursor moves either to the start or to the end.
+    // 38 - up arrow
+    // 40 - down arrow
+    if (e.keyCode === 38 || e.keyCode === 40) e.preventDefault();
+  }
 
   return (
     <Content
       onMouseDown={handleContentMouseDown}
     >
-      <Input
-        ref={inputRef}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        onFocus={() => setIsInputFocused(true)}
-        onBlur={() => setIsInputFocused(false)}
-      />
+      <InputWrapper
+        isFocused={isInputFocused}
+      >
+        <Input
+          ref={inputRef}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setIsInputFocused(true)}
+          onBlur={() => setIsInputFocused(false)}
+          onKeyDown={handleInputKeyDown}
+        />
+        {isLoading && <StyledLoader/>}
+      </InputWrapper>
       <Menu>
         <FiltersWrapper>
           {Object.values(FilterType).map((f, idx) => (
