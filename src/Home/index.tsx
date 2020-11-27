@@ -87,7 +87,7 @@ function Home() {
   }, { filter: () => true }, [focusedIdx, setFocusedIdx]);
 
   useHotkeys('down', (e: any) => {
-    if (focusedIdx < codeResults.length) setFocusedIdx(idx => idx+1);
+    if (focusedIdx < codeResults.length - 1) setFocusedIdx(idx => idx+1);
   }, { filter: () => true }, [codeResults, focusedIdx, setFocusedIdx]);
 
   return (

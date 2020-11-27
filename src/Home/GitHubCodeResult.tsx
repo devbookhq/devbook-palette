@@ -16,7 +16,7 @@ const hotkeysMarginRight = 10;
 const headerPadding = 10;
 
 const Container = styled.div`
-  margin-bottom: 10px;
+  padding-bottom: 10px;
   display: flex;
 `;
 
