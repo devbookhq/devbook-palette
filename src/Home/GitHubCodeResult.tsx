@@ -43,13 +43,13 @@ const Hotkey = styled.div`
   }
 `;
 
-const Result = styled.div<{ width: number }>`
+const Result = styled.div<{ width: number, isFocused?: boolean }>`
   width: ${props => props.width > 0 ? props.width + 'px' : '100%'};
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   border-radius: 5px;
-  border: 1px solid #404244;
+  border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#404244'};
 `;
 
 const Header = styled.div`
@@ -111,6 +111,11 @@ const Pre = styled.pre`
   overflow: auto;
   font-size: 13px;
   line-height: 17px;
+
+  :last-child {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
 `;
 
 const Line = styled.div`
@@ -131,9 +136,13 @@ const LineContent = styled.span`
 
 export interface GitHubCodeResultProps {
   codeResult: CodeResult;
+  isFocused?: boolean;
 }
 
-const GitHubCodeResult = memo(({ codeResult }: GitHubCodeResultProps) => {
+const GitHubCodeResult = memo(({
+  codeResult,
+  isFocused,
+}: GitHubCodeResultProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -158,22 +167,25 @@ const GitHubCodeResult = memo(({ codeResult }: GitHubCodeResultProps) => {
 
   return (
     <Container ref={containerRef}>
-      {/*
       <Hotkeys>
-        <Hotkey>
-          Open in browser
-        </Hotkey>
-        <Hotkey>
-          Copy code snippet
-        </Hotkey>
+        {isFocused && (
+          <>
+            <Hotkey>
+              Open in browser
+            </Hotkey>
+            <Hotkey>
+              Copy code snippet
+            </Hotkey>
+          </>
+        )}
       </Hotkeys>
-      */}
 
       <Result
         // 'headerPadding * 2' because padding is applied to both left and right.
         // The reason we set width to 100% when props.width is zero is so the Result div isn't shrinked on the initial render.
-        // width={(containerWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
-        width={containerWidth}
+        width={(containerWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
+        // width={containerWidth}
+        isFocused={isFocused}
       >
         <Header>
           <RepoName>

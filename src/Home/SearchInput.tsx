@@ -33,7 +33,7 @@ const Input = styled.input`
   outline: none;
 
   :focus {
-    border-color: #3897EE;
+    border-color: #5d9bd4;
   }
 `;
 
