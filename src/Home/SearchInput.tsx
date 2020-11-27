@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { connectGitHub } from 'mainProcess';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Hotkey, { ModifierKey } from 'components/Hotkey';
+import Loader from 'components/Loader';
 
 const Content = styled.div`
   width: 100%;
@@ -18,7 +19,19 @@ const Content = styled.div`
   border-bottom: 1px solid #373738;
 `;
 
+const InputWrapper = styled.div<{ isFocused?: boolean }>`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border-radius: 10px;
+  background: #2B2D2F;
+  border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#404244'};
+`;
+
 const Input = styled.input`
+  /*
   width: 100%;
   padding: 10px 13px;
 
@@ -35,6 +48,23 @@ const Input = styled.input`
   :focus {
     border-color: #5d9bd4;
   }
+  */
+  padding: 10px 13px;
+  flex: 1;
+
+  color: white;
+  font-family: 'Source Code Pro';
+  font-weight: 600;
+  font-size: 14px;
+
+  border: none;
+  outline: none;
+  background: transparent;
+`;
+
+const StyledLoader = styled(Loader)`
+  position: relative;
+  right: 2px;
 `;
 
 const Menu = styled.div`
@@ -101,6 +131,8 @@ interface SearchInputProps {
 
   activeFilter: FilterType;
   onFilterSelect: (f: FilterType) => void;
+
+  isLoading?: boolean;
 }
 
 function SearchInput({
@@ -109,6 +141,7 @@ function SearchInput({
   onChange,
   activeFilter,
   onFilterSelect,
+  isLoading,
 }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -137,15 +170,20 @@ function SearchInput({
     <Content
       onMouseDown={handleContentMouseDown}
     >
-      <Input
-        ref={inputRef}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        onFocus={() => setIsInputFocused(true)}
-        onBlur={() => setIsInputFocused(false)}
-        onKeyDown={handleInputKeyDown}
-      />
+      <InputWrapper
+        isFocused={isInputFocused}
+      >
+        <Input
+          ref={inputRef}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          onFocus={() => setIsInputFocused(true)}
+          onBlur={() => setIsInputFocused(false)}
+          onKeyDown={handleInputKeyDown}
+        />
+        {isLoading && <StyledLoader/>}
+      </InputWrapper>
       <Menu>
         <FiltersWrapper>
           {Object.values(FilterType).map((f, idx) => (

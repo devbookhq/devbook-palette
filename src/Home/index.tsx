@@ -47,23 +47,40 @@ function Home() {
 
   const [focusedIdx, setFocusedIdx] = useState(0);
 
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [hasEmptyResults, setHasEmptyResults] = useState(false);
+
+  function handleSearchInputChange(e: any) {
+    setIsLoadingData(true);
+    setSearchQuery(e.target.value);
+  }
+
   useEffect(() => {
     async function searchSO(query: string) {
       // const results = await searchStackOverflow(query);
       // console.log('StackOverflow', results);
+      setIsLoadingData(false);
     }
 
     async function searchCode(query: string) {
-      searchGitHubCode(query)
-      .then(setCodeResults);
+      const results = await searchGitHubCode(query);
+      setHasEmptyResults(results.length === 0);
+      setCodeResults(results);
+      setIsLoadingData(false);
+    }
+
+    async function searchAll(query: string) {
+      const results = await searchGitHubCode(query);
+      console.log('results', results);
+      setCodeResults(results);
+      setIsLoadingData(false);
     }
 
     if (!debouncedQuery) return;
 
     switch (activeFilter) {
       case FilterType.All:
-        searchSO(debouncedQuery);
-        searchCode(debouncedQuery);
+        searchAll(debouncedQuery);
       break;
       case FilterType.StackOverflow:
         searchSO(debouncedQuery);
@@ -72,7 +89,7 @@ function Home() {
         searchCode(debouncedQuery);
       break;
     }
-  }, [activeFilter, debouncedQuery]);
+  }, [activeFilter, debouncedQuery, setIsLoadingData]);
 
   useHotkeys('alt+shift+1', (e: any) => {
     setActiveFilter(FilterType.All);
@@ -102,12 +119,13 @@ function Home() {
       <SearchInput
         placeholder="Question or code"
         value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
+        onChange={handleSearchInputChange}
         activeFilter={activeFilter}
         onFilterSelect={f => setActiveFilter(f)}
+        isLoading={isLoadingData}
       />
 
-      {codeResults.length === 0 && searchQuery && <EmptyResults>Nothing found</EmptyResults>}
+      {hasEmptyResults && <EmptyResults>Nothing found</EmptyResults>}
       {codeResults.length > 0 &&
         <SearchResults>
           {codeResults.map((cr, idx) => (
