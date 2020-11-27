@@ -50,11 +50,6 @@ function Home() {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [hasEmptyResults, setHasEmptyResults] = useState(false);
 
-  function handleSearchInputChange(e: any) {
-    setIsLoadingData(true);
-    setSearchQuery(e.target.value);
-  }
-
   useEffect(() => {
     async function searchSO(query: string) {
       // const results = await searchStackOverflow(query);
@@ -71,13 +66,13 @@ function Home() {
 
     async function searchAll(query: string) {
       const results = await searchGitHubCode(query);
-      console.log('results', results);
       setCodeResults(results);
       setIsLoadingData(false);
     }
 
     if (!debouncedQuery) return;
 
+    setIsLoadingData(true);
     switch (activeFilter) {
       case FilterType.All:
         searchAll(debouncedQuery);
@@ -119,7 +114,7 @@ function Home() {
       <SearchInput
         placeholder="Question or code"
         value={searchQuery}
-        onChange={handleSearchInputChange}
+        onChange={e =>setSearchQuery(e.target.value)}
         activeFilter={activeFilter}
         onFilterSelect={f => setActiveFilter(f)}
         isLoading={isLoadingData}

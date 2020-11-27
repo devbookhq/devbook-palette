@@ -161,8 +161,8 @@ const GitHubCodeResult = memo(({
     // on the initial render but that solution returned an incorrect
     // value. I'm not sure why.
     // The value is correct once you resize the window though.
-    window.resizeTo(window.outerWidth, window.outerHeight + 1);
     window.resizeTo(window.outerWidth, window.outerHeight - 1);
+    window.resizeTo(window.outerWidth, window.outerHeight + 1);
 
     return () => window.removeEventListener('resize', resizeListener);
   }, [containerRef, setContainerWidth]);
