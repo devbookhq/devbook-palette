@@ -71,9 +71,8 @@ const RepoName = styled.div`
   white-space: nowrap;
 
   color: #B0B1B2;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 13px;
-  font-family: 'Source Code Pro';
 `;
 
 const FilePath = styled.div`
@@ -83,16 +82,14 @@ const FilePath = styled.div`
   direction: rtl; // This so we can see the name of the file.
   text-align: left;
 
-  color: white;
+  color: #676767;
   font-weight: 500;
   font-size: 13px;
-  font-family: 'Source Code Pro';
 `;
 
 const CodeWrapper = styled.div`
   width: 100%;
   height: 100%;
-  // padding: 2px 10px 10px;
   background: #2B2D2F;
 
   border-bottom-left-radius: 5px;
@@ -100,13 +97,6 @@ const CodeWrapper = styled.div`
 `;
 
 const CodeSnippet = styled.div`
-  /*
-  font-family: 'Source Code Pro';
-  font-size: 12px;
-  white-space: pre-line;
-  line-height: 20px;
-  */
-
   :not(:last-child) {
     border-bottom: 1px solid #404244;
   }
@@ -115,9 +105,12 @@ const CodeSnippet = styled.div`
 const Pre = styled.pre`
   height: 100%;
   margin: 0;
-  padding: 0.5em;
+  padding: 8px;
+
   text-align: left;
   overflow: auto;
+  font-size: 14px;
+  line-height: 22px;
 `;
 
 const Line = styled.div`
@@ -140,7 +133,6 @@ export interface GitHubCodeResultProps {
   codeResult: CodeResult;
 }
 
-// function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
 const GitHubCodeResult = memo(({ codeResult }: GitHubCodeResultProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
@@ -158,8 +150,8 @@ const GitHubCodeResult = memo(({ codeResult }: GitHubCodeResultProps) => {
     // on the initial render but that solution returned an incorrect
     // value. I'm not sure why.
     // The value is correct once you resize the window though.
-    // window.resizeTo(window.outerWidth, window.outerHeight + 1);
-    // window.resizeTo(window.outerWidth, window.outerHeight - 1);
+    window.resizeTo(window.outerWidth, window.outerHeight + 1);
+    window.resizeTo(window.outerWidth, window.outerHeight - 1);
 
     return () => window.removeEventListener('resize', resizeListener);
   }, [containerRef, setContainerWidth]);

@@ -1,4 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 
 import { connectGitHub } from 'mainProcess';
@@ -121,6 +125,14 @@ function SearchInput({
     }
   };
 
+  function handleInputKeyDown(e: any) {
+    // We want to prevent cursor from moving when the up or down arrow is pressed.
+    // The default behavior is that cursor moves either to the start or to the end.
+    // 38 - up arrow
+    // 40 - down arrow
+    if (e.keyCode === 38 || e.keyCode === 40) e.preventDefault();
+  }
+
   return (
     <Content
       onMouseDown={handleContentMouseDown}
@@ -132,6 +144,7 @@ function SearchInput({
         onChange={onChange}
         onFocus={() => setIsInputFocused(true)}
         onBlur={() => setIsInputFocused(false)}
+        onKeyDown={handleInputKeyDown}
       />
       <Menu>
         <FiltersWrapper>
