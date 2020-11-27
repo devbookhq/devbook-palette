@@ -27,24 +27,16 @@ const DragHeader = styled.div`
 
 const Content = styled.div`
   height: 100%;
-  width: 100%;
-  max-width: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-`;
-
-const AppDiv = styled.div`
-  height: 100%;
-  width: 100%;
-  display: flex;
 `;
 
 function App() {
   useHotkeys('esc', () => hideMainWindow());
 
   return (
-    <AppDiv>
+    <>
       <DragHeader />
       <Content>
         <Router>
@@ -71,7 +63,7 @@ function App() {
           </Switch>
         </Router>
       </Content>
-    </AppDiv>
+    </>
   );
 }
 

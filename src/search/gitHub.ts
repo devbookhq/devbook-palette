@@ -2,9 +2,9 @@ import { getGithubAccessToken } from 'mainProcess';
 import { Octokit } from '@octokit/rest';
 
 export interface CodeResult {
-  name: string;
-  path: string;
-  text_matches: {
+  filePath: string; // path
+  repoFullName: string; // repository -> full_name
+  textMatches: { // text_matches
     fragment: string;
     matches: { indices: number[], text: string; }[];
   }[];
@@ -44,7 +44,13 @@ export async function searchCode(query: string, pageSize?: number, page?: number
     per_page: pageSize,
   });
 
-  return result.data.items;
+  console.log(result.data.items);
+
+  return result.data.items.map(i => ({
+    filePath: i.path,
+    repoFullName: i.repository.full_name,
+    textMatches: (i as any).text_matches,
+  }) as CodeResult);
 }
 
 export async function searchRepositories(query: string, pageSize?: number, page?: number) {

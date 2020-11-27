@@ -6,50 +6,45 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import useDebounce from 'hooks/useDebounce';
-import { connectGitHub } from 'mainProcess';
-import { search as searchStackOverflow } from 'search/stackOverflow';
-import { searchCode as searchGitHubCode } from 'search/gitHub';
+
+import { search as searchStackOverflow } from 'search/stackoverflow';
+import {
+  searchCode as searchGitHubCode,
+  CodeResult,
+} from 'search/gitHub';
 
 import SearchInput, { FilterType } from './SearchInput';
 import GitHubCodeResult from './GitHubCodeResult';
 
 const Content = styled.div`
-  padding: 20px 30px;
-  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
 `;
 
-const ConnectGitHubButton = styled.button`
-  color: #3897EE;
-  font-size: 14px;
-  font-weight: 600;
-
-  border: none;
-  background: none;
-  outline: none;
-  :hover {
-    cursor: pointer;
-  }
+const SearchResults = styled.div`
+  width: 100%;
+  height: 100%;
+  padding: 10px 10px 0;
+  overflow-y: auto;
 `;
 
 function Home() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.All);
+  const [searchQuery, setSearchQuery] = useState('firestore collection() where');
   const debouncedQuery = useDebounce(searchQuery, 200);
+  const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.All);
+  const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
 
   useEffect(() => {
     async function searchSO(query: string) {
-      const results = await searchStackOverflow(query);
-      console.log('StackOverflow', results);
+      // const results = await searchStackOverflow(query);
+      // console.log('StackOverflow', results);
     }
 
     async function searchCode(query: string) {
       const results = await searchGitHubCode(query);
-      console.log('GitHub', results);
+      setCodeResults(results);
     }
 
     if (!debouncedQuery) return;
@@ -93,11 +88,14 @@ function Home() {
         onFilterSelect={f => setActiveFilter(f)}
       />
 
-      <ConnectGitHubButton onClick={() => connectGitHub()}>
-        Connect your GitHub account
-      </ConnectGitHubButton>
-
-      <GitHubCodeResult/>
+      <SearchResults>
+        {codeResults.map(cr => (
+          <GitHubCodeResult
+            key={cr.repoFullName + cr.filePath}
+            codeResult={cr}
+          />
+        ))}
+      </SearchResults>
     </Content>
   );
 }
