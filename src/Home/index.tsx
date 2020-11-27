@@ -31,7 +31,7 @@ const SearchResults = styled.div`
   overflow-y: auto;
 `;
 
-const EmptyResults = styled.div`
+const InfoMessage = styled.div`
   margin: 50px auto 0;
   color: #909090;
   font-size: 16px;
@@ -66,6 +66,7 @@ function Home() {
 
     async function searchAll(query: string) {
       const results = await searchGitHubCode(query);
+      setHasEmptyResults(results.length === 0);
       setCodeResults(results);
       setIsLoadingData(false);
     }
@@ -120,8 +121,9 @@ function Home() {
         isLoading={isLoadingData}
       />
 
-      {hasEmptyResults && <EmptyResults>Nothing found</EmptyResults>}
-      {codeResults.length > 0 &&
+      {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
+      {searchQuery && hasEmptyResults && <InfoMessage>Nothing found</InfoMessage>}
+      {searchQuery && codeResults.length > 0 &&
         <SearchResults>
           {codeResults.map((cr, idx) => (
             <GitHubCodeResult
