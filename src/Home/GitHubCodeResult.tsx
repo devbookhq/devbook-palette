@@ -71,7 +71,7 @@ const RepoName = styled.div`
   text-overflow: ellipsis;
   white-space: nowrap;
 
-  color: #B0B1B2;
+  color: #676767;
   font-weight: 500;
   font-size: 13px;
 `;
@@ -83,7 +83,7 @@ const FilePath = styled.div`
   direction: rtl; // This so we can see the name of the file.
   text-align: left;
 
-  color: #676767;
+  color: #B0B1B2;
   font-weight: 500;
   font-size: 13px;
 `;
@@ -138,6 +138,7 @@ const LineContent = styled.span`
 export interface GitHubCodeResultProps {
   codeResult: CodeResult;
   isFocused?: boolean;
+  onMouseEnter?: () => void;
 }
 
 const GitHubCodeResult = memo(({
@@ -171,7 +172,9 @@ const GitHubCodeResult = memo(({
   }, [isFocused]);
 
   return (
-    <Container ref={containerRef}>
+    <Container
+      ref={containerRef}
+     >
       <Hotkeys>
         {isFocused && (
           <>

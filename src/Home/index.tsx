@@ -31,6 +31,13 @@ const SearchResults = styled.div`
   overflow-y: auto;
 `;
 
+const EmptyResults = styled.div`
+  margin: 50px auto 0;
+  color: #909090;
+  font-size: 16px;
+  font-weight: 600;
+`;
+
 function Home() {
   //const [searchQuery, setSearchQuery] = useState('firestore collection() where');
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,15 +107,18 @@ function Home() {
         onFilterSelect={f => setActiveFilter(f)}
       />
 
-      <SearchResults>
-        {codeResults.map((cr, idx) => (
-          <GitHubCodeResult
-            key={cr.full_name + cr.file_path}
-            codeResult={cr}
-            isFocused={focusedIdx === idx}
-          />
-        ))}
-      </SearchResults>
+      {codeResults.length === 0 && searchQuery && <EmptyResults>Nothing found</EmptyResults>}
+      {codeResults.length > 0 &&
+        <SearchResults>
+          {codeResults.map((cr, idx) => (
+            <GitHubCodeResult
+              key={cr.full_name + cr.file_path}
+              codeResult={cr}
+              isFocused={focusedIdx === idx}
+            />
+          ))}
+        </SearchResults>
+      }
     </Content>
   );
 }
