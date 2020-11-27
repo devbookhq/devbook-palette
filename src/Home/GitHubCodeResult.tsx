@@ -109,8 +109,8 @@ const Pre = styled.pre`
 
   text-align: left;
   overflow: auto;
-  font-size: 14px;
-  line-height: 22px;
+  font-size: 13px;
+  line-height: 17px;
 `;
 
 const Line = styled.div`
