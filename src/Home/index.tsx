@@ -31,8 +31,9 @@ const SearchResults = styled.div`
 `;
 
 function Home() {
-  const [searchQuery, setSearchQuery] = useState('firestore collection() where');
-  const debouncedQuery = useDebounce(searchQuery, 500);
+  //const [searchQuery, setSearchQuery] = useState('firestore collection() where');
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedQuery = useDebounce(searchQuery, 400);
   const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.All);
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
 

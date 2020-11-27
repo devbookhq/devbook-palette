@@ -2,6 +2,7 @@ import React, {
   useLayoutEffect,
   useState,
   useRef,
+  memo,
 } from 'react';
 import styled from 'styled-components';
 import Highlight, { defaultProps } from 'prism-react-renderer';
@@ -139,7 +140,8 @@ export interface GitHubCodeResultProps {
   codeResult: CodeResult;
 }
 
-function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
+// function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
+const GitHubCodeResult = memo(({ codeResult }: GitHubCodeResultProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
@@ -156,8 +158,8 @@ function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
     // on the initial render but that solution returned an incorrect
     // value. I'm not sure why.
     // The value is correct once you resize the window though.
-    window.resizeTo(window.outerWidth, window.outerHeight + 1);
-    window.resizeTo(window.outerWidth, window.outerHeight - 1);
+    // window.resizeTo(window.outerWidth, window.outerHeight + 1);
+    // window.resizeTo(window.outerWidth, window.outerHeight - 1);
 
     return () => window.removeEventListener('resize', resizeListener);
   }, [containerRef, setContainerWidth]);
@@ -193,8 +195,8 @@ function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
         <CodeWrapper>
           <CodeSnippet>
             {codeResult.text_matches.map((m, idx) => (
-              /* This makes sure we don't show hits on file names for example. */
               <React.Fragment key={idx}>
+                {/* This makes sure we show only code hits. */}
                 {m.property === 'content' && (
                   <Highlight
                     {...defaultProps}
@@ -231,7 +233,7 @@ function GitHubCodeResult({ codeResult }: GitHubCodeResultProps) {
      </Result>
     </Container>
   );
-}
+});
 
 export default GitHubCodeResult;
 
