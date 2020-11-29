@@ -16,6 +16,7 @@ const hotkeysMarginRight = 10;
 const headerPadding = 10;
 
 const Container = styled.div`
+  width: 100%;
   padding-bottom: 10px;
   display: flex;
 `;
@@ -106,7 +107,7 @@ const CodeSnippet = styled.div`
 const Pre = styled.pre`
   height: 100%;
   margin: 0;
-  padding: 8px;
+  padding: 10px;
 
   text-align: left;
   overflow: auto;
@@ -135,19 +136,21 @@ const LineContent = styled.span`
   display: table-cell;
 `;
 
-export interface GitHubCodeResultProps {
+export interface GitHubCodeItemProps {
   codeResult: CodeResult;
   isFocused?: boolean;
-  onMouseEnter?: () => void;
+  parentWidth: number;
 }
 
-const GitHubCodeResult = memo(({
+const GitHubCodeItem = memo(({
   codeResult,
   isFocused,
-}: GitHubCodeResultProps) => {
+  parentWidth,
+}: GitHubCodeItemProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
 
+  /*
   useLayoutEffect(() => {
     function resizeListener(e: any) {
       if (!containerRef?.current) return;
@@ -166,6 +169,7 @@ const GitHubCodeResult = memo(({
 
     return () => window.removeEventListener('resize', resizeListener);
   }, [containerRef, setContainerWidth]);
+  */
 
   useEffect(() => {
     if (isFocused) containerRef?.current?.scrollIntoView(false);
@@ -191,28 +195,28 @@ const GitHubCodeResult = memo(({
       <Result
         // 'headerPadding * 2' because padding is applied to both left and right.
         // The reason we set width to 100% when props.width is zero is so the Result div isn't shrinked on the initial render.
-        width={(containerWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
+        //width={(containerWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
         // width={containerWidth}
+        width={(parentWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
         isFocused={isFocused}
       >
         <Header>
           <RepoName>
-            {codeResult.full_name}
+            {codeResult.repoFullName}
           </RepoName>
           <FilePath>
-            {codeResult.file_path}
+            {codeResult.filePath}
           </FilePath>
         </Header>
 
         <CodeWrapper>
           <CodeSnippet>
-            {codeResult.text_matches.map((m, idx) => (
+            {codeResult.filePreviews.map((el, idx) => (
               <React.Fragment key={idx}>
-                {/* This makes sure we show only code hits. */}
-                {m.property === 'content' && (
+                <>
                   <Highlight
                     {...defaultProps}
-                    code={m.fragment}
+                    code={el.fragment}
                     theme={dracula}
                     language="typescript" // TODO: Detect the fragment's language.
                   >
@@ -226,7 +230,7 @@ const GitHubCodeResult = memo(({
                       <Pre className={className} style={style}>
                         {tokens.map((line, i) => (
                           <Line {...getLineProps({ line, key: i })}>
-                            <LineNo>{i + 1}</LineNo>
+                            <LineNo>{el.startLine + i + 1}</LineNo>
                             <LineContent>
                               {line.map((token, key) => (
                                 <span {...getTokenProps({ token, key })} />
@@ -237,7 +241,12 @@ const GitHubCodeResult = memo(({
                       </Pre>
                     )}
                   </Highlight>
-                )}
+                  {/* This makes sure we show only code hits. */}
+                  {/*
+                  {m.property === 'content' && (
+                  )}
+                  */}
+                </>
               </React.Fragment>
             ))}
           </CodeSnippet>
@@ -247,5 +256,5 @@ const GitHubCodeResult = memo(({
   );
 });
 
-export default GitHubCodeResult;
+export default GitHubCodeItem;
 
