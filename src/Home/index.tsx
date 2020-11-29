@@ -49,10 +49,10 @@ function Home() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const [resultsWidth, setResultsWidth] = useState(0);
 
-  const [searchQuery, setSearchQuery] = useState('javascript show alert');
+  const [searchQuery, setSearchQuery] = useState('firestore where');
   const debouncedQuery = useDebounce(searchQuery, 400);
   // TODO: Change to FilterType.All.
-  const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.StackOverflow);
+  const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.All);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
@@ -154,6 +154,7 @@ function Home() {
         SearchResults must not be rendered conditionally so we can calculate its width
         before we fetch the search results.
       */}
+      {/*
       <SearchResults
         ref={resultsRef}
       >
@@ -165,8 +166,8 @@ function Home() {
           />
         ))}
       </SearchResults>
+      */}
 
-      {/*
       {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
       {searchQuery && hasEmptyResults && <InfoMessage>Nothing found</InfoMessage>}
       {searchQuery && codeResults.length > 0 &&
@@ -183,7 +184,6 @@ function Home() {
           ))}
         </SearchResults>
       }
-      */}
 
     </Content>
   );
