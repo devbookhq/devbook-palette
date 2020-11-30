@@ -111,6 +111,7 @@ function StackOverflowItem({
 
   return (
     <Container>
+      {/*
       <Hotkeys>
         <Hotkey>
           Open in browser
@@ -119,9 +120,12 @@ function StackOverflowItem({
           Copy code snippet
         </Hotkey>
       </Hotkeys>
+      */}
 
       <Result
-        width={(parentWidth - hotkeysWidth - hotkeysMarginRight) - headerPadding * 2}
+        // width={(parentWidth - hotkeysWidth - hotkeysMarginRight) - headerPadding * 2}
+        // width={parentWidth - headerPadding * 2}
+        width={0}
       >
         <Header>
           <QuestionTitle href={soResult.question.link} onClick={handleQuestionTitleClick}>

@@ -34,8 +34,10 @@ const Content = styled.div`
 const SearchResults = styled.div`
   width: 100%;
   height: 100%;
-  padding: 10px 10px 0;
-  overflow-y: auto;
+  padding: 10px 15px 50px;
+
+  overflow: hidden;
+  overflow-y: overlay;
 `;
 
 const InfoMessage = styled.div`
@@ -45,6 +47,22 @@ const InfoMessage = styled.div`
   font-weight: 600;
 `;
 
+const HotkeysPanel = styled.div`
+  position: absolute;
+  bottom: 0;
+  margin: 0 auto 10px;
+  width: 95%;
+  height: 40px;
+  z-index: 10;
+
+  // border-top: 1px solid #404244;
+  // border: 1px solid #404244;
+  border-radius: 5px;
+  background: #2B2D2F;
+  // background: #212122;
+  box-shadow: 0px 0px 23px 13px rgba(0, 0, 0, 0.2);
+`;
+
 function Home() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const [resultsWidth, setResultsWidth] = useState(0);
@@ -52,7 +70,7 @@ function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where');
   const debouncedQuery = useDebounce(searchQuery, 400);
   // TODO: Change to FilterType.All.
-  const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.All);
+  const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.GitHubCode);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
@@ -151,9 +169,41 @@ function Home() {
       />
 
       {/*
-        SearchResults must not be rendered conditionally so we can calculate its width
-        before we fetch the search results.
+        SearchResults element must not be rendered conditionally so we can calculate its width
+        before we fetch the actual search results.
       */}
+
+      <SearchResults
+        ref={resultsRef}
+      >
+        <>
+          {activeFilter === FilterType.StackOverflow &&
+            <>
+              {searchQuery && soResults.length > 0 && soResults.map(sor => (
+                <StackOverflowItem
+                  key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
+                  soResult={sor}
+                  parentWidth={resultsWidth}
+                />
+              ))}
+            </>
+          }
+
+          {activeFilter === FilterType.GitHubCode &&
+            <>
+              {codeResults.map((cr, idx) => (
+                <GitHubCodeItem
+                  key={cr.repoFullName + cr.filePath}
+                  codeResult={cr}
+                  isFocused={focusedIdx === idx}
+                  parentWidth={resultsWidth}
+                />
+              ))}
+            </>
+          }
+        </>
+      </SearchResults>
+
       {/*
       <SearchResults
         ref={resultsRef}
@@ -168,6 +218,7 @@ function Home() {
       </SearchResults>
       */}
 
+      {/*
       {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
       {searchQuery && hasEmptyResults && <InfoMessage>Nothing found</InfoMessage>}
       {searchQuery && codeResults.length > 0 &&
@@ -184,7 +235,10 @@ function Home() {
           ))}
         </SearchResults>
       }
+      */}
 
+
+      <HotkeysPanel/>
     </Content>
   );
 }
