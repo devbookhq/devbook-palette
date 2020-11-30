@@ -1,20 +1,21 @@
 import { getGithubAccessToken } from 'mainProcess';
 import axios from 'axios';
-// import { Octokit } from '@octokit/rest';
 
-export interface CodeResult {
-  filePath: string;
-  repoFullName: string;
-  filePreviews: {
-    startLine: number;
-    fragment: string;
-    indices: number[];
-  }[];
-  repoURL: string;
-  fileURL: string;
+// TODO: These types are also present in the `devbook` repository - move them into a shared library.
+interface FilePreview {
+  startLine: number;
+  fragment: string;
+  indices: number[][];
 }
 
-// let octokit: Octokit | undefined;
+export interface CodeResult {
+  repoFullName: string;
+  repoURL: string;
+  filePath: string;
+  fileURL: string;
+  filePreviews: FilePreview[];
+}
+
 let accessToken: string | null = null;
 
 export async function init(token?: string) {
@@ -25,25 +26,19 @@ export async function init(token?: string) {
   }
 }
 
-export async function searchCode(query: string, pageSize?: number, page?: number) {
+export async function searchCode(query: string, pageSize?: number, page?: number): Promise<CodeResult[]> {
   if (!accessToken) {
     await init();
   }
 
-  const result = await axios.post('https://api.getsidekick.app/search/github/code', { accessToken, query })
+  const result = await axios.post('https://api.getsidekick.app/search/github/code', {
+    accessToken,
+    query,
+    pageSize,
+    page,
+  })
   console.log('github result', result);
 
-  /*
-  const result = await octokit!.request('GET /search/code', {
-    headers: {
-      accept: 'application/vnd.github.v3.text-match+json',
-    },
-    q: query,
-    page,
-    per_page: pageSize,
-  });
-  */
-
-  return result.data.results as CodeResult[];
+  return result.data.results;
 }
 

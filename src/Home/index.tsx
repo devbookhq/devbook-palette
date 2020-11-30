@@ -14,7 +14,7 @@ import useOnWindowResize from 'hooks/useOnWindowResize';
 import {
   search as searchStackOverflow,
   StackOverflowResult,
-} from 'search/stackoverflow';
+} from 'search/stackOverflow';
 import {
   searchCode as searchGitHubCode,
   CodeResult,

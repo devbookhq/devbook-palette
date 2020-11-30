@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
-import { StackOverflowResult } from 'search/stackoverflow';
+import { StackOverflowResult } from 'search/stackOverflow';
 import { openLink } from 'mainProcess';
 
 const hotkeysWidth = 150;

@@ -1,25 +1,24 @@
 import axios from 'axios';
 
 // TODO: These types are also present in the `devbook-server` repository - move them into a shared library.
-
-export interface StackOverflowComment {
+interface StackOverflowComment {
   html: string;
 }
 
-export interface StackOverflowQuestion {
+interface StackOverflowQuestion {
   link: string;
   title: string;
   html: string;
-  timestamp: Date;
+  timestamp: number;
   votes: number;
   comments: StackOverflowComment[];
 }
 
-export interface StackOverflowAnswer {
+interface StackOverflowAnswer {
   html: string;
   votes: number;
   isAccepted: boolean;
-  timestamp: Date;
+  timestamp: number;
   comments: StackOverflowComment[];
 }
 
@@ -28,11 +27,9 @@ export interface StackOverflowResult {
   answers: StackOverflowAnswer[];
 }
 
-export async function search(query: string) {
-  // const url = `https://api.getsidekick.app/search/stackoverflow`;
-  const url = 'http://localhost:3002/search/stackoverflow';
+export async function search(query: string): Promise<StackOverflowResult[]> {
+  const url = `https://api.getsidekick.app/search/stackoverflow`;
   const result = await axios.post(url, { query });
 
-  return result.data.results as StackOverflowResult[];
+  return result.data.results;
 }
-
