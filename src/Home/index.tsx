@@ -1,5 +1,7 @@
 import React, {
+  useRef,
   useEffect,
+  useLayoutEffect,
   useState,
   useCallback,
 } from 'react';
@@ -7,15 +9,20 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import useDebounce from 'hooks/useDebounce';
+import useOnWindowResize from 'hooks/useOnWindowResize';
 
-import { search as searchStackOverflow } from 'search/stackoverflow';
+import {
+  search as searchStackOverflow,
+  StackOverflowResult,
+} from 'search/stackoverflow';
 import {
   searchCode as searchGitHubCode,
   CodeResult,
 } from 'search/gitHub';
 
 import SearchInput, { FilterType } from './SearchInput';
-import GitHubCodeResult from './GitHubCodeResult';
+import StackOverflowItem from './StackOverflowItem';
+import GitHubCodeItem from './GitHubCodeItem';
 
 const Content = styled.div`
   height: 100%;
@@ -39,12 +46,18 @@ const InfoMessage = styled.div`
 `;
 
 function Home() {
-  //const [searchQuery, setSearchQuery] = useState('firestore collection() where');
-  const [searchQuery, setSearchQuery] = useState('');
-  const debouncedQuery = useDebounce(searchQuery, 400);
-  const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.All);
-  const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const [resultsWidth, setResultsWidth] = useState(0);
 
+  const [searchQuery, setSearchQuery] = useState('firestore where');
+  const debouncedQuery = useDebounce(searchQuery, 400);
+  // TODO: Change to FilterType.All.
+  const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.All);
+
+  const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
+  const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
+
+  // TODO: We have two result variables but only one index.
   const [focusedIdx, setFocusedIdx] = useState(0);
 
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -52,13 +65,15 @@ function Home() {
 
   useEffect(() => {
     async function searchSO(query: string) {
-      // const results = await searchStackOverflow(query);
-      // console.log('StackOverflow', results);
+      const results = await searchStackOverflow(query);
+      setSOResults(results);
+      console.log('StackOverflow', results);
       setIsLoadingData(false);
     }
 
     async function searchCode(query: string) {
       const results = await searchGitHubCode(query);
+      console.log('GitHub', results);
       setHasEmptyResults(results.length === 0);
       setCodeResults(results);
       setIsLoadingData(false);
@@ -68,6 +83,10 @@ function Home() {
       const results = await searchGitHubCode(query);
       setHasEmptyResults(results.length === 0);
       setCodeResults(results);
+
+      // TODO: Unify results from GitHub and from StackOverflow.
+      // const soResults = await searchStackOverflow(query);
+
       setIsLoadingData(false);
     }
 
@@ -85,7 +104,17 @@ function Home() {
         searchCode(debouncedQuery);
       break;
     }
-  }, [activeFilter, debouncedQuery, setIsLoadingData]);
+  }, [activeFilter, debouncedQuery, setIsLoadingData, setSOResults, setCodeResults]);
+
+  useOnWindowResize((e: any) => {
+    if (!resultsRef?.current) return;
+    // NOTE: This only works if the values are in pixels!
+    const style = resultsRef.current.style;
+    const margin = (parseFloat(style.marginLeft) + parseFloat(style.marginRight)) || 0;
+    const padding = (parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)) || 0;
+    const border = (parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)) || 0;
+    setResultsWidth(resultsRef.current.offsetWidth + margin + padding + border);
+  }, [resultsRef, setResultsWidth]);
 
   useHotkeys('alt+shift+1', (e: any) => {
     setActiveFilter(FilterType.All);
@@ -121,19 +150,41 @@ function Home() {
         isLoading={isLoadingData}
       />
 
+      {/*
+        SearchResults must not be rendered conditionally so we can calculate its width
+        before we fetch the search results.
+      */}
+      {/*
+      <SearchResults
+        ref={resultsRef}
+      >
+        {searchQuery && soResults.length > 0 && soResults.map(sor => (
+          <StackOverflowItem
+            key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
+            soResult={sor}
+            parentWidth={resultsWidth}
+          />
+        ))}
+      </SearchResults>
+      */}
+
       {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
       {searchQuery && hasEmptyResults && <InfoMessage>Nothing found</InfoMessage>}
       {searchQuery && codeResults.length > 0 &&
-        <SearchResults>
+        <SearchResults
+          ref={resultsRef}
+        >
           {codeResults.map((cr, idx) => (
-            <GitHubCodeResult
-              key={cr.full_name + cr.file_path}
+            <GitHubCodeItem
+              key={cr.repoFullName + cr.filePath}
               codeResult={cr}
               isFocused={focusedIdx === idx}
+              parentWidth={resultsWidth}
             />
           ))}
         </SearchResults>
       }
+
     </Content>
   );
 }
