@@ -22,8 +22,14 @@ const Container = styled.div`
 `;
 
 const Hotkeys = styled.div`
+  /*
+  min-width: ${hotkeysWidth}px;
+  */
+  flex: 1;
   margin-right: ${hotkeysMarginRight}px;
   min-width: ${hotkeysWidth}px;
+
+
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -47,6 +53,8 @@ const Hotkey = styled.div`
 
 const Result = styled.div<{ width: number, isFocused?: boolean }>`
   width: ${props => props.width > 0 ? props.width + 'px' : '100%'};
+  max-width: ${props => props.width > 0 ? props.width + 'px' : '100%'};
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -179,6 +187,7 @@ const GitHubCodeItem = memo(({
     <Container
       ref={containerRef}
      >
+      {/*
       <Hotkeys>
         {isFocused && (
           <>
@@ -191,13 +200,16 @@ const GitHubCodeItem = memo(({
           </>
         )}
       </Hotkeys>
+      */}
 
       <Result
         // 'headerPadding * 2' because padding is applied to both left and right.
         // The reason we set width to 100% when props.width is zero is so the Result div isn't shrinked on the initial render.
         //width={(containerWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
         // width={containerWidth}
-        width={(parentWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
+        //width={(parentWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
+        // width={parentWidth}
+        width={0}
         isFocused={isFocused}
       >
         <Header>
