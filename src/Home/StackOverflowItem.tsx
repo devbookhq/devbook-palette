@@ -10,7 +10,6 @@ import { openLink } from 'mainProcess';
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   max-width: 100%;
-  padding-bottom: 10px;
   margin-bottom: 10px;
 
   display: flex;
@@ -32,7 +31,7 @@ const Header = styled.div`
 `;
 
 const QuestionTitle = styled.a`
-  color: #B0B1B2;
+  color: #fff;
   font-weight: 500;
   font-size: 14px;
   text-decoration: none;
@@ -47,8 +46,30 @@ const Content = styled.div`
   border-bottom-right-radius: 5px;
   background: #2B2D2F;
 
+  p {
+    font-size: 14px;
+    font-color: #D5D5D5;
+  }
+
+  code {
+    padding: 2px 4px;
+
+    font-size: 14px;
+    background: #404244;
+    border-radius: 3px;
+  }
+
   pre {
+    padding: 10px;
     overflow-y: auto;
+
+    background: #404244;
+    border-radius: 3px;
+
+    code {
+      padding: none;
+      background: transparent;
+    }
   }
 `;
 

@@ -34,8 +34,7 @@ const ResultsHeading = styled.div`
 `;
 
 const SearchResults = styled.div`
-  width: 100%;
-  height: 100%;
+  flex: 1;
   padding: 10px 15px;
 
   overflow: hidden;
@@ -58,6 +57,7 @@ const HotkeysPanel = styled.div`
   z-index: 10;
   */
   min-height: 50px;
+  max-height: 50px;
   width: 100%;
 
   border-top: 1px solid #404244;
@@ -85,20 +85,24 @@ function Home() {
 
   useEffect(() => {
     async function searchSO(query: string) {
+      setSOResults([]);
       const results = await searchStackOverflow(query);
       console.log('StackOverflow', results);
 
       setHasEmptyResults(results.length === 0);
       setSOResults(results);
+      setSOFocusedIdx(0);
       setIsLoadingData(false);
     }
 
     async function searchCode(query: string) {
+      setCodeResults([]);
       const results = await searchGitHubCode(query);
       console.log('GitHub', results);
 
       setHasEmptyResults(results.length === 0);
       setCodeResults(results);
+      setCodeFocusedIdx(0);
       setIsLoadingData(false);
     }
 
@@ -153,7 +157,7 @@ function Home() {
       <SearchInput
         placeholder="Question or code"
         value={searchQuery}
-        onChange={e =>setSearchQuery(e.target.value)}
+        onChange={e => setSearchQuery(e.target.value)}
         activeFilter={activeFilter}
         onFilterSelect={f => setActiveFilter(f)}
         isLoading={isLoadingData}
@@ -162,29 +166,31 @@ function Home() {
       {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
       {searchQuery && hasEmptyResults && <InfoMessage>Nothing found</InfoMessage>}
       {searchQuery && !hasEmptyResults &&
-        <SearchResults>
-          <>
-            <ResultsHeading>RESULTS</ResultsHeading>
-            {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
-              <StackOverflowItem
-                key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
-                soResult={sor}
-                isFocused={soFocusedIdx === idx}
-              />
-            ))}
+        <>
+          <SearchResults>
+            <>
+              <ResultsHeading>RESULTS</ResultsHeading>
+              {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
+                <StackOverflowItem
+                  key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
+                  soResult={sor}
+                  isFocused={soFocusedIdx === idx}
+                />
+              ))}
 
-            {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
-              <GitHubCodeItem
-                key={cr.repoFullName + cr.filePath}
-                codeResult={cr}
-                isFocused={codeFocusedIdx === idx}
-              />
-            ))}
-          </>
-        </SearchResults>
+              {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
+                <GitHubCodeItem
+                  key={cr.repoFullName + cr.filePath}
+                  codeResult={cr}
+                  isFocused={codeFocusedIdx === idx}
+                />
+              ))}
+            </>
+          </SearchResults>
+          <HotkeysPanel/>
+        </>
       }
 
-      <HotkeysPanel/>
     </Content>
   );
 }
