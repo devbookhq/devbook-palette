@@ -68,7 +68,6 @@ function Home() {
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
 
-  // TODO: We have two results variables but only one index.
   const [focusedIdx, setFocusedIdx] = useState(0);
 
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -77,14 +76,17 @@ function Home() {
   useEffect(() => {
     async function searchSO(query: string) {
       const results = await searchStackOverflow(query);
-      setSOResults(results);
       console.log('StackOverflow', results);
+
+      setHasEmptyResults(results.length === 0);
+      setSOResults(results);
       setIsLoadingData(false);
     }
 
     async function searchCode(query: string) {
       const results = await searchGitHubCode(query);
       console.log('GitHub', results);
+
       setHasEmptyResults(results.length === 0);
       setCodeResults(results);
       setIsLoadingData(false);
@@ -101,7 +103,7 @@ function Home() {
         searchCode(debouncedQuery);
       break;
     }
-  }, [activeFilter, debouncedQuery, setIsLoadingData, setSOResults, setCodeResults]);
+  }, [activeFilter, debouncedQuery]);
 
   useHotkeys('alt+shift+1', (e: any) => {
     setActiveFilter(ResultsFilter.StackOverflow);
@@ -132,71 +134,28 @@ function Home() {
         isLoading={isLoadingData}
       />
 
-      {/*
-        SearchResults element must not be rendered conditionally so we can calculate its width
-        before we fetch the actual search results.
-      */}
-
-      <SearchResults>
-        <>
-          {activeFilter === ResultsFilter.StackOverflow &&
-            <>
-              {searchQuery && soResults.length > 0 && soResults.map(sor => (
-                <StackOverflowItem
-                  key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
-                  soResult={sor}
-                />
-              ))}
-            </>
-          }
-
-          {activeFilter === ResultsFilter.GitHubCode &&
-            <>
-              {codeResults.map((cr, idx) => (
-                <GitHubCodeItem
-                  key={cr.repoFullName + cr.filePath}
-                  codeResult={cr}
-                  isFocused={focusedIdx === idx}
-                />
-              ))}
-            </>
-          }
-        </>
-      </SearchResults>
-
-      {/*
-      <SearchResults
-        ref={resultsRef}
-      >
-        {searchQuery && soResults.length > 0 && soResults.map(sor => (
-          <StackOverflowItem
-            key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
-            soResult={sor}
-            parentWidth={resultsWidth}
-          />
-        ))}
-      </SearchResults>
-      */}
-
-      {/*
       {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
       {searchQuery && hasEmptyResults && <InfoMessage>Nothing found</InfoMessage>}
-      {searchQuery && codeResults.length > 0 &&
-        <SearchResults
-          ref={resultsRef}
-        >
-          {codeResults.map((cr, idx) => (
-            <GitHubCodeItem
-              key={cr.repoFullName + cr.filePath}
-              codeResult={cr}
-              isFocused={focusedIdx === idx}
-              parentWidth={resultsWidth}
-            />
-          ))}
+      {searchQuery && !hasEmptyResults &&
+        <SearchResults>
+          <>
+            {activeFilter === ResultsFilter.StackOverflow && soResults.map(sor => (
+              <StackOverflowItem
+                key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
+                soResult={sor}
+              />
+            ))}
+
+            {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
+              <GitHubCodeItem
+                key={cr.repoFullName + cr.filePath}
+                codeResult={cr}
+                isFocused={focusedIdx === idx}
+              />
+            ))}
+          </>
         </SearchResults>
       }
-      */}
-
 
       <HotkeysPanel/>
     </Content>
