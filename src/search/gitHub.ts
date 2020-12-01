@@ -37,7 +37,6 @@ export async function searchCode(query: string, pageSize?: number, page?: number
     pageSize,
     page,
   })
-  console.log('github result', result);
 
   return result.data.results;
 }
