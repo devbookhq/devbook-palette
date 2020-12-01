@@ -1,18 +1,17 @@
-import React from 'react';
+import React, {
+  useEffect,
+  useRef,
+} from 'react';
 import styled from 'styled-components';
 
 import { StackOverflowResult } from 'search/stackoverflow';
 import { openLink } from 'mainProcess';
 
-const Container = styled.div`
-  width: 100%;
-  padding-bottom: 10px;
-  display: flex;
-`;
-
-const Result = styled.div<{ isFocused?: boolean }>`
+const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   max-width: 100%;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
 
   display: flex;
   flex-direction: column;
@@ -55,27 +54,38 @@ const Content = styled.div`
 
 interface StackOverflowItemProps {
   soResult: StackOverflowResult;
+  isFocused?: boolean;
 }
 
-function StackOverflowItem({ soResult }: StackOverflowItemProps) {
+function StackOverflowItem({
+  soResult,
+  isFocused,
+}: StackOverflowItemProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
   function handleQuestionTitleClick(e: any) {
     openLink(soResult.question.link);
     e.preventDefault();
   }
 
-  return (
-    <Container>
-      <Result>
-        <Header>
-          <QuestionTitle href={soResult.question.link} onClick={handleQuestionTitleClick}>
-            {soResult.question.title}
-          </QuestionTitle>
-        </Header>
+  useEffect(() => {
+    if (isFocused) containerRef?.current?.scrollIntoView(false);
+  }, [isFocused]);
 
-        <Content
-          dangerouslySetInnerHTML={{ __html: soResult.question.html }}
-        />
-      </Result>
+  return (
+    <Container
+      ref={containerRef}
+      isFocused={isFocused}
+    >
+      <Header>
+        <QuestionTitle href={soResult.question.link} onClick={handleQuestionTitleClick}>
+          {soResult.question.title}
+        </QuestionTitle>
+      </Header>
+
+      <Content
+        dangerouslySetInnerHTML={{ __html: soResult.question.html }}
+      />
     </Container>
   );
 }

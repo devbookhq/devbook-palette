@@ -9,15 +9,11 @@ import dracula from 'prism-react-renderer/themes/dracula';
 
 import { CodeResult } from 'search/gitHub';
 
-const Container = styled.div`
-  width: 100%;
-  padding-bottom: 10px;
-  display: flex;
-`;
-
-const Result = styled.div<{ isFocused?: boolean }>`
+const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   max-width: 100%;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
 
   display: flex;
   flex-direction: column;
@@ -129,62 +125,59 @@ const GitHubCodeItem = memo(({
   return (
     <Container
       ref={containerRef}
+      isFocused={isFocused}
      >
-      <Result
-        isFocused={isFocused}
-      >
-        <Header>
-          <RepoName>
-            {codeResult.repoFullName}
-          </RepoName>
-          <FilePath>
-            {codeResult.filePath}
-          </FilePath>
-        </Header>
+      <Header>
+        <RepoName>
+          {codeResult.repoFullName}
+        </RepoName>
+        <FilePath>
+          {codeResult.filePath}
+        </FilePath>
+      </Header>
 
-        <CodeWrapper>
-          <CodeSnippet>
-            {codeResult.filePreviews.map((el, idx) => (
-              <React.Fragment key={idx}>
-                <>
-                  <Highlight
-                    {...defaultProps}
-                    code={el.fragment}
-                    theme={dracula}
-                    language="typescript" // TODO: Detect the fragment's language.
-                  >
-                    {({
-                      className,
-                      style,
-                      tokens,
-                      getLineProps,
-                      getTokenProps
-                    }) => (
-                      <Pre className={className} style={style}>
-                        {tokens.map((line, i) => (
-                          <Line {...getLineProps({ line, key: i })}>
-                            <LineNo>{el.startLine + i + 1}</LineNo>
-                            <LineContent>
-                              {line.map((token, key) => (
-                                <span {...getTokenProps({ token, key })} />
-                              ))}
-                            </LineContent>
-                          </Line>
-                        ))}
-                      </Pre>
-                    )}
-                  </Highlight>
-                  {/* This makes sure we show only code hits. */}
-                  {/*
-                  {m.property === 'content' && (
+      <CodeWrapper>
+        <CodeSnippet>
+          {codeResult.filePreviews.map((el, idx) => (
+            <React.Fragment key={idx}>
+              <>
+                <Highlight
+                  {...defaultProps}
+                  code={el.fragment}
+                  theme={dracula}
+                  language="typescript" // TODO: Detect the fragment's language.
+                >
+                  {({
+                    className,
+                    style,
+                    tokens,
+                    getLineProps,
+                    getTokenProps
+                  }) => (
+                    <Pre className={className} style={style}>
+                      {tokens.map((line, i) => (
+                        <Line {...getLineProps({ line, key: i })}>
+                          <LineNo>{el.startLine + i + 1}</LineNo>
+                          <LineContent>
+                            {line.map((token, key) => (
+                              <span {...getTokenProps({ token, key })} />
+                            ))}
+                          </LineContent>
+                        </Line>
+                      ))}
+                    </Pre>
                   )}
-                  */}
-                </>
-              </React.Fragment>
-            ))}
-          </CodeSnippet>
-        </CodeWrapper>
-     </Result>
+                </Highlight>
+                {/* This makes sure we show only code hits. */}
+                {/*
+                {m.property === 'content' && (
+                )}
+                */}
+              </>
+            </React.Fragment>
+          ))}
+        </CodeSnippet>
+      </CodeWrapper>
     </Container>
   );
 });

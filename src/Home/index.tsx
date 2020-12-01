@@ -24,7 +24,13 @@ const Content = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+`;
+
+const ResultsHeading = styled.div`
+  margin-bottom: 10px;
+  color: #A6A6A7;
+  font-size: 14px;
+  font-weight: 500;
 `;
 
 const SearchResults = styled.div`
@@ -120,8 +126,18 @@ function Home() {
   }, { filter: () => true }, [focusedIdx]);
 
   useHotkeys('down', (e: any) => {
-    if (focusedIdx < codeResults.length - 1) setFocusedIdx(idx => idx+1);
-  }, { filter: () => true }, [codeResults, focusedIdx]);
+    let length = 0;
+     switch (activeFilter) {
+      case ResultsFilter.StackOverflow:
+        length = soResults.length;
+        break;
+      case ResultsFilter.GitHubCode:
+        length = codeResults.length;
+        break;
+     }
+
+    if (focusedIdx < length - 1) setFocusedIdx(idx => idx+1);
+  }, { filter: () => true }, [soResults, codeResults, focusedIdx]);
 
   return (
     <Content>
@@ -139,10 +155,12 @@ function Home() {
       {searchQuery && !hasEmptyResults &&
         <SearchResults>
           <>
-            {activeFilter === ResultsFilter.StackOverflow && soResults.map(sor => (
+            <ResultsHeading>RESULTS</ResultsHeading>
+            {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
               <StackOverflowItem
                 key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
                 soResult={sor}
+                isFocused={focusedIdx === idx}
               />
             ))}
 
