@@ -10,11 +10,16 @@ export interface StackOverflowQuestion {
   link: string;
   title: string;
   html: string;
+  votes: number;
+  timestamp: number;
   comments: StackOverflowComment[];
 }
 
 export interface StackOverflowAnswer {
   html: string;
+  votes: number;
+  isAccepted: boolean;
+  timestamp: number;
   comments: StackOverflowComment[];
 }
 
@@ -24,8 +29,8 @@ export interface StackOverflowResult {
 }
 
 export async function search(query: string) {
-  // const url = `https://api.getsidekick.app/search/stackoverflow`;
-  const url = 'http://localhost:3002/search/stackoverflow';
+  const url = `https://api.getsidekick.app/search/stackoverflow`;
+  // const url = 'http://localhost:3002/search/stackoverflow';
   const result = await axios.post(url, { query });
 
   return result.data.results as StackOverflowResult[];
