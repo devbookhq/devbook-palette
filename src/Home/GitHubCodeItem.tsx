@@ -1,7 +1,5 @@
 import React, {
-  useLayoutEffect,
   useEffect,
-  useState,
   useRef,
   memo,
 } from 'react';
@@ -11,60 +9,25 @@ import dracula from 'prism-react-renderer/themes/dracula';
 
 import { CodeResult } from 'search/gitHub';
 
-const hotkeysWidth = 150;
-const hotkeysMarginRight = 10;
-const headerPadding = 10;
-
-const Container = styled.div`
+const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
+  max-width: 100%;
   padding-bottom: 10px;
-  display: flex;
-`;
-
-const Hotkeys = styled.div`
-  /*
-  min-width: ${hotkeysWidth}px;
-  */
-  flex: 1;
-  margin-right: ${hotkeysMarginRight}px;
-  min-width: ${hotkeysWidth}px;
-
-
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-`;
-
-const Hotkey = styled.div`
-  padding: 5px;
-  width: 100%;
-
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-
-  background: #2B2D2F;
-  border-radius: 5px;
-
-  :not(:last-child) {
-    margin-bottom: 10px;
-  }
-`;
-
-const Result = styled.div<{ width: number, isFocused?: boolean }>`
-  width: ${props => props.width > 0 ? props.width + 'px' : '100%'};
-  max-width: ${props => props.width > 0 ? props.width + 'px' : '100%'};
+  margin-bottom: 10px;
 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
   border-radius: 5px;
   border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#404244'};
 `;
 
 const Header = styled.div`
+  width: 100%;
   max-width: 100%;
-  padding: ${headerPadding}px;
+  padding: 10px;
+
   display: flex;
   flex-direction: column;
   background: #212122;
@@ -147,37 +110,13 @@ const LineContent = styled.span`
 export interface GitHubCodeItemProps {
   codeResult: CodeResult;
   isFocused?: boolean;
-  parentWidth: number;
 }
 
 const GitHubCodeItem = memo(({
   codeResult,
   isFocused,
-  parentWidth,
 }: GitHubCodeItemProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-
-  /*
-  useLayoutEffect(() => {
-    function resizeListener(e: any) {
-      if (!containerRef?.current) return;
-      setContainerWidth(containerRef.current.offsetWidth);
-    }
-
-    window.addEventListener('resize', resizeListener);
-
-    // This is a hack to get a correct height of the container.
-    // The other solution is to get the height of the container
-    // on the initial render but that solution returned an incorrect
-    // value. I'm not sure why.
-    // The value is correct once you resize the window though.
-    window.resizeTo(window.outerWidth, window.outerHeight - 1);
-    window.resizeTo(window.outerWidth, window.outerHeight + 1);
-
-    return () => window.removeEventListener('resize', resizeListener);
-  }, [containerRef, setContainerWidth]);
-  */
 
   useEffect(() => {
     if (isFocused) containerRef?.current?.scrollIntoView(false);
@@ -186,84 +125,59 @@ const GitHubCodeItem = memo(({
   return (
     <Container
       ref={containerRef}
+      isFocused={isFocused}
      >
-      {/*
-      <Hotkeys>
-        {isFocused && (
-          <>
-            <Hotkey>
-              Open in browser
-            </Hotkey>
-            <Hotkey>
-              Copy code snippet
-            </Hotkey>
-          </>
-        )}
-      </Hotkeys>
-      */}
+      <Header>
+        <RepoName>
+          {codeResult.repoFullName}
+        </RepoName>
+        <FilePath>
+          {codeResult.filePath}
+        </FilePath>
+      </Header>
 
-      <Result
-        // 'headerPadding * 2' because padding is applied to both left and right.
-        // The reason we set width to 100% when props.width is zero is so the Result div isn't shrinked on the initial render.
-        //width={(containerWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
-        // width={containerWidth}
-        //width={(parentWidth - hotkeysWidth + hotkeysMarginRight) - headerPadding * 2}
-        // width={parentWidth}
-        width={0}
-        isFocused={isFocused}
-      >
-        <Header>
-          <RepoName>
-            {codeResult.repoFullName}
-          </RepoName>
-          <FilePath>
-            {codeResult.filePath}
-          </FilePath>
-        </Header>
-
-        <CodeWrapper>
-          <CodeSnippet>
-            {codeResult.filePreviews.map((el, idx) => (
-              <React.Fragment key={idx}>
-                <>
-                  <Highlight
-                    {...defaultProps}
-                    code={el.fragment}
-                    theme={dracula}
-                    language="typescript" // TODO: Detect the fragment's language.
-                  >
-                    {({
-                      className,
-                      style,
-                      tokens,
-                      getLineProps,
-                      getTokenProps
-                    }) => (
-                      <Pre className={className} style={style}>
-                        {tokens.map((line, i) => (
-                          <Line {...getLineProps({ line, key: i })}>
-                            <LineNo>{el.startLine + i + 1}</LineNo>
-                            <LineContent>
-                              {line.map((token, key) => (
-                                <span {...getTokenProps({ token, key })} />
-                              ))}
-                            </LineContent>
-                          </Line>
-                        ))}
-                      </Pre>
-                    )}
-                  </Highlight>
-                  {/* This makes sure we show only code hits. */}
-                  {/*
-                  {m.property === 'content' && (
+      <CodeWrapper>
+        <CodeSnippet>
+          {codeResult.filePreviews.map((el, idx) => (
+            <React.Fragment key={idx}>
+              <>
+                <Highlight
+                  {...defaultProps}
+                  code={el.fragment}
+                  theme={dracula}
+                  language="typescript" // TODO: Detect the fragment's language.
+                >
+                  {({
+                    className,
+                    style,
+                    tokens,
+                    getLineProps,
+                    getTokenProps
+                  }) => (
+                    <Pre className={className} style={style}>
+                      {tokens.map((line, i) => (
+                        <Line {...getLineProps({ line, key: i })}>
+                          <LineNo>{el.startLine + i + 1}</LineNo>
+                          <LineContent>
+                            {line.map((token, key) => (
+                              <span {...getTokenProps({ token, key })} />
+                            ))}
+                          </LineContent>
+                        </Line>
+                      ))}
+                    </Pre>
                   )}
-                  */}
-                </>
-              </React.Fragment>
-            ))}
-          </CodeSnippet>
-        </CodeWrapper>
-     </Result>
+                </Highlight>
+                {/* This makes sure we show only code hits. */}
+                {/*
+                {m.property === 'content' && (
+                )}
+                */}
+              </>
+            </React.Fragment>
+          ))}
+        </CodeSnippet>
+      </CodeWrapper>
     </Container>
   );
 });

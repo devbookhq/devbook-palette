@@ -1,5 +1,4 @@
 import React, {
-  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -65,7 +64,7 @@ const FiltersWrapper = styled.div`
 `;
 
 const Filter = styled.div`
-  margin-right: 10px;
+  margin-right: 8px;
   display: flex;
   align-items: center;
 `;
@@ -101,8 +100,7 @@ const ConnectGitHubButton = styled.button`
   }
 `;
 
-export enum FilterType {
-  All = 'All',
+export enum ResultsFilter {
   StackOverflow = 'StackOverflow',
   GitHubCode = 'Code',
 }
@@ -112,8 +110,8 @@ interface SearchInputProps {
   value: string;
   onChange: (e: any) => void;
 
-  activeFilter: FilterType;
-  onFilterSelect: (f: FilterType) => void;
+  activeFilter: ResultsFilter;
+  onFilterSelect: (f: ResultsFilter) => void;
 
   isLoading?: boolean;
 }
@@ -169,7 +167,7 @@ function SearchInput({
       </InputWrapper>
       <Menu>
         <FiltersWrapper>
-          {Object.values(FilterType).map((f, idx) => (
+          {Object.values(ResultsFilter).map((f, idx) => (
             <Filter
               key={f}
             >
