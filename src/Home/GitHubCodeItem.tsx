@@ -1,19 +1,19 @@
 import React, {
   useEffect,
-  useState,
   useRef,
   memo,
 } from 'react';
 import styled from 'styled-components';
 import Highlight, { defaultProps } from 'prism-react-renderer';
-import dracula from 'prism-react-renderer/themes/dracula';
+import theme from 'prism-react-renderer/themes/vsDark'; // vsDark or nightOwl
 
 import { CodeResult } from 'search/gitHub';
+
+theme.plain.backgroundColor = '#2B2D2F';
 
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   max-width: 100%;
-  padding-bottom: 10px;
   margin-bottom: 10px;
   display: flex;
   flex-direction: column;
@@ -106,7 +106,8 @@ const Delimiter = styled.div`
 
 const MarkedSpan = styled.span`
   font-weight: 600;
-  background: #5f609e;
+  /* line-height: 4em; */
+  background: #BF9035;
 `;
 
 function isInRange(ranges: number[][], offset: number) {
@@ -198,7 +199,7 @@ const GitHubCodeItem = memo(({
                 <Highlight
                   {...defaultProps}
                   code={el.fragment}
-                  theme={dracula}
+                  theme={theme}
                   language="typescript" // TODO: Detect the fragment's language.
                 >
                   {({

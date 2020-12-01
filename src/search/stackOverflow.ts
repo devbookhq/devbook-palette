@@ -9,11 +9,16 @@ export interface StackOverflowQuestion {
   link: string;
   title: string;
   html: string;
+  timestamp: number;
+  votes: number;
   comments: StackOverflowComment[];
 }
 
 export interface StackOverflowAnswer {
   html: string;
+  votes: number;
+  isAccepted: boolean;
+  timestamp: number;
   comments: StackOverflowComment[];
 }
 
