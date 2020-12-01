@@ -31,19 +31,6 @@ export async function searchCode(query: string, pageSize?: number, page?: number
   }
 
   const result = await axios.post('https://api.getsidekick.app/search/github/code', { accessToken, query })
-  console.log('github result', result);
-
-  /*
-  const result = await octokit!.request('GET /search/code', {
-    headers: {
-      accept: 'application/vnd.github.v3.text-match+json',
-    },
-    q: query,
-    page,
-    per_page: pageSize,
-  });
-  */
-
   return result.data.results as CodeResult[];
 }
 

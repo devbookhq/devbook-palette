@@ -1,5 +1,4 @@
 import React, {
-  useEffect,
   useRef,
   useState,
 } from 'react';
@@ -65,7 +64,7 @@ const FiltersWrapper = styled.div`
 `;
 
 const Filter = styled.div`
-  margin-right: 10px;
+  margin-right: 8px;
   display: flex;
   align-items: center;
 `;

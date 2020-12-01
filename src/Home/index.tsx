@@ -1,15 +1,11 @@
 import React, {
-  useRef,
   useEffect,
-  useLayoutEffect,
   useState,
-  useCallback,
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import useDebounce from 'hooks/useDebounce';
-import useOnWindowResize from 'hooks/useOnWindowResize';
 
 import {
   search as searchStackOverflow,
@@ -56,7 +52,7 @@ const HotkeysPanel = styled.div`
   z-index: 10;
 
   // border-top: 1px solid #404244;
-  // border: 1px solid #404244;
+  border: 1px solid #404244;
   border-radius: 5px;
   background: #2B2D2F;
   // background: #212122;
@@ -64,9 +60,6 @@ const HotkeysPanel = styled.div`
 `;
 
 function Home() {
-  const resultsRef = useRef<HTMLDivElement>(null);
-  const [resultsWidth, setResultsWidth] = useState(0);
-
   const [searchQuery, setSearchQuery] = useState('firestore where');
   const debouncedQuery = useDebounce(searchQuery, 400);
   // TODO: Change to FilterType.All.
@@ -75,7 +68,7 @@ function Home() {
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
 
-  // TODO: We have two result variables but only one index.
+  // TODO: We have two results variables but only one index.
   const [focusedIdx, setFocusedIdx] = useState(0);
 
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -124,16 +117,6 @@ function Home() {
     }
   }, [activeFilter, debouncedQuery, setIsLoadingData, setSOResults, setCodeResults]);
 
-  useOnWindowResize((e: any) => {
-    if (!resultsRef?.current) return;
-    // NOTE: This only works if the values are in pixels!
-    const style = resultsRef.current.style;
-    const margin = (parseFloat(style.marginLeft) + parseFloat(style.marginRight)) || 0;
-    const padding = (parseFloat(style.paddingLeft) + parseFloat(style.paddingRight)) || 0;
-    const border = (parseFloat(style.borderLeftWidth) + parseFloat(style.borderRightWidth)) || 0;
-    setResultsWidth(resultsRef.current.offsetWidth + margin + padding + border);
-  }, [resultsRef, setResultsWidth]);
-
   useHotkeys('alt+shift+1', (e: any) => {
     setActiveFilter(FilterType.All);
     e.preventDefault();
@@ -151,11 +134,11 @@ function Home() {
 
   useHotkeys('up', (e: any) => {
     if (focusedIdx > 0) setFocusedIdx(idx => idx-1);
-  }, { filter: () => true }, [focusedIdx, setFocusedIdx]);
+  }, { filter: () => true }, [focusedIdx]);
 
   useHotkeys('down', (e: any) => {
     if (focusedIdx < codeResults.length - 1) setFocusedIdx(idx => idx+1);
-  }, { filter: () => true }, [codeResults, focusedIdx, setFocusedIdx]);
+  }, { filter: () => true }, [codeResults, focusedIdx]);
 
   return (
     <Content>
@@ -173,9 +156,7 @@ function Home() {
         before we fetch the actual search results.
       */}
 
-      <SearchResults
-        ref={resultsRef}
-      >
+      <SearchResults>
         <>
           {activeFilter === FilterType.StackOverflow &&
             <>
@@ -183,7 +164,6 @@ function Home() {
                 <StackOverflowItem
                   key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
                   soResult={sor}
-                  parentWidth={resultsWidth}
                 />
               ))}
             </>
@@ -196,7 +176,6 @@ function Home() {
                   key={cr.repoFullName + cr.filePath}
                   codeResult={cr}
                   isFocused={focusedIdx === idx}
-                  parentWidth={resultsWidth}
                 />
               ))}
             </>

@@ -1,12 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { StackOverflowResult } from 'search/stackoverflow';
 import { openLink } from 'mainProcess';
-
-const hotkeysWidth = 150;
-const hotkeysMarginRight = 10;
-const headerPadding = 10;
 
 const Container = styled.div`
   width: 100%;
@@ -14,43 +10,10 @@ const Container = styled.div`
   display: flex;
 `;
 
-const Hotkeys = styled.div`
-  /*
-  width: ${hotkeysWidth}px;
-  max-width: ${hotkeysWidth}px;
-  */
-  // min-width: ${hotkeysWidth}px;
-  flex: 1;
-
-  margin-right: ${hotkeysMarginRight}px;
-  // width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-`;
-
-const Hotkey = styled.div`
-  padding: 5px;
+const Result = styled.div<{ isFocused?: boolean }>`
   width: 100%;
+  max-width: 100%;
 
-  color: white;
-  font-size: 13px;
-  font-weight: 500;
-
-  background: #2B2D2F;
-  border-radius: 5px;
-
-  :not(:last-child) {
-    margin-bottom: 10px;
-  }
-`;
-
-const Result = styled.div<{ width: number, isFocused?: boolean }>`
-  width: ${props => props.width > 0 ? props.width + 'px' : '100%'};
-  /*
-  min-width: ${props => props.width > 0 ? props.width + 'px' : '100%'};
-  */
-  max-width: ${props => props.width > 0 ? props.width + 'px' : '100%'};
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -62,7 +25,7 @@ const Result = styled.div<{ width: number, isFocused?: boolean }>`
 const Header = styled.div`
   width: 100%;
   max-width: 100%;
-  padding: ${headerPadding}px;
+  padding: 10px;
 
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
@@ -92,18 +55,9 @@ const Content = styled.div`
 
 interface StackOverflowItemProps {
   soResult: StackOverflowResult;
-  parentWidth: number;
 }
 
-function StackOverflowItem({
-  soResult,
-  parentWidth,
-}: StackOverflowItemProps) {
-
-  useEffect(() => {
-    console.log('parentWidth', parentWidth);
-  }, [parentWidth]);
-
+function StackOverflowItem({ soResult }: StackOverflowItemProps) {
   function handleQuestionTitleClick(e: any) {
     openLink(soResult.question.link);
     e.preventDefault();
@@ -111,22 +65,7 @@ function StackOverflowItem({
 
   return (
     <Container>
-      {/*
-      <Hotkeys>
-        <Hotkey>
-          Open in browser
-        </Hotkey>
-        <Hotkey>
-          Copy code snippet
-        </Hotkey>
-      </Hotkeys>
-      */}
-
-      <Result
-        // width={(parentWidth - hotkeysWidth - hotkeysMarginRight) - headerPadding * 2}
-        // width={parentWidth - headerPadding * 2}
-        width={0}
-      >
+      <Result>
         <Header>
           <QuestionTitle href={soResult.question.link} onClick={handleQuestionTitleClick}>
             {soResult.question.title}
