@@ -11,14 +11,15 @@ import { openLink } from 'mainProcess';
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   max-width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 
   border-radius: 5px;
-  border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#404244'};
+  // border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#404244'};
+  border: 1px solid ${props => props.isFocused ? '#7059FF' : '#404244'};
 `;
 
 const Header = styled.div`
@@ -35,7 +36,7 @@ const Header = styled.div`
 const QuestionTitle = styled.a`
   color: #fff;
   font-weight: 500;
-  font-size: 14px;
+  font-size: 16px;
   text-decoration: none;
 `;
 
@@ -103,17 +104,22 @@ const AnswerContent = styled.div`
 
   p {
     font-size: 14px;
-    font-color: #D5D5D5;
+    font-weight: 500;
+    color: #fff;
   }
 
   code {
     padding: 2px 4px;
 
+    color: #D9D9DA;
     font-size: 14px;
+    font-weight: 500;
+
     background: #404244;
     border-radius: 3px;
   }
 
+  /* Code block */
   pre {
     padding: 10px;
     overflow-y: auto;
@@ -122,8 +128,9 @@ const AnswerContent = styled.div`
     border-radius: 3px;
 
     code {
-      padding: none;
+      padding: 0;
       background: transparent;
+      line-height: 18px;
     }
   }
 `;
