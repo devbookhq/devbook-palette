@@ -56,9 +56,11 @@ const HotkeysPanel = styled.div`
   width: 95%;
   z-index: 10;
   */
-  min-height: 50px;
-  max-height: 50px;
   width: 100%;
+  padding: 10px 15px;
+
+  display: flex;
+  align-items: center;
 
   border-top: 1px solid #404244;
   // border: 1px solid #404244;
@@ -66,6 +68,14 @@ const HotkeysPanel = styled.div`
   // background: #2B2D2F;
   background: #212122;
   // box-shadow: 0px 0px 23px 13px rgba(0, 0, 0, 0.2);
+`;
+
+const Hotkey = styled.div`
+  margin-right: 15px;
+
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
 `;
 
 function Home() {
@@ -187,7 +197,11 @@ function Home() {
               ))}
             </>
           </SearchResults>
-          <HotkeysPanel/>
+
+          <HotkeysPanel>
+            <Hotkey>DETAIL - Enter</Hotkey>
+            <Hotkey>OPEN IN BROWSER - Shift + Enter</Hotkey>
+          </HotkeysPanel>
         </>
       }
 
