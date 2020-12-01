@@ -16,7 +16,7 @@ import {
   CodeResult,
 } from 'search/gitHub';
 
-import SearchInput, { FilterType } from './SearchInput';
+import SearchInput, { ResultsFilter } from './SearchInput';
 import StackOverflowItem from './StackOverflowItem';
 import GitHubCodeItem from './GitHubCodeItem';
 
@@ -62,8 +62,8 @@ const HotkeysPanel = styled.div`
 function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where');
   const debouncedQuery = useDebounce(searchQuery, 400);
-  // TODO: Change to FilterType.All.
-  const [activeFilter, setActiveFilter] = useState<FilterType>(FilterType.GitHubCode);
+
+  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
@@ -90,45 +90,26 @@ function Home() {
       setIsLoadingData(false);
     }
 
-    async function searchAll(query: string) {
-      const results = await searchGitHubCode(query);
-      setHasEmptyResults(results.length === 0);
-      setCodeResults(results);
-
-      // TODO: Unify results from GitHub and from StackOverflow.
-      // const soResults = await searchStackOverflow(query);
-
-      setIsLoadingData(false);
-    }
-
     if (!debouncedQuery) return;
 
     setIsLoadingData(true);
     switch (activeFilter) {
-      case FilterType.All:
-        searchAll(debouncedQuery);
-      break;
-      case FilterType.StackOverflow:
+      case ResultsFilter.StackOverflow:
         searchSO(debouncedQuery);
       break;
-      case FilterType.GitHubCode:
+      case ResultsFilter.GitHubCode:
         searchCode(debouncedQuery);
       break;
     }
   }, [activeFilter, debouncedQuery, setIsLoadingData, setSOResults, setCodeResults]);
 
   useHotkeys('alt+shift+1', (e: any) => {
-    setActiveFilter(FilterType.All);
+    setActiveFilter(ResultsFilter.StackOverflow);
     e.preventDefault();
   }, { filter: () => true });
 
   useHotkeys('alt+shift+2', (e: any) => {
-    setActiveFilter(FilterType.StackOverflow);
-    e.preventDefault();
-  }, { filter: () => true });
-
-  useHotkeys('alt+shift+3', (e: any) => {
-    setActiveFilter(FilterType.GitHubCode);
+    setActiveFilter(ResultsFilter.GitHubCode);
     e.preventDefault();
   }, { filter: () => true });
 
@@ -158,7 +139,7 @@ function Home() {
 
       <SearchResults>
         <>
-          {activeFilter === FilterType.StackOverflow &&
+          {activeFilter === ResultsFilter.StackOverflow &&
             <>
               {searchQuery && soResults.length > 0 && soResults.map(sor => (
                 <StackOverflowItem
@@ -169,7 +150,7 @@ function Home() {
             </>
           }
 
-          {activeFilter === FilterType.GitHubCode &&
+          {activeFilter === ResultsFilter.GitHubCode &&
             <>
               {codeResults.map((cr, idx) => (
                 <GitHubCodeItem
