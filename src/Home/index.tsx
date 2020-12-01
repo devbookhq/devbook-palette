@@ -36,7 +36,7 @@ const ResultsHeading = styled.div`
 const SearchResults = styled.div`
   width: 100%;
   height: 100%;
-  padding: 10px 15px 50px;
+  padding: 10px 15px;
 
   overflow: hidden;
   overflow-y: overlay;
@@ -50,19 +50,22 @@ const InfoMessage = styled.div`
 `;
 
 const HotkeysPanel = styled.div`
+  /*
   position: absolute;
   bottom: 0;
   margin: 0 auto 10px;
   width: 95%;
-  height: 40px;
   z-index: 10;
+  */
+  min-height: 50px;
+  width: 100%;
 
-  // border-top: 1px solid #404244;
-  border: 1px solid #404244;
-  border-radius: 5px;
-  background: #2B2D2F;
-  // background: #212122;
-  box-shadow: 0px 0px 23px 13px rgba(0, 0, 0, 0.2);
+  border-top: 1px solid #404244;
+  // border: 1px solid #404244;
+  // border-radius: 5px;
+  // background: #2B2D2F;
+  background: #212122;
+  // box-shadow: 0px 0px 23px 13px rgba(0, 0, 0, 0.2);
 `;
 
 function Home() {
@@ -74,7 +77,8 @@ function Home() {
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
 
-  const [focusedIdx, setFocusedIdx] = useState(0);
+  const [codeFocusedIdx, setCodeFocusedIdx] = useState(0);
+  const [soFocusedIdx, setSOFocusedIdx] = useState(0);
 
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [hasEmptyResults, setHasEmptyResults] = useState(false);
@@ -122,22 +126,27 @@ function Home() {
   }, { filter: () => true });
 
   useHotkeys('up', (e: any) => {
-    if (focusedIdx > 0) setFocusedIdx(idx => idx-1);
-  }, { filter: () => true }, [focusedIdx]);
+    switch (activeFilter) {
+      case ResultsFilter.StackOverflow:
+        if (soFocusedIdx > 0) setSOFocusedIdx(idx => idx-1);
+      break;
+      case ResultsFilter.GitHubCode:
+        if (codeFocusedIdx > 0) setCodeFocusedIdx(idx => idx-1);
+      break;
+    }
+  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx]);
 
   useHotkeys('down', (e: any) => {
     let length = 0;
      switch (activeFilter) {
       case ResultsFilter.StackOverflow:
-        length = soResults.length;
+        if (soFocusedIdx < soResults.length - 1) setSOFocusedIdx(idx => idx+1);
         break;
       case ResultsFilter.GitHubCode:
-        length = codeResults.length;
+        if (codeFocusedIdx < codeResults.length - 1) setCodeFocusedIdx(idx => idx+1);
         break;
      }
-
-    if (focusedIdx < length - 1) setFocusedIdx(idx => idx+1);
-  }, { filter: () => true }, [soResults, codeResults, focusedIdx]);
+  }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults]);
 
   return (
     <Content>
@@ -160,7 +169,7 @@ function Home() {
               <StackOverflowItem
                 key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
                 soResult={sor}
-                isFocused={focusedIdx === idx}
+                isFocused={soFocusedIdx === idx}
               />
             ))}
 
@@ -168,7 +177,7 @@ function Home() {
               <GitHubCodeItem
                 key={cr.repoFullName + cr.filePath}
                 codeResult={cr}
-                isFocused={focusedIdx === idx}
+                isFocused={codeFocusedIdx === idx}
               />
             ))}
           </>
