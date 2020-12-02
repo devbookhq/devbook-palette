@@ -1,6 +1,7 @@
 import React, {
   useRef,
   useState,
+  useEffect,
 } from 'react';
 import styled from 'styled-components';
 
@@ -114,6 +115,7 @@ interface SearchInputProps {
   onFilterSelect: (f: ResultsFilter) => void;
 
   isLoading?: boolean;
+  isModalOpened?: boolean;
 }
 
 function SearchInput({
@@ -123,13 +125,11 @@ function SearchInput({
   activeFilter,
   onFilterSelect,
   isLoading,
+  isModalOpened,
 }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
 
-  useIPCRenderer('did-show-main-window', () => {
-    inputRef?.current?.focus();
-  });
 
   function handleContentMouseDown(e: any) {
     // Prevent blur when user is clicking on the filter buttons under the input element.
@@ -146,6 +146,15 @@ function SearchInput({
     // 40 - down arrow
     if (e.keyCode === 38 || e.keyCode === 40) e.preventDefault();
   }
+
+  useIPCRenderer('did-show-main-window', () => {
+    inputRef?.current?.focus();
+  });
+
+  useEffect(() => {
+    if (isModalOpened) inputRef?.current?.blur();
+    else inputRef?.current?.focus();
+  }, [isModalOpened]);
 
   return (
     <Content

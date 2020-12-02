@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { StackOverflowResult } from 'search/stackOverflow';
 import Modal from 'components/Modal';
 
-const marginTop = 40;
+const marginTop = 60;
 
 const StyledModal = styled(Modal)`
   width: 100%;
@@ -13,7 +13,7 @@ const StyledModal = styled(Modal)`
   padding: 10px;
 
   background: #212122;
-  border-radius: 12px 12px 0 0;
+  border-radius: 20px 20px 0 0;
 `;
 
 interface StackOverflowModalProps {

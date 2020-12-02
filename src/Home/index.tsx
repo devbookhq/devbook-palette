@@ -95,42 +95,6 @@ function Home() {
 
   const [isSOModalOpened, setIsSOModalOpened] = useState(false);
 
-  useEffect(() => {
-    async function searchSO(query: string) {
-      setSOResults([]);
-      const results = await searchStackOverflow(query);
-      console.log('StackOverflow', results);
-
-      setHasEmptyResults(results.length === 0);
-      setSOResults(results);
-      setSOFocusedIdx(0);
-      setIsLoadingData(false);
-    }
-
-    async function searchCode(query: string) {
-      setCodeResults([]);
-      const results = await searchGitHubCode(query);
-      console.log('GitHub', results);
-
-      setHasEmptyResults(results.length === 0);
-      setCodeResults(results);
-      setCodeFocusedIdx(0);
-      setIsLoadingData(false);
-    }
-
-    if (!debouncedQuery) return;
-
-    setIsLoadingData(true);
-    switch (activeFilter) {
-      case ResultsFilter.StackOverflow:
-        searchSO(debouncedQuery);
-      break;
-      case ResultsFilter.GitHubCode:
-        searchCode(debouncedQuery);
-      break;
-    }
-  }, [activeFilter, debouncedQuery]);
-
   useHotkeys('alt+shift+1', (e: any) => {
     setActiveFilter(ResultsFilter.StackOverflow);
     e.preventDefault();
@@ -168,9 +132,45 @@ function Home() {
     setIsSOModalOpened(true);
   });
 
+  useEffect(() => {
+    async function searchSO(query: string) {
+      setSOResults([]);
+      const results = await searchStackOverflow(query);
+      console.log('StackOverflow', results);
+
+      setHasEmptyResults(results.length === 0);
+      setSOResults(results);
+      setSOFocusedIdx(0);
+      setIsLoadingData(false);
+    }
+
+    async function searchCode(query: string) {
+      setCodeResults([]);
+      const results = await searchGitHubCode(query);
+      console.log('GitHub', results);
+
+      setHasEmptyResults(results.length === 0);
+      setCodeResults(results);
+      setCodeFocusedIdx(0);
+      setIsLoadingData(false);
+    }
+
+    if (!debouncedQuery) return;
+
+    setIsLoadingData(true);
+    switch (activeFilter) {
+      case ResultsFilter.StackOverflow:
+        searchSO(debouncedQuery);
+      break;
+      case ResultsFilter.GitHubCode:
+        searchCode(debouncedQuery);
+      break;
+    }
+  }, [activeFilter, debouncedQuery]);
+
   return (
     <>
-    {isSOModalOpened &&
+    {isSOModalOpened && soResults[soFocusedIdx] &&
       <StackOverflowModal
         soResult={soResults[soFocusedIdx]}
         onCloseRequest={() => setIsSOModalOpened(false)}
@@ -185,6 +185,7 @@ function Home() {
         activeFilter={activeFilter}
         onFilterSelect={f => setActiveFilter(f)}
         isLoading={isLoadingData}
+        isModalOpened={isSOModalOpened}
       />
 
       {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}

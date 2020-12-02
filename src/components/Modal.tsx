@@ -2,7 +2,9 @@ import React, { useRef } from 'react';
 import styled from 'styled-components';
 
 import useLockBodyScroll from 'hooks/useLockBodyScroll';
-import useOnClickOutside from 'hooks/useOnClickOutside';
+// import useOnClickOutside from 'hooks/useOnClickOutside';
+
+import { ReactComponent as closeImg } from 'img/close.svg';
 
 const Overlay = styled.div`
   position: fixed;
@@ -13,11 +15,35 @@ const Overlay = styled.div`
   left: 0;
 
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
 
   background: rgba(182, 182, 182, 0.05);
   backdrop-filter: blur(10px);
+`;
+
+const CancelButton = styled.button`
+  // padding: 2px;
+  position: absolute;
+  top: 22px;
+  right: 18px;
+
+  border: none;
+  outline: none;
+  background: transparent;
+
+  :hover {
+    cursor: pointer;
+    path {
+      stroke: #fff;
+    }
+  }
+`;
+
+const CloseImg = styled(closeImg)`
+  width: auto;
+  height: 18px;
 `;
 
 const Content = styled.div``;
@@ -36,10 +62,16 @@ function Modal({
   const contentRef = useRef<HTMLDivElement>(null);
 
   useLockBodyScroll();
-  useOnClickOutside(contentRef, onCloseRequest || (() => {}));
+  // useOnClickOutside(contentRef, onCloseRequest || (() => {}));
 
   return (
     <Overlay>
+      <CancelButton
+        onClick={onCloseRequest}
+      >
+        <CloseImg/>
+      </CancelButton>
+
       <Content
         className={className}
         ref={contentRef}

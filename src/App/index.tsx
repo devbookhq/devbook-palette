@@ -35,9 +35,15 @@ const Content = styled.div`
 function App() {
   useHotkeys('esc', () => hideMainWindow());
 
+  function handleDragHeaderClick(e: any) {
+    console.log('Handle drag', e);
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
   return (
     <>
-      <DragHeader />
+      <DragHeader onClick={handleDragHeaderClick} />
       <Content>
         <Router>
           <Switch>
