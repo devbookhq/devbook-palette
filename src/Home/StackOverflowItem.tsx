@@ -133,6 +133,19 @@ const AnswerContent = styled.div`
       line-height: 18px;
     }
   }
+
+  h1 {
+    font-size: 15px;
+  }
+
+  h2 {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 14px;
+  }
 `;
 
 interface StackOverflowItemProps {
