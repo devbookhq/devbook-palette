@@ -5,6 +5,8 @@ import axios from 'axios';
 interface FilePreview {
   startLine: number;
   fragment: string;
+  fileContent: string;
+  startingOffset: number;
   indices: number[][];
 }
 
@@ -32,7 +34,7 @@ export async function searchCode(query: string, pageSize?: number, page?: number
   }
 
   // const result = await axios.post('http://localhost:3002/search/github/code', {
-  const result = await axios.post('https://api.getsidekick.app/search/github/code', {
+    const result = await axios.post('https://api.getsidekick.app/search/github/scode', {
     accessToken,
     query,
     pageSize,

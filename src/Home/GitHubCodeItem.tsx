@@ -77,7 +77,7 @@ const Pre = styled.pre`
   font-family: 'Roboto Mono';
   font-weight: 600;
   font-size: 13px;
-  line-height: 17px;
+  line-height: 19px;
   text-align: left;
 
   :last-child {
@@ -124,7 +124,9 @@ const Delimiter = styled.div`
 
 const MarkedSpan = styled.span`
   font-weight: 600;
-  background: #534741;
+  background: #806416;
+  color: white;
+  box-shadow: 0 0 0 1px #806416;
 `;
 
 function isInRange(ranges: number[][], offset: number) {
