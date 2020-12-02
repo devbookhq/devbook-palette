@@ -6,7 +6,6 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import useDebounce from 'hooks/useDebounce';
-
 import {
   search as searchStackOverflow,
   StackOverflowResult,
@@ -18,6 +17,7 @@ import {
 
 import SearchInput, { ResultsFilter } from './SearchInput';
 import StackOverflowItem from './StackOverflowItem';
+import StackOverflowModal from './StackOverflowModal';
 import GitHubCodeItem from './GitHubCodeItem';
 
 const Content = styled.div`
@@ -93,6 +93,8 @@ function Home() {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [hasEmptyResults, setHasEmptyResults] = useState(false);
 
+  const [isSOModalOpened, setIsSOModalOpened] = useState(false);
+
   useEffect(() => {
     async function searchSO(query: string) {
       setSOResults([]);
@@ -162,7 +164,19 @@ function Home() {
      }
   }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults]);
 
+  useHotkeys('enter', (e: any) => {
+    setIsSOModalOpened(true);
+  });
+
   return (
+    <>
+    {isSOModalOpened &&
+      <StackOverflowModal
+        soResult={soResults[soFocusedIdx]}
+        onCloseRequest={() => setIsSOModalOpened(false)}
+      />
+    }
+
     <Content>
       <SearchInput
         placeholder="Question or code"
@@ -206,6 +220,7 @@ function Home() {
       }
 
     </Content>
+    </>
   );
 }
 
