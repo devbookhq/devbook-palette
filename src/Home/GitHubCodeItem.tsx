@@ -5,7 +5,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import Highlight, { defaultProps } from 'prism-react-renderer';
-import theme from 'prism-react-renderer/themes/vsDark'; // vsDark or nightOwl
+import theme from 'prism-react-renderer/themes/vsDark';
 
 import { CodeResult } from 'search/gitHub';
 
@@ -82,6 +82,10 @@ const Pre = styled.pre`
   }
 `;
 
+const LinesWrapper = styled.div`
+  display: flex;
+`;
+
 const Line = styled.div`
   display: table-row;
 `;
@@ -97,6 +101,10 @@ const LineNo = styled.span`
 
 const LineContent = styled.span`
   display: table-cell;
+`;
+
+const SmallWrapper = styled.div`
+  display: table-column;
 `;
 
 const Delimiter = styled.div`
@@ -138,7 +146,6 @@ function getMarkedContent(ranges: number[][], content: string, startingOffset: n
         }
 
         markedAccumulator = markedAccumulator.concat(curr.content);
-
       } else {
         if (markedAccumulator.length > 0) {
           newContent.push(<MarkedSpan key={curr.key}>{markedAccumulator}</MarkedSpan>);
@@ -211,13 +218,21 @@ const GitHubCodeItem = memo(({
                   }) => (
                       <Pre className={className} style={style}>
                         {(() => {
+                          const linesNos: JSX.Element[] = [];
                           const lines: JSX.Element[] = [];
                           let currentOffset = 0;
 
                           for (const [i, line] of tokens.entries()) {
-                            const element = (
+                            const lineNoElement = (
                               <Line {...getLineProps({ line, key: i })}>
-                                <LineNo>{el.startLine + i}</LineNo>
+                                <LineNo>
+                                  {el.startLine + i}
+                                </LineNo>
+                              </Line>
+                            );
+
+                            const lineElement = (
+                              <Line {...getLineProps({ line, key: i })}>
                                 <LineContent>
                                   {(() => {
                                     const tokens: JSX.Element[] = [];
@@ -244,10 +259,17 @@ const GitHubCodeItem = memo(({
                                 </LineContent>
                               </Line>
                             );
-                            lines.push(element);
+                            lines.push(lineElement);
+                            linesNos.push(lineNoElement);
                           }
 
-                          return lines;
+                          return (
+                            <LinesWrapper>
+                              <SmallWrapper>{linesNos}</SmallWrapper>
+                              <SmallWrapper>{lines}</SmallWrapper>
+                            </LinesWrapper>
+                          );
+
                         })()}
                       </Pre>
                     )}
