@@ -41,4 +41,3 @@ export async function searchCode(query: string, pageSize?: number, page?: number
 
   return result.data.results;
 }
-
