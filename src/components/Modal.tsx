@@ -24,7 +24,6 @@ const Overlay = styled.div`
 `;
 
 const CancelButton = styled.button`
-  // padding: 2px;
   position: absolute;
   top: 22px;
   right: 18px;

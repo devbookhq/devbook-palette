@@ -95,7 +95,7 @@ const AnswerDate = styled.span`
   font-weight: 500;
 `;
 
-const AnswerContent = styled.div`
+const AnswerBody = styled.div`
   hr {
     border: none;
     height: 1px;
@@ -219,7 +219,7 @@ function StackOverflowItem({
           </AnswerMetadata>
 
           {/* TODO: Use prism for code snippets? */}
-          <AnswerContent
+          <AnswerBody
             dangerouslySetInnerHTML={{
               __html: activeAnswer.html
             }}
