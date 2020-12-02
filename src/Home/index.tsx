@@ -5,6 +5,7 @@ import React, {
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
+import { hideMainWindow } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
   search as searchStackOverflow,
@@ -95,6 +96,51 @@ function Home() {
 
   const [isSOModalOpened, setIsSOModalOpened] = useState(false);
 
+  useHotkeys('alt+shift+1', (e: any) => {
+    setActiveFilter(ResultsFilter.StackOverflow);
+    e.preventDefault();
+  }, { filter: () => true });
+
+  useHotkeys('alt+shift+2', (e: any) => {
+    setActiveFilter(ResultsFilter.GitHubCode);
+    e.preventDefault();
+  }, { filter: () => true });
+
+  useHotkeys('up', () => {
+    switch (activeFilter) {
+      case ResultsFilter.StackOverflow:
+        if (soFocusedIdx > 0) setSOFocusedIdx(idx => idx-1);
+      break;
+      case ResultsFilter.GitHubCode:
+        if (codeFocusedIdx > 0) setCodeFocusedIdx(idx => idx-1);
+      break;
+    }
+  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx]);
+
+  useHotkeys('down', () => {
+    let length = 0;
+     switch (activeFilter) {
+      case ResultsFilter.StackOverflow:
+        if (soFocusedIdx < soResults.length - 1) setSOFocusedIdx(idx => idx+1);
+        break;
+      case ResultsFilter.GitHubCode:
+        if (codeFocusedIdx < codeResults.length - 1) setCodeFocusedIdx(idx => idx+1);
+        break;
+     }
+  }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults]);
+
+  useHotkeys('enter', () => {
+    setIsSOModalOpened(true);
+  });
+
+  useHotkeys('esc', () => {
+    if (!isSOModalOpened) {
+      hideMainWindow();
+    } else {
+      setIsSOModalOpened(false);
+    }
+  }, [isSOModalOpened]);
+
   useEffect(() => {
     async function searchSO(query: string) {
       setSOResults([]);
@@ -131,46 +177,9 @@ function Home() {
     }
   }, [activeFilter, debouncedQuery]);
 
-  useHotkeys('alt+shift+1', (e: any) => {
-    setActiveFilter(ResultsFilter.StackOverflow);
-    e.preventDefault();
-  }, { filter: () => true });
-
-  useHotkeys('alt+shift+2', (e: any) => {
-    setActiveFilter(ResultsFilter.GitHubCode);
-    e.preventDefault();
-  }, { filter: () => true });
-
-  useHotkeys('up', (e: any) => {
-    switch (activeFilter) {
-      case ResultsFilter.StackOverflow:
-        if (soFocusedIdx > 0) setSOFocusedIdx(idx => idx-1);
-      break;
-      case ResultsFilter.GitHubCode:
-        if (codeFocusedIdx > 0) setCodeFocusedIdx(idx => idx-1);
-      break;
-    }
-  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx]);
-
-  useHotkeys('down', (e: any) => {
-    let length = 0;
-     switch (activeFilter) {
-      case ResultsFilter.StackOverflow:
-        if (soFocusedIdx < soResults.length - 1) setSOFocusedIdx(idx => idx+1);
-        break;
-      case ResultsFilter.GitHubCode:
-        if (codeFocusedIdx < codeResults.length - 1) setCodeFocusedIdx(idx => idx+1);
-        break;
-     }
-  }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults]);
-
-  useHotkeys('enter', (e: any) => {
-    setIsSOModalOpened(true);
-  });
-
   return (
     <>
-    {isSOModalOpened &&
+    {isSOModalOpened && soResults[soFocusedIdx] &&
       <StackOverflowModal
         soResult={soResults[soFocusedIdx]}
         onCloseRequest={() => setIsSOModalOpened(false)}
@@ -185,6 +194,7 @@ function Home() {
         activeFilter={activeFilter}
         onFilterSelect={f => setActiveFilter(f)}
         isLoading={isLoadingData}
+        isModalOpened={isSOModalOpened}
       />
 
       {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}

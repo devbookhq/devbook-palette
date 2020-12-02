@@ -6,9 +6,7 @@ import {
   Route,
   Redirect,
 } from 'react-router-dom';
-import { useHotkeys } from 'react-hotkeys-hook';
 
-import { hideMainWindow } from 'mainProcess';
 import Onboarding from 'Onboarding';
 import Home from 'Home';
 
@@ -33,11 +31,15 @@ const Content = styled.div`
 `;
 
 function App() {
-  useHotkeys('esc', () => hideMainWindow());
+  function handleDragHeaderClick(e: any) {
+    console.log('Handle drag', e);
+    e.preventDefault();
+    e.stopPropagation();
+  }
 
   return (
     <>
-      <DragHeader />
+      <DragHeader onClick={handleDragHeaderClick} />
       <Content>
         <Router>
           <Switch>
