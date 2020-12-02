@@ -31,6 +31,7 @@ export async function searchCode(query: string, pageSize?: number, page?: number
     await init();
   }
 
+  // const result = await axios.post('http://localhost:3002/search/github/code', {
   const result = await axios.post('https://api.getsidekick.app/search/github/code', {
     accessToken,
     query,

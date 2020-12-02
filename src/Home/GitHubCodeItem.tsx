@@ -106,8 +106,7 @@ const Delimiter = styled.div`
 
 const MarkedSpan = styled.span`
   font-weight: 600;
-  /* line-height: 4em; */
-  background: #BF9035;
+  background: #534741;
 `;
 
 function isInRange(ranges: number[][], offset: number) {
