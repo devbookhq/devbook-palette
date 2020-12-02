@@ -6,7 +6,7 @@ import Modal from 'components/Modal';
 
 const marginTop = 40;
 
-const Content = styled.div`
+const StyledModal = styled(Modal)`
   width: 100%;
   height: calc(100vh - ${marginTop}px);
   margin-top: ${marginTop}px;
@@ -25,19 +25,12 @@ function StackOverflowModal({
   soResult,
   onCloseRequest,
 }: StackOverflowModalProps) {
-  function a() {
-    console.log('CLOSE');
-    onCloseRequest();
-  }
-
   return (
-    <Modal
-      onCloseRequest={a}
+    <StyledModal
+      onCloseRequest={onCloseRequest}
     >
-      <Content>
-        <h3>{soResult.question.title}</h3>
-      </Content>
-    </Modal>
+      <h3>{soResult.question.title}</h3>
+    </StyledModal>
   );
 }
 

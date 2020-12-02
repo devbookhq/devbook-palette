@@ -49,14 +49,14 @@ const QuestionVotes = styled.span`
   margin-right: 15px;
 
   color: #AAABAC;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-size: 14px;
   font-weight: 500;
 `;
 
 const QuestionDate = styled.span`
   color: #AAABAC;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-size: 14px;
   font-weight: 500;
 `;
@@ -83,14 +83,14 @@ const AnswerVotes = styled.span`
   margin-right: 15px;
 
   color: #38EE97;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-size: 14px;
   font-weight: 500;
 `;
 
 const AnswerDate = styled.span`
   color: #AAABAC;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-size: 14px;
   font-weight: 500;
 `;
@@ -112,6 +112,7 @@ const AnswerContent = styled.div`
     padding: 2px 4px;
 
     color: #D9D9DA;
+    font-family: 'Roboto Mono';
     font-size: 14px;
     font-weight: 500;
 

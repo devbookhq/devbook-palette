@@ -20,17 +20,16 @@ const Overlay = styled.div`
   backdrop-filter: blur(10px);
 `;
 
-const Content = styled.div`
-  width: 100%;
-  height: 100%;
-`;
+const Content = styled.div``;
 
 interface ModalProps {
+  className?: string;
   children?: React.ReactNode | React.ReactNode[];
   onCloseRequest?: () => void;
 }
 
 function Modal({
+  className,
   children,
   onCloseRequest,
 }: ModalProps) {
@@ -41,7 +40,10 @@ function Modal({
 
   return (
     <Overlay>
-      <Content ref={contentRef}>
+      <Content
+        className={className}
+        ref={contentRef}
+      >
         {children}
       </Content>
     </Overlay>

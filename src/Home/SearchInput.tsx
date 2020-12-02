@@ -35,7 +35,7 @@ const Input = styled.input`
   flex: 1;
 
   color: white;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-weight: 600;
   font-size: 14px;
 
