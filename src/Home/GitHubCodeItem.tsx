@@ -87,11 +87,12 @@ const Line = styled.div`
 `;
 
 const LineNo = styled.span`
-  display: table-cell;
-  text-align: right;
   padding-right: 1em;
+  display: table-cell;
   user-select: none;
-  opacity: 0.5;
+
+  color: #959697;
+  text-align: right;
 `;
 
 const LineContent = styled.span`
