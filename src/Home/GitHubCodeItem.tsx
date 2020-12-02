@@ -72,7 +72,7 @@ const Pre = styled.pre`
   height: 100%;
   margin: 0;
   padding: 10px;
-  overflow: auto;
+  overflow: hidden;
 
   font-family: 'Roboto Mono';
   font-weight: 600;
@@ -107,8 +107,13 @@ const LineContent = styled.span`
   display: table-cell;
 `;
 
-const SmallWrapper = styled.div`
+const LinesNoWrapper = styled.div`
   display: table-column;
+`;
+
+const LinesContentWrapper = styled.div`
+  display: table-column;
+  overflow: auto;
 `;
 
 const Delimiter = styled.div`
@@ -269,8 +274,8 @@ const GitHubCodeItem = memo(({
 
                           return (
                             <LinesWrapper>
-                              <SmallWrapper>{linesNos}</SmallWrapper>
-                              <SmallWrapper>{lines}</SmallWrapper>
+                              <LinesNoWrapper>{linesNos}</LinesNoWrapper>
+                              <LinesContentWrapper>{lines}</LinesContentWrapper>
                             </LinesWrapper>
                           );
 
