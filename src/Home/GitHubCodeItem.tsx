@@ -72,10 +72,14 @@ const Pre = styled.pre`
   height: 100%;
   margin: 0;
   padding: 10px;
-  text-align: left;
   overflow: auto;
+
+  font-family: 'Roboto Mono';
+  font-weight: 600;
   font-size: 13px;
   line-height: 17px;
+  text-align: left;
+
   :last-child {
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;

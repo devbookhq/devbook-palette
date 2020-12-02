@@ -49,7 +49,7 @@ const Step = styled.div`
   display: flex;
   align-items: center;
   color: white;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-size: 16px;
   font-weight: 500;
 `;
@@ -57,7 +57,7 @@ const Step = styled.div`
 const Shortcut = styled.div`
   margin: 0 5px;
   color: #4FA1ED;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-size: 16px;
   font-weight: 500;
 `;
@@ -68,7 +68,7 @@ const Select = styled.select`
   border-radius: 3px;
   background: #1A1D25;
   color: white;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-size: 16px;
   font-weight: 500;
   :hover {
