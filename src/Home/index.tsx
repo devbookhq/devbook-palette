@@ -5,6 +5,7 @@ import React, {
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
+import { hideMainWindow } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
   search as searchStackOverflow,
@@ -105,7 +106,7 @@ function Home() {
     e.preventDefault();
   }, { filter: () => true });
 
-  useHotkeys('up', (e: any) => {
+  useHotkeys('up', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         if (soFocusedIdx > 0) setSOFocusedIdx(idx => idx-1);
@@ -116,7 +117,7 @@ function Home() {
     }
   }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx]);
 
-  useHotkeys('down', (e: any) => {
+  useHotkeys('down', () => {
     let length = 0;
      switch (activeFilter) {
       case ResultsFilter.StackOverflow:
@@ -128,9 +129,17 @@ function Home() {
      }
   }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults]);
 
-  useHotkeys('enter', (e: any) => {
+  useHotkeys('enter', () => {
     setIsSOModalOpened(true);
   });
+
+  useHotkeys('esc', () => {
+    if (!isSOModalOpened) {
+      hideMainWindow();
+    } else {
+      setIsSOModalOpened(false);
+    }
+  }, [isSOModalOpened]);
 
   useEffect(() => {
     async function searchSO(query: string) {
