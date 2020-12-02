@@ -156,6 +156,7 @@ function Home() {
     async function searchCode(query: string) {
       setCodeResults([]);
       const results = await searchGitHubCode(query);
+        setIsSOModalOpened(false);
       console.log('GitHub', results);
 
       setHasEmptyResults(results.length === 0);
