@@ -178,7 +178,7 @@ function Home() {
     async function searchSO(query: string) {
       setSOResults([]);
       const results = await searchStackOverflow(query);
-      console.log('StackOverflow', results);
+      setIsSOModalOpened(false);
 
       setHasEmptyResults(results.length === 0);
       setSOResults(results);
@@ -189,8 +189,7 @@ function Home() {
     async function searchCode(query: string) {
       setCodeResults([]);
       const results = await searchGitHubCode(query);
-      setIsSOModalOpened(false);
-      console.log('GitHub', results);
+      setIsGitHubModalOpened(false);
 
       setHasEmptyResults(results.length === 0);
       setCodeResults(results);
@@ -276,4 +275,3 @@ function Home() {
 }
 
 export default Home;
-
