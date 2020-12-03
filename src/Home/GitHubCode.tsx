@@ -132,20 +132,79 @@ function getMarkedContent(ranges: number[][], content: string, startingOffset: n
     }, [] as (string | JSX.Element)[]);
 }
 
-export interface GitHubCode {
-  filePreviews: Omit<FilePreview, 'fileContent' | 'startingOffset'>[];
+// TODO: Add correct types to arguments:
+// tokens (Token[][]),
+// getLineProps ((input: LineInputProps) => LineOutputProps), and
+// getTokenProps ((input: TokenInputProps) => TokenOutputProps)
+// I cannot get the types from prism-react-renderer because they are not explicitly exported
+function getRenderableLines(preview: FilePreview, tokens: any, getLineProps: any, getTokenProps: any) {
+  const linesNos: JSX.Element[] = [];
+  const lines: JSX.Element[] = [];
+  let currentOffset = 0;
+
+  for (const [i, line] of tokens.entries()) {
+    // Assemble line number element
+    const lineNoElement = (
+      <Line {...getLineProps({ line, key: i })}>
+        <LineNo>
+          {preview.startLine + i}
+        </LineNo>
+      </Line>
+    );
+    linesNos.push(lineNoElement);
+
+    // Assemble line element from tokens
+    const tokens: JSX.Element[] = [];
+
+    for (const [key, token] of line.entries()) {
+      const tokenStartOffset = currentOffset;
+      const tokenEndOffset = currentOffset + token.content.length;
+      currentOffset = tokenEndOffset;
+
+      const tokenProps = { ...getTokenProps({ token, key }) };
+      const children = getMarkedContent(preview.indices, tokenProps.children, tokenStartOffset + i);
+
+      const markedTokenProps = {
+        ...tokenProps,
+        children,
+      };
+
+      const element = <span {...markedTokenProps} />;
+      tokens.push(element);
+    }
+
+    const lineElement = (
+      <Line {...getLineProps({ line, key: i })}>
+        <LineContent>
+          {tokens}
+        </LineContent>
+      </Line>
+    );
+    lines.push(lineElement);
+  }
+
+  return (
+    <LinesWrapper>
+      <LinesNoWrapper>{linesNos}</LinesNoWrapper>
+      <LinesContentWrapper>{lines}</LinesContentWrapper>
+    </LinesWrapper>
+  );
+}
+
+interface GitHubCode {
+  filePreviews: FilePreview[];
 }
 
 const GitHubCode = memo(({ filePreviews }: GitHubCode) => {
   return (
     <CodeWrapper>
       <CodeSnippet>
-        {filePreviews.map((el, idx) => (
+        {filePreviews.map((preview, idx) => (
           <React.Fragment key={idx}>
             <>
               <Highlight
                 {...defaultProps}
-                code={el.fragment}
+                code={preview.fragment}
                 theme={theme}
                 language="typescript" // TODO: Detect the fragment's language.
               >
@@ -157,60 +216,7 @@ const GitHubCode = memo(({ filePreviews }: GitHubCode) => {
                   getTokenProps,
                 }) => (
                     <Pre className={className} style={style}>
-                      {(() => {
-                        const linesNos: JSX.Element[] = [];
-                        const lines: JSX.Element[] = [];
-                        let currentOffset = 0;
-
-                        for (const [i, line] of tokens.entries()) {
-                          const lineNoElement = (
-                            <Line {...getLineProps({ line, key: i })}>
-                              <LineNo>
-                                {el.startLine + i}
-                              </LineNo>
-                            </Line>
-                          );
-
-                          const lineElement = (
-                            <Line {...getLineProps({ line, key: i })}>
-                              <LineContent>
-                                {(() => {
-                                  const tokens: JSX.Element[] = [];
-
-                                  for (const [key, token] of line.entries()) {
-                                    const tokenStartOffset = currentOffset;
-                                    const tokenEndOffset = currentOffset + token.content.length;
-                                    currentOffset = tokenEndOffset;
-
-                                    const tokenProps = { ...getTokenProps({ token, key }) };
-                                    const children = getMarkedContent(el.indices, tokenProps.children, tokenStartOffset + i);
-
-                                    const markedTokenProps = {
-                                      ...tokenProps,
-                                      children,
-                                    };
-
-                                    const element = <span {...markedTokenProps} />;
-                                    tokens.push(element);
-                                  }
-
-                                  return tokens;
-                                })()}
-                              </LineContent>
-                            </Line>
-                          );
-                          lines.push(lineElement);
-                          linesNos.push(lineNoElement);
-                        }
-
-                        return (
-                          <LinesWrapper>
-                            <LinesNoWrapper>{linesNos}</LinesNoWrapper>
-                            <LinesContentWrapper>{lines}</LinesContentWrapper>
-                          </LinesWrapper>
-                        );
-
-                      })()}
+                      {getRenderableLines(preview, tokens, getLineProps, getTokenProps)}
                     </Pre>
                   )}
               </Highlight>

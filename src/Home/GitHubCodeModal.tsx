@@ -27,7 +27,6 @@ function transformFragmentPreviewsToFilePreview(filePreviews: FilePreview[], fil
     indices,
     fragment: fileContent,
     startLine: 1,
-
     startingOffset: 0,
   };
 }

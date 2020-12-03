@@ -134,7 +134,6 @@ function Home() {
   }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx, activeFilter]);
 
   useHotkeys('down', () => {
-    let length = 0;
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         if (soFocusedIdx < soResults.length - 1) setSOFocusedIdx(idx => idx + 1);
