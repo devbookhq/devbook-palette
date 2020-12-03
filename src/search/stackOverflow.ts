@@ -30,6 +30,7 @@ export interface StackOverflowResult {
 export async function search(query: string): Promise<StackOverflowResult[]> {
   const url = `https://api.getsidekick.app/search/stackoverflow`;
   // const url = 'http://localhost:3002/search/stackoverflow';
+
   const result = await axios.post(url, { query });
 
   return result.data.results;
