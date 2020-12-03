@@ -25,7 +25,7 @@ const Header = styled.div`
   padding: 10px;
   display: flex;
   flex-direction: column;
-  background: #212122;
+  /* background: #212122; */
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
 `;

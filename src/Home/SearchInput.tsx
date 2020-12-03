@@ -16,7 +16,7 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
 
-  border-bottom: 1px solid #373738;
+  border-bottom: 1px solid #3B3A4A;
 `;
 
 const InputWrapper = styled.div<{ isFocused?: boolean }>`
@@ -27,8 +27,7 @@ const InputWrapper = styled.div<{ isFocused?: boolean }>`
   align-items: center;
 
   border-radius: 10px;
-  background: #2B2D2F;
-  border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#404244'};
+  border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#3B3A4A'};
 `;
 
 const Input = styled.input`
@@ -71,7 +70,7 @@ const Filter = styled.div`
 `;
 
 const FilterButton = styled.button<{ selected?: boolean }>`
-  color: ${props => props.selected ? 'white' : '#909090'};
+  color: ${props => props.selected ? 'white' : '#5A5A6F'};
   font-size: 14px;
   font-weight: 600;
 

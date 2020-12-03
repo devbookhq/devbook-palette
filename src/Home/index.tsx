@@ -64,11 +64,11 @@ const HotkeysPanel = styled.div`
   display: flex;
   align-items: center;
 
-  border-top: 1px solid #404244;
+  /* border-top: 1px solid #404244; */
   // border: 1px solid #404244;
   // border-radius: 5px;
   // background: #2B2D2F;
-  background: #212122;
+  background: #1F212D;
   // box-shadow: 0px 0px 23px 13px rgba(0, 0, 0, 0.2);
 `;
 

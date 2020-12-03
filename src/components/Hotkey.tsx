@@ -5,13 +5,14 @@ import { ReactComponent as shiftKeyImg } from 'img/shift-key.svg';
 import { ReactComponent as altKeyImg } from 'img/alt-key.svg';
 
 const Content = styled.div`
-  padding: 5px 8px;
+  padding: 6px 8px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
 
+  color: white;
   border-radius: 5px;
-  background: #2B2D2F;
+  background: #262736;
 `;
 
 const ShiftKeyImg = styled(shiftKeyImg)`
@@ -19,6 +20,9 @@ const ShiftKeyImg = styled(shiftKeyImg)`
   height: 11px;
   :not(:last-child) {
     margin-right: 7px;
+  }
+  stroke: {
+    color: white;
   }
 `;
 
@@ -37,7 +41,6 @@ const Key = styled.div`
     margin-right: 7px;
   }
 
-  color: #BFC0C1;
   font-weight: 600;
   font-size: 13px;
   line-height: 9px;
@@ -55,8 +58,8 @@ interface HotkeyProps {
 function renderModifier(modifier: ModifierKey) {
   return (
     <>
-      {modifier === ModifierKey.Alt && <AltKeyImg/>}
-      {modifier === ModifierKey.Shift && <ShiftKeyImg/>}
+      {modifier === ModifierKey.Alt && <AltKeyImg />}
+      {modifier === ModifierKey.Shift && <ShiftKeyImg />}
     </>
   );
 }

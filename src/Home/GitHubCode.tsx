@@ -1,16 +1,16 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import Highlight, { defaultProps } from 'prism-react-renderer';
-import theme from 'prism-react-renderer/themes/vsDark';
+import theme from 'prism-react-renderer/themes/nightOwl';
 
 import { FilePreview } from 'search/gitHub';
 
-theme.plain.backgroundColor = '#2B2D2F';
+theme.plain.backgroundColor = '#272636';
 
 const CodeWrapper = styled.div`
   width: 100%;
   height: 100%;
-  background: #2B2D2F;
+  /* background: #2B2D2F; */
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
 `;
