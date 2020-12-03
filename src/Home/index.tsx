@@ -20,6 +20,7 @@ import SearchInput, { ResultsFilter } from './SearchInput';
 import StackOverflowItem from './StackOverflowItem';
 import StackOverflowModal from './StackOverflowModal';
 import GitHubCodeItem from './GitHubCodeItem';
+import GitHubCodeModal from './GitHubCodeModal';
 
 const Content = styled.div`
   height: 100%;
@@ -95,51 +96,84 @@ function Home() {
   const [hasEmptyResults, setHasEmptyResults] = useState(false);
 
   const [isSOModalOpened, setIsSOModalOpened] = useState(false);
+  const [isGitHubModalOpened, setIsGitHubModalOpened] = useState(false);
+
+  const isModalOpened = isSOModalOpened || isGitHubModalOpened;
 
   useHotkeys('alt+shift+1', (e: any) => {
+    if (isModalOpened) {
+      // TODO: Check what exactly is prevent default doing here
+      e.preventDefault();
+      return;
+    }
+
     setActiveFilter(ResultsFilter.StackOverflow);
     e.preventDefault();
-  }, { filter: () => true });
+  }, { filter: () => true }, [isModalOpened]);
 
   useHotkeys('alt+shift+2', (e: any) => {
+    if (isModalOpened) {
+      // TODO: Check what exactly is prevent default doing here
+      e.preventDefault();
+      return;
+    }
+
     setActiveFilter(ResultsFilter.GitHubCode);
     e.preventDefault();
-  }, { filter: () => true });
+  }, { filter: () => true }, [isModalOpened]);
 
   useHotkeys('up', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
-        if (soFocusedIdx > 0) setSOFocusedIdx(idx => idx-1);
-      break;
+        if (soFocusedIdx > 0) setSOFocusedIdx(idx => idx - 1);
+        break;
       case ResultsFilter.GitHubCode:
-        if (codeFocusedIdx > 0) setCodeFocusedIdx(idx => idx-1);
-      break;
+        if (codeFocusedIdx > 0) setCodeFocusedIdx(idx => idx - 1);
+        break;
     }
-  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx]);
+  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx, activeFilter]);
 
   useHotkeys('down', () => {
     let length = 0;
-     switch (activeFilter) {
+    switch (activeFilter) {
       case ResultsFilter.StackOverflow:
-        if (soFocusedIdx < soResults.length - 1) setSOFocusedIdx(idx => idx+1);
+        if (soFocusedIdx < soResults.length - 1) setSOFocusedIdx(idx => idx + 1);
         break;
       case ResultsFilter.GitHubCode:
-        if (codeFocusedIdx < codeResults.length - 1) setCodeFocusedIdx(idx => idx+1);
+        if (codeFocusedIdx < codeResults.length - 1) setCodeFocusedIdx(idx => idx + 1);
         break;
-     }
-  }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults]);
+    }
+  }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults, activeFilter]);
 
   useHotkeys('enter', () => {
-    setIsSOModalOpened(true);
-  });
+    switch (activeFilter) {
+      case ResultsFilter.StackOverflow:
+        setIsSOModalOpened(true);
+        break;
+      case ResultsFilter.GitHubCode:
+        setIsGitHubModalOpened(true);
+        break;
+    }
+  }, [activeFilter]);
 
   useHotkeys('esc', () => {
-    if (!isSOModalOpened) {
-      hideMainWindow();
-    } else {
-      setIsSOModalOpened(false);
+    switch (activeFilter) {
+      case ResultsFilter.StackOverflow:
+        if (!isSOModalOpened) {
+          hideMainWindow();
+        } else {
+          setIsSOModalOpened(false);
+        }
+        break;
+      case ResultsFilter.GitHubCode:
+        if (!isGitHubModalOpened) {
+          hideMainWindow();
+        } else {
+          setIsGitHubModalOpened(false);
+        }
+        break;
     }
-  }, [isSOModalOpened]);
+  }, [isSOModalOpened, isGitHubModalOpened, activeFilter]);
 
   useEffect(() => {
     async function searchSO(query: string) {
@@ -156,7 +190,7 @@ function Home() {
     async function searchCode(query: string) {
       setCodeResults([]);
       const results = await searchGitHubCode(query);
-        setIsSOModalOpened(false);
+      setIsSOModalOpened(false);
       console.log('GitHub', results);
 
       setHasEmptyResults(results.length === 0);
@@ -171,66 +205,73 @@ function Home() {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         searchSO(debouncedQuery);
-      break;
+        break;
       case ResultsFilter.GitHubCode:
         searchCode(debouncedQuery);
-      break;
+        break;
     }
   }, [activeFilter, debouncedQuery]);
 
   return (
     <>
-    {isSOModalOpened && soResults[soFocusedIdx] &&
-      <StackOverflowModal
-        soResult={soResults[soFocusedIdx]}
-        onCloseRequest={() => setIsSOModalOpened(false)}
-      />
-    }
-
-    <Content>
-      <SearchInput
-        placeholder="Question or code"
-        value={searchQuery}
-        onChange={e => setSearchQuery(e.target.value)}
-        activeFilter={activeFilter}
-        onFilterSelect={f => setActiveFilter(f)}
-        isLoading={isLoadingData}
-        isModalOpened={isSOModalOpened}
-      />
-
-      {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
-      {searchQuery && hasEmptyResults && <InfoMessage>Nothing found</InfoMessage>}
-      {searchQuery && !hasEmptyResults &&
-        <>
-          <SearchResults>
-            <>
-              <ResultsHeading>RESULTS</ResultsHeading>
-              {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
-                <StackOverflowItem
-                  key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
-                  soResult={sor}
-                  isFocused={soFocusedIdx === idx}
-                />
-              ))}
-
-              {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
-                <GitHubCodeItem
-                  key={cr.repoFullName + cr.filePath}
-                  codeResult={cr}
-                  isFocused={codeFocusedIdx === idx}
-                />
-              ))}
-            </>
-          </SearchResults>
-
-          <HotkeysPanel>
-            <Hotkey>DETAIL - Enter</Hotkey>
-            <Hotkey>OPEN IN BROWSER - Shift + Enter</Hotkey>
-          </HotkeysPanel>
-        </>
+      {isSOModalOpened && soResults[soFocusedIdx] &&
+        <StackOverflowModal
+          soResult={soResults[soFocusedIdx]}
+          onCloseRequest={() => setIsSOModalOpened(false)}
+        />
       }
 
-    </Content>
+      {isGitHubModalOpened && codeResults[codeFocusedIdx] &&
+        <GitHubCodeModal
+          codeResult={codeResults[codeFocusedIdx]}
+          onCloseRequest={() => setIsGitHubModalOpened(false)}
+        />
+      }
+
+      <Content>
+        <SearchInput
+          placeholder="Question or code"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          activeFilter={activeFilter}
+          onFilterSelect={f => setActiveFilter(f)}
+          isLoading={isLoadingData}
+          isModalOpened={isSOModalOpened}
+        />
+
+        {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
+        {searchQuery && hasEmptyResults && <InfoMessage>Nothing found</InfoMessage>}
+        {searchQuery && !hasEmptyResults &&
+          <>
+            <SearchResults>
+              <>
+                <ResultsHeading>RESULTS</ResultsHeading>
+                {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
+                  <StackOverflowItem
+                    key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
+                    soResult={sor}
+                    isFocused={soFocusedIdx === idx}
+                  />
+                ))}
+
+                {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
+                  <GitHubCodeItem
+                    key={cr.repoFullName + cr.filePath}
+                    codeResult={cr}
+                    isFocused={codeFocusedIdx === idx}
+                  />
+                ))}
+              </>
+            </SearchResults>
+
+            <HotkeysPanel>
+              <Hotkey>DETAIL - Enter</Hotkey>
+              <Hotkey>OPEN IN BROWSER - Shift + Enter</Hotkey>
+            </HotkeysPanel>
+          </>
+        }
+
+      </Content>
     </>
   );
 }

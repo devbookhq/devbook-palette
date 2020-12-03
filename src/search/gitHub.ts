@@ -2,10 +2,9 @@ import { getGithubAccessToken } from 'mainProcess';
 import axios from 'axios';
 
 // TODO: These types are also present in the `devbook` repository - move them into a shared library.
-interface FilePreview {
+export interface FilePreview {
   startLine: number;
   fragment: string;
-  fileContent: string;
   startingOffset: number;
   indices: number[][];
 }
@@ -15,6 +14,7 @@ export interface CodeResult {
   repoURL: string;
   filePath: string;
   fileURL: string;
+  fileContent: string;
   filePreviews: FilePreview[];
 }
 
@@ -33,8 +33,8 @@ export async function searchCode(query: string, pageSize?: number, page?: number
     await init();
   }
 
-  // const result = await axios.post('http://localhost:3002/search/github/code', {
-    const result = await axios.post('https://api.getsidekick.app/search/github/code', {
+  const result = await axios.post('http://localhost:3002/search/github/code', {
+    // const result = await axios.post('https://api.getsidekick.app/search/github/code', {
     accessToken,
     query,
     pageSize,
