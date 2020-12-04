@@ -92,7 +92,7 @@ function createMainWindow() {
     height: mainWinHeight,
     minWidth: 700,
     minHeight: 100,
-    backgroundColor: '#1D1D1D',
+    backgroundColor: '#1C1B26',
     alwaysOnTop: true,
     frame: false,
     fullscreenable: false,

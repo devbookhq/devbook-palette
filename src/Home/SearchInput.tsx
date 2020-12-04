@@ -12,7 +12,7 @@ import Loader from 'components/Loader';
 
 const Content = styled.div`
   width: 100%;
-  padding: 20px 10px 10px;
+  padding-top 5px;
   display: flex;
   flex-direction: column;
 `;
@@ -24,12 +24,13 @@ const InputWrapper = styled.div<{ isFocused?: boolean }>`
   justify-content: space-between;
   align-items: center;
 
-  border-radius: 10px;
-  border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#3B3A4A'};
+  // border-radius: 10px;
+  // border-bottom: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#3B3A4A'};
+  border-bottom: 1px solid #3B3A4A;
 `;
 
 const Input = styled.input`
-  padding: 10px 13px;
+  padding: 10px 15px;
   flex: 1;
 
   color: white;
@@ -50,6 +51,8 @@ const StyledLoader = styled(Loader)`
 const Menu = styled.div`
   width: 100%;
   margin-top: 10px;
+  padding: 0 10px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -126,7 +129,6 @@ function SearchInput({
 }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
-
 
   function handleContentMouseDown(e: any) {
     // Prevent blur when user is clicking on the filter buttons under the input element.

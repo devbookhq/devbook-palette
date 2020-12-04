@@ -37,6 +37,7 @@ const ResultsHeading = styled.div`
 
 const SearchResults = styled.div`
   flex: 1;
+  margin-top: 20px;
   padding: 10px 15px;
 
   overflow: hidden;
@@ -274,3 +275,4 @@ function Home() {
 }
 
 export default Home;
+

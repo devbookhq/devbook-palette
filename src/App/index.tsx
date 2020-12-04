@@ -32,7 +32,6 @@ const Content = styled.div`
 
 function App() {
   function handleDragHeaderClick(e: any) {
-    console.log('Handle drag', e);
     e.preventDefault();
     e.stopPropagation();
   }
