@@ -10,14 +10,14 @@ theme.plain.backgroundColor = '#272636';
 const CodeWrapper = styled.div`
   width: 100%;
   height: 100%;
-  /* background: #2B2D2F; */
+
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
 `;
 
 const CodeSnippet = styled.div`
   :not(:last-child) {
-    border-bottom: 1px solid #404244;
+    border-bottom: 1px solid #2F2E3C;
   }
 `;
 
@@ -28,7 +28,7 @@ const Pre = styled.pre`
   overflow: hidden;
 
   font-family: 'Roboto Mono';
-  font-weight: 600;
+  font-weight: 500;
   font-size: 13px;
   line-height: 19px;
   text-align: left;
@@ -52,7 +52,7 @@ const LineNo = styled.span`
   display: table-cell;
   user-select: none;
 
-  color: #959697;
+  color: #5A5A6F;
   text-align: right;
 `;
 
@@ -72,7 +72,7 @@ const LinesContentWrapper = styled.div`
 const Delimiter = styled.div`
   width: 100%;
   height: 1px;
-  background: #404244;
+  background: #2F2E3C;
 `;
 
 const MarkedSpan = styled.span`

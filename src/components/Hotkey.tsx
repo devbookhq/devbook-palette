@@ -21,8 +21,9 @@ const ShiftKeyImg = styled(shiftKeyImg)`
   :not(:last-child) {
     margin-right: 7px;
   }
-  stroke: {
-    color: white;
+
+  path {
+    fill: white;
   }
 `;
 
@@ -33,6 +34,10 @@ const AltKeyImg = styled(altKeyImg)`
   height: 11px;
   :not(:last-child) {
     margin-right: 7px;
+  }
+
+  path {
+    fill: white;
   }
 `;
 

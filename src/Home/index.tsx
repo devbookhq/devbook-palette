@@ -30,7 +30,7 @@ const Content = styled.div`
 
 const ResultsHeading = styled.div`
   margin-bottom: 10px;
-  color: #A6A6A7;
+  color: #5A5A6F;
   font-size: 14px;
   font-weight: 500;
 `;
@@ -84,7 +84,7 @@ function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where');
   const debouncedQuery = useDebounce(searchQuery, 400);
 
-  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
+  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.GitHubCode);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
@@ -243,7 +243,6 @@ function Home() {
           <>
             <SearchResults>
               <>
-                <ResultsHeading>RESULTS</ResultsHeading>
                 {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
                   <StackOverflowItem
                     key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.

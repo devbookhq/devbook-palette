@@ -5,7 +5,6 @@ import axios from 'axios';
 export interface FilePreview {
   startLine: number;
   fragment: string;
-  startingOffset: number;
   indices: number[][];
 }
 
@@ -15,6 +14,7 @@ export interface CodeResult {
   filePath: string;
   fileURL: string;
   fileContent: string;
+  absoluteIndices: number[][];
   filePreviews: FilePreview[];
 }
 

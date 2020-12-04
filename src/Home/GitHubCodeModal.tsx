@@ -14,22 +14,41 @@ const StyledModal = styled(Modal)`
   margin-top: ${marginTop}px;
 
   overflow-y: auto;
-  background: #212122;
+  background: #1C1B26;
   border-radius: 20px 20px 0 0;
 `;
 
-function transformFragmentPreviewsToFilePreview(filePreviews: FilePreview[], fileContent: string): FilePreview {
-  // Add starting lines so we can scroll there
-  const indices = filePreviews
-    .flatMap(preview => preview.indices.map(indices => indices.map(i => i + preview.startingOffset)));
+const Header = styled.div`
+  width: 100%;
+  max-width: 100%;
+  padding: 10px;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+`;
 
-  return {
-    indices,
-    fragment: fileContent,
-    startLine: 1,
-    startingOffset: 0,
-  };
-}
+const RepoName = styled.div`
+  margin-bottom: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #5A5A6F;
+  font-weight: 500;
+  font-size: 13px;
+`;
+
+const FilePath = styled.div`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl; // This so we can see the name of the file.
+  text-align: left;
+  color: #9CACC5;
+  font-weight: 500;
+  font-size: 13px;
+`;
 
 interface GitHubCodeModalProps {
   codeResult: CodeResult;
@@ -40,13 +59,28 @@ function GitHubCodeModal({
   codeResult,
   onCloseRequest,
 }: GitHubCodeModalProps) {
-  const wholeFilePreviews = [transformFragmentPreviewsToFilePreview(codeResult.filePreviews, codeResult.fileContent)];
+
+  const filePreviews: FilePreview[] = [{
+    indices: codeResult.absoluteIndices,
+    fragment: codeResult.fileContent,
+    startLine: 1,
+  }];
+
   return (
     <StyledModal
       onCloseRequest={onCloseRequest}
     >
+      <Header>
+        <RepoName>
+          {codeResult.repoFullName}
+        </RepoName>
+        <FilePath>
+          {codeResult.filePath}
+        </FilePath>
+      </Header>
+
       <GitHubCode
-        filePreviews={wholeFilePreviews}
+        filePreviews={filePreviews}
       />
 
     </StyledModal>

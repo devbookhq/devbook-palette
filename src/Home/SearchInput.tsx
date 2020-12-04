@@ -15,8 +15,6 @@ const Content = styled.div`
   padding: 20px 10px 10px;
   display: flex;
   flex-direction: column;
-
-  border-bottom: 1px solid #3B3A4A;
 `;
 
 const InputWrapper = styled.div<{ isFocused?: boolean }>`
@@ -171,7 +169,7 @@ function SearchInput({
           onBlur={() => setIsInputFocused(false)}
           onKeyDown={handleInputKeyDown}
         />
-        {isLoading && <StyledLoader/>}
+        {isLoading && <StyledLoader />}
       </InputWrapper>
       <Menu>
         <FiltersWrapper>
@@ -185,7 +183,7 @@ function SearchInput({
               >{f}
               </FilterButton>
               <Hotkey
-                hotkey={[ModifierKey.Shift, ModifierKey.Alt, `${idx+1}`]}
+                hotkey={[ModifierKey.Shift, ModifierKey.Alt, `${idx + 1}`]}
               />
             </Filter>
           ))}

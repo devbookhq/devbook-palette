@@ -16,7 +16,7 @@ const Container = styled.div<{ isFocused?: boolean }>`
   flex-direction: column;
   align-items: flex-start;
   border-radius: 5px;
-  border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#404244'};
+  border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#2F2E3C'};
 `;
 
 const Header = styled.div`
@@ -25,7 +25,6 @@ const Header = styled.div`
   padding: 10px;
   display: flex;
   flex-direction: column;
-  /* background: #212122; */
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
 `;
@@ -35,7 +34,7 @@ const RepoName = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #676767;
+  color: #5A5A6F;
   font-weight: 500;
   font-size: 13px;
 `;
@@ -46,7 +45,7 @@ const FilePath = styled.div`
   white-space: nowrap;
   direction: rtl; // This so we can see the name of the file.
   text-align: left;
-  color: #B0B1B2;
+  color: #9CACC5;
   font-weight: 500;
   font-size: 13px;
 `;

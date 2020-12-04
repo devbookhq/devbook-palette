@@ -52,7 +52,7 @@ body {
 
 *::-webkit-scrollbar-track {
   /* color of the tracking area */
-  background: rgba(29, 29, 29, 0.55);
+  /* background: rgba(29, 29, 29, 0.55); */
   background: transparent;
 }
 
@@ -62,12 +62,12 @@ body {
   background-clip: padding-box;
 
   /* color of the scroll thumb */
-  background-color: #6E7075;
+  background-color: #595A6F;
 
   /* roundness of the scroll thumb */
   /* 'border-radius' is required for compatibility and is tagged as a problem when omitted */
-  -webkit-border-radius: 10px;
-  border-radius: 10px;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
 }
 
 *::-webkit-scrollbar-corner {
