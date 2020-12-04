@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { StackOverflowResult, StackOverflowAnswer } from 'search/stackOverflow';
 import { openLink } from 'mainProcess';
 
-const Container = styled.div`
+const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   max-width: 100%;
   margin-bottom: 30px;
@@ -16,6 +16,9 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
+  border-radius: 5px;
+  border: 1px solid ${props => props.isFocused ? '#3A41AF' : 'transparent'};
 `;
 
 const Header = styled.div<{ isFocused?: boolean }>`
@@ -26,8 +29,8 @@ const Header = styled.div<{ isFocused?: boolean }>`
   display: flex;
   justify-content: space-between;
 
-  border-radius: 5px;
-  background: ${props => props.isFocused ? '#262736' : 'transparent'};
+  border-radius: 5px 5px 0 0;
+  background: ${props => props.isFocused ? '#3A41AF' : 'transparent'};
 `;
 
 const QuestionTitle = styled.a`
@@ -220,6 +223,7 @@ function StackOverflowItem({
     <>
     <Container
       ref={containerRef}
+      isFocused={isFocused}
     >
       <Header
         isFocused={isFocused}
