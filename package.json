@@ -66,7 +66,7 @@
     "eject": "craco eject",
     "postinstall": "electron-builder install-app-deps",
     "electron:dev": "concurrently \"BROWSER=none npm start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && tsc -p electron && electron --enable-logging .\"",
-    "electron:build-mac": "npm build && tsc -p electron && npx electron-builder build --mac"
+    "electron:build-mac": "npm run build && tsc -p electron && npx electron-builder build --mac"
   },
   "dependencies": {
     "axios": "^0.21.0",

@@ -151,6 +151,7 @@ function createMainWindow() {
   });
 
   if (isdev) {
+    console.log('Development');
     mainWindow.loadURL(`http://localhost:${PORT}/index.html`);
     // Hot Reloading
     require('electron-reload')(__dirname, {

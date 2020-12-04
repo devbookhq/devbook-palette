@@ -39,6 +39,7 @@ class OnboardingWindow {
     });
 
     if (isdev) {
+      console.log('Development');
       this.window.loadURL(`http://localhost:${PORT}/index.html#/onboarding`);
       // Hot Reloading
       require('electron-reload')(__dirname, {
