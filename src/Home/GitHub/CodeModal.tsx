@@ -12,10 +12,14 @@ const StyledModal = styled(Modal)`
   width: 100%;
   height: calc(100vh - ${marginTop}px);
   margin-top: ${marginTop}px;
+  overflow: auto;
 
-  overflow-y: auto;
   background: #1C1B26;
   border-radius: 20px 20px 0 0;
+`;
+
+const StyledCode = styled(Code)`
+
 `;
 
 const Header = styled.div`
@@ -50,6 +54,9 @@ const FilePath = styled.div`
   font-size: 13px;
 `;
 
+const CodeWrapper = styled.div`
+`;
+
 interface GitHubCodeModalProps {
   codeResult: CodeResult;
   onCloseRequest: () => void;
@@ -79,9 +86,11 @@ function GitHubCodeModal({
         </FilePath>
       </Header>
 
-      <Code
-        filePreviews={filePreviews}
-      />
+      <CodeWrapper>
+        <StyledCode
+          filePreviews={filePreviews}
+        />
+      </CodeWrapper>
 
     </StyledModal>
   );

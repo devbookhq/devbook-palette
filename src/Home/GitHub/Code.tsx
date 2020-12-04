@@ -113,16 +113,13 @@ function getMarkedContent(ranges: number[][], content: string, startingOffset: n
 }
 
 // TODO: Add correct types to arguments:
-// tokens (Token[][]),
-// getLineProps ((input: LineInputProps) => LineOutputProps), and
+// tokens (Token[][]), and
 // getTokenProps ((input: TokenInputProps) => TokenOutputProps)
 // I cannot get the types from prism-react-renderer because they are not explicitly exported
-function getRenderableLines(preview: FilePreview, tokens: any, getLineProps: any, getTokenProps: any) {
+function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: any) {
   const linesNos: JSX.Element[] = [];
   const lines: JSX.Element[] = [];
   let currentOffset = 0;
-
-  console.time('assemble code');
 
   for (let i = 0; i < tokens.length; i++) {
     const line = tokens[i];
@@ -143,7 +140,6 @@ function getRenderableLines(preview: FilePreview, tokens: any, getLineProps: any
       const tokenEndOffset = currentOffset + token.content.length;
       currentOffset = tokenEndOffset;
 
-      // TODO: Optmized these two functions (cca 60ms*2)
       const tokenProps = getTokenProps({ token, key: j });
       const children = getMarkedContent(preview.indices, tokenProps.children, tokenStartOffset + i);
 
@@ -164,8 +160,6 @@ function getRenderableLines(preview: FilePreview, tokens: any, getLineProps: any
     );
   }
 
-  console.timeEnd('assemble code');
-
   return (
     <React.Fragment>
       <LinesNoWrapper>{linesNos}</LinesNoWrapper>
@@ -176,11 +170,12 @@ function getRenderableLines(preview: FilePreview, tokens: any, getLineProps: any
 
 interface GitHubCodeProps {
   filePreviews: FilePreview[];
+  className?: string;
 }
 
-function GitHubCode({ filePreviews }: GitHubCodeProps) {
+function GitHubCode({ filePreviews, className }: GitHubCodeProps) {
   return (
-    <Container>
+    <Container className={className}>
       <div>
         {filePreviews.map((preview, idx) => (
           <React.Fragment key={idx}>
@@ -194,11 +189,10 @@ function GitHubCode({ filePreviews }: GitHubCodeProps) {
                 className,
                 style,
                 tokens,
-                getLineProps,
                 getTokenProps,
               }) => (
                   <Pre className={className} style={style}>
-                    {getRenderableLines(preview, tokens, getLineProps, getTokenProps)}
+                    {getRenderableLines(preview, tokens, getTokenProps)}
                   </Pre>
                 )}
             </Prism>

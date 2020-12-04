@@ -17,7 +17,7 @@ const Container = styled.div<{ isFocused?: boolean }>`
   flex-direction: column;
   align-items: flex-start;
   border-radius: 5px;
-  border: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#2F2E3C'};
+  border: 1px solid ${props => props.isFocused ? '#3A41AF' : '#2F2E3C'};
 `;
 
 const Header = styled.div`
