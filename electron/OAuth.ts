@@ -7,6 +7,7 @@ import querystring from 'querystring';
 import fs from 'fs';
 import path from 'path';
 import { app } from 'electron';
+import isdev from './isdev';
 
 function getRandomToken() {
   return crypto.randomBytes(48).toString('hex');
@@ -25,7 +26,7 @@ class OAuth {
     scope: '',
     allow_signup: 'true',
   };
-  private static redirectHTML = fs.readFileSync(path.join(app.getAppPath(), 'resources', 'OAuthRedirect.html'), 'utf8').toString();
+  private static redirectHTML = fs.readFileSync(path.join(app.getAppPath(), isdev ? '' : '..', 'resources', 'OAuthRedirect.html'), 'utf8').toString();
 
   private stateTokens: { [state: string]: boolean } = {};
   private app = express();

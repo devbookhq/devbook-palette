@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as process from 'process';
 import { inspect } from 'util';
 
-import isdev from './isDev';
+import isdev from './isdev';
 
 class OnboardingWindow {
   public window: electron.BrowserWindow | undefined;

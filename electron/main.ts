@@ -10,7 +10,7 @@ import {
 } from 'electron';
 import keytar from 'keytar';
 
-import isdev from './isDev';
+import isdev from './isdev';
 import Tray from './tray';
 import OnboardingWindow from './OnboardingWindow';
 import OAuth from './OAuth';

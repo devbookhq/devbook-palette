@@ -78,45 +78,38 @@ function getMarkedContent(ranges: number[][], content: string, startingOffset: n
   let markedAccumulator = '';
   let plainAccumulator = '';
 
-  return Object.values(content)
-    // Transform all chars from content and mark those that are in any ranges
-    .map((char, i) => {
-      const offset = startingOffset + i + 1;
-      return {
-        key: offset,
-        content: char,
-        marked: isInRange(ranges, offset),
-      };
-    })
-    // Join continuos marked and unmarked sequences of chars and transform them to rendeable elements
-    .reduce((newContent, curr, i, markedChars) => {
-      if (curr.marked) {
+  const newContent = [];
 
-        if (plainAccumulator.length > 0) {
-          newContent.push(plainAccumulator);
-          plainAccumulator = '';
-        }
+  for (let i = 0; i < content.length; i++) {
+    const offset = i + startingOffset + 1;
+    const isMarked = isInRange(ranges, offset);
+    const char = content[i];
 
-        markedAccumulator = markedAccumulator.concat(curr.content);
-      } else {
-        if (markedAccumulator.length > 0) {
-          newContent.push(<MarkedSpan key={curr.key}>{markedAccumulator}</MarkedSpan>);
-          markedAccumulator = '';
-        }
-
-        plainAccumulator = plainAccumulator.concat(curr.content);
+    if (isMarked) {
+      if (plainAccumulator.length > 0) {
+        newContent.push(plainAccumulator);
+        plainAccumulator = '';
       }
 
-      if (i === markedChars.length - 1) {
-        if (plainAccumulator.length > 0) {
-          newContent.push(plainAccumulator);
-        }
-        if (markedAccumulator.length > 0) {
-          newContent.push(<MarkedSpan key={curr.key}>{markedAccumulator}</MarkedSpan>);
-        }
+      markedAccumulator = markedAccumulator.concat(char);
+    } else {
+      if (markedAccumulator.length > 0) {
+        newContent.push(<MarkedSpan key={offset}>{markedAccumulator}</MarkedSpan>);
+        markedAccumulator = '';
       }
-      return newContent;
-    }, [] as (string | JSX.Element)[]);
+
+      plainAccumulator = plainAccumulator.concat(char);
+    }
+  }
+
+  if (plainAccumulator.length > 0) {
+    newContent.push(plainAccumulator);
+  }
+  if (markedAccumulator.length > 0) {
+    newContent.push(<MarkedSpan key="last">{markedAccumulator}</MarkedSpan>);
+  }
+
+  return newContent;
 }
 
 // TODO: Add correct types to arguments:
@@ -150,24 +143,25 @@ function getRenderableLines(preview: FilePreview, tokens: any, getLineProps: any
       const tokenEndOffset = currentOffset + token.content.length;
       currentOffset = tokenEndOffset;
 
-      const tokenProps = { ...getTokenProps({ token, key: j }) };
+      // TODO: Optmized these two functions (cca 60ms*2)
+      const tokenProps = getTokenProps({ token, key: j });
       const children = getMarkedContent(preview.indices, tokenProps.children, tokenStartOffset + i);
 
-      const markedTokenProps = {
-        ...tokenProps,
-        children,
-      };
-
-      const element = <span {...markedTokenProps} />;
-      outputTokens.push(element);
+      outputTokens.push(
+        <span
+          key={tokenProps.key}
+          style={tokenProps.style}
+          className={tokenProps.className}
+          children={children}
+        />
+      );
     }
 
-    const lineElement = (
-      <LineContent {...getLineProps({ line, key: i })}>
+    lines.push(
+      <LineContent key={i}>
         {outputTokens}
       </LineContent>
     );
-    lines.push(lineElement);
   }
 
   console.timeEnd('assemble code');
