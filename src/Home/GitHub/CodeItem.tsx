@@ -2,11 +2,12 @@ import React, {
   useEffect,
   useRef,
   memo,
+  useMemo,
 } from 'react';
 import styled from 'styled-components';
 
 import { CodeResult } from 'search/gitHub';
-import GitHubCode from './GitHubCode';
+import Code from './Code';
 
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
@@ -65,6 +66,8 @@ const GitHubCodeItem = memo(({
     if (isFocused) containerRef?.current?.scrollIntoView(false);
   }, [isFocused]);
 
+  const MemoizedCode = useMemo(() => Code({ filePreviews: codeResult.filePreviews }), [codeResult]);
+
   return (
     <Container
       ref={containerRef}
@@ -80,9 +83,7 @@ const GitHubCodeItem = memo(({
         </FilePath>
       </Header>
 
-      <GitHubCode
-        filePreviews={codeResult.filePreviews}
-      />
+      {MemoizedCode}
 
     </Container>
   );

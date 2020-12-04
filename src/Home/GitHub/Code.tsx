@@ -1,21 +1,18 @@
-import React, { memo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-import Highlight, { defaultProps } from 'prism-react-renderer';
+import Prism, { defaultProps } from 'prism-react-renderer';
 import theme from 'prism-react-renderer/themes/nightOwl';
 
 import { FilePreview } from 'search/gitHub';
 
 theme.plain.backgroundColor = '#272636';
 
-const CodeWrapper = styled.div`
+const Container = styled.div`
   width: 100%;
   height: 100%;
-
   border-bottom-left-radius: 5px;
   border-bottom-right-radius: 5px;
-`;
 
-const CodeSnippet = styled.div`
   :not(:last-child) {
     border-bottom: 1px solid #2F2E3C;
   }
@@ -26,6 +23,7 @@ const Pre = styled.pre`
   margin: 0;
   padding: 10px;
   overflow: hidden;
+  display: flex;
 
   font-family: 'Roboto Mono';
   font-weight: 500;
@@ -39,25 +37,15 @@ const Pre = styled.pre`
   }
 `;
 
-const LinesWrapper = styled.div`
-  display: flex;
-`;
-
-const Line = styled.div`
-  display: table-row;
-`;
-
-const LineNo = styled.span`
+const LineNo = styled.div`
   padding-right: 1em;
-  display: table-cell;
   user-select: none;
 
   color: #5A5A6F;
   text-align: right;
 `;
 
-const LineContent = styled.span`
-  display: table-cell;
+const LineContent = styled.div`
 `;
 
 const LinesNoWrapper = styled.div`
@@ -127,7 +115,6 @@ function getMarkedContent(ranges: number[][], content: string, startingOffset: n
           newContent.push(<MarkedSpan key={curr.key}>{markedAccumulator}</MarkedSpan>);
         }
       }
-
       return newContent;
     }, [] as (string | JSX.Element)[]);
 }
@@ -142,26 +129,28 @@ function getRenderableLines(preview: FilePreview, tokens: any, getLineProps: any
   const lines: JSX.Element[] = [];
   let currentOffset = 0;
 
-  for (const [i, line] of tokens.entries()) {
+  console.time('assemble code');
+
+  for (let i = 0; i < tokens.length; i++) {
+    const line = tokens[i];
     // Assemble line number element
     const lineNoElement = (
-      <Line {...getLineProps({ line, key: i })}>
-        <LineNo>
-          {preview.startLine + i}
-        </LineNo>
-      </Line>
+      <LineNo key={i}>
+        {preview.startLine + i}
+      </LineNo>
     );
     linesNos.push(lineNoElement);
 
     // Assemble line element from tokens
-    const tokens: JSX.Element[] = [];
+    const outputTokens: JSX.Element[] = [];
 
-    for (const [key, token] of line.entries()) {
+    for (let j = 0; j < line.length; j++) {
+      const token = line[j];
       const tokenStartOffset = currentOffset;
       const tokenEndOffset = currentOffset + token.content.length;
       currentOffset = tokenEndOffset;
 
-      const tokenProps = { ...getTokenProps({ token, key }) };
+      const tokenProps = { ...getTokenProps({ token, key: j }) };
       const children = getMarkedContent(preview.indices, tokenProps.children, tokenStartOffset + i);
 
       const markedTokenProps = {
@@ -170,63 +159,61 @@ function getRenderableLines(preview: FilePreview, tokens: any, getLineProps: any
       };
 
       const element = <span {...markedTokenProps} />;
-      tokens.push(element);
+      outputTokens.push(element);
     }
 
     const lineElement = (
-      <Line {...getLineProps({ line, key: i })}>
-        <LineContent>
-          {tokens}
-        </LineContent>
-      </Line>
+      <LineContent {...getLineProps({ line, key: i })}>
+        {outputTokens}
+      </LineContent>
     );
     lines.push(lineElement);
   }
 
+  console.timeEnd('assemble code');
+
   return (
-    <LinesWrapper>
+    <React.Fragment>
       <LinesNoWrapper>{linesNos}</LinesNoWrapper>
       <LinesContentWrapper>{lines}</LinesContentWrapper>
-    </LinesWrapper>
+    </React.Fragment>
   );
 }
 
-interface GitHubCode {
+interface GitHubCodeProps {
   filePreviews: FilePreview[];
 }
 
-const GitHubCode = memo(({ filePreviews }: GitHubCode) => {
+function GitHubCode({ filePreviews }: GitHubCodeProps) {
   return (
-    <CodeWrapper>
-      <CodeSnippet>
+    <Container>
+      <div>
         {filePreviews.map((preview, idx) => (
           <React.Fragment key={idx}>
-            <>
-              <Highlight
-                {...defaultProps}
-                code={preview.fragment}
-                theme={theme}
-                language="typescript" // TODO: Detect the fragment's language.
-              >
-                {({
-                  className,
-                  style,
-                  tokens,
-                  getLineProps,
-                  getTokenProps,
-                }) => (
-                    <Pre className={className} style={style}>
-                      {getRenderableLines(preview, tokens, getLineProps, getTokenProps)}
-                    </Pre>
-                  )}
-              </Highlight>
-              {idx + 1 !== filePreviews.length && <Delimiter />}
-            </>
+            <Prism
+              {...defaultProps}
+              code={preview.fragment}
+              theme={theme}
+              language="typescript" // TODO: Detect the fragment's language.
+            >
+              {({
+                className,
+                style,
+                tokens,
+                getLineProps,
+                getTokenProps,
+              }) => (
+                  <Pre className={className} style={style}>
+                    {getRenderableLines(preview, tokens, getLineProps, getTokenProps)}
+                  </Pre>
+                )}
+            </Prism>
+            {idx + 1 !== filePreviews.length && <Delimiter />}
           </React.Fragment>
         ))}
-      </CodeSnippet>
-    </CodeWrapper>
+      </div>
+    </Container>
   );
-});
+};
 
 export default GitHubCode;

@@ -19,8 +19,8 @@ import {
 import SearchInput, { ResultsFilter } from './SearchInput';
 import StackOverflowItem from './StackOverflowItem';
 import StackOverflowModal from './StackOverflowModal';
-import GitHubCodeItem from './GitHubCodeItem';
-import GitHubCodeModal from './GitHubCodeModal';
+import GitHubCodeItem from './GitHub/CodeItem';
+import GitHubCodeModal from './GitHub/CodeModal';
 
 const Content = styled.div`
   height: 100%;
@@ -46,7 +46,7 @@ const SearchResults = styled.div`
 
 const InfoMessage = styled.div`
   margin: 50px auto 0;
-  color: #909090;
+  color: #5A5A6F;
   font-size: 16px;
   font-weight: 600;
 `;
@@ -85,7 +85,7 @@ function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where');
   const debouncedQuery = useDebounce(searchQuery, 400);
 
-  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
+  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.GitHubCode);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);

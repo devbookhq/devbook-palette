@@ -12,7 +12,7 @@ import Loader from 'components/Loader';
 
 const Content = styled.div`
   width: 100%;
-  padding-top 5px;
+  padding-top: 5px;
   display: flex;
   flex-direction: column;
 `;

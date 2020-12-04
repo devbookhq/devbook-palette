@@ -43,6 +43,10 @@ const CancelButton = styled.button`
 const CloseImg = styled(closeImg)`
   width: auto;
   height: 18px;
+
+  path {
+    stroke: #5A5A6F;
+  }
 `;
 
 const Content = styled.div``;
@@ -68,7 +72,7 @@ function Modal({
       <CancelButton
         onClick={onCloseRequest}
       >
-        <CloseImg/>
+        <CloseImg />
       </CancelButton>
 
       <Content

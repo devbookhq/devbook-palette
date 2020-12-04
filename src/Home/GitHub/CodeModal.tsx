@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { CodeResult, FilePreview } from 'search/gitHub';
 import Modal from 'components/Modal';
 
-import GitHubCode from './GitHubCode';
+import Code from './Code';
 
 const marginTop = 60;
 
@@ -79,7 +79,7 @@ function GitHubCodeModal({
         </FilePath>
       </Header>
 
-      <GitHubCode
+      <Code
         filePreviews={filePreviews}
       />
 
