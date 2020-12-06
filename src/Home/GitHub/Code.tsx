@@ -1,6 +1,7 @@
 import React, {
   useRef,
   useLayoutEffect,
+  useEffect,
 } from 'react';
 import styled from 'styled-components';
 import Prism, { defaultProps } from 'prism-react-renderer';
@@ -114,12 +115,12 @@ function getMarkedContent(ranges: number[][], content: string, startingOffset: n
 // tokens (Token[][]), and
 // getTokenProps ((input: TokenInputProps) => TokenOutputProps)
 // I cannot get the types from prism-react-renderer because they are not explicitly exported
-function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: any, firstHighlightRef: any) {
+function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: any, firstHighlightRef: any, containerRef: any) {
   const linesNos: JSX.Element[] = [];
   const lines: JSX.Element[] = [];
   let currentOffset = 0;
 
-  let noHighlight = true;
+  let afterFirstHighlight = false;
 
   for (let i = 0; i < tokens.length; i++) {
     const line = tokens[i];
@@ -145,7 +146,7 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
 
       outputTokens.push(
         <span
-          ref={hasHighlight && noHighlight && firstHighlightRef}
+          ref={hasHighlight && !afterFirstHighlight ? firstHighlightRef : undefined}
           key={tokenProps.key}
           style={tokenProps.style}
           className={tokenProps.className}
@@ -153,7 +154,7 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
         />
       );
 
-      noHighlight = noHighlight && !hasHighlight;
+      afterFirstHighlight = afterFirstHighlight || !!hasHighlight;
     }
 
     lines.push(
@@ -165,7 +166,7 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
 
   return (
     <>
-      <LinesNoWrapper>{linesNos}</LinesNoWrapper>
+      <LinesNoWrapper ref={containerRef}>{linesNos}</LinesNoWrapper>
       <LinesContentWrapper>{lines}</LinesContentWrapper>
     </>
   );
@@ -182,11 +183,21 @@ function Code({
   className,
   isFocused,
 }: CodeProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const firstHighlightRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    // if (isFocused) firstHighlightRef?.current?.
-  }, [isFocused]);
+  useEffect(() => {
+    if (isFocused && containerRef.current && firstHighlightRef.current) {
+      // TODO: Scroll to the top of the preview without using ref.
+      containerRef?.current?.scrollIntoView({ inline: 'end' });
+
+      // TODO/HACK: scrollIntoView is only working here in the first opened code modal view when called normally.
+      // setTimeout without any delay is a hack which puts it on the event loop stack and gives control to the event loop.
+      setTimeout(() => {
+        firstHighlightRef?.current?.scrollIntoView({ block: 'center', behavior: 'smooth', inline: 'end' })
+      });
+    }
+  }, [isFocused, firstHighlightRef, filePreview, containerRef]);
 
   return (
     <Container className={className}>
@@ -203,7 +214,7 @@ function Code({
           getTokenProps,
         }) => (
             <Pre className={className} style={style}>
-              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef)}
+              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, containerRef)}
             </Pre>
           )}
       </Prism>

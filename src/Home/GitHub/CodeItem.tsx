@@ -69,7 +69,7 @@ const CodeItem = memo(({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isFocused) containerRef?.current?.scrollIntoView(false);
+    if (isFocused) containerRef?.current?.scrollIntoView();
   }, [isFocused]);
 
   const MemoizedCode = useMemo(() => {
