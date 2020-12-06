@@ -143,12 +143,7 @@ function StackOverflowItem({
 
   useEffect(() => {
     const accepted = soResult.answers.filter(a => a.isAccepted === true);
-    const mostUpvoted = soResult.answers.reduce((acc, val) => {
-      if (!acc) {
-        return val;
-      }
-      return val.votes > acc.votes ? val : acc;
-    }, undefined as StackOverflowAnswer | undefined);
+    const mostUpvoted = soResult.answers.reduce((acc, val) => val.votes > acc.votes ? val : acc);
 
     if (accepted.length > 0) {
       const isMostUpvoted = mostUpvoted === accepted[0];
@@ -161,7 +156,7 @@ function StackOverflowItem({
   }, [soResult]);
 
   useEffect(() => {
-    if (isFocused) containerRef?.current?.scrollIntoView();
+    if (isFocused) containerRef?.current?.scrollIntoView(false);
   }, [isFocused]);
 
   return (
@@ -181,7 +176,9 @@ function StackOverflowItem({
         />
 
         <QuestionMetadata>
-          <QuestionVotes>{soResult.question.votes} Upvotes</QuestionVotes>
+          <QuestionVotes>
+            {soResult.question.votes} {soResult.question.votes === 1 || soResult.question.votes === -1 ? 'Upvote' : 'Upvotes'}
+          </QuestionVotes>
           <QuestionDate>{getDateString(soResult.question.timestamp * 1000)}</QuestionDate>
         </QuestionMetadata>
       </Header>
@@ -192,7 +189,9 @@ function StackOverflowItem({
             {answerTypes.map(t => (
               <AnswerTypeTag key={t}>{t}</AnswerTypeTag>
             ))}
-            <AnswerVotes>{activeAnswer.votes} Upvotes</AnswerVotes>
+            <AnswerVotes>
+              {activeAnswer.votes} {activeAnswer.votes === 1 || activeAnswer.votes === -1 ? 'Upvote' : 'Upvotes'}
+            </AnswerVotes>
             <AnswerDate>{getDateString(activeAnswer.timestamp * 1000)}</AnswerDate>
           </AnswerMetadata>
 
@@ -208,3 +207,4 @@ function StackOverflowItem({
 }
 
 export default StackOverflowItem;
+

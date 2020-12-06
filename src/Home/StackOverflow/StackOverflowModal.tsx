@@ -92,16 +92,25 @@ const Answers = styled.div`
 const Answer = styled.div`
   width: 100%;
   height: 100%;
-  margin-top: 10px;
+  margin-bottom: 20px;
 
   display: flex;
   flex-direction: column;
+
+  border-radius: 5px;
+  border: 1px solid #262736;
 `;
 
 const AnswerMetadata = styled.div`
   width: 100%;
+  max-width: 100%;
+  padding: 10px;
+
   display: flex;
   align-items: center;
+
+  border-radius: 5px 5px 0 0;
+  background: #262736;
 `;
 
 const AnswerTag = styled.span`
@@ -132,6 +141,18 @@ const AnswerDate = styled.span`
   color: #9CACC5;
   font-size: 14px;
   font-weight: 500;
+`;
+
+const AnswerBody = styled(StackOverflowBody)`
+  padding: 0 10px;
+`;
+
+const AnswersHeading = styled.span`
+  margin-bottom: 10px;
+
+  color: #fff;
+  font-weight: 600;
+  font-size: 17px;
 `;
 
 interface StackOverflowModalProps {
@@ -210,6 +231,7 @@ function StackOverflowModal({
         />
       </Question>
 
+      <AnswersHeading>Answers</AnswersHeading>
       <Answers>
         {sortedAnswers.map((a, idx) => (
           <Answer
@@ -222,11 +244,11 @@ function StackOverflowModal({
               {mostUpvotedIdx === idx &&
                 <AnswerTag>{AnswerType.MostUpvoted}</AnswerTag>
               }
-              <AnswerVotes>{a.votes} Upvotes</AnswerVotes>
+              <AnswerVotes>{a.votes} {a.votes === 1 || a.votes === -1 ? 'Upvote' : 'Upvotes'}</AnswerVotes>
               <AnswerDate>{getDateString(a.timestamp * 1000)}</AnswerDate>
             </AnswerMetadata>
 
-            <StackOverflowBody
+            <AnswerBody
               dangerouslySetInnerHTML={{
                 __html: a.html,
               }}
