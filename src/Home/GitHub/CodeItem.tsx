@@ -78,8 +78,8 @@ const CodeItem = memo(({
 
   const MemoizedCode = useMemo(() => {
     return codeResult.filePreviews.map((preview, i) =>
-      <React.Fragment>
-        {Code({ filePreview: preview })}
+      <React.Fragment key={i}>
+        <Code filePreview={preview} />
         {i + 1 !== codeResult.filePreviews.length && <Delimiter />}
       </React.Fragment>
     );

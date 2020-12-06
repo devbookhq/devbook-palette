@@ -7,16 +7,7 @@ import { FilePreview } from 'search/gitHub';
 
 theme.plain.backgroundColor = '#272636';
 
-const Container = styled.div`
-  width: 100%;
-  height: 100%;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-
-  :not(:last-child) {
-    border-bottom: 1px solid #2F2E3C;
-  }
-`;
+const Content = styled.div``;
 
 const Pre = styled.pre`
   height: 100%;
@@ -155,43 +146,36 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
   }
 
   return (
-    <React.Fragment>
+    <>
       <LinesNoWrapper>{linesNos}</LinesNoWrapper>
       <LinesContentWrapper>{lines}</LinesContentWrapper>
-    </React.Fragment>
+    </>
   );
 }
 
 interface GitHubCodeProps {
   filePreview: FilePreview;
-  className?: string;
-  key?: string | number;
 }
 
-function Code({
-  filePreview,
-  key,
-}: GitHubCodeProps) {
+function Code({ filePreview }: GitHubCodeProps) {
   return (
-    <Container key={key}>
-      <Prism
-        {...defaultProps}
-        code={filePreview.fragment}
-        theme={theme}
-        language="typescript" // TODO: Detect the fragment's language.
-      >
-        {({
-          className,
-          style,
-          tokens,
-          getTokenProps,
-        }) => (
-            <Pre className={className} style={style}>
-              {getRenderableLines(filePreview, tokens, getTokenProps)}
-            </Pre>
-          )}
-      </Prism>
-    </Container>
+    <Prism
+      {...defaultProps}
+      code={filePreview.fragment}
+      theme={theme}
+      language="typescript" // TODO: Detect the fragment's language.
+    >
+      {({
+        className,
+        style,
+        tokens,
+        getTokenProps,
+      }) => (
+          <Pre className={className} style={style}>
+            {getRenderableLines(filePreview, tokens, getTokenProps)}
+          </Pre>
+        )}
+    </Prism>
   );
 };
 
