@@ -30,6 +30,17 @@ const StyledModal = styled(Modal)`
   border-radius: 20px 20px 0 0;
 `;
 
+const Question = styled.div`
+  width: 100%;
+  margin-bottom: 30px;
+
+  display: flex;
+  flex-direction: column;
+
+  border-radius: 5px;
+  border: 1px solid #3A41AF;
+`;
+
 const Header = styled.div`
   width: 100%;
   max-width: 100%;
@@ -38,8 +49,8 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
 
-  border-radius: 5px;
-  background: #262736;
+  border-radius: 5px 5px 0 0;
+  background: #3A41AF;
 `;
 
 const QuestionTitle = styled.a`
@@ -68,6 +79,9 @@ const QuestionDate = styled.span`
   font-weight: 500;
 `;
 
+const QuestionBody = styled(StackOverflowBody)`
+  padding: 0 10px;
+`;
 
 const Answers = styled.div`
   width: 100%;
@@ -174,25 +188,27 @@ function StackOverflowModal({
     <StyledModal
       onCloseRequest={onCloseRequest}
     >
-      <Header>
-        <QuestionTitle
-          href={soResult.question.link}
-          onClick={handleQuestionTitleClick}
+      <Question>
+        <Header>
+          <QuestionTitle
+            href={soResult.question.link}
+            onClick={handleQuestionTitleClick}
+            dangerouslySetInnerHTML={{
+              __html: soResult.question.title,
+            }}
+          />
+          <QuestionMetadata>
+            <QuestionVotes>{soResult.question.votes} Upvotes</QuestionVotes>
+            <QuestionDate>{getDateString(soResult.question.timestamp * 1000)}</QuestionDate>
+          </QuestionMetadata>
+        </Header>
+
+        <QuestionBody
           dangerouslySetInnerHTML={{
-            __html: soResult.question.title,
+            __html: soResult.question.html,
           }}
         />
-        <QuestionMetadata>
-          <QuestionVotes>{soResult.question.votes} Upvotes</QuestionVotes>
-          <QuestionDate>{getDateString(soResult.question.timestamp * 1000)}</QuestionDate>
-        </QuestionMetadata>
-      </Header>
-
-      <StackOverflowBody
-        dangerouslySetInnerHTML={{
-          __html: soResult.question.html,
-        }}
-      />
+      </Question>
 
       <Answers>
         {sortedAnswers.map((a, idx) => (
