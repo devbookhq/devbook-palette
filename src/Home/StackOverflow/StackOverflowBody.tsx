@@ -61,6 +61,10 @@ const Body = styled.div`
     color: #4CACD6;
     text-decoration: underline;
   }
+
+  img {
+    max-width: 100%;
+  }
 `;
 
 interface StackOverflowBodyProps {
