@@ -71,6 +71,7 @@ const CodeItem = memo(({
   console.log(codeResult.fileURL);
 
   useEffect(() => {
+    // TODO: Make sure containerRef is actually initialized.
     if (isFocused) containerRef?.current?.scrollIntoView();
   }, [isFocused]);
 
