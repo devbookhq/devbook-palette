@@ -143,7 +143,12 @@ function StackOverflowItem({
 
   useEffect(() => {
     const accepted = soResult.answers.filter(a => a.isAccepted === true);
-    const mostUpvoted = soResult.answers.reduce((acc, val) => val.votes > acc.votes ? val : acc);
+    const mostUpvoted = soResult.answers.reduce((acc, val) => {
+      if (!acc) {
+        return val;
+      }
+      return val.votes > acc.votes ? val : acc;
+    }, undefined as StackOverflowAnswer | undefined);
 
     if (accepted.length > 0) {
       const isMostUpvoted = mostUpvoted === accepted[0];

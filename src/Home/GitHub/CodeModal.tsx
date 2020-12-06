@@ -82,6 +82,7 @@ function CodeModal({
       </Header>
 
       <StyledCode
+        isFocused={true}
         filePreview={filePreview}
       />
 

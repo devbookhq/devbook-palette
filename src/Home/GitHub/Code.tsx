@@ -1,4 +1,7 @@
-import React from 'react';
+import React, {
+  useRef,
+  useLayoutEffect,
+} from 'react';
 import styled from 'styled-components';
 import Prism, { defaultProps } from 'prism-react-renderer';
 import theme from 'prism-react-renderer/themes/nightOwl';
@@ -54,7 +57,7 @@ const LinesContentWrapper = styled.div`
   display: table-column;
 `;
 
-const MarkedSpan = styled.span`
+const HighlightedResult = styled.span`
   font-weight: 600;
   background: #806416;
   color: white;
@@ -66,27 +69,31 @@ function isInRange(ranges: number[][], offset: number) {
 }
 
 function getMarkedContent(ranges: number[][], content: string, startingOffset: number) {
-  let markedAccumulator = '';
+  let highlightAccumulator = '';
   let plainAccumulator = '';
+
+  let hasHighlight = false;
 
   const newContent = [];
 
   for (let i = 0; i < content.length; i++) {
     const offset = i + startingOffset + 1;
-    const isMarked = isInRange(ranges, offset);
+    const isHighlighted = isInRange(ranges, offset);
     const char = content[i];
 
-    if (isMarked) {
+    if (isHighlighted) {
+      hasHighlight = true;
+
       if (plainAccumulator.length > 0) {
         newContent.push(plainAccumulator);
         plainAccumulator = '';
       }
 
-      markedAccumulator = markedAccumulator.concat(char);
+      highlightAccumulator = highlightAccumulator.concat(char);
     } else {
-      if (markedAccumulator.length > 0) {
-        newContent.push(<MarkedSpan key={offset}>{markedAccumulator}</MarkedSpan>);
-        markedAccumulator = '';
+      if (highlightAccumulator.length > 0) {
+        newContent.push(<HighlightedResult key={offset}>{highlightAccumulator}</HighlightedResult>);
+        highlightAccumulator = '';
       }
 
       plainAccumulator = plainAccumulator.concat(char);
@@ -96,21 +103,23 @@ function getMarkedContent(ranges: number[][], content: string, startingOffset: n
   if (plainAccumulator.length > 0) {
     newContent.push(plainAccumulator);
   }
-  if (markedAccumulator.length > 0) {
-    newContent.push(<MarkedSpan key="last">{markedAccumulator}</MarkedSpan>);
+  if (highlightAccumulator.length > 0) {
+    newContent.push(<HighlightedResult key="last">{highlightAccumulator}</HighlightedResult>);
   }
 
-  return newContent;
+  return [newContent, hasHighlight];
 }
 
 // TODO: Add correct types to arguments:
 // tokens (Token[][]), and
 // getTokenProps ((input: TokenInputProps) => TokenOutputProps)
 // I cannot get the types from prism-react-renderer because they are not explicitly exported
-function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: any) {
+function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: any, firstHighlightRef: any) {
   const linesNos: JSX.Element[] = [];
   const lines: JSX.Element[] = [];
   let currentOffset = 0;
+
+  let noHighlight = true;
 
   for (let i = 0; i < tokens.length; i++) {
     const line = tokens[i];
@@ -132,16 +141,19 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
       currentOffset = tokenEndOffset;
 
       const tokenProps = getTokenProps({ token, key: j });
-      const children = getMarkedContent(preview.indices, tokenProps.children, tokenStartOffset + i);
+      const [children, hasHighlight] = getMarkedContent(preview.indices, tokenProps.children, tokenStartOffset + i);
 
       outputTokens.push(
         <span
+          ref={hasHighlight && noHighlight && firstHighlightRef}
           key={tokenProps.key}
           style={tokenProps.style}
           className={tokenProps.className}
           children={children}
         />
       );
+
+      noHighlight = noHighlight && !hasHighlight;
     }
 
     lines.push(
@@ -162,9 +174,20 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
 interface CodeProps {
   filePreview: FilePreview;
   className?: string;
+  isFocused?: boolean;
 }
 
-function Code({ filePreview, className }: CodeProps) {
+function Code({
+  filePreview,
+  className,
+  isFocused,
+}: CodeProps) {
+  const firstHighlightRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    // if (isFocused) firstHighlightRef?.current?.
+  }, [isFocused]);
+
   return (
     <Container className={className}>
       <Prism
@@ -180,7 +203,7 @@ function Code({ filePreview, className }: CodeProps) {
           getTokenProps,
         }) => (
             <Pre className={className} style={style}>
-              {getRenderableLines(filePreview, tokens, getTokenProps)}
+              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef)}
             </Pre>
           )}
       </Prism>
