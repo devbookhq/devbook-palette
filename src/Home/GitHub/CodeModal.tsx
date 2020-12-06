@@ -16,6 +16,10 @@ const StyledModal = styled(Modal)`
   border-radius: 20px 20px 0 0;
 `;
 
+const StyledCode = styled(Code)`
+  height: calc(100% - ${marginTop}px);
+`;
+
 const Header = styled.div`
   width: 100%;
   max-width: 100%;
@@ -77,7 +81,7 @@ function CodeModal({
         </FilePath>
       </Header>
 
-      <Code
+      <StyledCode
         filePreview={filePreview}
       />
 
