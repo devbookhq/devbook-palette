@@ -51,12 +51,22 @@ const FilePath = styled.div`
   font-size: 13px;
 `;
 
+const CodeWrapper = styled.div`
+  width: 100%;
+`;
+
+const Delimiter = styled.div`
+  width: 100%;
+  height: 1px;
+  background: #2F2E3C;
+`;
+
 export interface GitHubCodeItemProps {
   codeResult: CodeResult;
   isFocused?: boolean;
 }
 
-const GitHubCodeItem = memo(({
+const CodeItem = memo(({
   codeResult,
   isFocused,
 }: GitHubCodeItemProps) => {
@@ -66,7 +76,14 @@ const GitHubCodeItem = memo(({
     if (isFocused) containerRef?.current?.scrollIntoView(false);
   }, [isFocused]);
 
-  const MemoizedCode = useMemo(() => Code({ filePreviews: codeResult.filePreviews }), [codeResult]);
+  const MemoizedCode = useMemo(() => {
+    return codeResult.filePreviews.map((preview, i) =>
+      <React.Fragment key={i}>
+        <Code filePreview={preview} />
+        {i + 1 !== codeResult.filePreviews.length && <Delimiter />}
+      </React.Fragment>
+    );
+  }, [codeResult]);
 
   return (
     <Container
@@ -83,10 +100,12 @@ const GitHubCodeItem = memo(({
         </FilePath>
       </Header>
 
-      {MemoizedCode}
+      <CodeWrapper>
+        {MemoizedCode}
+      </CodeWrapper>
 
     </Container>
   );
 });
 
-export default GitHubCodeItem;
+export default CodeItem;

@@ -19,8 +19,8 @@ import {
 import SearchInput, { ResultsFilter } from './SearchInput';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
-import GitHubCodeItem from './GitHub/CodeItem';
-import GitHubCodeModal from './GitHub/CodeModal';
+import CodeItem from './GitHub/CodeItem';
+import CodeModal from './GitHub/CodeModal';
 
 const Content = styled.div`
   height: 100%;
@@ -86,7 +86,7 @@ function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where query');
   const debouncedQuery = useDebounce(searchQuery, 400);
 
-  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
+  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.GitHubCode);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
@@ -102,26 +102,12 @@ function Home() {
 
   const isModalOpened = isSOModalOpened || isGitHubModalOpened;
 
-  useHotkeys('alt+shift+1', (e: any) => {
-    if (isModalOpened) {
-      // TODO: Check what exactly is prevent default doing here
-      e.preventDefault();
-      return;
-    }
-
-    setActiveFilter(ResultsFilter.StackOverflow);
-    e.preventDefault();
+  useHotkeys('Cmd+1', () => {
+    if (!isModalOpened) setActiveFilter(ResultsFilter.StackOverflow);
   }, { filter: () => true }, [isModalOpened]);
 
-  useHotkeys('alt+shift+2', (e: any) => {
-    if (isModalOpened) {
-      // TODO: Check what exactly is prevent default doing here
-      e.preventDefault();
-      return;
-    }
-
-    setActiveFilter(ResultsFilter.GitHubCode);
-    e.preventDefault();
+  useHotkeys('Cmd+2', () => {
+    if (!isModalOpened) setActiveFilter(ResultsFilter.GitHubCode);
   }, { filter: () => true }, [isModalOpened]);
 
   useHotkeys('up', () => {
@@ -222,7 +208,7 @@ function Home() {
       }
 
       {isGitHubModalOpened && codeResults[codeFocusedIdx] &&
-        <GitHubCodeModal
+        <CodeModal
           codeResult={codeResults[codeFocusedIdx]}
           onCloseRequest={() => setIsGitHubModalOpened(false)}
         />
@@ -254,7 +240,7 @@ function Home() {
                 ))}
 
                 {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
-                  <GitHubCodeItem
+                  <CodeItem
                     key={cr.repoFullName + cr.filePath}
                     codeResult={cr}
                     isFocused={codeFocusedIdx === idx}
@@ -276,4 +262,3 @@ function Home() {
 }
 
 export default Home;
-

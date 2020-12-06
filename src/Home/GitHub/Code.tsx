@@ -7,17 +7,6 @@ import { FilePreview } from 'search/gitHub';
 
 theme.plain.backgroundColor = '#272636';
 
-const Container = styled.div`
-  width: 100%;
-  height: 100%;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-
-  :not(:last-child) {
-    border-bottom: 1px solid #2F2E3C;
-  }
-`;
-
 const Pre = styled.pre`
   height: 100%;
   margin: 0;
@@ -55,12 +44,6 @@ const LinesNoWrapper = styled.div`
 const LinesContentWrapper = styled.div`
   display: table-column;
   overflow: auto;
-`;
-
-const Delimiter = styled.div`
-  width: 100%;
-  height: 1px;
-  background: #2F2E3C;
 `;
 
 const MarkedSpan = styled.span`
@@ -161,47 +144,37 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
   }
 
   return (
-    <React.Fragment>
+    <>
       <LinesNoWrapper>{linesNos}</LinesNoWrapper>
       <LinesContentWrapper>{lines}</LinesContentWrapper>
-    </React.Fragment>
+    </>
   );
 }
 
 interface GitHubCodeProps {
-  filePreviews: FilePreview[];
-  className?: string;
+  filePreview: FilePreview;
 }
 
-function GitHubCode({ filePreviews, className }: GitHubCodeProps) {
+function Code({ filePreview }: GitHubCodeProps) {
   return (
-    <Container className={className}>
-      <div>
-        {filePreviews.map((preview, idx) => (
-          <React.Fragment key={idx}>
-            <Prism
-              {...defaultProps}
-              code={preview.fragment}
-              theme={theme}
-              language="typescript" // TODO: Detect the fragment's language.
-            >
-              {({
-                className,
-                style,
-                tokens,
-                getTokenProps,
-              }) => (
-                  <Pre className={className} style={style}>
-                    {getRenderableLines(preview, tokens, getTokenProps)}
-                  </Pre>
-                )}
-            </Prism>
-            {idx + 1 !== filePreviews.length && <Delimiter />}
-          </React.Fragment>
-        ))}
-      </div>
-    </Container>
+    <Prism
+      {...defaultProps}
+      code={filePreview.fragment}
+      theme={theme}
+      language="typescript" // TODO: Detect the fragment's language.
+    >
+      {({
+        className,
+        style,
+        tokens,
+        getTokenProps,
+      }) => (
+          <Pre className={className} style={style}>
+            {getRenderableLines(filePreview, tokens, getTokenProps)}
+          </Pre>
+        )}
+    </Prism>
   );
 };
 
-export default GitHubCode;
+export default Code;

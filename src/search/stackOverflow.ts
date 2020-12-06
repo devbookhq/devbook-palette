@@ -15,7 +15,7 @@ export interface StackOverflowQuestion {
   html: string;
   timestamp: number;
   votes: number;
-  comments: StackOverflowComment[];
+  // comments: StackOverflowComment[];
 }
 
 export interface StackOverflowAnswer {
@@ -23,7 +23,7 @@ export interface StackOverflowAnswer {
   votes: number;
   isAccepted: boolean;
   timestamp: number;
-  comments: StackOverflowComment[];
+  // comments: StackOverflowComment[];
 }
 
 export interface StackOverflowResult {
