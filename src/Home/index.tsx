@@ -28,16 +28,9 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-const ResultsHeading = styled.div`
-  margin-bottom: 10px;
-  color: #5A5A6F;
-  font-size: 14px;
-  font-weight: 500;
-`;
-
 const SearchResults = styled.div`
   flex: 1;
-  margin-top: 20px;
+  margin-top: 15px;
   padding: 10px 15px;
 
   overflow: hidden;
@@ -52,25 +45,13 @@ const InfoMessage = styled.div`
 `;
 
 const HotkeysPanel = styled.div`
-  /*
-  position: absolute;
-  bottom: 0;
-  margin: 0 auto 10px;
-  width: 95%;
-  z-index: 10;
-  */
   width: 100%;
   padding: 10px 15px;
 
   display: flex;
   align-items: center;
 
-  /* border-top: 1px solid #404244; */
-  // border: 1px solid #404244;
-  // border-radius: 5px;
-  // background: #2B2D2F;
   background: #1F212D;
-  // box-shadow: 0px 0px 23px 13px rgba(0, 0, 0, 0.2);
 `;
 
 const Hotkey = styled.div`
@@ -86,7 +67,7 @@ function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where query');
   const debouncedQuery = useDebounce(searchQuery, 400);
 
-  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.GitHubCode);
+  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);

@@ -51,10 +51,6 @@ const FilePath = styled.div`
   font-size: 13px;
 `;
 
-const CodeWrapper = styled.div`
-  width: 100%;
-`;
-
 const Delimiter = styled.div`
   width: 100%;
   height: 1px;

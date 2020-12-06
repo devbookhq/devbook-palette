@@ -71,7 +71,7 @@ body {
 }
 
 *::-webkit-scrollbar-corner {
-  /* background: transparent; */
+  background: transparent;
 }
 
 * {

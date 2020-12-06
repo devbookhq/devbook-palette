@@ -5,17 +5,11 @@ import theme from 'prism-react-renderer/themes/nightOwl';
 
 import { FilePreview } from 'search/gitHub';
 
-theme.plain.backgroundColor = '#272636';
+theme.plain.backgroundColor = 'rgb(39, 38, 54)';
 
 const Container = styled.div`
   width: 100%;
-  height: 100%;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-
-  :not(:last-child) {
-    border-bottom: 1px solid #2F2E3C;
-  }
+  height: 80%;
 `;
 
 const Pre = styled.pre`
@@ -24,6 +18,8 @@ const Pre = styled.pre`
   padding: 10px;
   display: flex;
   overflow: auto;
+
+  background: transparent;
 
   font-family: 'Roboto Mono';
   font-weight: 500;
@@ -46,7 +42,8 @@ const LineNo = styled.div`
 `;
 
 const LineContent = styled.div`
-  width: 100%;
+  margin-right: 1em;
+  background: rgb(39, 38, 54);
 `;
 
 const LinesNoWrapper = styled.div`
@@ -164,11 +161,12 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
 
 interface CodeProps {
   filePreview: FilePreview;
+  className?: string;
 }
 
-function Code({ filePreview }: CodeProps) {
+function Code({ filePreview, className }: CodeProps) {
   return (
-    <Container>
+    <Container className={className}>
       <Prism
         {...defaultProps}
         code={filePreview.fragment}

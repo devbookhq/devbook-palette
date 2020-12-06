@@ -3,7 +3,6 @@ import styled from 'styled-components';
 
 import { CodeResult, FilePreview } from 'search/gitHub';
 import Modal from 'components/Modal';
-
 import Code from './Code';
 
 const marginTop = 60;
@@ -12,7 +11,6 @@ const StyledModal = styled(Modal)`
   width: 100%;
   height: calc(100vh - ${marginTop}px);
   margin-top: ${marginTop}px;
-  overflow: auto;
 
   background: #1C1B26;
   border-radius: 20px 20px 0 0;
