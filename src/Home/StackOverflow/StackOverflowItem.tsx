@@ -156,7 +156,7 @@ function StackOverflowItem({
   }, [soResult]);
 
   useEffect(() => {
-    if (isFocused) containerRef?.current?.scrollIntoView(false);
+    if (isFocused) containerRef?.current?.scrollIntoView();
   }, [isFocused]);
 
   return (
