@@ -152,7 +152,7 @@ function StackOverflowModal({
   useEffect(() => {
     const acceptedIdx = soResult.answers.findIndex(a => a.isAccepted);
 
-    // Place the accepted answer at the start but only if it isn't alread at the start.
+    // Place the accepted answer at the start but only if it isn't already at the start.
     if (acceptedIdx !== -1
         && soResult.answers.length >= 2
         && soResult.answers[acceptedIdx].votes < soResult.answers[0].votes

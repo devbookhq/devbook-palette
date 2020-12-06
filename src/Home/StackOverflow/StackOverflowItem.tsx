@@ -122,7 +122,7 @@ function StackOverflowItem({
 }: StackOverflowItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeAnswer, setActiveAnswer] = useState<StackOverflowAnswer | undefined>();
-  const [answerType, setAnswerType] = useState<AnswerType | undefined>();
+  const [answerTypes, setAnswerTypes] = useState<AnswerType[]>([]);
 
   function handleQuestionTitleClick(e: any) {
     openLink(soResult.question.link);
@@ -143,13 +143,15 @@ function StackOverflowItem({
 
   useEffect(() => {
     const accepted = soResult.answers.filter(a => a.isAccepted === true);
+    const mostUpvoted = soResult.answers.reduce((acc, val) => val.votes > acc.votes ? val : acc);
+
     if (accepted.length > 0) {
+      const isMostUpvoted = mostUpvoted === accepted[0];
       setActiveAnswer(accepted[0]);
-      setAnswerType(AnswerType.Accepted);
+      setAnswerTypes(isMostUpvoted ? [AnswerType.Accepted, AnswerType.MostUpvoted] : [AnswerType.Accepted]);
     } else if (soResult.answers.length > 0) {
-      const mostUpvoted = soResult.answers.reduce((acc, val) => val.votes > acc.votes ? val : acc);
       setActiveAnswer(mostUpvoted);
-      setAnswerType(AnswerType.MostUpvoted);
+      setAnswerTypes([AnswerType.MostUpvoted]);
     }
   }, [soResult]);
 
@@ -179,10 +181,12 @@ function StackOverflowItem({
         </QuestionMetadata>
       </Header>
 
-      {activeAnswer && answerType &&
+      {activeAnswer &&
         <Answer>
           <AnswerMetadata>
-            <AnswerTypeTag>{answerType}</AnswerTypeTag>
+            {answerTypes.map(t => (
+              <AnswerTypeTag key={t}>{t}</AnswerTypeTag>
+            ))}
             <AnswerVotes>{activeAnswer.votes} Upvotes</AnswerVotes>
             <AnswerDate>{getDateString(activeAnswer.timestamp * 1000)}</AnswerDate>
           </AnswerMetadata>
