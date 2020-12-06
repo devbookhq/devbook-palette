@@ -1,6 +1,5 @@
 import React, {
   useRef,
-  useLayoutEffect,
   useEffect,
 } from 'react';
 import styled from 'styled-components';

@@ -52,7 +52,7 @@ const FilePath = styled.div`
   font-size: 13px;
 `;
 
-interface GitHubCodeModalProps {
+interface CodeModalProps {
   codeResult: CodeResult;
   onCloseRequest: () => void;
 }
@@ -60,7 +60,7 @@ interface GitHubCodeModalProps {
 function CodeModal({
   codeResult,
   onCloseRequest,
-}: GitHubCodeModalProps) {
+}: CodeModalProps) {
 
   const filePreview: FilePreview = {
     indices: codeResult.absoluteIndices,

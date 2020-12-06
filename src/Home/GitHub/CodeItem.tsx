@@ -57,7 +57,7 @@ const Delimiter = styled.div`
   background: #2F2E3C;
 `;
 
-export interface GitHubCodeItemProps {
+export interface CodeItemProps {
   codeResult: CodeResult;
   isFocused?: boolean;
 }
@@ -65,8 +65,10 @@ export interface GitHubCodeItemProps {
 const CodeItem = memo(({
   codeResult,
   isFocused,
-}: GitHubCodeItemProps) => {
+}: CodeItemProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  console.log(codeResult.fileURL);
 
   useEffect(() => {
     if (isFocused) containerRef?.current?.scrollIntoView();
