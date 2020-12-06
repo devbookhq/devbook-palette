@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import sidekickPreviewImg from 'img/sidekick-preview.png';
 
-const Content = styled.div`
+const Container = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
@@ -50,7 +50,7 @@ const SidekickImg = styled.img`
 
 function IntroductionPage() {
   return (
-    <Content>
+    <Container>
       <Titles>
         <Title>Welcome to Sidekick</Title>
         <Subtitle>
@@ -62,9 +62,8 @@ function IntroductionPage() {
       </Titles>
 
       <SidekickImg src={sidekickPreviewImg} />
-    </Content>
+    </Container>
   );
 }
 
 export default IntroductionPage;
-

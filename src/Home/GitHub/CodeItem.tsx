@@ -100,9 +100,7 @@ const CodeItem = memo(({
         </FilePath>
       </Header>
 
-      <CodeWrapper>
-        {MemoizedCode}
-      </CodeWrapper>
+      {MemoizedCode}
 
     </Container>
   );

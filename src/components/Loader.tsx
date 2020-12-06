@@ -57,4 +57,3 @@ function Loader({ className }: LoaderProps) {
 }
 
 export default Loader;
-

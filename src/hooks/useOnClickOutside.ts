@@ -21,4 +21,3 @@ function useOnClickOutside(ref: any, handler: any) {
 }
 
 export default useOnClickOutside;
-

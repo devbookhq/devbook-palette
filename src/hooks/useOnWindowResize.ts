@@ -17,4 +17,3 @@ function useOnWindowResize(handler: (event: any) => void, deps: any[] = []) {
 }
 
 export default useOnWindowResize;
-

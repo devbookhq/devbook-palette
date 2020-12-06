@@ -10,7 +10,7 @@ import IntroductionPage from './pages/Introduction';
 import TrayPage from './pages/Tray';
 import ShortcutPage from './pages/Shortcut';
 
-const Content = styled.div`
+const Container = styled.div`
   margin-top: 7px;
   padding-bottom: 20px;
   width: 100%;
@@ -76,7 +76,7 @@ function Onboarding() {
   }
 
   return (
-    <Content>
+    <Container>
       <PageContent>
         {pageIndex === 0 && (
           <IntroductionPage/>
@@ -120,9 +120,8 @@ function Onboarding() {
         </NextButtonDisabled>
       )}
       </Navigation>
-    </Content>
+    </Container>
   );
 }
 
 export default Onboarding;
-

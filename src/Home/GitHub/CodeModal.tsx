@@ -50,8 +50,6 @@ const FilePath = styled.div`
   font-size: 13px;
 `;
 
-const CodeWrapper = styled.div``;
-
 interface GitHubCodeModalProps {
   codeResult: CodeResult;
   onCloseRequest: () => void;
@@ -81,11 +79,9 @@ function CodeModal({
         </FilePath>
       </Header>
 
-      <CodeWrapper>
-        <Code
-          filePreview={filePreview}
-        />
-      </CodeWrapper>
+      <Code
+        filePreview={filePreview}
+      />
 
     </StyledModal>
   );

@@ -35,4 +35,3 @@ electron.ipcRenderer.on('console', (event, args) => {
 });
 
 export default electron;
-

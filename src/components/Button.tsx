@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
-const Content = styled.div<{ disabled?: boolean }>`
+const Container = styled.div<{ disabled?: boolean }>`
   padding: 8px 20px;
   display: flex;
   align-items: center;
@@ -33,11 +33,10 @@ const Button: FunctionComponent<ButtonProps> = ({
   className, children, onClick, disabled, onClickDisabled
 }) => {
   return (
-    <Content className={className} onClick={disabled ? (onClickDisabled || (() => { })) : onClick} disabled={disabled} >
+    <Container className={className} onClick={disabled ? (onClickDisabled || (() => { })) : onClick} disabled={disabled} >
       {children}
-    </Content >
+    </Container >
   );
 }
 
 export default Button;
-

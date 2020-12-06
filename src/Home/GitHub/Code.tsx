@@ -7,12 +7,23 @@ import { FilePreview } from 'search/gitHub';
 
 theme.plain.backgroundColor = '#272636';
 
+const Container = styled.div`
+  width: 100%;
+  height: 100%;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+
+  :not(:last-child) {
+    border-bottom: 1px solid #2F2E3C;
+  }
+`;
+
 const Pre = styled.pre`
   height: 100%;
   margin: 0;
   padding: 10px;
-  overflow: hidden;
   display: flex;
+  overflow: auto;
 
   font-family: 'Roboto Mono';
   font-weight: 500;
@@ -35,6 +46,7 @@ const LineNo = styled.div`
 `;
 
 const LineContent = styled.div`
+  width: 100%;
 `;
 
 const LinesNoWrapper = styled.div`
@@ -43,7 +55,6 @@ const LinesNoWrapper = styled.div`
 
 const LinesContentWrapper = styled.div`
   display: table-column;
-  overflow: auto;
 `;
 
 const MarkedSpan = styled.span`
@@ -151,29 +162,31 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
   );
 }
 
-interface GitHubCodeProps {
+interface CodeProps {
   filePreview: FilePreview;
 }
 
-function Code({ filePreview }: GitHubCodeProps) {
+function Code({ filePreview }: CodeProps) {
   return (
-    <Prism
-      {...defaultProps}
-      code={filePreview.fragment}
-      theme={theme}
-      language="typescript" // TODO: Detect the fragment's language.
-    >
-      {({
-        className,
-        style,
-        tokens,
-        getTokenProps,
-      }) => (
-          <Pre className={className} style={style}>
-            {getRenderableLines(filePreview, tokens, getTokenProps)}
-          </Pre>
-        )}
-    </Prism>
+    <Container>
+      <Prism
+        {...defaultProps}
+        code={filePreview.fragment}
+        theme={theme}
+        language="typescript" // TODO: Detect the fragment's language.
+      >
+        {({
+          className,
+          style,
+          tokens,
+          getTokenProps,
+        }) => (
+            <Pre className={className} style={style}>
+              {getRenderableLines(filePreview, tokens, getTokenProps)}
+            </Pre>
+          )}
+      </Prism>
+    </Container>
   );
 };
 

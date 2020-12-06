@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ReactComponent as CheckIcon } from 'img/check.svg';
 
-const Content = styled.div`
+const Container = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
@@ -108,7 +108,7 @@ function TrayPage(props: TrayPageProps) {
   }
 
   return (
-    <Content>
+    <Container>
       <Titles>
         <Title>How it works</Title>
         <Subtitle>
@@ -138,9 +138,8 @@ function TrayPage(props: TrayPageProps) {
           </Step>
         </StepWrapper>
       </Steps>
-    </Content>
+    </Container>
   );
 }
 
 export default TrayPage;
-

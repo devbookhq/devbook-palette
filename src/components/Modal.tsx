@@ -49,7 +49,7 @@ const CloseImg = styled(closeImg)`
   }
 `;
 
-const Content = styled.div``;
+const Container = styled.div``;
 
 interface ModalProps {
   className?: string;
@@ -75,15 +75,14 @@ function Modal({
         <CloseImg />
       </CancelButton>
 
-      <Content
+      <Container
         className={className}
         ref={contentRef}
       >
         {children}
-      </Content>
+      </Container>
     </Overlay>
   );
 }
 
 export default Modal;
-

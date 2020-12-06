@@ -10,7 +10,7 @@ import useIPCRenderer from 'hooks/useIPCRenderer';
 import Hotkey, { ModifierKey } from 'components/Hotkey';
 import Loader from 'components/Loader';
 
-const Content = styled.div`
+const Container = styled.div`
   width: 100%;
   padding-top: 5px;
   display: flex;
@@ -156,7 +156,7 @@ function SearchInput({
   }, [isModalOpened]);
 
   return (
-    <Content
+    <Container
       onMouseDown={handleContentMouseDown}
     >
       <InputWrapper
@@ -194,9 +194,8 @@ function SearchInput({
           Connect your GitHub account
         </ConnectGitHubButton>
       </Menu>
-    </Content>
+    </Container>
   );
 }
 
 export default SearchInput;
-

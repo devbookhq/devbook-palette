@@ -5,7 +5,7 @@ import { ReactComponent as shiftKeyImg } from 'img/shift-key.svg';
 import { ReactComponent as altKeyImg } from 'img/alt-key.svg';
 import { ReactComponent as cmdKeyImg } from 'img/cmd-key.svg';
 
-const Content = styled.div`
+const Container = styled.div`
   padding: 6px 8px;
   display: flex;
   align-items: center;
@@ -16,15 +16,11 @@ const Content = styled.div`
   background: #262736;
 `;
 
-const CommandKeyImg = styled(cmdKeyImg)`
+const CmdKeyImg = styled(cmdKeyImg)`
   width: auto;
   height: 11px;
   :not(:last-child) {
     margin-right: 7px;
-  }
-
-  path {
-    fill: white;
   }
 `;
 
@@ -79,14 +75,14 @@ function renderModifier(modifier: ModifierKey) {
     <>
       {modifier === ModifierKey.Alt && <AltKeyImg />}
       {modifier === ModifierKey.Shift && <ShiftKeyImg />}
-      {modifier === ModifierKey.Cmd && <CommandKeyImg />}
+      {modifier === ModifierKey.Cmd && <CmdKeyImg />}
     </>
   );
 }
 
 function Hotkey({ hotkey }: HotkeyProps) {
   return (
-    <Content>
+    <Container>
       {hotkey.map(el => (
         <React.Fragment key={el}>
           {Object.keys(ModifierKey).includes(el)
@@ -95,9 +91,8 @@ function Hotkey({ hotkey }: HotkeyProps) {
           }
         </React.Fragment>
       ))}
-    </Content>
+    </Container>
   );
 }
 
 export default Hotkey;
-

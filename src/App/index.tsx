@@ -23,7 +23,7 @@ const DragHeader = styled.div`
   -webkit-user-select: non: el.values[0],;
 `;
 
-const Content = styled.div`
+const Container = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -39,7 +39,7 @@ function App() {
   return (
     <>
       <DragHeader onClick={handleDragHeaderClick} />
-      <Content>
+      <Container>
         <Router>
           <Switch>
             <Route
@@ -63,10 +63,9 @@ function App() {
             </Route>
           </Switch>
         </Router>
-      </Content>
+      </Container>
     </>
   );
 }
 
 export default App;
-

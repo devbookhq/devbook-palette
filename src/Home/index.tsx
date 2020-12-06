@@ -22,7 +22,7 @@ import StackOverflowItem from './StackOverflow/StackOverflowItem';
 import CodeItem from './GitHub/CodeItem';
 import CodeModal from './GitHub/CodeModal';
 
-const Content = styled.div`
+const Container = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -214,7 +214,7 @@ function Home() {
         />
       }
 
-      <Content>
+      <Container>
         <SearchInput
           placeholder="Question or code"
           value={searchQuery}
@@ -256,7 +256,7 @@ function Home() {
           </>
         }
 
-      </Content>
+      </Container>
     </>
   );
 }
