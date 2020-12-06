@@ -5,7 +5,11 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import { StackOverflowResult, StackOverflowAnswer } from 'search/stackOverflow';
+import {
+  StackOverflowResult,
+  StackOverflowAnswer,
+  AnswerType,
+} from 'search/stackOverflow';
 import { openLink } from 'mainProcess';
 
 const Container = styled.div<{ isFocused?: boolean }>`
@@ -18,7 +22,7 @@ const Container = styled.div<{ isFocused?: boolean }>`
   align-items: flex-start;
 
   border-radius: 5px;
-  border: 1px solid ${props => props.isFocused ? '#3A41AF' : 'transparent'};
+  border: 1px solid ${props => props.isFocused ? '#3A41AF' : '#262736'};
 `;
 
 const Header = styled.div<{ isFocused?: boolean }>`
@@ -30,7 +34,7 @@ const Header = styled.div<{ isFocused?: boolean }>`
   justify-content: space-between;
 
   border-radius: 5px 5px 0 0;
-  background: ${props => props.isFocused ? '#3A41AF' : 'transparent'};
+  background: ${props => props.isFocused ? '#3A41AF' : '#262736'};
 `;
 
 const QuestionTitle = styled.a`
@@ -160,19 +164,6 @@ const AnswerBody = styled.div`
   }
 `;
 
-const Delimiter = styled.hr`
-  margin: 30px 0 0;
-  border: none;
-  height: 1px;
-  width: 100%;
-  background-color: #2F2E3C;
-`;
-
-enum AnswerType {
-  Accepted = 'Accepted answer',
-  MostUpvoted = 'Most upvoted answer',
-}
-
 interface StackOverflowItemProps {
   soResult: StackOverflowResult;
   isFocused?: boolean;
@@ -220,7 +211,6 @@ function StackOverflowItem({
   }, [isFocused]);
 
   return (
-    <>
     <Container
       ref={containerRef}
       isFocused={isFocused}
@@ -257,44 +247,7 @@ function StackOverflowItem({
           />
         </Answer>
       }
-      <Delimiter/>
     </Container>
-    {/*
-    <Container
-      ref={containerRef}
-      isFocused={isFocused}
-    >
-      <Header>
-        <QuestionTitle
-          href={soResult.question.link}
-          onClick={handleQuestionTitleClick}
-          dangerouslySetInnerHTML={{
-            __html: soResult.question.title,
-          }}
-        />
-        <QuestionMetadata>
-          <QuestionVotes>{soResult.question.votes} Upvotes</QuestionVotes>
-          <QuestionDate>{getDateString(soResult.question.timestamp * 1000)}</QuestionDate>
-        </QuestionMetadata>
-      </Header>
-
-      {activeAnswer &&
-        <Answer>
-          <AnswerMetadata>
-            <AnswerVotes>{activeAnswer.votes} Upvotes</AnswerVotes>
-            <AnswerDate>{getDateString(activeAnswer.timestamp * 1000)}</AnswerDate>
-          </AnswerMetadata>
-
-          <AnswerBody
-            dangerouslySetInnerHTML={{
-              __html: activeAnswer.html
-            }}
-          />
-        </Answer>
-      }
-    </Container>
-    */}
-    </>
   );
 }
 

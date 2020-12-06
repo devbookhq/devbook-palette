@@ -82,7 +82,8 @@ const Hotkey = styled.div`
 `;
 
 function Home() {
-  const [searchQuery, setSearchQuery] = useState('firestore where');
+  // const [searchQuery, setSearchQuery] = useState('Load Balancing with Node and Heroku');
+  const [searchQuery, setSearchQuery] = useState('firestore where query');
   const debouncedQuery = useDebounce(searchQuery, 400);
 
   const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
@@ -235,7 +236,7 @@ function Home() {
           activeFilter={activeFilter}
           onFilterSelect={f => setActiveFilter(f)}
           isLoading={isLoadingData}
-          isModalOpened={isSOModalOpened}
+          isModalOpened={isSOModalOpened || isGitHubModalOpened}
         />
 
         {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
