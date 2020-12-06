@@ -3,6 +3,7 @@ import styled from 'styled-components';
 
 import { ReactComponent as shiftKeyImg } from 'img/shift-key.svg';
 import { ReactComponent as altKeyImg } from 'img/alt-key.svg';
+import { ReactComponent as cmdKeyImg } from 'img/cmd-key.svg';
 
 const Content = styled.div`
   padding: 6px 8px;
@@ -13,6 +14,18 @@ const Content = styled.div`
   color: white;
   border-radius: 5px;
   background: #262736;
+`;
+
+const CommandKeyImg = styled(cmdKeyImg)`
+  width: auto;
+  height: 11px;
+  :not(:last-child) {
+    margin-right: 7px;
+  }
+
+  path {
+    fill: white;
+  }
 `;
 
 const ShiftKeyImg = styled(shiftKeyImg)`
@@ -54,6 +67,7 @@ const Key = styled.div`
 export enum ModifierKey {
   Alt = 'Alt',
   Shift = 'Shift',
+  Cmd = 'Cmd',
 }
 
 interface HotkeyProps {
@@ -65,6 +79,7 @@ function renderModifier(modifier: ModifierKey) {
     <>
       {modifier === ModifierKey.Alt && <AltKeyImg />}
       {modifier === ModifierKey.Shift && <ShiftKeyImg />}
+      {modifier === ModifierKey.Cmd && <CommandKeyImg />}
     </>
   );
 }

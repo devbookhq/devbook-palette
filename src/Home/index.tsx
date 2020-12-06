@@ -102,26 +102,12 @@ function Home() {
 
   const isModalOpened = isSOModalOpened || isGitHubModalOpened;
 
-  useHotkeys('alt+shift+1', (e: any) => {
-    if (isModalOpened) {
-      // TODO: Check what exactly is prevent default doing here
-      e.preventDefault();
-      return;
-    }
-
-    setActiveFilter(ResultsFilter.StackOverflow);
-    e.preventDefault();
+  useHotkeys('Cmd+1', () => {
+    if (!isModalOpened) setActiveFilter(ResultsFilter.StackOverflow);
   }, { filter: () => true }, [isModalOpened]);
 
-  useHotkeys('alt+shift+2', (e: any) => {
-    if (isModalOpened) {
-      // TODO: Check what exactly is prevent default doing here
-      e.preventDefault();
-      return;
-    }
-
-    setActiveFilter(ResultsFilter.GitHubCode);
-    e.preventDefault();
+  useHotkeys('Cmd+2', () => {
+    if (!isModalOpened) setActiveFilter(ResultsFilter.GitHubCode);
   }, { filter: () => true }, [isModalOpened]);
 
   useHotkeys('up', () => {

@@ -7,8 +7,6 @@ import { FilePreview } from 'search/gitHub';
 
 theme.plain.backgroundColor = '#272636';
 
-const Content = styled.div``;
-
 const Pre = styled.pre`
   height: 100%;
   margin: 0;

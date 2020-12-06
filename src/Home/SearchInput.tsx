@@ -185,7 +185,7 @@ function SearchInput({
               >{f}
               </FilterButton>
               <Hotkey
-                hotkey={[ModifierKey.Shift, ModifierKey.Alt, `${idx + 1}`]}
+                hotkey={[ModifierKey.Cmd, `${idx + 1}`]}
               />
             </Filter>
           ))}
