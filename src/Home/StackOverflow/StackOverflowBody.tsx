@@ -1,6 +1,9 @@
+import React from 'react';
 import styled from 'styled-components';
 
-const StackOverflowBody = styled.div`
+import { openLink } from 'mainProcess';
+
+const Body = styled.div`
   hr {
     border: none;
     height: 1px;
@@ -8,7 +11,7 @@ const StackOverflowBody = styled.div`
     height: 0;
   }
 
-  p {
+  * {
     font-size: 14px;
     font-weight: 500;
     color: #fff;
@@ -59,6 +62,28 @@ const StackOverflowBody = styled.div`
     text-decoration: underline;
   }
 `;
+
+interface StackOverflowBodyProps {
+  dangerouslySetInnerHTML?: any;
+}
+
+function StackOverflowBody({ dangerouslySetInnerHTML }: StackOverflowBodyProps) {
+  function handleBodyClick(e: any) {
+    const target = e.target || e.srcElement;
+    if (target.tagName === 'A') {
+      const url = target.getAttribute('href');
+      openLink(url);
+      e.preventDefault();
+    }
+  }
+
+  return (
+    <Body
+      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
+      onClick={handleBodyClick}
+    />
+  );
+}
 
 export default StackOverflowBody;
 
