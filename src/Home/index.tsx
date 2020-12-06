@@ -17,8 +17,8 @@ import {
 } from 'search/gitHub';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
-import StackOverflowItem from './StackOverflowItem';
-import StackOverflowModal from './StackOverflowModal';
+import StackOverflowModal from './StackOverflow/StackOverflowModal';
+import StackOverflowItem from './StackOverflow/StackOverflowItem';
 import CodeItem from './GitHub/CodeItem';
 import CodeModal from './GitHub/CodeModal';
 
