@@ -84,6 +84,12 @@ function StackOverflowBody({
       openLink(url);
       e.preventDefault();
     }
+
+    if (target.tagName === 'IMG') {
+      const url = target.getAttribute('src');
+      openLink(url);
+      e.preventDefault();
+    }
   }
 
   return (
