@@ -68,10 +68,15 @@ const Body = styled.div`
 `;
 
 interface StackOverflowBodyProps {
+  className?: string;
   dangerouslySetInnerHTML?: any;
 }
 
-function StackOverflowBody({ dangerouslySetInnerHTML }: StackOverflowBodyProps) {
+function StackOverflowBody({
+  className,
+  dangerouslySetInnerHTML,
+}: StackOverflowBodyProps) {
+  // Open all links in the browser.
   function handleBodyClick(e: any) {
     const target = e.target || e.srcElement;
     if (target.tagName === 'A') {
@@ -83,6 +88,7 @@ function StackOverflowBody({ dangerouslySetInnerHTML }: StackOverflowBodyProps) 
 
   return (
     <Body
+      className={className}
       dangerouslySetInnerHTML={dangerouslySetInnerHTML}
       onClick={handleBodyClick}
     />
