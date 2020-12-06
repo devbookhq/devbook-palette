@@ -53,6 +53,11 @@ const StackOverflowBody = styled.div`
   h3 {
     font-size: 14px;
   }
+
+  a {
+    color: #4CACD6;
+    text-decoration: underline;
+  }
 `;
 
 export default StackOverflowBody;
