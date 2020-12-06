@@ -57,12 +57,6 @@ const LinesContentWrapper = styled.div`
   overflow: auto;
 `;
 
-const Delimiter = styled.div`
-  width: 100%;
-  height: 1px;
-  background: #2F2E3C;
-`;
-
 const MarkedSpan = styled.span`
   font-weight: 600;
   background: #806416;
@@ -169,39 +163,36 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
 }
 
 interface GitHubCodeProps {
-  filePreviews: FilePreview[];
+  filePreview: FilePreview;
   className?: string;
+  key?: string | number;
 }
 
-function GitHubCode({ filePreviews, className }: GitHubCodeProps) {
+function Code({
+  filePreview,
+  key,
+}: GitHubCodeProps) {
   return (
-    <Container className={className}>
-      <div>
-        {filePreviews.map((preview, idx) => (
-          <React.Fragment key={idx}>
-            <Prism
-              {...defaultProps}
-              code={preview.fragment}
-              theme={theme}
-              language="typescript" // TODO: Detect the fragment's language.
-            >
-              {({
-                className,
-                style,
-                tokens,
-                getTokenProps,
-              }) => (
-                  <Pre className={className} style={style}>
-                    {getRenderableLines(preview, tokens, getTokenProps)}
-                  </Pre>
-                )}
-            </Prism>
-            {idx + 1 !== filePreviews.length && <Delimiter />}
-          </React.Fragment>
-        ))}
-      </div>
+    <Container key={key}>
+      <Prism
+        {...defaultProps}
+        code={filePreview.fragment}
+        theme={theme}
+        language="typescript" // TODO: Detect the fragment's language.
+      >
+        {({
+          className,
+          style,
+          tokens,
+          getTokenProps,
+        }) => (
+            <Pre className={className} style={style}>
+              {getRenderableLines(filePreview, tokens, getTokenProps)}
+            </Pre>
+          )}
+      </Prism>
     </Container>
   );
 };
 
-export default GitHubCode;
+export default Code;

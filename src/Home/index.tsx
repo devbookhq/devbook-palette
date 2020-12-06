@@ -19,8 +19,8 @@ import {
 import SearchInput, { ResultsFilter } from './SearchInput';
 import StackOverflowItem from './StackOverflowItem';
 import StackOverflowModal from './StackOverflowModal';
-import GitHubCodeItem from './GitHub/CodeItem';
-import GitHubCodeModal from './GitHub/CodeModal';
+import CodeItem from './GitHub/CodeItem';
+import CodeModal from './GitHub/CodeModal';
 
 const Content = styled.div`
   height: 100%;
@@ -222,7 +222,7 @@ function Home() {
       }
 
       {isGitHubModalOpened && codeResults[codeFocusedIdx] &&
-        <GitHubCodeModal
+        <CodeModal
           codeResult={codeResults[codeFocusedIdx]}
           onCloseRequest={() => setIsGitHubModalOpened(false)}
         />
@@ -254,7 +254,7 @@ function Home() {
                 ))}
 
                 {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
-                  <GitHubCodeItem
+                  <CodeItem
                     key={cr.repoFullName + cr.filePath}
                     codeResult={cr}
                     isFocused={codeFocusedIdx === idx}

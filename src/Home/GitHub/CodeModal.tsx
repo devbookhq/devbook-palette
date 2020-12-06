@@ -18,10 +18,6 @@ const StyledModal = styled(Modal)`
   border-radius: 20px 20px 0 0;
 `;
 
-const StyledCode = styled(Code)`
-
-`;
-
 const Header = styled.div`
   width: 100%;
   max-width: 100%;
@@ -54,24 +50,23 @@ const FilePath = styled.div`
   font-size: 13px;
 `;
 
-const CodeWrapper = styled.div`
-`;
+const CodeWrapper = styled.div``;
 
 interface GitHubCodeModalProps {
   codeResult: CodeResult;
   onCloseRequest: () => void;
 }
 
-function GitHubCodeModal({
+function CodeModal({
   codeResult,
   onCloseRequest,
 }: GitHubCodeModalProps) {
 
-  const filePreviews: FilePreview[] = [{
+  const filePreview: FilePreview = {
     indices: codeResult.absoluteIndices,
     fragment: codeResult.fileContent,
     startLine: 1,
-  }];
+  };
 
   return (
     <StyledModal
@@ -87,8 +82,8 @@ function GitHubCodeModal({
       </Header>
 
       <CodeWrapper>
-        <StyledCode
-          filePreviews={filePreviews}
+        <Code
+          filePreview={filePreview}
         />
       </CodeWrapper>
 
@@ -96,4 +91,4 @@ function GitHubCodeModal({
   );
 }
 
-export default GitHubCodeModal;
+export default CodeModal;
