@@ -1,8 +1,15 @@
-import React from 'react';
+import React, {
+  useEffect,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 
 import { openLink } from 'mainProcess';
-import { StackOverflowResult } from 'search/stackOverflow';
+import {
+  StackOverflowResult,
+  StackOverflowAnswer,
+  AnswerType,
+} from 'search/stackOverflow';
 import Modal from 'components/Modal';
 
 const marginTop = 60;
@@ -11,10 +18,52 @@ const StyledModal = styled(Modal)`
   width: 100%;
   height: calc(100vh - ${marginTop}px);
   margin-top: ${marginTop}px;
+  padding: 10px;
+
+  display: flex;
+  flex-direction: column;
 
   overflow-y: auto;
-  background: #212122;
+  background: #1C1B26;
   border-radius: 20px 20px 0 0;
+`;
+
+const Header = styled.div`
+  width: 100%;
+  max-width: 100%;
+  padding: 10px;
+
+  display: flex;
+  justify-content: space-between;
+
+  border-radius: 5px;
+  background: #262736;
+`;
+
+const QuestionTitle = styled.a`
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+`;
+
+const QuestionMetadata = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const QuestionVotes = styled.span`
+  margin-right: 15px;
+
+  color: #9CACC5;
+  font-size: 14px;
+  font-weight: 500;
+`;
+
+const QuestionDate = styled.span`
+  color: #9CACC5;
+  font-size: 14px;
+  font-weight: 500;
 `;
 
 const Body = styled.div`
@@ -22,6 +71,7 @@ const Body = styled.div`
     border: none;
     height: 1px;
     background-color: #535557;
+    height: 0;
   }
 
   p {
@@ -38,7 +88,7 @@ const Body = styled.div`
     font-size: 14px;
     font-weight: 500;
 
-    background: #404244;
+    background: #23222D;
     border-radius: 3px;
   }
 
@@ -47,7 +97,7 @@ const Body = styled.div`
     padding: 10px;
     overflow-y: auto;
 
-    background: #404244;
+    background: #23222D;
     border-radius: 3px;
 
     code {
@@ -71,59 +121,60 @@ const Body = styled.div`
   }
 `;
 
-const Header = styled.div`
-  width: 100%;
-  max-width: 100%;
-  padding: 10px;
-
-  border-bottom: 1px solid #535557;
-  border-radius: 20px 20px 0 0;
-  background: #212122;
-`;
-
-const QuestionTitle = styled.a`
-  color: #fff;
-  font-weight: 500;
-  font-size: 16px;
-  text-decoration: none;
-`;
-
-const QuestionMetadata = styled.div`
-  margin-top: 10px;
-  display: flex;
-`;
-
-const QuestionVotes = styled.span`
-  margin-right: 15px;
-
-  color: #AAABAC;
-  font-family: 'Roboto Mono';
-  font-size: 14px;
-  font-weight: 500;
-`;
-
-const QuestionDate = styled.span`
-  color: #AAABAC;
-  font-family: 'Roboto Mono';
-  font-size: 14px;
-  font-weight: 500;
-`;
-
-const QuestionBody = styled(Body)`
-  padding: 10px;
-`;
+const QuestionBody = styled(Body)``;
 
 const Answers = styled.div`
   width: 100%;
-  padding: 10px;
   display: flex;
   flex-direction: column;
-  background: #2B2D2F;
 `;
 
-const AnswerBody = styled(Body)`
-  border-bottom: 1px solid #404244;
+const Answer = styled.div`
+  width: 100%;
+  height: 100%;
+  margin-top: 10px;
+
+  display: flex;
+  flex-direction: column;
 `;
+
+const AnswerMetadata = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+`;
+
+const AnswerTag = styled.span`
+  margin-right: 10px;
+  padding: 5px 10px;
+
+  color: #43D1A3;
+  font-size: 14px;
+  font-weight: 600;
+
+  border-radius: 20px;
+  background: rgba(67, 209, 163, 0.1);
+`;
+
+const AnswerVotes = styled.span`
+  margin-right: 10px;
+  padding: 5px 10px;
+
+  color: #4395D1;
+  font-size: 14px;
+  font-weight: 600;
+
+  border-radius: 20px;
+  background: rgba(67, 149, 209, 0.1);
+`;
+
+const AnswerDate = styled.span`
+  color: #9CACC5;
+  font-size: 14px;
+  font-weight: 500;
+`;
+
+const AnswerBody = styled(Body)``;
 
 interface StackOverflowModalProps {
   soResult: StackOverflowResult;
@@ -134,6 +185,9 @@ function StackOverflowModal({
   soResult,
   onCloseRequest,
 }: StackOverflowModalProps) {
+  const [sortedAnswers, setSortedAnswers] = useState<StackOverflowAnswer[]>([]);
+  const [answerType, setAnswerType] = useState<AnswerType | undefined>();
+  const [mostUpvotedIdx, setMostUpvotedIdx] = useState(-1);
 
   function handleQuestionTitleClick(e: any) {
     openLink(soResult.question.link);
@@ -151,6 +205,27 @@ function StackOverflowModal({
     const [dayMonth, year, time] = date.split(', ');
     return `${dayMonth} '${year} at ${time}`;
   }
+
+  useEffect(() => {
+    const acceptedIdx = soResult.answers.findIndex(a => a.isAccepted);
+
+    // Place the accepted answer at the start but only if it isn't alread at the start.
+    if (acceptedIdx !== -1
+        && soResult.answers.length >= 2
+        && soResult.answers[acceptedIdx].votes < soResult.answers[0].votes
+    ) {
+      const answers = [
+        soResult.answers[acceptedIdx],
+        ...soResult.answers.slice(0, acceptedIdx),
+        ...soResult.answers.slice(acceptedIdx+1)
+       ];
+      setMostUpvotedIdx(1);
+      setSortedAnswers(answers);
+    } else {
+      setMostUpvotedIdx(0);
+      setSortedAnswers(soResult.answers);
+    }
+  }, [soResult.answers]);
 
   return (
     <StyledModal
@@ -177,13 +252,27 @@ function StackOverflowModal({
       />
 
       <Answers>
-        {soResult.answers.map((a, idx) => (
-          <AnswerBody
+        {sortedAnswers.map((a, idx) => (
+          <Answer
             key={idx}
-            dangerouslySetInnerHTML={{
-              __html: a.html,
-            }}
-          />
+          >
+            <AnswerMetadata>
+              {a.isAccepted &&
+                <AnswerTag>{AnswerType.Accepted}</AnswerTag>
+              }
+              {mostUpvotedIdx === idx &&
+                <AnswerTag>{AnswerType.MostUpvoted}</AnswerTag>
+              }
+              <AnswerVotes>{a.votes} Upvotes</AnswerVotes>
+              <AnswerDate>{getDateString(a.timestamp * 1000)}</AnswerDate>
+            </AnswerMetadata>
+
+            <AnswerBody
+              dangerouslySetInnerHTML={{
+                __html: a.html,
+              }}
+            />
+          </Answer>
         ))}
       </Answers>
     </StyledModal>
@@ -191,3 +280,4 @@ function StackOverflowModal({
 }
 
 export default StackOverflowModal;
+
