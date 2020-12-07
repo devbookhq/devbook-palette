@@ -10,8 +10,9 @@ import {
   StackOverflowAnswer,
   AnswerType,
 } from 'search/stackOverflow';
-import { openLink } from 'mainProcess';
+// import { openLink } from 'mainProcess';
 
+import FocusState from '../SearchItemFocusState';
 import StackOverflowBody from './StackOverflowBody';
 
 const Container = styled.div<{ isFocused?: boolean }>`
@@ -25,6 +26,13 @@ const Container = styled.div<{ isFocused?: boolean }>`
 
   border-radius: 5px;
   border: 1px solid ${props => props.isFocused ? '#3A41AF' : '#262736'};
+
+  :hover {
+    border: 1px solid ${props => props.isFocused ? '3A41AF' : '#2C2F5A'};
+    #so-header {
+      background: ${props => props.isFocused ? '3A41AF' : '#2C2F5A'};
+    }
+  }
 `;
 
 const Header = styled.div<{ isFocused?: boolean }>`
@@ -37,13 +45,17 @@ const Header = styled.div<{ isFocused?: boolean }>`
 
   border-radius: 5px 5px 0 0;
   background: ${props => props.isFocused ? '#3A41AF' : '#262736'};
+
+  :hover {
+    cursor: ${props => props.isFocused ? 'default' : 'pointer'};
+  }
 `;
 
 const QuestionTitle = styled.a`
   color: #fff;
   font-weight: 600;
   font-size: 16px;
-  text-decoration: none;
+  text-decoration: underline;
 `;
 
 const QuestionMetadata = styled.div`
@@ -111,21 +123,33 @@ const AnswerDate = styled.span`
   font-weight: 500;
 `;
 
+const NoAnswer = styled.span`
+  margin: 50px auto;
+  color: #5A5A6F;
+  font-size: 16px;
+  font-weight: 600;
+`;
+
 interface StackOverflowItemProps {
   soResult: StackOverflowResult;
-  isFocused?: boolean;
+  focusState?: FocusState;
+  onHeaderClick: (e: any) => void;
+  onTitleClick: (e: any) => void;
 }
 
-function StackOverflowItem({
+function StackOverflowItem ({
   soResult,
-  isFocused,
+  focusState,
+  onHeaderClick,
+  onTitleClick,
 }: StackOverflowItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeAnswer, setActiveAnswer] = useState<StackOverflowAnswer | undefined>();
   const [answerTypes, setAnswerTypes] = useState<AnswerType[]>([]);
 
   function handleQuestionTitleClick(e: any) {
-    openLink(soResult.question.link);
+    // openLink(soResult.question.link);
+    onTitleClick(e);
     e.preventDefault();
   }
 
@@ -144,9 +168,7 @@ function StackOverflowItem({
   useEffect(() => {
     const accepted = soResult.answers.filter(a => a.isAccepted === true);
     const mostUpvoted = soResult.answers.reduce((acc, val) => {
-      if (!acc) {
-        return val;
-      }
+      if (!acc) return val;
       return val.votes > acc.votes ? val : acc;
     }, undefined as StackOverflowAnswer | undefined);
 
@@ -161,17 +183,18 @@ function StackOverflowItem({
   }, [soResult]);
 
   useEffect(() => {
-    // TODO: Make sure containerRef is actually initialized.
-    if (isFocused) containerRef?.current?.scrollIntoView();
-  }, [isFocused]);
+    if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
+  }, [focusState]);
 
   return (
     <Container
       ref={containerRef}
-      isFocused={isFocused}
+      isFocused={focusState !== FocusState.None}
     >
       <Header
-        isFocused={isFocused}
+        id="so-header"
+        isFocused={focusState !== FocusState.None}
+        onClick={onHeaderClick}
       >
         <QuestionTitle
           href={soResult.question.link}
@@ -208,8 +231,13 @@ function StackOverflowItem({
           />
         </Answer>
       }
+
+      {!activeAnswer &&
+        <NoAnswer>The question has no answers</NoAnswer>
+      }
     </Container>
   );
 }
 
 export default StackOverflowItem;
+

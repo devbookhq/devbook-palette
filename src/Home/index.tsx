@@ -17,6 +17,7 @@ import {
 } from 'search/gitHub';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
+import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
 import CodeItem from './GitHub/CodeItem';
@@ -62,6 +63,11 @@ const Hotkey = styled.div`
   font-weight: 500;
 `;
 
+interface FocusIndex {
+  idx: number;
+  focusState: FocusState;
+}
+
 function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where query');
 
@@ -73,8 +79,14 @@ function Home() {
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
 
-  const [codeFocusedIdx, setCodeFocusedIdx] = useState(0);
-  const [soFocusedIdx, setSOFocusedIdx] = useState(0);
+  const [codeFocusedIdx, setCodeFocusedIdx] = useState<FocusIndex>({
+    idx: 0,
+    focusState: FocusState.NoScroll,
+  });
+  const [soFocusedIdx, setSOFocusedIdx] = useState<FocusIndex>({
+    idx: 0,
+    focusState: FocusState.NoScroll,
+  });
 
   const [isLoadingSO, setIsLoadingSO] = useState(false);
   const [isLoadingCode, setIsLoadingCode] = useState(false);
@@ -107,22 +119,42 @@ function Home() {
   useHotkeys('up', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
-        if (soFocusedIdx > 0) setSOFocusedIdx(idx => idx - 1);
+        if (soFocusedIdx.idx > 0) {
+          setSOFocusedIdx(current => ({
+            idx: current.idx - 1,
+            focusState: FocusState.WithScroll,
+          }));
+        }
         break;
       case ResultsFilter.GitHubCode:
-        if (!isModalOpened && codeFocusedIdx > 0) setCodeFocusedIdx(idx => idx - 1);
+        if (!isModalOpened && codeFocusedIdx.idx > 0) {
+          setCodeFocusedIdx(current => ({
+            idx: current.idx - 1,
+            focusState: FocusState.WithScroll,
+          }));
+        }
         break;
     }
-  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx, activeFilter, isModalOpened]);
+  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx.idx, activeFilter, isModalOpened]);
 
   useHotkeys('down', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
-        if (soFocusedIdx < soResults.length - 1) setSOFocusedIdx(idx => idx + 1);
+        if (soFocusedIdx.idx < soResults.length - 1) {
+          setSOFocusedIdx(current => ({
+            idx: current.idx + 1,
+            focusState: FocusState.WithScroll
+          }));
+        };
         break;
       case ResultsFilter.GitHubCode:
-        if (!isModalOpened && codeFocusedIdx < codeResults.length - 1) setCodeFocusedIdx(idx => idx + 1);
-        break;
+        if (!isModalOpened && codeFocusedIdx.idx < codeResults.length - 1) {
+          setCodeFocusedIdx(current => ({
+            idx: current.idx + 1,
+            focusState: FocusState.WithScroll
+          }));
+        }
+       break;
     }
   }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults, activeFilter, isModalOpened]);
 
@@ -164,7 +196,10 @@ function Home() {
       setIsSOModalOpened(false);
 
       setSOResults(results);
-      setSOFocusedIdx(0);
+      setSOFocusedIdx({
+        idx: 0,
+        focusState: FocusState.WithScroll
+      });
       setIsLoadingSO(false);
     }
 
@@ -175,7 +210,10 @@ function Home() {
       setIsCodeModalOpened(false);
 
       setCodeResults(results);
-      setCodeFocusedIdx(0);
+      setCodeFocusedIdx({
+        idx: 0,
+        focusState: FocusState.WithScroll
+      });
       setIsLoadingCode(false);
     }
 
@@ -198,16 +236,16 @@ function Home() {
 
   return (
     <>
-      {isSOModalOpened && soResults[soFocusedIdx] &&
+      {isSOModalOpened && soResults[soFocusedIdx.idx] &&
         <StackOverflowModal
-          soResult={soResults[soFocusedIdx]}
+          soResult={soResults[soFocusedIdx.idx]}
           onCloseRequest={() => setIsSOModalOpened(false)}
         />
       }
 
-      {isCodeModalOpened && codeResults[codeFocusedIdx] &&
+      {isCodeModalOpened && codeResults[codeFocusedIdx.idx] &&
         <CodeModal
-          codeResult={codeResults[codeFocusedIdx]}
+          codeResult={codeResults[codeFocusedIdx.idx]}
           onCloseRequest={() => setIsCodeModalOpened(false)}
         />
       }
@@ -228,21 +266,27 @@ function Home() {
         {searchQuery && !hasEmptyResults && !isLoading &&
           <>
             <SearchResults>
-              {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
-                <StackOverflowItem
-                  key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
-                  soResult={sor}
-                  isFocused={soFocusedIdx === idx}
-                />
-              ))}
+              <>
+                {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
+                  <StackOverflowItem
+                    key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
+                    soResult={sor}
+                    focusState={soFocusedIdx.idx === idx ? soFocusedIdx.focusState : FocusState.None}
+                    onHeaderClick={() => setSOFocusedIdx({ idx, focusState: FocusState.NoScroll})}
+                    onTitleClick={() => setIsSOModalOpened(true)}
+                  />
+                ))}
 
-              {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
-                <CodeItem
-                  key={cr.repoFullName + cr.filePath}
-                  codeResult={cr}
-                  isFocused={codeFocusedIdx === idx}
-                />
-              ))}
+                {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
+                  <CodeItem
+                    key={cr.repoFullName + cr.filePath}
+                    codeResult={cr}
+                    focusState={codeFocusedIdx.idx === idx ? codeFocusedIdx.focusState : FocusState.None}
+                    onHeaderClick={() => setCodeFocusedIdx({ idx, focusState: FocusState.NoScroll})}
+                    onFilePathClick={() => setIsCodeModalOpened(true)}
+                  />
+                ))}
+              </>
             </SearchResults>
 
             <HotkeysPanel>
