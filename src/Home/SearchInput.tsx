@@ -65,7 +65,7 @@ const FiltersWrapper = styled.div`
 `;
 
 const Filter = styled.div`
-  margin-right: 8px;
+  margin-right: 10px;
   display: flex;
   align-items: center;
 `;
@@ -81,10 +81,6 @@ const FilterButton = styled.button<{ selected?: boolean }>`
   :hover {
     cursor: pointer;
     color: white;
-  }
-
-  :not(:last-child) {
-    margin-right: 2px;
   }
 `;
 

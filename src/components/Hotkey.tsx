@@ -6,7 +6,7 @@ import { ReactComponent as altKeyImg } from 'img/alt-key.svg';
 import { ReactComponent as cmdKeyImg } from 'img/cmd-key.svg';
 
 const Container = styled.div`
-  padding: 6px 8px;
+  padding: 3px 7px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -18,9 +18,9 @@ const Container = styled.div`
 
 const CmdKeyImg = styled(cmdKeyImg)`
   width: auto;
-  height: 11px;
+  height: 12px;
   :not(:last-child) {
-    margin-right: 7px;
+    margin-right: 5px;
   }
 `;
 
@@ -56,8 +56,7 @@ const Key = styled.div`
   }
 
   font-weight: 600;
-  font-size: 13px;
-  line-height: 9px;
+  font-size: 14px;
 `;
 
 export enum ModifierKey {
