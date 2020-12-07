@@ -6,7 +6,9 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
+import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 import { CodeResult } from 'search/gitHub';
+import { openLink } from 'mainProcess';
 
 import FocusState from '../SearchItemFocusState';
 import Code from './Code';
@@ -60,6 +62,11 @@ const RepoName = styled.span`
   font-size: 13px;
 `;
 
+const FilePathWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const FilePath = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
@@ -71,6 +78,35 @@ const FilePath = styled.span`
   font-weight: 600;
   font-size: 14px;
   text-decoration: underline;
+
+  :hover {
+    cursor: pointer;
+  }
+`;
+
+const ExternalLinkButton = styled.button`
+  position: relative;
+  top: 2px;
+
+  background: none;
+  border: none;
+  outline: none;
+
+  :hover {
+    path {
+      stroke: #fff;
+      cursor: pointer;
+    }
+  }
+`;
+
+const ExternalLinkImg = styled(externalLinkImg)`
+  height: auto;
+  width: 12px;
+
+  path {
+    stroke: #9CACC5;
+  }
 
   :hover {
     cursor: pointer;
@@ -98,9 +134,9 @@ const CodeItem = memo(({
 }: CodeItemProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
-  }, [focusState]);
+  function handleOpenExternalLinkButton() {
+    openLink(codeResult.fileURL);
+  }
 
   const memoizedCode = useMemo(() => {
     return codeResult.filePreviews.map((preview, i) =>
@@ -110,6 +146,10 @@ const CodeItem = memo(({
       </React.Fragment>
     );
   }, [codeResult]);
+
+  useEffect(() => {
+    if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
+  }, [focusState]);
 
   return (
     <Container
@@ -124,11 +164,17 @@ const CodeItem = memo(({
         <RepoName>
           {codeResult.repoFullName}
         </RepoName>
-        <FilePath
-          onClick={onFilePathClick}
-        >
-          {codeResult.filePath}
-        </FilePath>
+
+        <FilePathWrapper>
+          <FilePath
+            onClick={onFilePathClick}
+          >
+            {codeResult.filePath}
+          </FilePath>
+          <ExternalLinkButton onClick={handleOpenExternalLinkButton}>
+            <ExternalLinkImg/>
+          </ExternalLinkButton>
+        </FilePathWrapper>
       </Header>
 
       {memoizedCode}

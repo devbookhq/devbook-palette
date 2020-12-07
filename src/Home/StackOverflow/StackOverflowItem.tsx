@@ -16,7 +16,6 @@ import { openLink } from 'mainProcess';
 import FocusState from '../SearchItemFocusState';
 import StackOverflowBody from './StackOverflowBody';
 
-
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   max-width: 100%;
