@@ -190,13 +190,13 @@ function Code({
   isFocused,
   isInModal,
 }: CodeProps) {
-  const preRef = useRef<any>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
   const firstHighlightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isInModal) return;
-    preRef?.current?.focus();
-  }, [isInModal])
+    lineRef?.current?.focus();
+  }, [isInModal]);
 
   useEffect(() => {
     if (isFocused && firstHighlightRef.current) {
@@ -228,7 +228,7 @@ function Code({
               className={className}
               style={style}
             >
-              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, preRef)}
+              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
             </Pre>
           )}
       </Prism>

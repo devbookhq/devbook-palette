@@ -1,9 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import useLockBodyScroll from 'hooks/useLockBodyScroll';
-// import useOnClickOutside from 'hooks/useOnClickOutside';
-
 import { ReactComponent as closeImg } from 'img/close.svg';
 
 const Overlay = styled.div`
@@ -55,17 +53,16 @@ interface ModalProps {
   className?: string;
   children?: React.ReactNode | React.ReactNode[];
   onCloseRequest?: () => void;
+  tabIndex?: number;
 }
 
-function Modal({
+const Modal = React.forwardRef<HTMLDivElement, ModalProps>(({
   className,
   children,
   onCloseRequest,
-}: ModalProps) {
-  const contentRef = useRef<HTMLDivElement>(null);
-
+  tabIndex,
+}, ref) => {
   useLockBodyScroll();
-  // useOnClickOutside(contentRef, onCloseRequest || (() => {}));
 
   return (
     <Overlay>
@@ -77,12 +74,14 @@ function Modal({
 
       <Container
         className={className}
-        ref={contentRef}
+        ref={ref}
+        tabIndex={tabIndex}
       >
         {children}
       </Container>
     </Overlay>
   );
-}
+});
 
 export default Modal;
+

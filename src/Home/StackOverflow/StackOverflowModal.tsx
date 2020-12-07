@@ -1,4 +1,5 @@
 import React, {
+  useRef,
   useEffect,
   useState,
 } from 'react';
@@ -164,6 +165,7 @@ function StackOverflowModal({
   soResult,
   onCloseRequest,
 }: StackOverflowModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
   const [sortedAnswers, setSortedAnswers] = useState<StackOverflowAnswer[]>([]);
   const [mostUpvotedIdx, setMostUpvotedIdx] = useState(-1);
 
@@ -183,6 +185,12 @@ function StackOverflowModal({
     const [dayMonth, year, time] = date.split(', ');
     return `${dayMonth} '${year} at ${time}`;
   }
+
+  // We focus the modal so user can use arrows for scrolling.
+  useEffect(() => {
+    if (soResult.answers.length === 0) return;
+    modalRef?.current?.focus();
+  }, [soResult.answers]);
 
   useEffect(() => {
     const acceptedIdx = soResult.answers.findIndex(a => a.isAccepted);
@@ -208,6 +216,8 @@ function StackOverflowModal({
   return (
     <StyledModal
       onCloseRequest={onCloseRequest}
+      ref={modalRef}
+      tabIndex={0}
     >
       <Question>
         <Header>
@@ -249,6 +259,7 @@ function StackOverflowModal({
             </AnswerMetadata>
 
             <AnswerBody
+              // tabIndex={0}
               dangerouslySetInnerHTML={{
                 __html: a.html,
               }}

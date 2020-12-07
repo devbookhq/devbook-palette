@@ -117,6 +117,8 @@ function Home() {
   }, { filter: () => true }, [isModalOpened]);
 
   useHotkeys('up', () => {
+    if (isModalOpened) return;
+
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         if (soFocusedIdx.idx > 0) {
@@ -127,7 +129,7 @@ function Home() {
         }
         break;
       case ResultsFilter.GitHubCode:
-        if (!isModalOpened && codeFocusedIdx.idx > 0) {
+        if (codeFocusedIdx.idx > 0) {
           setCodeFocusedIdx(current => ({
             idx: current.idx - 1,
             focusState: FocusState.WithScroll,
@@ -138,6 +140,8 @@ function Home() {
   }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx.idx, activeFilter, isModalOpened]);
 
   useHotkeys('down', () => {
+    if (isModalOpened) return;
+
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         if (soFocusedIdx.idx < soResults.length - 1) {
@@ -148,7 +152,7 @@ function Home() {
         };
         break;
       case ResultsFilter.GitHubCode:
-        if (!isModalOpened && codeFocusedIdx.idx < codeResults.length - 1) {
+        if (codeFocusedIdx.idx < codeResults.length - 1) {
           setCodeFocusedIdx(current => ({
             idx: current.idx + 1,
             focusState: FocusState.WithScroll
