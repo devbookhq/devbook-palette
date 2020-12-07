@@ -63,11 +63,12 @@ const Hotkey = styled.div`
 `;
 
 function Home() {
-  // const [searchQuery, setSearchQuery] = useState('Load Balancing with Node and Heroku');
   const [searchQuery, setSearchQuery] = useState('firestore where query');
-  const debouncedQuery = useDebounce(searchQuery, 400);
 
-  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.GitHubCode);
+  const trimmedSearchQuery = searchQuery.trim();
+  const debouncedQuery = useDebounce(trimmedSearchQuery, 400);
+
+  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
@@ -75,13 +76,25 @@ function Home() {
   const [codeFocusedIdx, setCodeFocusedIdx] = useState(0);
   const [soFocusedIdx, setSOFocusedIdx] = useState(0);
 
-  const [isLoadingData, setIsLoadingData] = useState(false);
-  const [hasEmptyResults, setHasEmptyResults] = useState(false);
+  const [isLoadingSO, setIsLoadingSO] = useState(false);
+  const [isLoadingCode, setIsLoadingCode] = useState(false);
 
   const [isSOModalOpened, setIsSOModalOpened] = useState(false);
-  const [isGitHubModalOpened, setIsGitHubModalOpened] = useState(false);
+  const [isCodeModalOpened, setIsCodeModalOpened] = useState(false);
 
-  const isModalOpened = isSOModalOpened || isGitHubModalOpened;
+  const [usedQuery, setUsedQuery] = useState<string>();
+
+  const isModalOpened =
+    (isSOModalOpened && activeFilter === ResultsFilter.StackOverflow) ||
+    (isCodeModalOpened && activeFilter === ResultsFilter.GitHubCode);
+
+  const isLoading =
+    (isLoadingSO && activeFilter === ResultsFilter.StackOverflow) ||
+    (isLoadingCode && activeFilter === ResultsFilter.GitHubCode);
+
+  const hasEmptyResults =
+    (soResults.length === 0 && activeFilter === ResultsFilter.StackOverflow) ||
+    (codeResults.length === 0 && activeFilter === ResultsFilter.GitHubCode);
 
   useHotkeys('Cmd+1', () => {
     if (!isModalOpened) setActiveFilter(ResultsFilter.StackOverflow);
@@ -119,7 +132,7 @@ function Home() {
         setIsSOModalOpened(true);
         break;
       case ResultsFilter.GitHubCode:
-        setIsGitHubModalOpened(true);
+        setIsCodeModalOpened(true);
         break;
     }
   }, [activeFilter]);
@@ -134,50 +147,54 @@ function Home() {
         }
         break;
       case ResultsFilter.GitHubCode:
-        if (!isGitHubModalOpened) {
+        if (!isCodeModalOpened) {
           hideMainWindow();
         } else {
-          setIsGitHubModalOpened(false);
+          setIsCodeModalOpened(false);
         }
         break;
     }
-  }, [isSOModalOpened, isGitHubModalOpened, activeFilter]);
+  }, [isSOModalOpened, isCodeModalOpened, activeFilter]);
 
   useEffect(() => {
     async function searchSO(query: string) {
+      setIsLoadingSO(true);
       setSOResults([]);
       const results = await searchStackOverflow(query);
       setIsSOModalOpened(false);
 
-      setHasEmptyResults(results.length === 0);
       setSOResults(results);
       setSOFocusedIdx(0);
-      setIsLoadingData(false);
+      setIsLoadingSO(false);
     }
 
     async function searchCode(query: string) {
+      setIsLoadingCode(true);
       setCodeResults([]);
       const results = await searchGitHubCode(query);
-      setIsGitHubModalOpened(false);
+      setIsCodeModalOpened(false);
 
-      setHasEmptyResults(results.length === 0);
       setCodeResults(results);
       setCodeFocusedIdx(0);
-      setIsLoadingData(false);
+      setIsLoadingCode(false);
     }
 
-    if (!debouncedQuery) return;
+    async function search(query: string, activeFilter: ResultsFilter) {
+      setUsedQuery(query);
 
-    setIsLoadingData(true);
-    switch (activeFilter) {
-      case ResultsFilter.StackOverflow:
-        searchSO(debouncedQuery);
-        break;
-      case ResultsFilter.GitHubCode:
-        searchCode(debouncedQuery);
-        break;
+      if (activeFilter === ResultsFilter.StackOverflow) {
+        await searchSO(query);
+        searchCode(query);
+      } else if (activeFilter === ResultsFilter.GitHubCode) {
+        await searchCode(query);
+        searchSO(query);
+      }
     }
-  }, [activeFilter, debouncedQuery]);
+
+    if (debouncedQuery && debouncedQuery !== usedQuery) {
+      search(debouncedQuery, activeFilter);
+    }
+  }, [debouncedQuery, usedQuery, activeFilter]);
 
   return (
     <>
@@ -188,10 +205,10 @@ function Home() {
         />
       }
 
-      {isGitHubModalOpened && codeResults[codeFocusedIdx] &&
+      {isCodeModalOpened && codeResults[codeFocusedIdx] &&
         <CodeModal
           codeResult={codeResults[codeFocusedIdx]}
-          onCloseRequest={() => setIsGitHubModalOpened(false)}
+          onCloseRequest={() => setIsCodeModalOpened(false)}
         />
       }
 
@@ -202,32 +219,30 @@ function Home() {
           onChange={e => setSearchQuery(e.target.value)}
           activeFilter={activeFilter}
           onFilterSelect={f => setActiveFilter(f)}
-          isLoading={isLoadingData}
+          isLoading={isLoading}
           isModalOpened={isModalOpened}
         />
 
-        {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
-        {searchQuery && hasEmptyResults && <InfoMessage>Nothing found</InfoMessage>}
-        {searchQuery && !hasEmptyResults &&
+        {!searchQuery && !isLoading && <InfoMessage>Type your search query</InfoMessage>}
+        {searchQuery && hasEmptyResults && !isLoading && <InfoMessage>Nothing found</InfoMessage>}
+        {searchQuery && !hasEmptyResults && !isLoading &&
           <>
             <SearchResults>
-              <>
-                {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
-                  <StackOverflowItem
-                    key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
-                    soResult={sor}
-                    isFocused={soFocusedIdx === idx}
-                  />
-                ))}
+              {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
+                <StackOverflowItem
+                  key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
+                  soResult={sor}
+                  isFocused={soFocusedIdx === idx}
+                />
+              ))}
 
-                {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
-                  <CodeItem
-                    key={cr.repoFullName + cr.filePath}
-                    codeResult={cr}
-                    isFocused={codeFocusedIdx === idx}
-                  />
-                ))}
-              </>
+              {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
+                <CodeItem
+                  key={cr.repoFullName + cr.filePath}
+                  codeResult={cr}
+                  isFocused={codeFocusedIdx === idx}
+                />
+              ))}
             </SearchResults>
 
             <HotkeysPanel>
@@ -242,4 +257,3 @@ function Home() {
 }
 
 export default Home;
-
