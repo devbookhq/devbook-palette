@@ -68,7 +68,7 @@ function isInRange(ranges: number[][], offset: number) {
   return ranges.some(([start, end]) => start < offset && end >= offset);
 }
 
-function getMarkedContent(ranges: number[][], content: string, startingOffset: number) {
+function getHighlightedContent(ranges: number[][], content: string, startingOffset: number) {
   let highlightAccumulator = '';
   let plainAccumulator = '';
 
@@ -114,36 +114,37 @@ function getMarkedContent(ranges: number[][], content: string, startingOffset: n
 // tokens (Token[][]), and
 // getTokenProps ((input: TokenInputProps) => TokenOutputProps)
 // I cannot get the types from prism-react-renderer because they are not explicitly exported
-function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: any, firstHighlightRef: any, containerRef: any) {
-  const linesNos: JSX.Element[] = [];
-  const lines: JSX.Element[] = [];
-  let currentOffset = 0;
+function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any, firstHighlightRef: any, containerRef: any) {
+  const assembledLinesNos: JSX.Element[] = [];
+  const assembledLines: JSX.Element[] = [];
 
+  let currentCharOffset = 0;
   let afterFirstHighlight = false;
 
-  for (let i = 0; i < tokens.length; i++) {
-    const line = tokens[i];
+  for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
+    const line = lines[lineIdx];
     // Assemble line number element
     const lineNoElement = (
-      <LineNo key={i}>
-        {preview.startLine + i}
+      <LineNo key={lineIdx}>
+        {preview.startLine + lineIdx}
       </LineNo>
     );
-    linesNos.push(lineNoElement);
+    assembledLinesNos.push(lineNoElement);
 
     // Assemble line element from tokens
-    const outputTokens: JSX.Element[] = [];
+    const assembledTokens: JSX.Element[] = [];
 
-    for (let j = 0; j < line.length; j++) {
-      const token = line[j];
-      const tokenStartOffset = currentOffset;
-      const tokenEndOffset = currentOffset + token.content.length;
-      currentOffset = tokenEndOffset;
+    for (let tokenIdx = 0; tokenIdx < line.length; tokenIdx++) {
+      const token = line[tokenIdx];
+      const tokenStartOffset = currentCharOffset;
+      const tokenEndOffset = currentCharOffset + token.content.length;
 
-      const tokenProps = getTokenProps({ token, key: j });
-      const [children, hasHighlight] = getMarkedContent(preview.indices, tokenProps.children, tokenStartOffset + i);
+      currentCharOffset = tokenEndOffset;
 
-      outputTokens.push(
+      const tokenProps = getTokenProps({ token, key: tokenIdx });
+      const [children, hasHighlight] = getHighlightedContent(preview.indices, tokenProps.children, tokenStartOffset);
+
+      assembledTokens.push(
         <span
           ref={hasHighlight && !afterFirstHighlight ? firstHighlightRef : undefined}
           key={tokenProps.key}
@@ -156,17 +157,19 @@ function getRenderableLines(preview: FilePreview, tokens: any, getTokenProps: an
       afterFirstHighlight = afterFirstHighlight || !!hasHighlight;
     }
 
-    lines.push(
-      <LineContent key={i}>
-        {outputTokens}
+    assembledLines.push(
+      <LineContent key={lineIdx}>
+        {assembledTokens}
       </LineContent>
     );
+
+    currentCharOffset = currentCharOffset + 1;
   }
 
   return (
     <>
-      <LinesNoWrapper ref={containerRef}>{linesNos}</LinesNoWrapper>
-      <LinesContentWrapper>{lines}</LinesContentWrapper>
+      <LinesNoWrapper ref={containerRef}>{assembledLinesNos}</LinesNoWrapper>
+      <LinesContentWrapper>{assembledLines}</LinesContentWrapper>
     </>
   );
 }
