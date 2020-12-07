@@ -18,14 +18,14 @@ const Container = styled.div`
 `;
 
 const InputWrapper = styled.div<{ isFocused?: boolean }>`
-  min-height: 42px;
+  min-height: 46px;
   width: 100%;
+  padding-bottom: 5px;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
 
-  // border-radius: 10px;
-  // border-bottom: 1px solid ${props => props.isFocused ? '#5d9bd4' : '#3B3A4A'};
   border-bottom: 1px solid #3B3A4A;
 `;
 
@@ -195,3 +195,4 @@ function SearchInput({
 }
 
 export default SearchInput;
+
