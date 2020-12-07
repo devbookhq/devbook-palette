@@ -46,7 +46,6 @@ const LineNo = styled.div`
 
 const LineContent = styled.div`
   margin-right: 1em;
-  // background: rgb(39, 38, 54);
   background: #1C1B26;
 `;
 
