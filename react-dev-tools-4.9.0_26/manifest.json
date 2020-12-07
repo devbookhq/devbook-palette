@@ -17,7 +17,7 @@
       "matches": [ "\u003Call_urls>" ],
       "run_at": "document_start"
    } ],
-   "content_security_policy": "script-src 'self'; object-src 'self'",
+   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
    "description": "Adds React debugging tools to the Chrome Developer Tools.\n\nCreated from revision 75726fadfd on 10/19/2020.",
    "devtools_page": "main.html",
    "differential_fingerprint": "1.8580ded8b2df9556020dfea5b798c28750da7c0e36b3567f5f4b3065b2dce3c8",

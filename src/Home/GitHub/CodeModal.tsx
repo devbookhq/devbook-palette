@@ -1,4 +1,7 @@
-import React from 'react';
+import React, {
+  useEffect,
+  useRef,
+} from 'react';
 import styled from 'styled-components';
 
 import { CodeResult, FilePreview } from 'search/gitHub';
@@ -66,7 +69,6 @@ function CodeModal({
   codeResult,
   onCloseRequest,
 }: CodeModalProps) {
-
   const filePreview: FilePreview = {
     indices: codeResult.absoluteIndices,
     fragment: codeResult.fileContent,
