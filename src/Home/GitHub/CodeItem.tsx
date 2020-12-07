@@ -20,14 +20,16 @@ const Container = styled.div<{ isFocused?: boolean }>`
   border: 1px solid ${props => props.isFocused ? '#3A41AF' : '#2F2E3C'};
 `;
 
-const Header = styled.div`
+const Header = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   max-width: 100%;
   padding: 10px;
+
   display: flex;
   flex-direction: column;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+
+  border-radius: 5px 5px 0 0;
+  background: ${props => props.isFocused ? '#3A41AF' : '#262736'};
 `;
 
 const RepoName = styled.div`
@@ -35,7 +37,8 @@ const RepoName = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #5A5A6F;
+
+  color: #fff;
   font-weight: 500;
   font-size: 13px;
 `;
@@ -46,9 +49,10 @@ const FilePath = styled.div`
   white-space: nowrap;
   direction: rtl; // This so we can see the name of the file.
   text-align: left;
-  color: #9CACC5;
-  font-weight: 500;
-  font-size: 13px;
+
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
 `;
 
 const Delimiter = styled.div`
@@ -73,7 +77,7 @@ const CodeItem = memo(({
     if (isFocused) containerRef?.current?.scrollIntoView();
   }, [isFocused]);
 
-  const MemoizedCode = useMemo(() => {
+  const memoizedCode = useMemo(() => {
     return codeResult.filePreviews.map((preview, i) =>
       <React.Fragment key={i}>
         <Code filePreview={preview} />
@@ -87,8 +91,9 @@ const CodeItem = memo(({
       ref={containerRef}
       isFocused={isFocused}
     >
-
-      <Header>
+      <Header
+        isFocused={isFocused}
+      >
         <RepoName>
           {codeResult.repoFullName}
         </RepoName>
@@ -97,8 +102,7 @@ const CodeItem = memo(({
         </FilePath>
       </Header>
 
-      {MemoizedCode}
-
+      {memoizedCode}
     </Container>
   );
 });

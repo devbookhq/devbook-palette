@@ -24,11 +24,14 @@ const Header = styled.div`
   width: 100%;
   max-width: 100%;
   padding: 10px;
+
   display: flex;
   overflow: hidden;
   flex-direction: column;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+
+  border-radius: 5px 5px 0 0;
+  background: #3A41AF;
+  box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.15);
 `;
 
 const RepoName = styled.div`
@@ -36,7 +39,8 @@ const RepoName = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  color: #5A5A6F;
+
+  color: #fff;
   font-weight: 500;
   font-size: 13px;
 `;
@@ -46,10 +50,11 @@ const FilePath = styled.div`
   text-overflow: ellipsis;
   white-space: nowrap;
   direction: rtl; // This so we can see the name of the file.
+
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
   text-align: left;
-  color: #9CACC5;
-  font-weight: 500;
-  font-size: 13px;
 `;
 
 interface CodeModalProps {

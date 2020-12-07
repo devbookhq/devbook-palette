@@ -8,7 +8,7 @@ import theme from 'prism-react-renderer/themes/nightOwl';
 
 import { FilePreview } from 'search/gitHub';
 
-theme.plain.backgroundColor = 'rgb(39, 38, 54)';
+theme.plain.backgroundColor = '#1C1B26';
 
 const Container = styled.div`
   width: 100%;
@@ -46,7 +46,8 @@ const LineNo = styled.div`
 
 const LineContent = styled.div`
   margin-right: 1em;
-  background: rgb(39, 38, 54);
+  // background: rgb(39, 38, 54);
+  background: #1C1B26;
 `;
 
 const LinesNoWrapper = styled.div`
@@ -225,3 +226,4 @@ function Code({
 };
 
 export default Code;
+
