@@ -34,6 +34,9 @@ const Pre = styled.pre`
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
   }
+  :focus {
+    border: 5px red;
+  }
 `;
 
 const LineNo = styled.div`
@@ -114,7 +117,7 @@ function getHighlightedContent(ranges: number[][], content: string, startingOffs
 // tokens (Token[][]), and
 // getTokenProps ((input: TokenInputProps) => TokenOutputProps)
 // I cannot get the types from prism-react-renderer because they are not explicitly exported
-function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any, firstHighlightRef: any, containerRef: any) {
+function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any, firstHighlightRef: any) {
   const assembledLinesNos: JSX.Element[] = [];
   const assembledLines: JSX.Element[] = [];
 
@@ -168,7 +171,7 @@ function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any
 
   return (
     <>
-      <LinesNoWrapper ref={containerRef}>{assembledLinesNos}</LinesNoWrapper>
+      <LinesNoWrapper>{assembledLinesNos}</LinesNoWrapper>
       <LinesContentWrapper>{assembledLines}</LinesContentWrapper>
     </>
   );
@@ -185,21 +188,17 @@ function Code({
   className,
   isFocused,
 }: CodeProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const firstHighlightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isFocused && containerRef.current && firstHighlightRef.current) {
-      // TODO: Scroll to the top of the preview without using ref.
-      containerRef?.current?.scrollIntoView({ inline: 'end' });
-
-      // TODO/HACK: scrollIntoView is only working here in the first opened code modal view when called normally.
+    if (isFocused && firstHighlightRef.current) {
+      // TODO/HACK: scrollIntoView is only working in the first opened code modal view when called normally.
       // setTimeout without any delay is a hack which puts it on the event loop stack and gives control to the event loop.
       setTimeout(() => {
-        firstHighlightRef?.current?.scrollIntoView({ block: 'center', behavior: 'smooth', inline: 'end' })
+        firstHighlightRef.current?.scrollIntoView({ block: 'center', inline: 'end' })
       });
     }
-  }, [isFocused, firstHighlightRef, filePreview, containerRef]);
+  }, [isFocused, firstHighlightRef, filePreview]);
 
   return (
     <Container className={className}>
@@ -216,7 +215,7 @@ function Code({
           getTokenProps,
         }) => (
             <Pre className={className} style={style}>
-              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, containerRef)}
+              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef)}
             </Pre>
           )}
       </Prism>
@@ -225,4 +224,3 @@ function Code({
 };
 
 export default Code;
-

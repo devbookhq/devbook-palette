@@ -97,10 +97,10 @@ function Home() {
         if (soFocusedIdx > 0) setSOFocusedIdx(idx => idx - 1);
         break;
       case ResultsFilter.GitHubCode:
-        if (codeFocusedIdx > 0) setCodeFocusedIdx(idx => idx - 1);
+        if (!isModalOpened && codeFocusedIdx > 0) setCodeFocusedIdx(idx => idx - 1);
         break;
     }
-  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx, activeFilter]);
+  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx, activeFilter, isModalOpened]);
 
   useHotkeys('down', () => {
     switch (activeFilter) {
@@ -108,10 +108,10 @@ function Home() {
         if (soFocusedIdx < soResults.length - 1) setSOFocusedIdx(idx => idx + 1);
         break;
       case ResultsFilter.GitHubCode:
-        if (codeFocusedIdx < codeResults.length - 1) setCodeFocusedIdx(idx => idx + 1);
+        if (!isModalOpened && codeFocusedIdx < codeResults.length - 1) setCodeFocusedIdx(idx => idx + 1);
         break;
     }
-  }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults, activeFilter]);
+  }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults, activeFilter, isModalOpened]);
 
   useHotkeys('enter', () => {
     switch (activeFilter) {
@@ -203,7 +203,7 @@ function Home() {
           activeFilter={activeFilter}
           onFilterSelect={f => setActiveFilter(f)}
           isLoading={isLoadingData}
-          isModalOpened={isSOModalOpened || isGitHubModalOpened}
+          isModalOpened={isModalOpened}
         />
 
         {!searchQuery && <InfoMessage>Type your search query</InfoMessage>}
