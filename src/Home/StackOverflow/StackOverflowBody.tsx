@@ -4,17 +4,23 @@ import styled from 'styled-components';
 import { openLink } from 'mainProcess';
 
 const Body = styled.div`
+  * {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.6em;
+    color: #fff;
+  }
+
+  strong {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
   hr {
     border: none;
     height: 1px;
     background-color: #535557;
     height: 0;
-  }
-
-  * {
-    font-size: 14px;
-    font-weight: 500;
-    color: #fff;
   }
 
   code {
@@ -23,7 +29,7 @@ const Body = styled.div`
     color: #D9D9DA;
     font-family: 'Roboto Mono';
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
 
     background: #23222D;
     border-radius: 3px;
