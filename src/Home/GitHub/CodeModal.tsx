@@ -1,7 +1,4 @@
-import React, {
-  useEffect,
-  useRef,
-} from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { CodeResult, FilePreview } from 'search/gitHub';

@@ -1,7 +1,6 @@
 import React, {
   useEffect,
   useState,
-  useRef,
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
