@@ -111,6 +111,13 @@ const AnswerDate = styled.span`
   font-weight: 500;
 `;
 
+const NoAnswer = styled.span`
+  margin: 50px auto;
+  color: #5A5A6F;
+  font-size: 16px;
+  font-weight: 600;
+`;
+
 interface StackOverflowItemProps {
   soResult: StackOverflowResult;
   isFocused?: boolean;
@@ -207,6 +214,10 @@ function StackOverflowItem({
             }}
           />
         </Answer>
+      }
+
+      {!activeAnswer &&
+        <NoAnswer>The question has no answers</NoAnswer>
       }
     </Container>
   );
