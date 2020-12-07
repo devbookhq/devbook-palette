@@ -1,6 +1,7 @@
 import React, {
   useEffect,
   useState,
+  useRef,
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -18,7 +19,7 @@ import {
 
 import SearchInput, { ResultsFilter } from './SearchInput';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
-import StackOverflowItem from './StackOverflow/StackOverflowItem';
+import StackOverflowItem, { FocusState } from './StackOverflow/StackOverflowItem';
 import CodeItem from './GitHub/CodeItem';
 import CodeModal from './GitHub/CodeModal';
 
@@ -67,21 +68,27 @@ function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where query');
   const debouncedQuery = useDebounce(searchQuery, 400);
 
-  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.GitHubCode);
+  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
 
   const [codeFocusedIdx, setCodeFocusedIdx] = useState(0);
-  const [soFocusedIdx, setSOFocusedIdx] = useState(0);
+  const [soFocusedIdx, setSOFocusedIdx] = useState<{ idx: number, focusState: FocusState }>({
+    idx: 0,
+    focusState: FocusState.NoScroll,
+  });
 
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [hasEmptyResults, setHasEmptyResults] = useState(false);
 
   const [isSOModalOpened, setIsSOModalOpened] = useState(false);
   const [isGitHubModalOpened, setIsGitHubModalOpened] = useState(false);
-
   const isModalOpened = isSOModalOpened || isGitHubModalOpened;
+
+  function openSOModal() {
+    setIsSOModalOpened(true);
+  }
 
   useHotkeys('Cmd+1', () => {
     if (!isModalOpened) setActiveFilter(ResultsFilter.StackOverflow);
@@ -94,7 +101,12 @@ function Home() {
   useHotkeys('up', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
-        if (soFocusedIdx > 0) setSOFocusedIdx(idx => idx - 1);
+        if (soFocusedIdx.idx > 0) {
+          setSOFocusedIdx(current => ({
+            idx: current.idx - 1,
+            focusState: FocusState.WithScroll,
+          }));
+        }
         break;
       case ResultsFilter.GitHubCode:
         if (!isModalOpened && codeFocusedIdx > 0) setCodeFocusedIdx(idx => idx - 1);
@@ -105,7 +117,12 @@ function Home() {
   useHotkeys('down', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
-        if (soFocusedIdx < soResults.length - 1) setSOFocusedIdx(idx => idx + 1);
+        if (soFocusedIdx.idx < soResults.length - 1) {
+          setSOFocusedIdx(current => ({
+            idx: current.idx + 1,
+            focusState: FocusState.WithScroll
+          }));
+        };
         break;
       case ResultsFilter.GitHubCode:
         if (!isModalOpened && codeFocusedIdx < codeResults.length - 1) setCodeFocusedIdx(idx => idx + 1);
@@ -116,7 +133,7 @@ function Home() {
   useHotkeys('enter', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
-        setIsSOModalOpened(true);
+        openSOModal();
         break;
       case ResultsFilter.GitHubCode:
         setIsGitHubModalOpened(true);
@@ -151,7 +168,12 @@ function Home() {
 
       setHasEmptyResults(results.length === 0);
       setSOResults(results);
-      setSOFocusedIdx(0);
+
+      setSOFocusedIdx({
+        idx: 0,
+        focusState: FocusState.WithScroll
+      });
+
       setIsLoadingData(false);
     }
 
@@ -181,9 +203,9 @@ function Home() {
 
   return (
     <>
-      {isSOModalOpened && soResults[soFocusedIdx] &&
+      {isSOModalOpened && soResults[soFocusedIdx.idx] &&
         <StackOverflowModal
-          soResult={soResults[soFocusedIdx]}
+          soResult={soResults[soFocusedIdx.idx]}
           onCloseRequest={() => setIsSOModalOpened(false)}
         />
       }
@@ -216,7 +238,9 @@ function Home() {
                   <StackOverflowItem
                     key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
                     soResult={sor}
-                    isFocused={soFocusedIdx === idx}
+                    focusState={soFocusedIdx.idx === idx ? soFocusedIdx.focusState : FocusState.None}
+                    onHeaderClick={() => setSOFocusedIdx({ idx, focusState: FocusState.NoScroll})}
+                    onTitleClick={() => openSOModal()}
                   />
                 ))}
 
