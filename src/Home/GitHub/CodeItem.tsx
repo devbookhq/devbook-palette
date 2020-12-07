@@ -7,17 +7,28 @@ import React, {
 import styled from 'styled-components';
 
 import { CodeResult } from 'search/gitHub';
+
+import FocusState from '../SearchItemFocusState';
 import Code from './Code';
 
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   max-width: 100%;
   margin-bottom: 10px;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+
   border-radius: 5px;
-  border: 1px solid ${props => props.isFocused ? '#3A41AF' : '#2F2E3C'};
+  border: 1px solid ${props => props.isFocused ? '#3A41AF' : '#262736'};
+
+  :hover {
+    border: 1px solid ${props => props.isFocused ? '3A41AF' : '#2C2F5A'};
+    #code-header {
+      background: ${props => props.isFocused ? '3A41AF' : '#2C2F5A'};
+    }
+  }
 `;
 
 const Header = styled.div<{ isFocused?: boolean }>`
@@ -30,6 +41,10 @@ const Header = styled.div<{ isFocused?: boolean }>`
 
   border-radius: 5px 5px 0 0;
   background: ${props => props.isFocused ? '#3A41AF' : '#262736'};
+
+  :hover {
+    cursor: ${props => props.isFocused ? 'default' : 'pointer'};
+  }
 `;
 
 const RepoName = styled.div`
@@ -53,6 +68,11 @@ const FilePath = styled.div`
   color: #fff;
   font-weight: 600;
   font-size: 14px;
+  text-decoration: underline;
+
+  :hover {
+    cursor: pointer;
+  }
 `;
 
 const Delimiter = styled.div`
@@ -63,19 +83,22 @@ const Delimiter = styled.div`
 
 export interface CodeItemProps {
   codeResult: CodeResult;
-  isFocused?: boolean;
+  focusState?: FocusState;
+  onHeaderClick: (e: any) => void;
+  onFilePathClick: (e: any) => void;
 }
 
 const CodeItem = memo(({
   codeResult,
-  isFocused,
+  focusState,
+  onHeaderClick,
+  onFilePathClick,
 }: CodeItemProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // TODO: Make sure containerRef is actually initialized.
-    if (isFocused) containerRef?.current?.scrollIntoView();
-  }, [isFocused]);
+    if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
+  }, [focusState]);
 
   const memoizedCode = useMemo(() => {
     return codeResult.filePreviews.map((preview, i) =>
@@ -89,15 +112,19 @@ const CodeItem = memo(({
   return (
     <Container
       ref={containerRef}
-      isFocused={isFocused}
+      isFocused={focusState !== FocusState.None}
     >
       <Header
-        isFocused={isFocused}
+        id="code-header"
+        isFocused={focusState !== FocusState.None}
+        onClick={onHeaderClick}
       >
         <RepoName>
           {codeResult.repoFullName}
         </RepoName>
-        <FilePath>
+        <FilePath
+          onClick={onFilePathClick}
+        >
           {codeResult.filePath}
         </FilePath>
       </Header>
@@ -108,3 +135,4 @@ const CodeItem = memo(({
 });
 
 export default CodeItem;
+

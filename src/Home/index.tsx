@@ -18,8 +18,9 @@ import {
 } from 'search/gitHub';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
+import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
-import StackOverflowItem, { FocusState } from './StackOverflow/StackOverflowItem';
+import StackOverflowItem from './StackOverflow/StackOverflowItem';
 import CodeItem from './GitHub/CodeItem';
 import CodeModal from './GitHub/CodeModal';
 
@@ -63,6 +64,11 @@ const Hotkey = styled.div`
   font-weight: 500;
 `;
 
+interface FocusIndex {
+  idx: number;
+  focusState: FocusState;
+}
+
 function Home() {
   // const [searchQuery, setSearchQuery] = useState('Load Balancing with Node and Heroku');
   const [searchQuery, setSearchQuery] = useState('firestore where query');
@@ -73,8 +79,11 @@ function Home() {
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
 
-  const [codeFocusedIdx, setCodeFocusedIdx] = useState(0);
-  const [soFocusedIdx, setSOFocusedIdx] = useState<{ idx: number, focusState: FocusState }>({
+  const [codeFocusedIdx, setCodeFocusedIdx] = useState<FocusIndex>({
+    idx: 0,
+    focusState: FocusState.NoScroll,
+  });
+  const [soFocusedIdx, setSOFocusedIdx] = useState<FocusIndex>({
     idx: 0,
     focusState: FocusState.NoScroll,
   });
@@ -85,10 +94,6 @@ function Home() {
   const [isSOModalOpened, setIsSOModalOpened] = useState(false);
   const [isGitHubModalOpened, setIsGitHubModalOpened] = useState(false);
   const isModalOpened = isSOModalOpened || isGitHubModalOpened;
-
-  function openSOModal() {
-    setIsSOModalOpened(true);
-  }
 
   useHotkeys('Cmd+1', () => {
     if (!isModalOpened) setActiveFilter(ResultsFilter.StackOverflow);
@@ -109,10 +114,15 @@ function Home() {
         }
         break;
       case ResultsFilter.GitHubCode:
-        if (!isModalOpened && codeFocusedIdx > 0) setCodeFocusedIdx(idx => idx - 1);
+        if (!isModalOpened && codeFocusedIdx.idx > 0) {
+          setCodeFocusedIdx(current => ({
+            idx: current.idx - 1,
+            focusState: FocusState.WithScroll,
+          }));
+        }
         break;
     }
-  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx, activeFilter, isModalOpened]);
+  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx.idx, activeFilter, isModalOpened]);
 
   useHotkeys('down', () => {
     switch (activeFilter) {
@@ -125,15 +135,20 @@ function Home() {
         };
         break;
       case ResultsFilter.GitHubCode:
-        if (!isModalOpened && codeFocusedIdx < codeResults.length - 1) setCodeFocusedIdx(idx => idx + 1);
-        break;
+        if (!isModalOpened && codeFocusedIdx.idx < codeResults.length - 1) {
+          setCodeFocusedIdx(current => ({
+            idx: current.idx + 1,
+            focusState: FocusState.WithScroll
+          }));
+        }
+       break;
     }
   }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults, activeFilter, isModalOpened]);
 
   useHotkeys('enter', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
-        openSOModal();
+        setIsSOModalOpened(true);
         break;
       case ResultsFilter.GitHubCode:
         setIsGitHubModalOpened(true);
@@ -184,7 +199,11 @@ function Home() {
 
       setHasEmptyResults(results.length === 0);
       setCodeResults(results);
-      setCodeFocusedIdx(0);
+
+      setCodeFocusedIdx({
+        idx: 0,
+        focusState: FocusState.WithScroll
+      });
       setIsLoadingData(false);
     }
 
@@ -210,9 +229,9 @@ function Home() {
         />
       }
 
-      {isGitHubModalOpened && codeResults[codeFocusedIdx] &&
+      {isGitHubModalOpened && codeResults[codeFocusedIdx.idx] &&
         <CodeModal
-          codeResult={codeResults[codeFocusedIdx]}
+          codeResult={codeResults[codeFocusedIdx.idx]}
           onCloseRequest={() => setIsGitHubModalOpened(false)}
         />
       }
@@ -240,7 +259,7 @@ function Home() {
                     soResult={sor}
                     focusState={soFocusedIdx.idx === idx ? soFocusedIdx.focusState : FocusState.None}
                     onHeaderClick={() => setSOFocusedIdx({ idx, focusState: FocusState.NoScroll})}
-                    onTitleClick={() => openSOModal()}
+                    onTitleClick={() => setIsSOModalOpened(true)}
                   />
                 ))}
 
@@ -248,7 +267,9 @@ function Home() {
                   <CodeItem
                     key={cr.repoFullName + cr.filePath}
                     codeResult={cr}
-                    isFocused={codeFocusedIdx === idx}
+                    focusState={codeFocusedIdx.idx === idx ? codeFocusedIdx.focusState : FocusState.None}
+                    onHeaderClick={() => setCodeFocusedIdx({ idx, focusState: FocusState.NoScroll})}
+                    onFilePathClick={() => setIsGitHubModalOpened(true)}
                   />
                 ))}
               </>

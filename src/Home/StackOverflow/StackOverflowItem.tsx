@@ -12,6 +12,7 @@ import {
 } from 'search/stackOverflow';
 import { openLink } from 'mainProcess';
 
+import FocusState from '../SearchItemFocusState';
 import StackOverflowBody from './StackOverflowBody';
 
 const Container = styled.div<{ isFocused?: boolean }>`
@@ -128,12 +129,6 @@ const NoAnswer = styled.span`
   font-size: 16px;
   font-weight: 600;
 `;
-
-export enum FocusState {
-  None,
-  WithScroll,
-  NoScroll,
-}
 
 interface StackOverflowItemProps {
   soResult: StackOverflowResult;
