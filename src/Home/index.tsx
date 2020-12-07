@@ -154,7 +154,7 @@ function Home() {
             focusState: FocusState.WithScroll
           }));
         }
-       break;
+        break;
     }
   }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults, activeFilter, isModalOpened]);
 
@@ -272,7 +272,7 @@ function Home() {
                     key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
                     soResult={sor}
                     focusState={soFocusedIdx.idx === idx ? soFocusedIdx.focusState : FocusState.None}
-                    onHeaderClick={() => setSOFocusedIdx({ idx, focusState: FocusState.NoScroll})}
+                    onHeaderClick={() => setSOFocusedIdx({ idx, focusState: FocusState.NoScroll })}
                     onTitleClick={() => setIsSOModalOpened(true)}
                   />
                 ))}
@@ -282,7 +282,7 @@ function Home() {
                     key={cr.repoFullName + cr.filePath}
                     codeResult={cr}
                     focusState={codeFocusedIdx.idx === idx ? codeFocusedIdx.focusState : FocusState.None}
-                    onHeaderClick={() => setCodeFocusedIdx({ idx, focusState: FocusState.NoScroll})}
+                    onHeaderClick={() => setCodeFocusedIdx({ idx, focusState: FocusState.NoScroll })}
                     onFilePathClick={() => setIsCodeModalOpened(true)}
                   />
                 ))}
