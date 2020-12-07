@@ -38,6 +38,7 @@ const Header = styled.div<{ isFocused?: boolean }>`
 
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
 
   border-radius: 5px 5px 0 0;
   background: ${props => props.isFocused ? '#3A41AF' : '#262736'};
@@ -47,8 +48,9 @@ const Header = styled.div<{ isFocused?: boolean }>`
   }
 `;
 
-const RepoName = styled.div`
+const RepoName = styled.span`
   margin-bottom: 5px;
+
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -58,7 +60,7 @@ const RepoName = styled.div`
   font-size: 13px;
 `;
 
-const FilePath = styled.div`
+const FilePath = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
