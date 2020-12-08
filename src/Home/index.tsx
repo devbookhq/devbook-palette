@@ -5,7 +5,11 @@ import React, {
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import { hideMainWindow } from 'mainProcess';
+import {
+  hideMainWindow,
+  openLink,
+  createTmpFile,
+} from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
   search as searchStackOverflow,
@@ -17,7 +21,7 @@ import {
 } from 'search/gitHub';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
-import HotkeysPanel from './HotkeysPanel';
+import HotkeysPanel, { HotkeyWithText } from './HotkeysPanel';
 import { ModifierKey } from './HotkeysPanel/Hotkey';
 import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
@@ -52,6 +56,30 @@ interface FocusIndex {
   focusState: FocusState;
 }
 
+const soResultsHotkeys: HotkeyWithText[] = [
+  {text: 'Navigate', hotkey: ['ARROWS']},
+  {text: 'Show detail', hotkey: ['ENTER']},
+  {text: 'Open in browser', hotkey: [ModifierKey.Command, 'O']},
+];
+const soModalHotkeys: HotkeyWithText[] = [
+  {text: 'Navigate', hotkey: ['ARROWS']},
+  {text: 'Open in browser', hotkey: [ModifierKey.Command, 'O']},
+  {text: 'Close', hotkey: ['ESC']},
+];
+
+const gitHubCodeResultsHotkeys: HotkeyWithText[] = [
+  {text: 'Navigate', hotkey: ['ARROWS']},
+  {text: 'Show detail', hotkey: ['ENTER']},
+  {text: 'Open in VSCode', hotkey: [ModifierKey.Command, 'I']},
+  {text: 'Open in browser', hotkey: [ModifierKey.Command, 'O']},
+];
+const gitHubModalHotkeys: HotkeyWithText[] = [
+  {text: 'Navigate', hotkey: ['ARROWS']},
+  {text: 'Open in VSCode', hotkey: [ModifierKey.Command, 'I']},
+  {text: 'Open in browser', hotkey: [ModifierKey.Command, 'O']},
+  {text: 'Close', hotkey: ['ESC']},
+];
+
 function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where query');
 
@@ -71,6 +99,8 @@ function Home() {
     idx: 0,
     focusState: FocusState.NoScroll,
   });
+  // User opens the app with the StackOverflow search filter active.
+  const [activeHotkeys, setActiveHotkeys] = useState<HotkeyWithText[]>(soResultsHotkeys);
 
   const [isLoadingSO, setIsLoadingSO] = useState(false);
   const [isLoadingCode, setIsLoadingCode] = useState(false);
@@ -91,6 +121,30 @@ function Home() {
   const hasEmptyResults =
     (soResults.length === 0 && activeFilter === ResultsFilter.StackOverflow) ||
     (codeResults.length === 0 && activeFilter === ResultsFilter.GitHubCode);
+
+  async function openFileInVSCode(path: string, content: string) {
+    const tmpPath = await createTmpFile({
+      filePath: path,
+      fileContent: content,
+    });
+    if (tmpPath) {
+      const vscodeFileURL = `vscode://file/${tmpPath}`;
+      await openLink(vscodeFileURL);
+    } else {
+      // TODO: Handle error for user.
+      console.error('Cannot create tmp file with the file content.')
+    }
+  }
+
+  useEffect(() => {
+    if (!isSOModalOpened && !isCodeModalOpened) {
+      if (activeFilter === ResultsFilter.StackOverflow) setActiveHotkeys(soResultsHotkeys);
+      if (activeFilter === ResultsFilter.GitHubCode) setActiveHotkeys(gitHubCodeResultsHotkeys);
+    }
+
+    if (isSOModalOpened) setActiveHotkeys(soModalHotkeys);
+    if (isCodeModalOpened) setActiveHotkeys(gitHubModalHotkeys);
+  }, [isSOModalOpened, isCodeModalOpened, activeFilter]);
 
   // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys('Cmd+1', () => {
@@ -184,11 +238,32 @@ function Home() {
 
   // 'cmd+o' hotkey - open the focused result in a browser.
   useHotkeys('Cmd+o', () => {
-  }, []);
+    let url = '';
+    switch (activeFilter) {
+      case ResultsFilter.StackOverflow: {
+        const item = soResults[soFocusedIdx.idx];
+        if (item) url = item.question.link;
+        break;
+      }
+      case ResultsFilter.GitHubCode: {
+        const item = codeResults[codeFocusedIdx.idx];
+        if (item) url = item.fileURL;
+        break;
+      }
+    }
+    if (url) openLink(url);
+  }, [activeFilter, soResults, soFocusedIdx, codeResults, codeFocusedIdx]);
+
 
   // 'cmd+i' hotkey - open the GitHubCode result in a vscode.
   useHotkeys('Cmd+i', () => {
-  }, []);
+    if (activeFilter === ResultsFilter.GitHubCode) {
+      const item = codeResults[codeFocusedIdx.idx];
+      if (!item) return;
+
+      openFileInVSCode(item.filePath, item.fileContent);
+    }
+  }, [activeFilter, codeResults, codeFocusedIdx]);
 
   useEffect(() => {
     async function searchSO(query: string) {
@@ -292,10 +367,7 @@ function Home() {
             </SearchResults>
 
             <HotkeysPanel
-              hotkeys={[
-                {text: 'Open in browser', hotkey: [ModifierKey.Command, 'O']},
-                {text: 'Open in VSCode', hotkey: [ModifierKey.Command, 'I']},
-              ]}
+              hotkeys={activeHotkeys}
             />
           </>
         }
@@ -305,3 +377,4 @@ function Home() {
 }
 
 export default Home;
+

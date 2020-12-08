@@ -1,10 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import {
-  openLink,
-  createTmpFile,
-} from 'mainProcess';
+import { openLink } from 'mainProcess';
 import { CodeResult, FilePreview } from 'search/gitHub';
 import Modal from 'components/Modal';
 import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
@@ -114,19 +111,6 @@ function CodeModal({
 
   function handleOpenExternalLinkButton() {
     openLink(codeResult.fileURL);
-  }
-
-  async function openFileInVSCode() {
-    const tmpPath = await createTmpFile({
-      filePath: codeResult.filePath,
-      fileContent: codeResult.fileContent,
-    });
-    if (tmpPath) {
-      const vscodeFileURL = `vscode://file/${tmpPath}`;
-      await openLink(vscodeFileURL);
-    } else {
-      console.log('Cannot create tmp file with the file content.')
-    }
   }
 
   return (
