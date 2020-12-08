@@ -143,7 +143,7 @@ function SearchInput({
   }
 
   useIPCRenderer('did-show-main-window', () => {
-    inputRef?.current?.focus();
+    if (!isModalOpened) inputRef?.current?.focus();
   });
 
   useEffect(() => {
@@ -195,4 +195,3 @@ function SearchInput({
 }
 
 export default SearchInput;
-
