@@ -112,8 +112,10 @@ function CodeModal({
     startLine: 1,
   };
 
-  function handleOpenExternalLinkButton() {
-    openLink(codeResult.fileURL);
+  async function handleOpenExternalLinkButton() {
+    const firstPreview = codeResult.filePreviews[0];
+    const gitHubFileURL = firstPreview ? `${codeResult.fileURL}#L${firstPreview.startLine + 3}` : codeResult.fileURL;
+    await openLink(gitHubFileURL);
   }
 
   async function openFileInVSCode() {
@@ -122,7 +124,8 @@ function CodeModal({
       fileContent: codeResult.fileContent,
     });
     if (tmpPath) {
-      const vscodeFileURL = `vscode://file/${tmpPath}`;
+      const firstPreview = codeResult.filePreviews[0];
+      const vscodeFileURL = firstPreview ? `vscode://file/${tmpPath}:${firstPreview.startLine + 3}` : `vscode://file/${tmpPath}`;
       await openLink(vscodeFileURL);
     } else {
       console.log('Cannot create tmp file with the file content.')
