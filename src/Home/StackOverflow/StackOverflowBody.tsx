@@ -76,12 +76,14 @@ const Body = styled.div`
 interface StackOverflowBodyProps {
   className?: string;
   dangerouslySetInnerHTML?: any;
+  tabIndex?: number;
 }
 
-function StackOverflowBody({
+const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProps>(({
   className,
   dangerouslySetInnerHTML,
-}: StackOverflowBodyProps) {
+  tabIndex,
+}, ref) => {
   // Open all links in the browser.
   function handleBodyClick(e: any) {
     const target = e.target || e.srcElement;
@@ -100,11 +102,14 @@ function StackOverflowBody({
 
   return (
     <Body
+      ref={ref}
+      tabIndex={tabIndex}
       className={className}
       dangerouslySetInnerHTML={dangerouslySetInnerHTML}
       onClick={handleBodyClick}
     />
   );
-}
+});
 
 export default StackOverflowBody;
+

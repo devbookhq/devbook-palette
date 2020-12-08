@@ -107,8 +107,9 @@ function CodeModal({
       </Header>
 
       <StyledCode
-        isFocused={true}
         filePreview={filePreview}
+        isFocused={true}
+        isInModal={true}
       />
 
     </StyledModal>

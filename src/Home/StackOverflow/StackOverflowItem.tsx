@@ -5,12 +5,13 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
+import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 import {
   StackOverflowResult,
   StackOverflowAnswer,
   AnswerType,
 } from 'search/stackOverflow';
-// import { openLink } from 'mainProcess';
+import { openLink } from 'mainProcess';
 
 import FocusState from '../SearchItemFocusState';
 import StackOverflowBody from './StackOverflowBody';
@@ -51,11 +52,47 @@ const Header = styled.div<{ isFocused?: boolean }>`
   }
 `;
 
-const QuestionTitle = styled.a`
+const QuestionTitleWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const QuestionTitle = styled.span`
+  margin-right: 5px;
+
   color: #fff;
   font-weight: 600;
   font-size: 16px;
   text-decoration: underline;
+`;
+
+const ExternalLinkButton = styled.button`
+  position: relative;
+  top: 1px;
+
+  background: none;
+  border: none;
+  outline: none;
+
+  :hover {
+    path {
+      stroke: #fff;
+      cursor: pointer;
+    }
+  }
+`;
+
+const ExternalLinkImg = styled(externalLinkImg)`
+  height: auto;
+  width: 12px;
+
+  path {
+    stroke: #9CACC5;
+  }
+
+  :hover {
+    cursor: pointer;
+  }
 `;
 
 const QuestionMetadata = styled.div`
@@ -148,9 +185,12 @@ function StackOverflowItem ({
   const [answerTypes, setAnswerTypes] = useState<AnswerType[]>([]);
 
   function handleQuestionTitleClick(e: any) {
-    // openLink(soResult.question.link);
     onTitleClick(e);
     e.preventDefault();
+  }
+
+  function handleOpenExternalLinkButton() {
+    openLink(soResult.question.link);
   }
 
   function getDateString(timestamp: number) {
@@ -196,13 +236,17 @@ function StackOverflowItem ({
         isFocused={focusState !== FocusState.None}
         onClick={onHeaderClick}
       >
-        <QuestionTitle
-          href={soResult.question.link}
-          onClick={handleQuestionTitleClick}
-          dangerouslySetInnerHTML={{
-            __html: soResult.question.title,
-          }}
-        />
+        <QuestionTitleWrapper>
+          <QuestionTitle
+            onClick={handleQuestionTitleClick}
+            dangerouslySetInnerHTML={{
+              __html: soResult.question.title,
+            }}
+          />
+          <ExternalLinkButton onClick={handleOpenExternalLinkButton}>
+            <ExternalLinkImg/>
+          </ExternalLinkButton>
+        </QuestionTitleWrapper>
 
         <QuestionMetadata>
           <QuestionVotes>

@@ -117,7 +117,7 @@ function getHighlightedContent(ranges: number[][], content: string, startingOffs
 // tokens (Token[][]), and
 // getTokenProps ((input: TokenInputProps) => TokenOutputProps)
 // I cannot get the types from prism-react-renderer because they are not explicitly exported
-function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any, firstHighlightRef: React.RefObject<HTMLElement>) {
+function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any, firstHighlightRef: React.RefObject<HTMLElement>, ref: any) {
   const assembledLinesNos: JSX.Element[] = [];
   const assembledLines: JSX.Element[] = [];
 
@@ -161,7 +161,7 @@ function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any
     }
 
     assembledLines.push(
-      <LineContent key={lineIdx}>
+      <LineContent key={lineIdx} ref={ref} tabIndex={0}>
         {assembledTokens}
       </LineContent>
     );
@@ -181,14 +181,22 @@ interface CodeProps {
   filePreview: FilePreview;
   className?: string;
   isFocused?: boolean;
+  isInModal?: boolean;
 }
 
 function Code({
   filePreview,
   className,
   isFocused,
+  isInModal,
 }: CodeProps) {
+  const lineRef = useRef<HTMLDivElement>(null);
   const firstHighlightRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isInModal) return;
+    lineRef?.current?.focus();
+  }, [isInModal]);
 
   useEffect(() => {
     if (isFocused && firstHighlightRef.current) {
@@ -202,7 +210,9 @@ function Code({
   }, [isFocused, firstHighlightRef, filePreview]);
 
   return (
-    <Container className={className}>
+    <Container
+      className={className}
+    >
       <Prism
         {...defaultProps}
         code={filePreview.fragment}
@@ -215,8 +225,11 @@ function Code({
           tokens,
           getTokenProps,
         }) => (
-            <Pre className={className} style={style}>
-              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef)}
+            <Pre
+              className={className}
+              style={style}
+            >
+              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
             </Pre>
           )}
       </Prism>
