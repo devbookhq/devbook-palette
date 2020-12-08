@@ -172,7 +172,7 @@ const CodeItem = memo(({
             {codeResult.filePath}
           </FilePath>
           <ExternalLinkButton onClick={handleOpenExternalLinkButton}>
-            <ExternalLinkImg/>
+            <ExternalLinkImg />
           </ExternalLinkButton>
         </FilePathWrapper>
       </Header>
@@ -183,4 +183,3 @@ const CodeItem = memo(({
 });
 
 export default CodeItem;
-

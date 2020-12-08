@@ -24,8 +24,6 @@ function logInRendered(...args: any) {
   mainWindow?.webContents.send('console', args);
 }
 
-tmp.setGracefulCleanup();
-
 const oldLog = console.log;
 console.log = (...args: any) => {
   oldLog(...args);
@@ -37,6 +35,9 @@ console.error = (...args: any) => {
   oldError(...args);
   logInRendered('error', ...args);
 }
+
+// Automatically delete temporary files after the application exit.
+tmp.setGracefulCleanup();
 
 // https://stackoverflow.com/questions/41664208/electron-tray-icon-change-depending-on-dark-theme
 let trayIcon: electron.NativeImage;
@@ -142,6 +143,9 @@ function createMainWindow() {
 
   mainWindow.on('blur', () => {
     if (!isdev) {
+      electron.Menu.sendActionToFirstResponder('hide:');
+      // TODO: On Windows this should probably be mainWindow.minimize. 
+      // The "hide:" action alone may also be sufficient for handling the hide and return focus flow on MacOS.
       mainWindow?.hide();
     }
   });
@@ -265,6 +269,7 @@ ipcMain.on('view-ready', () => {
 
 ipcMain.on('hide-window', () => {
   mainWindow?.hide();
+  electron.Menu.sendActionToFirstResponder('hide:');
 });
 
 ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => {
