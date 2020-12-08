@@ -125,7 +125,7 @@ function CodeModal({
       const vscodeFileURL = `vscode://file/${tmpPath}`;
       await openLink(vscodeFileURL);
     } else {
-      console.log('Cannot create tmp file with code.')
+      console.log('Cannot create tmp file with the file content.')
     }
   }
 
@@ -143,7 +143,7 @@ function CodeModal({
             {codeResult.filePath}
           </FilePath>
           <ExternalLinkButton onClick={handleOpenExternalLinkButton}>
-            <ExternalLinkImg/>
+            <ExternalLinkImg />
           </ExternalLinkButton>
         </FilePathWrapper>
       </Header>
