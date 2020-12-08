@@ -16,7 +16,7 @@ const Container = styled.div`
   background: #262736;
 `;
 
-const CmdKeyImg = styled(cmdKeyImg)`
+const CommandKeyImg = styled(cmdKeyImg)`
   width: auto;
   height: 12px;
   :not(:last-child) {
@@ -62,11 +62,13 @@ const Key = styled.div`
 export enum ModifierKey {
   Alt = 'Alt',
   Shift = 'Shift',
-  Cmd = 'Cmd',
+  Command = 'Command',
 }
 
+export type HotkeyType = (string | ModifierKey)[];
+
 interface HotkeyProps {
-  hotkey: (string | ModifierKey)[];
+  hotkey: HotkeyType;
 }
 
 function renderModifier(modifier: ModifierKey) {
@@ -74,7 +76,7 @@ function renderModifier(modifier: ModifierKey) {
     <>
       {modifier === ModifierKey.Alt && <AltKeyImg />}
       {modifier === ModifierKey.Shift && <ShiftKeyImg />}
-      {modifier === ModifierKey.Cmd && <CmdKeyImg />}
+      {modifier === ModifierKey.Command && <CommandKeyImg />}
     </>
   );
 }

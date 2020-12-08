@@ -17,6 +17,8 @@ import {
 } from 'search/gitHub';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
+import HotkeysPanel from './HotkeysPanel';
+import { ModifierKey } from './HotkeysPanel/Hotkey';
 import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
@@ -43,24 +45,6 @@ const InfoMessage = styled.div`
   color: #5A5A6F;
   font-size: 16px;
   font-weight: 600;
-`;
-
-const HotkeysPanel = styled.div`
-  width: 100%;
-  padding: 10px 15px;
-
-  display: flex;
-  align-items: center;
-
-  background: #1F212D;
-`;
-
-const Hotkey = styled.div`
-  margin-right: 15px;
-
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
 `;
 
 interface FocusIndex {
@@ -108,14 +92,17 @@ function Home() {
     (soResults.length === 0 && activeFilter === ResultsFilter.StackOverflow) ||
     (codeResults.length === 0 && activeFilter === ResultsFilter.GitHubCode);
 
+  // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys('Cmd+1', () => {
     if (!isModalOpened) setActiveFilter(ResultsFilter.StackOverflow);
   }, { filter: () => true }, [isModalOpened]);
 
+  // 'cmd+2' hotkey - change search filter to GitHub Code search.
   useHotkeys('Cmd+2', () => {
     if (!isModalOpened) setActiveFilter(ResultsFilter.GitHubCode);
   }, { filter: () => true }, [isModalOpened]);
 
+  // 'up arrow' hotkey - navigation.
   useHotkeys('up', () => {
     if (isModalOpened) return;
 
@@ -139,6 +126,7 @@ function Home() {
     }
   }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx.idx, activeFilter, isModalOpened]);
 
+  // 'down arrow' hotkey - navigation.
   useHotkeys('down', () => {
     if (isModalOpened) return;
 
@@ -162,6 +150,7 @@ function Home() {
     }
   }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults, activeFilter, isModalOpened]);
 
+  // 'enter' hotkey - open the focused result in a modal.
   useHotkeys('enter', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
@@ -173,6 +162,7 @@ function Home() {
     }
   }, [activeFilter]);
 
+  // 'esc' hotkey - close modal or hide main window.
   useHotkeys('esc', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
@@ -191,6 +181,14 @@ function Home() {
         break;
     }
   }, [isSOModalOpened, isCodeModalOpened, activeFilter]);
+
+  // 'cmd+o' hotkey - open the focused result in a browser.
+  useHotkeys('Cmd+o', () => {
+  }, []);
+
+  // 'cmd+i' hotkey - open the GitHubCode result in a vscode.
+  useHotkeys('Cmd+i', () => {
+  }, []);
 
   useEffect(() => {
     async function searchSO(query: string) {
@@ -293,10 +291,12 @@ function Home() {
               </>
             </SearchResults>
 
-            <HotkeysPanel>
-              <Hotkey>DETAIL - Enter</Hotkey>
-              <Hotkey>OPEN IN BROWSER - Shift + Enter</Hotkey>
-            </HotkeysPanel>
+            <HotkeysPanel
+              hotkeys={[
+                {text: 'Open in browser', hotkey: [ModifierKey.Command, 'O']},
+                {text: 'Open in VSCode', hotkey: [ModifierKey.Command, 'I']},
+              ]}
+            />
           </>
         }
       </Container>
