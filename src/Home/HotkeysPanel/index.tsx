@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import Hotkey, { HotkeyType, ModifierKey } from './Hotkey';
+import Hotkey, { HotkeyType } from './Hotkey';
 
 const Container = styled.div`
   width: 100%;
@@ -10,9 +10,15 @@ const Container = styled.div`
 
   display: flex;
   align-items: center;
+  justify-content: space-between;
 
   background: #2E303D;
   box-shadow: 0px -4px 30px 5px #1C1B26;
+`;
+
+const Section = styled.div`
+  display: flex;
+  align-items: center;
 `;
 
 const HotkeyWrapper = styled.div`
@@ -35,22 +41,38 @@ export interface HotkeyWithText {
 }
 
 interface HotkeysPanelProps {
-  hotkeys: HotkeyWithText[];
+  hotkeysLeft: HotkeyWithText[];
+  hotkeysRight: HotkeyWithText[];
 }
 
-function HotkeysPanel({ hotkeys }: HotkeysPanelProps) {
+function HotkeysPanel({ hotkeysLeft, hotkeysRight }: HotkeysPanelProps) {
   return (
     <Container>
-      {hotkeys.map(h => (
-        <HotkeyWrapper
-          key={h.text}
-        >
-          <HotkeyText>{h.text}</HotkeyText>
-          <Hotkey
-            hotkey={h.hotkey}
-          />
-        </HotkeyWrapper>
-      ))}
+      <Section>
+        {hotkeysLeft.map(h => (
+          <HotkeyWrapper
+            key={h.text}
+          >
+            <HotkeyText>{h.text}</HotkeyText>
+            <Hotkey
+              hotkey={h.hotkey}
+            />
+          </HotkeyWrapper>
+        ))}
+      </Section>
+
+      <Section>
+        {hotkeysRight.map(h => (
+          <HotkeyWrapper
+            key={h.text}
+          >
+            <HotkeyText>{h.text}</HotkeyText>
+            <Hotkey
+              hotkey={h.hotkey}
+            />
+          </HotkeyWrapper>
+        ))}
+      </Section>
     </Container>
   );
 }

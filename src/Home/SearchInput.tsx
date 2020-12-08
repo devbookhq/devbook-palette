@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import { connectGitHub } from 'mainProcess';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Loader from 'components/Loader';
-import Hotkey, { ModifierKey } from './HotkeysPanel/Hotkey';
+import Hotkey, { Key } from './HotkeysPanel/Hotkey';
 
 const Container = styled.div`
   width: 100%;
@@ -181,7 +181,7 @@ function SearchInput({
               >{f}
               </FilterButton>
               <Hotkey
-                hotkey={[ModifierKey.Command, `${idx + 1}`]}
+                hotkey={[Key.Command, `${idx + 1}`]}
               />
             </Filter>
           ))}

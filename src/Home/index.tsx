@@ -22,7 +22,7 @@ import {
 
 import SearchInput, { ResultsFilter } from './SearchInput';
 import HotkeysPanel, { HotkeyWithText } from './HotkeysPanel';
-import { ModifierKey } from './HotkeysPanel/Hotkey';
+import { Key } from './HotkeysPanel/Hotkey';
 import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
@@ -56,29 +56,47 @@ interface FocusIndex {
   focusState: FocusState;
 }
 
-const soResultsHotkeys: HotkeyWithText[] = [
-  {text: 'Navigate', hotkey: ['ARROWS']},
-  {text: 'Show detail', hotkey: ['ENTER']},
-  {text: 'Open in browser', hotkey: [ModifierKey.Command, 'O']},
-];
-const soModalHotkeys: HotkeyWithText[] = [
-  {text: 'Navigate', hotkey: ['ARROWS']},
-  {text: 'Open in browser', hotkey: [ModifierKey.Command, 'O']},
-  {text: 'Close', hotkey: ['ESC']},
-];
+type Hotkeys = {left: HotkeyWithText[], right: HotkeyWithText[]};
 
-const gitHubCodeResultsHotkeys: HotkeyWithText[] = [
-  {text: 'Navigate', hotkey: ['ARROWS']},
-  {text: 'Show detail', hotkey: ['ENTER']},
-  {text: 'Open in VSCode', hotkey: [ModifierKey.Command, 'I']},
-  {text: 'Open in browser', hotkey: [ModifierKey.Command, 'O']},
-];
-const gitHubModalHotkeys: HotkeyWithText[] = [
-  {text: 'Navigate', hotkey: ['ARROWS']},
-  {text: 'Open in VSCode', hotkey: [ModifierKey.Command, 'I']},
-  {text: 'Open in browser', hotkey: [ModifierKey.Command, 'O']},
-  {text: 'Close', hotkey: ['ESC']},
-];
+const soResultsHotkeys: Hotkeys = {
+  left: [
+    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
+    {text: 'Show detail', hotkey: [Key.Enter]},
+  ],
+  right: [
+    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
+  ],
+};
+const soModalHotkeys: Hotkeys = {
+  left: [
+    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
+  ],
+  right: [
+    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
+    {text: 'Close', hotkey: ['Esc']},
+  ],
+};
+
+const gitHubCodeResultsHotkeys: Hotkeys = {
+  left: [
+    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
+    {text: 'Show detail', hotkey: [Key.Enter]},
+  ],
+  right: [
+    {text: 'Open in VSCode', hotkey: [Key.Command, 'I']},
+    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
+  ],
+};
+const gitHubModalHotkeys: Hotkeys = {
+  left: [
+    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
+  ],
+  right: [
+    {text: 'Open in VSCode', hotkey: [Key.Command, 'I']},
+    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
+    {text: 'Close', hotkey: ['Esc']},
+  ],
+};
 
 function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where query');
@@ -100,7 +118,7 @@ function Home() {
     focusState: FocusState.NoScroll,
   });
   // User opens the app with the StackOverflow search filter active.
-  const [activeHotkeys, setActiveHotkeys] = useState<HotkeyWithText[]>(soResultsHotkeys);
+  const [activeHotkeys, setActiveHotkeys] = useState<Hotkeys>(soResultsHotkeys);
 
   const [isLoadingSO, setIsLoadingSO] = useState(false);
   const [isLoadingCode, setIsLoadingCode] = useState(false);
@@ -367,7 +385,8 @@ function Home() {
             </SearchResults>
 
             <HotkeysPanel
-              hotkeys={activeHotkeys}
+              hotkeysLeft={activeHotkeys.left}
+              hotkeysRight={activeHotkeys.right}
             />
           </>
         }
