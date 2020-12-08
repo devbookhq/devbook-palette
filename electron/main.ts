@@ -3,11 +3,13 @@ import * as process from 'process';
 import { inspect } from 'util';
 import * as electron from 'electron';
 import Store from 'electron-store';
+import fs from 'fs';
 import {
   BrowserWindow,
   app,
   ipcMain,
 } from 'electron';
+import tmp from 'tmp';
 import keytar from 'keytar';
 
 import isdev from './isdev';
@@ -21,6 +23,8 @@ const PORT = 3000;
 function logInRendered(...args: any) {
   mainWindow?.webContents.send('console', args);
 }
+
+tmp.setGracefulCleanup();
 
 const oldLog = console.log;
 console.log = (...args: any) => {
@@ -199,10 +203,12 @@ function trySetGlobalShortcut(shortcut: string) {
 
 /////////// App Events ///////////
 app.once('ready', async () => {
-  // Load react dev tools.
-  await electron.session.defaultSession.loadExtension(
-    path.join(__dirname, '..', '..', 'react-dev-tools-4.9.0_26'),
-  );
+  if (isdev) {
+    // Load react dev tools.
+    await electron.session.defaultSession.loadExtension(
+      path.join(__dirname, '..', '..', 'react-dev-tools-4.9.0_26'),
+    );
+  }
 
   isFirstRun = store.get('firstRun', true);
   isAppReady = true;
@@ -286,4 +292,30 @@ ipcMain.on('github-oauth', (event, arg) => {
 
 ipcMain.handle('github-access-token', () => {
   return keytar.getPassword('github', 'default');
+});
+
+ipcMain.handle('create-tmp-file', async (event, { filePath, fileContent }: { filePath: string, fileContent: string }) => {
+  const basename = path.basename(filePath);
+  try {
+    const { name } = await new Promise<{ name: string, fd: number }>((resolve, reject) => {
+      tmp.file({
+        template: `tmp-XXXXXX-${basename}`,
+      }, (error, name, fd) => {
+        if (error) {
+          return reject(error);
+        }
+
+        fs.write(fd, fileContent, (error) => {
+          if (error) {
+            return reject(error);
+          }
+          return resolve({ name, fd })
+        });
+
+      });
+    });
+    return name;
+  } catch (error) {
+    console.error(error);
+  }
 });

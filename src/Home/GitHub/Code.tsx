@@ -117,7 +117,7 @@ function getHighlightedContent(ranges: number[][], content: string, startingOffs
 // tokens (Token[][]), and
 // getTokenProps ((input: TokenInputProps) => TokenOutputProps)
 // I cannot get the types from prism-react-renderer because they are not explicitly exported
-function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any, firstHighlightRef: any) {
+function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any, firstHighlightRef: React.RefObject<HTMLElement>) {
   const assembledLinesNos: JSX.Element[] = [];
   const assembledLines: JSX.Element[] = [];
 
@@ -194,6 +194,7 @@ function Code({
     if (isFocused && firstHighlightRef.current) {
       // TODO/HACK: scrollIntoView is only working in the first opened code modal view when called normally.
       // setTimeout without any delay is a hack which puts it on the event loop stack and gives control to the event loop.
+      // I'm not sure why the hack is needed.
       setTimeout(() => {
         firstHighlightRef.current?.scrollIntoView({ block: 'center', inline: 'end' })
       });

@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { CodeResult, FilePreview } from 'search/gitHub';
 import Modal from 'components/Modal';
 import Code from './Code';
+import { openLink } from 'mainProcess';
+import { createTmpFile } from 'mainProcess';
 
 const marginTop = 60;
 
@@ -46,6 +48,7 @@ const RepoName = styled.div`
 `;
 
 const FilePath = styled.div`
+  display: flex;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -55,6 +58,11 @@ const FilePath = styled.div`
   font-weight: 600;
   font-size: 14px;
   text-align: left;
+  text-decoration: underline;
+
+  :hover {
+    cursor: pointer;
+  }
 `;
 
 interface CodeModalProps {
@@ -72,6 +80,19 @@ function CodeModal({
     startLine: 1,
   };
 
+  async function openFileInVSCode() {
+    const tmpPath = await createTmpFile({
+      filePath: codeResult.filePath,
+      fileContent: codeResult.fileContent,
+    });
+    if (tmpPath) {
+      const vscodeFileURL = `vscode://file/${tmpPath}`;
+      await openLink(vscodeFileURL);
+    } else {
+      console.log('Cannot create tmp file with code.')
+    }
+  }
+
   return (
     <StyledModal
       onCloseRequest={onCloseRequest}
@@ -80,7 +101,7 @@ function CodeModal({
         <RepoName>
           {codeResult.repoFullName}
         </RepoName>
-        <FilePath>
+        <FilePath onClick={openFileInVSCode}>
           {codeResult.filePath}
         </FilePath>
       </Header>

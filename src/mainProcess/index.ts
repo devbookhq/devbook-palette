@@ -28,6 +28,10 @@ export function getGithubAccessToken(): Promise<string | null> {
   return electron.ipcRenderer.invoke('github-access-token');
 }
 
+export function createTmpFile(options: { fileContent: string, filePath: string }): Promise<string | undefined> {
+  return electron.ipcRenderer.invoke('create-tmp-file', options);
+}
+
 // So we see logs from the main process in the Chrome debug tools
 electron.ipcRenderer.on('console', (event, args) => {
   const [type, ...consoleArgs] = args;

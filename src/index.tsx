@@ -1,11 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { notifyViewReady, } from './mainProcess';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-
 import './index.css';
+
+import { notifyViewReady, } from './mainProcess';
+import * as serviceWorker from './serviceWorker';
+import App from './App';
+
 
 ReactDOM.render(
   <React.StrictMode>
