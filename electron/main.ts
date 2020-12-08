@@ -61,7 +61,7 @@ let onboardingWindow: OnboardingWindow | undefined = undefined;
 
 const oauth = new OAuth(
   () => mainWindow?.show(),
-  () => mainWindow?.hide(),
+  () => electron.Menu.sendActionToFirstResponder('hide:'),
 );
 
 oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
@@ -144,9 +144,6 @@ function createMainWindow() {
   mainWindow.on('blur', () => {
     if (!isdev) {
       electron.Menu.sendActionToFirstResponder('hide:');
-      // TODO: On Windows this should probably be mainWindow.minimize. 
-      // The "hide:" action alone may also be sufficient for handling the hide and return focus flow on MacOS.
-      mainWindow?.hide();
     }
   });
 
@@ -184,7 +181,7 @@ function toggleVisibilityOnMainWindow() {
   }
 
   if (mainWindow.isVisible()) {
-    mainWindow.hide();
+    electron.Menu.sendActionToFirstResponder('hide:');
   } else {
     mainWindow.show();
     mainWindow.webContents?.send('did-show-main-window');
@@ -268,7 +265,6 @@ ipcMain.on('view-ready', () => {
 });
 
 ipcMain.on('hide-window', () => {
-  mainWindow?.hide();
   electron.Menu.sendActionToFirstResponder('hide:');
 });
 
