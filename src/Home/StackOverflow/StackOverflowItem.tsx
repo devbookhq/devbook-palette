@@ -64,6 +64,10 @@ const QuestionTitle = styled.span`
   font-weight: 600;
   font-size: 16px;
   text-decoration: underline;
+
+  :hover {
+    cursor: pointer;
+  }
 `;
 
 const ExternalLinkButton = styled.button`

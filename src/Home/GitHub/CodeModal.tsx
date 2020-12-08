@@ -1,11 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
 
+import {
+  openLink,
+  createTmpFile,
+} from 'mainProcess';
 import { CodeResult, FilePreview } from 'search/gitHub';
 import Modal from 'components/Modal';
+import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
+
 import Code from './Code';
-import { openLink } from 'mainProcess';
-import { createTmpFile } from 'mainProcess';
 
 const marginTop = 60;
 
@@ -47,18 +51,46 @@ const RepoName = styled.div`
   font-size: 13px;
 `;
 
-const FilePath = styled.div`
+const FilePathWrapper = styled.div`
   display: flex;
+  align-items: center;
+`;
+
+const FilePath = styled.span`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   direction: rtl; // This so we can see the name of the file.
+  text-align: left;
 
   color: #fff;
   font-weight: 600;
   font-size: 14px;
-  text-align: left;
-  text-decoration: underline;
+`;
+
+const ExternalLinkButton = styled.button`
+  position: relative;
+  top: 2px;
+
+  background: none;
+  border: none;
+  outline: none;
+
+  :hover {
+    path {
+      stroke: #fff;
+      cursor: pointer;
+    }
+  }
+`;
+
+const ExternalLinkImg = styled(externalLinkImg)`
+  height: auto;
+  width: 12px;
+
+  path {
+    stroke: #9CACC5;
+  }
 
   :hover {
     cursor: pointer;
@@ -79,6 +111,10 @@ function CodeModal({
     fragment: codeResult.fileContent,
     startLine: 1,
   };
+
+  function handleOpenExternalLinkButton() {
+    openLink(codeResult.fileURL);
+  }
 
   async function openFileInVSCode() {
     const tmpPath = await createTmpFile({
@@ -101,9 +137,15 @@ function CodeModal({
         <RepoName>
           {codeResult.repoFullName}
         </RepoName>
-        <FilePath onClick={openFileInVSCode}>
-          {codeResult.filePath}
-        </FilePath>
+
+        <FilePathWrapper>
+          <FilePath>
+            {codeResult.filePath}
+          </FilePath>
+          <ExternalLinkButton onClick={handleOpenExternalLinkButton}>
+            <ExternalLinkImg/>
+          </ExternalLinkButton>
+        </FilePathWrapper>
       </Header>
 
       <StyledCode
