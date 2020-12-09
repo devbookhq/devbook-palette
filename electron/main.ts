@@ -181,7 +181,8 @@ function toggleVisibilityOnMainWindow() {
   }
 
   if (mainWindow.isVisible()) {
-    electron.Menu.sendActionToFirstResponder('hide:');
+    if (isFirstRun) mainWindow.hide();
+    else electron.Menu.sendActionToFirstResponder('hide:');
   } else {
     mainWindow.show();
     mainWindow.webContents?.send('did-show-main-window');
@@ -287,7 +288,7 @@ ipcMain.on('register-default-shortcut', () => {
   trySetGlobalShortcut(shortcut);
 });
 
-ipcMain.on('github-oauth', (event, arg) => {
+ipcMain.on('github-oauth', () => {
   oauth.requestOAuth();
 });
 

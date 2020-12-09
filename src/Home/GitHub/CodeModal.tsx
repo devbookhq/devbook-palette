@@ -2,7 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { openLink } from 'mainProcess';
-import { CodeResult, FilePreview } from 'search/gitHub';
+import {
+  CodeResult,
+  FilePreview,
+} from 'search/gitHub';
 import Modal from 'components/Modal';
 import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 
