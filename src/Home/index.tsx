@@ -48,7 +48,7 @@ const SearchResults = styled.div`
 `;
 
 const InfoMessage = styled.div`
-  margin: 50px auto 0;
+  margin: 100px auto 0;
   color: #5A5A6F;
   font-size: 16px;
   font-weight: 600;
@@ -62,28 +62,24 @@ const GitHubConnect = styled.div`
 `;
 
 const ConnectGitHubButton = styled.div`
-  border-radius: 5px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   padding: 10px 20px;
-  background: #535BD7;
 
   font-size: 15px;
   font-weight: 500;
   color: white;
 
   user-select: none;
+  border-radius: 5px;
+  background: #535BD7;
 
   :hover {
     cursor: pointer;
   }
 `;
 
-const GitHubConnectTitle = styled.div`
-  font-size: 18px;
-  font-weight: 400;
-  color: #5A5A6F;
-
-  margin-bottom: 30px;
+const GitHubConnectTitle = styled(InfoMessage)`
+  margin: 0 0 30px;
 `;
 
 const GitHubPrivacyLink = styled.div`
