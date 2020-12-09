@@ -100,45 +100,45 @@ interface FocusIndex {
   focusState: FocusState;
 }
 
-type Hotkeys = {left: HotkeyWithText[], right: HotkeyWithText[]};
+type Hotkeys = { left: HotkeyWithText[], right: HotkeyWithText[] };
 
 const soResultsHotkeys: Hotkeys = {
   left: [
-    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
-    {text: 'Show detail', hotkey: [Key.Enter]},
+    { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown] },
+    { text: 'Show detail', hotkey: [Key.Enter] },
   ],
   right: [
-    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
+    { text: 'Open in browser', hotkey: [Key.Command, 'O'] },
   ],
 };
 const soModalHotkeys: Hotkeys = {
   left: [
-    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
+    { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown] },
   ],
   right: [
-    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
-    {text: 'Close', hotkey: ['Esc']},
+    { text: 'Open in browser', hotkey: [Key.Command, 'O'] },
+    { text: 'Close', hotkey: ['Esc'] },
   ],
 };
 
 const gitHubCodeResultsHotkeys: Hotkeys = {
   left: [
-    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
-    {text: 'Show detail', hotkey: [Key.Enter]},
+    { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown] },
+    { text: 'Show detail', hotkey: [Key.Enter] },
   ],
   right: [
-    {text: 'Open in VSCode', hotkey: [Key.Command, 'I']},
-    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
+    { text: 'Open in VSCode', hotkey: [Key.Command, 'I'] },
+    { text: 'Open in browser', hotkey: [Key.Command, 'O'] },
   ],
 };
 const gitHubModalHotkeys: Hotkeys = {
   left: [
-    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
+    { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown] },
   ],
   right: [
-    {text: 'Open in VSCode', hotkey: [Key.Command, 'I']},
-    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
-    {text: 'Close', hotkey: ['Esc']},
+    { text: 'Open in VSCode', hotkey: [Key.Command, 'I'] },
+    { text: 'Open in browser', hotkey: [Key.Command, 'O'] },
+    { text: 'Close', hotkey: ['Esc'] },
   ],
 };
 
@@ -148,7 +148,7 @@ function Home() {
   const trimmedSearchQuery = searchQuery.trim();
   const debouncedQuery = useDebounce(trimmedSearchQuery, 400);
 
-  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.GitHubCode);
+  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
@@ -315,7 +315,9 @@ function Home() {
       }
       case ResultsFilter.GitHubCode: {
         const item = codeResults[codeFocusedIdx.idx];
-        if (item) url = item.fileURL;
+        const firstPreview = item?.filePreviews[0];
+        const gitHubFileURL = firstPreview ? `${item.fileURL}#L${firstPreview.startLine + 3}` : item?.fileURL;
+        if (item) url = gitHubFileURL;
         break;
       }
     }
