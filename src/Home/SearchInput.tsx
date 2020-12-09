@@ -6,8 +6,8 @@ import React, {
 import styled from 'styled-components';
 
 import useIPCRenderer from 'hooks/useIPCRenderer';
-import Hotkey, { ModifierKey } from 'components/Hotkey';
 import Loader from 'components/Loader';
+import Hotkey, { Key } from './HotkeysPanel/Hotkey';
 
 const Container = styled.div`
   width: 100%;
@@ -167,7 +167,7 @@ function SearchInput({
               >{f}
               </FilterButton>
               <Hotkey
-                hotkey={[ModifierKey.Cmd, `${idx + 1}`]}
+                hotkey={[Key.Command, `${idx + 1}`]}
               />
             </Filter>
           ))}

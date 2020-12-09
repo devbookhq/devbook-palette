@@ -9,6 +9,7 @@ import {
   hideMainWindow,
   connectGitHub,
   openLink,
+  createTmpFile,
 } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -22,6 +23,8 @@ import {
 } from 'search/gitHub';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
+import HotkeysPanel, { HotkeyWithText } from './HotkeysPanel';
+import { Key } from './HotkeysPanel/Hotkey';
 import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
@@ -95,28 +98,52 @@ const GitHubPrivacyLink = styled.div`
   }
 `;
 
-const HotkeysPanel = styled.div`
-  width: 100%;
-  padding: 10px 15px;
-
-  display: flex;
-  align-items: center;
-
-  background: #1F212D;
-`;
-
-const Hotkey = styled.div`
-  margin-right: 15px;
-
-  color: #fff;
-  font-size: 14px;
-  font-weight: 500;
-`;
-
 interface FocusIndex {
   idx: number;
   focusState: FocusState;
 }
+
+type Hotkeys = {left: HotkeyWithText[], right: HotkeyWithText[]};
+
+const soResultsHotkeys: Hotkeys = {
+  left: [
+    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
+    {text: 'Show detail', hotkey: [Key.Enter]},
+  ],
+  right: [
+    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
+  ],
+};
+const soModalHotkeys: Hotkeys = {
+  left: [
+    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
+  ],
+  right: [
+    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
+    {text: 'Close', hotkey: ['Esc']},
+  ],
+};
+
+const gitHubCodeResultsHotkeys: Hotkeys = {
+  left: [
+    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
+    {text: 'Show detail', hotkey: [Key.Enter]},
+  ],
+  right: [
+    {text: 'Open in VSCode', hotkey: [Key.Command, 'I']},
+    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
+  ],
+};
+const gitHubModalHotkeys: Hotkeys = {
+  left: [
+    {text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown]},
+  ],
+  right: [
+    {text: 'Open in VSCode', hotkey: [Key.Command, 'I']},
+    {text: 'Open in browser', hotkey: [Key.Command, 'O']},
+    {text: 'Close', hotkey: ['Esc']},
+  ],
+};
 
 function Home() {
   const [searchQuery, setSearchQuery] = useState('firestore where query');
@@ -137,6 +164,8 @@ function Home() {
     idx: 0,
     focusState: FocusState.NoScroll,
   });
+  // User opens the app with the StackOverflow search filter active.
+  const [activeHotkeys, setActiveHotkeys] = useState<Hotkeys>(soResultsHotkeys);
 
   const [isLoadingSO, setIsLoadingSO] = useState(false);
   const [isLoadingCode, setIsLoadingCode] = useState(false);
@@ -163,14 +192,41 @@ function Home() {
     (soResults.length === 0 && activeFilter === ResultsFilter.StackOverflow) ||
     (codeResults.length === 0 && activeFilter === ResultsFilter.GitHubCode);
 
+  async function openFileInVSCode(path: string, content: string) {
+    const tmpPath = await createTmpFile({
+      filePath: path,
+      fileContent: content,
+    });
+    if (tmpPath) {
+      const vscodeFileURL = `vscode://file/${tmpPath}`;
+      await openLink(vscodeFileURL);
+    } else {
+      // TODO: Handle error for user.
+      console.error('Cannot create tmp file with the file content.')
+    }
+  }
+
+  useEffect(() => {
+    if (!isSOModalOpened && !isCodeModalOpened) {
+      if (activeFilter === ResultsFilter.StackOverflow) setActiveHotkeys(soResultsHotkeys);
+      if (activeFilter === ResultsFilter.GitHubCode) setActiveHotkeys(gitHubCodeResultsHotkeys);
+    }
+
+    if (isSOModalOpened) setActiveHotkeys(soModalHotkeys);
+    if (isCodeModalOpened) setActiveHotkeys(gitHubModalHotkeys);
+  }, [isSOModalOpened, isCodeModalOpened, activeFilter]);
+
+  // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys('Cmd+1', () => {
     if (!isModalOpened) setActiveFilter(ResultsFilter.StackOverflow);
   }, { filter: () => true }, [isModalOpened]);
 
+  // 'cmd+2' hotkey - change search filter to GitHub Code search.
   useHotkeys('Cmd+2', () => {
     if (!isModalOpened) setActiveFilter(ResultsFilter.GitHubCode);
   }, { filter: () => true }, [isModalOpened]);
 
+  // 'up arrow' hotkey - navigation.
   useHotkeys('up', () => {
     if (isModalOpened) return;
 
@@ -194,6 +250,7 @@ function Home() {
     }
   }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx.idx, activeFilter, isModalOpened]);
 
+  // 'down arrow' hotkey - navigation.
   useHotkeys('down', () => {
     if (isModalOpened) return;
 
@@ -217,6 +274,7 @@ function Home() {
     }
   }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults, activeFilter, isModalOpened]);
 
+  // 'enter' hotkey - open the focused result in a modal.
   useHotkeys('enter', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
@@ -228,6 +286,7 @@ function Home() {
     }
   }, [activeFilter]);
 
+  // 'esc' hotkey - close modal or hide main window.
   useHotkeys('esc', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
@@ -246,6 +305,35 @@ function Home() {
         break;
     }
   }, [isSOModalOpened, isCodeModalOpened, activeFilter]);
+
+  // 'cmd+o' hotkey - open the focused result in a browser.
+  useHotkeys('Cmd+o', () => {
+    let url = '';
+    switch (activeFilter) {
+      case ResultsFilter.StackOverflow: {
+        const item = soResults[soFocusedIdx.idx];
+        if (item) url = item.question.link;
+        break;
+      }
+      case ResultsFilter.GitHubCode: {
+        const item = codeResults[codeFocusedIdx.idx];
+        if (item) url = item.fileURL;
+        break;
+      }
+    }
+    if (url) openLink(url);
+  }, [activeFilter, soResults, soFocusedIdx, codeResults, codeFocusedIdx]);
+
+
+  // 'cmd+i' hotkey - open the GitHubCode result in a vscode.
+  useHotkeys('Cmd+i', () => {
+    if (activeFilter === ResultsFilter.GitHubCode) {
+      const item = codeResults[codeFocusedIdx.idx];
+      if (!item) return;
+
+      openFileInVSCode(item.filePath, item.fileContent);
+    }
+  }, [activeFilter, codeResults, codeFocusedIdx]);
 
   useEffect(() => {
     async function searchSO(query: string) {
@@ -391,10 +479,10 @@ function Home() {
               </>
             </SearchResults>
 
-            <HotkeysPanel>
-              <Hotkey>DETAIL - Enter</Hotkey>
-              <Hotkey>OPEN IN BROWSER - Shift + Enter</Hotkey>
-            </HotkeysPanel>
+            <HotkeysPanel
+              hotkeysLeft={activeHotkeys.left}
+              hotkeysRight={activeHotkeys.right}
+            />
           </>
         }
       </Container>

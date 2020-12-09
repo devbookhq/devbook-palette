@@ -1,10 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import {
-  openLink,
-  createTmpFile,
-} from 'mainProcess';
+import { openLink } from 'mainProcess';
 import { CodeResult, FilePreview } from 'search/gitHub';
 import Modal from 'components/Modal';
 import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
@@ -116,20 +113,6 @@ function CodeModal({
     const firstPreview = codeResult.filePreviews[0];
     const gitHubFileURL = firstPreview ? `${codeResult.fileURL}#L${firstPreview.startLine + 3}` : codeResult.fileURL;
     await openLink(gitHubFileURL);
-  }
-
-  async function openFileInVSCode() {
-    const tmpPath = await createTmpFile({
-      filePath: codeResult.filePath,
-      fileContent: codeResult.fileContent,
-    });
-    if (tmpPath) {
-      const firstPreview = codeResult.filePreviews[0];
-      const vscodeFileURL = firstPreview ? `vscode://file/${tmpPath}:${firstPreview.startLine + 3}` : `vscode://file/${tmpPath}`;
-      await openLink(vscodeFileURL);
-    } else {
-      console.log('Cannot create tmp file with the file content.')
-    }
   }
 
   return (
