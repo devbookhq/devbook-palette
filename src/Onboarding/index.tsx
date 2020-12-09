@@ -6,10 +6,8 @@ import {
 } from 'mainProcess';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
-import logoImg from 'img/logo.png';
 
 import IntroductionPage from './pages/Introduction';
-import TrayPage from './pages/Tray';
 import ShortcutPage from './pages/Shortcut';
 
 const Container = styled.div`
@@ -61,29 +59,6 @@ const NextButton = styled(Button)`
   font-size: 16px;
 `;
 
-const LogoWrapper = styled.div`
-  position: absolute;
-  top: 40px;
-  left: 10px;
-  display: flex;
-  align-items: center;
-`;
-
-const LogoImg = styled.img`
-  margin-right: 5px;
-  height: auto;
-  width: 43.5px;
-`;
-
-const LogoName = styled.span`
-  position: relative;
-  bottom: 2px;
-
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-`;
-
 function Onboarding() {
   const [pageIndex, setPageIndex] = useState(0);
   const [didShowMainWindow, setDidShowMainWindow] = useState(false);
@@ -110,16 +85,9 @@ function Onboarding() {
 
   return (
     <Container>
-      {/*
-      <LogoWrapper>
-        <LogoImg src={logoImg}/>
-        <LogoName>Devbook</LogoName>
-      </LogoWrapper>
-      */}
-
       <PageContent>
         {pageIndex === 0 && (
-          <IntroductionPage/>
+          <IntroductionPage />
         )}
         {pageIndex === 1 && (
           <ShortcutPage
@@ -132,30 +100,30 @@ function Onboarding() {
       <Navigation>
         {pageIndex > 0 && (
           <BackButton
-            onClick={() => setPageIndex(c => c-=1)}
+            onClick={() => setPageIndex(c => c -= 1)}
           >Back
           </BackButton>
         )}
 
         {pageIndex < 1 && (
           <NextButton
-            onClick={() => setPageIndex(c => c+=1)}
+            onClick={() => setPageIndex(c => c += 1)}
           >Next
           </NextButton>
         )}
 
-      {pageIndex === 1 && didShowMainWindow && (
-        <NextButton
-          onClick={handleFinishButtonClick}
-        >Finish
-        </NextButton>
-      )}
-      {pageIndex === 1 && !didShowMainWindow && (
-        <NextButtonDisabled
-          onClick={() => {}}
-        >Finish
-        </NextButtonDisabled>
-      )}
+        {pageIndex === 1 && didShowMainWindow && (
+          <NextButton
+            onClick={handleFinishButtonClick}
+          >Finish
+          </NextButton>
+        )}
+        {pageIndex === 1 && !didShowMainWindow && (
+          <NextButtonDisabled
+            onClick={() => { }}
+          >Finish
+          </NextButtonDisabled>
+        )}
       </Navigation>
     </Container>
   );

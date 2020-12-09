@@ -1,7 +1,6 @@
 import React, {
   useRef,
   useEffect,
-  useCallback,
 } from 'react';
 import styled from 'styled-components';
 import Prism, { defaultProps } from 'prism-react-renderer';
