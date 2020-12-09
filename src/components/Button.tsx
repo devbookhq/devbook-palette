@@ -7,18 +7,17 @@ const Container = styled.div<{ disabled?: boolean }>`
   align-items: center;
   justify-content: center;
 
-  color: #F28360;
+  color: #fff;
   font-weight: 500;
   font-size: 14px;
   user-select: none;
 
-  background: rgba(242, 131, 96, 0.1);
+  background: #535BD7;
   border-radius: 3px;
-  border: 1px solid #F28360;
 
   :hover {
     cursor: pointer;
-    background: rgba(242, 131, 96, 0.25);
+    background: #646CEA;
   }
 `;
 

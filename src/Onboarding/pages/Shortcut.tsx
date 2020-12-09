@@ -134,7 +134,7 @@ function TrayPage(props: TrayPageProps) {
           <Step>
             {props.didHitShortcut && <CheckIconDone />}
             {!props.didHitShortcut && <CheckIconNotDone />}
-            2. Hit <Shortcut>{selectedShortcut}</Shortcut> to show Sidekick
+            2. Hit <Shortcut>{selectedShortcut}</Shortcut> to show Devbook
           </Step>
         </StepWrapper>
       </Steps>
@@ -143,3 +143,4 @@ function TrayPage(props: TrayPageProps) {
 }
 
 export default TrayPage;
+

@@ -6,6 +6,8 @@ import {
 } from 'mainProcess';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
+import logoImg from 'img/logo.png';
+
 import IntroductionPage from './pages/Introduction';
 import TrayPage from './pages/Tray';
 import ShortcutPage from './pages/Shortcut';
@@ -17,7 +19,7 @@ const Container = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #42444A;
+  background: #1C1B26;
 `;
 
 const PageContent = styled.div`
@@ -37,18 +39,49 @@ const BackButton = styled(Button)`
   background: transparent;
   color: #FFF;
   font-size: 16px;
+  :hover {
+    background: transparent;
+  }
 `;
 
 const NextButtonDisabled = styled(Button)`
   margin-left: auto;
   font-size: 16px;
-  background: #919396;
+  background: #343654;
   cursor: not-allowed;
+
+  :hover {
+    background: #343654;
+    cursor: not-allowed;
+  }
 `;
 
 const NextButton = styled(Button)`
   margin-left: auto;
   font-size: 16px;
+`;
+
+const LogoWrapper = styled.div`
+  position: absolute;
+  top: 40px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+`;
+
+const LogoImg = styled.img`
+  margin-right: 5px;
+  height: auto;
+  width: 43.5px;
+`;
+
+const LogoName = styled.span`
+  position: relative;
+  bottom: 2px;
+
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
 `;
 
 function Onboarding() {
@@ -77,14 +110,18 @@ function Onboarding() {
 
   return (
     <Container>
+      {/*
+      <LogoWrapper>
+        <LogoImg src={logoImg}/>
+        <LogoName>Devbook</LogoName>
+      </LogoWrapper>
+      */}
+
       <PageContent>
         {pageIndex === 0 && (
           <IntroductionPage/>
         )}
         {pageIndex === 1 && (
-          <TrayPage/>
-        )}
-        {pageIndex === 2 && (
           <ShortcutPage
             didHitShortcut={didShowMainWindow}
             onDidChangeShortcut={handleDidChangeShortcut}
@@ -100,20 +137,20 @@ function Onboarding() {
           </BackButton>
         )}
 
-        {pageIndex < 2 && (
+        {pageIndex < 1 && (
           <NextButton
             onClick={() => setPageIndex(c => c+=1)}
           >Next
           </NextButton>
         )}
 
-      {pageIndex === 2 && didShowMainWindow && (
+      {pageIndex === 1 && didShowMainWindow && (
         <NextButton
           onClick={handleFinishButtonClick}
         >Finish
         </NextButton>
       )}
-      {pageIndex === 2 && !didShowMainWindow && (
+      {pageIndex === 1 && !didShowMainWindow && (
         <NextButtonDisabled
           onClick={() => {}}
         >Finish
