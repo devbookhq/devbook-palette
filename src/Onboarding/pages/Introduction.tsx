@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import sidekickPreviewImg from 'img/sidekick-preview.png';
+import devbookPreviewImg from 'img/devbook-preview.png';
 
 const Container = styled.div`
   width: 100%;
@@ -34,17 +34,17 @@ const Subtitle = styled.span`
 `;
 
 const Explanation = styled.span`
-  margin-top: 25px;
+  margin-top: 10px;
   color: white;
   font-size: 16px;
   font-weight: 400;
   text-align: center;
 `;
 
-const SidekickImg = styled.img`
+const DevbookImg = styled.img`
   margin-top: 20px;
   height: auto;
-  max-width: 950px;
+  max-width: 1000px;
   width: 100%;
 `;
 
@@ -52,16 +52,13 @@ function IntroductionPage() {
   return (
     <Container>
       <Titles>
-        <Title>Welcome to Sidekick</Title>
-        <Subtitle>
-          Search engine for your terminal
-        </Subtitle>
+        <Title>Search engine for developers</Title>
         <Explanation>
-          Sidekick makes it easy to search yours and your team's terminal history.
+          Single place to search in StackOverflow and GitHub code.
         </Explanation>
       </Titles>
 
-      <SidekickImg src={sidekickPreviewImg} />
+      <DevbookImg src={devbookPreviewImg} />
     </Container>
   );
 }
