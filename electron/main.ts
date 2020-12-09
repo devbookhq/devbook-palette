@@ -143,7 +143,8 @@ function createMainWindow() {
 
   mainWindow.on('blur', () => {
     if (!isdev) {
-      electron.Menu.sendActionToFirstResponder('hide:');
+      if (isFirstRun) mainWindow?.hide();
+      else electron.Menu.sendActionToFirstResponder('hide:');
     }
   });
 
@@ -266,7 +267,8 @@ ipcMain.on('view-ready', () => {
 });
 
 ipcMain.on('hide-window', () => {
-  electron.Menu.sendActionToFirstResponder('hide:');
+  if (isFirstRun) mainWindow?.hide();
+  else electron.Menu.sendActionToFirstResponder('hide:');
 });
 
 ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => {
