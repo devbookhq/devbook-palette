@@ -5,7 +5,6 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import { connectGitHub } from 'mainProcess';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Hotkey, { ModifierKey } from 'components/Hotkey';
 import Loader from 'components/Loader';
@@ -81,19 +80,6 @@ const FilterButton = styled.button<{ selected?: boolean }>`
   :hover {
     cursor: pointer;
     color: white;
-  }
-`;
-
-const ConnectGitHubButton = styled.button`
-  color: #3897EE;
-  font-size: 14px;
-  font-weight: 600;
-
-  border: none;
-  background: none;
-  outline: none;
-  :hover {
-    cursor: pointer;
   }
 `;
 
@@ -186,9 +172,6 @@ function SearchInput({
             </Filter>
           ))}
         </FiltersWrapper>
-        <ConnectGitHubButton onClick={() => connectGitHub()}>
-          Connect your GitHub account
-        </ConnectGitHubButton>
       </Menu>
     </Container>
   );

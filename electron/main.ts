@@ -66,7 +66,7 @@ const oauth = new OAuth(
 
 oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
   mainWindow?.webContents.send('github-access-token', { accessToken });
-  await keytar.setPassword('github', 'default', accessToken);
+  await keytar.setPassword('devbook-github', 'default', accessToken);
 });
 
 oauth.emitter.on('error', ({ message }: { message: string }) => {
@@ -96,7 +96,7 @@ function createMainWindow() {
     width: mainWinWidth,
     height: mainWinHeight,
     minWidth: 700,
-    minHeight: 100,
+    minHeight: 400,
     backgroundColor: '#1C1B26',
     alwaysOnTop: true,
     frame: false,
@@ -292,7 +292,7 @@ ipcMain.on('github-oauth', (event, arg) => {
 });
 
 ipcMain.handle('github-access-token', () => {
-  return keytar.getPassword('github', 'default');
+  return keytar.getPassword('devbook-github', 'default');
 });
 
 ipcMain.handle('create-tmp-file', async (event, { filePath, fileContent }: { filePath: string, fileContent: string }) => {
@@ -312,11 +312,10 @@ ipcMain.handle('create-tmp-file', async (event, { filePath, fileContent }: { fil
           }
           return resolve({ name, fd })
         });
-
       });
     });
     return name;
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
   }
 });

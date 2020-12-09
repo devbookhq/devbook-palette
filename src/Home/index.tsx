@@ -5,7 +5,11 @@ import React, {
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import { hideMainWindow } from 'mainProcess';
+import {
+  hideMainWindow,
+  connectGitHub,
+  openLink,
+} from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
   search as searchStackOverflow,
@@ -14,6 +18,7 @@ import {
 import {
   searchCode as searchGitHubCode,
   CodeResult,
+  init as initGitHub,
 } from 'search/gitHub';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
@@ -22,6 +27,7 @@ import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
 import CodeItem from './GitHub/CodeItem';
 import CodeModal from './GitHub/CodeModal';
+import useIPCRenderer from 'hooks/useIPCRenderer';
 
 const Container = styled.div`
   height: 100%;
@@ -43,6 +49,50 @@ const InfoMessage = styled.div`
   color: #5A5A6F;
   font-size: 16px;
   font-weight: 600;
+`;
+
+const GitHubConnect = styled.div`
+  margin: 100px auto 0;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+`;
+
+const ConnectGitHubButton = styled.div`
+  border-radius: 5px;
+  margin-bottom: 10px;
+  padding: 10px 20px;
+  background: #535BD7;
+
+  font-size: 15px;
+  font-weight: 500;
+  color: white;
+
+  user-select: none;
+
+  :hover {
+    cursor: pointer;
+  }
+`;
+
+const GitHubConnectTitle = styled.div`
+  font-size: 18px;
+  font-weight: 400;
+  color: #5A5A6F;
+
+  margin-bottom: 30px;
+`;
+
+const GitHubPrivacyLink = styled.div`
+  color: #535BD7;
+  font-size: 14px;
+  font-weight: 500;
+
+  text-decoration: underline;
+
+  :hover {
+    cursor: pointer;
+  }
 `;
 
 const HotkeysPanel = styled.div`
@@ -74,7 +124,7 @@ function Home() {
   const trimmedSearchQuery = searchQuery.trim();
   const debouncedQuery = useDebounce(trimmedSearchQuery, 400);
 
-  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
+  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.GitHubCode);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
@@ -94,7 +144,12 @@ function Home() {
   const [isSOModalOpened, setIsSOModalOpened] = useState(false);
   const [isCodeModalOpened, setIsCodeModalOpened] = useState(false);
 
-  const [usedQuery, setUsedQuery] = useState<string>();
+  const [currentResultsQuery, setCurrentResultsQuery] = useState('');
+
+  const [isGitHubConnected, setIsGitHubConnected] = useState(false);
+  // TODO: There is surely a better way to write this, probably a reducer.
+  // We will refactor this when we have the time.
+  const [gitHubConnectedPreviousState, setGitHubConnectedPreviousState] = useState(false);
 
   const isModalOpened =
     (isSOModalOpened && activeFilter === ResultsFilter.StackOverflow) ||
@@ -202,7 +257,7 @@ function Home() {
       setSOResults(results);
       setSOFocusedIdx({
         idx: 0,
-        focusState: FocusState.WithScroll
+        focusState: FocusState.WithScroll,
       });
       setIsLoadingSO(false);
     }
@@ -216,27 +271,55 @@ function Home() {
       setCodeResults(results);
       setCodeFocusedIdx({
         idx: 0,
-        focusState: FocusState.WithScroll
+        focusState: FocusState.WithScroll,
       });
       setIsLoadingCode(false);
     }
 
     async function search(query: string, activeFilter: ResultsFilter) {
-      setUsedQuery(query);
-
       if (activeFilter === ResultsFilter.StackOverflow) {
         await searchSO(query);
-        searchCode(query);
+        if (isGitHubConnected) searchCode(query);
       } else if (activeFilter === ResultsFilter.GitHubCode) {
-        await searchCode(query);
+        if (isGitHubConnected) await searchCode(query);
         searchSO(query);
       }
     }
 
-    if (debouncedQuery && debouncedQuery !== usedQuery) {
+    if (debouncedQuery && debouncedQuery !== currentResultsQuery) {
+      setCurrentResultsQuery(debouncedQuery);
       search(debouncedQuery, activeFilter);
     }
-  }, [debouncedQuery, usedQuery, activeFilter]);
+
+    if (isGitHubConnected && !gitHubConnectedPreviousState) {
+      setGitHubConnectedPreviousState(true);
+      searchCode(debouncedQuery);
+    }
+
+  }, [debouncedQuery, currentResultsQuery, activeFilter, isGitHubConnected, gitHubConnectedPreviousState]);
+
+  useEffect(() => {
+    async function checkGitHubAccount() {
+      try {
+        await initGitHub();
+        setIsGitHubConnected(true);
+      } catch (error) {
+        console.error('Cannot find connected GitHub Account');
+      }
+    }
+
+    if (!isGitHubConnected) checkGitHubAccount();
+  }, [isGitHubConnected]);
+
+  useIPCRenderer('github-access-token', async (event, { accessToken }: { accessToken: string }) => {
+    await initGitHub(accessToken);
+    setIsGitHubConnected(true);
+  });
+
+  async function openPrivacyTerms() {
+    // TODO: Add route describing privacy to our website address.
+    return openLink('https://usedevbook.com');
+  }
 
   return (
     <>
@@ -265,8 +348,23 @@ function Home() {
           isModalOpened={isModalOpened}
         />
 
-        {!searchQuery && !isLoading && <InfoMessage>Type your search query</InfoMessage>}
-        {searchQuery && hasEmptyResults && !isLoading && <InfoMessage>Nothing found</InfoMessage>}
+        {!searchQuery && (isGitHubConnected || activeFilter === ResultsFilter.StackOverflow) && !isLoading && <InfoMessage>Type your search query</InfoMessage>}
+        {searchQuery && (isGitHubConnected || activeFilter === ResultsFilter.StackOverflow) && hasEmptyResults && !isLoading && <InfoMessage>Nothing found</InfoMessage>}
+
+        {activeFilter === ResultsFilter.GitHubCode && !isGitHubConnected &&
+          <GitHubConnect>
+            <GitHubConnectTitle>
+              Connect your GitHub account to search on GitHub
+            </GitHubConnectTitle>
+            <ConnectGitHubButton onClick={() => connectGitHub()}>
+              Connect my GitHub account
+            </ConnectGitHubButton>
+            <GitHubPrivacyLink onClick={openPrivacyTerms}>
+              Read more about privacy and what access Devbook needs
+            </GitHubPrivacyLink>
+          </GitHubConnect>
+        }
+
         {searchQuery && !hasEmptyResults && !isLoading &&
           <>
             <SearchResults>
@@ -281,7 +379,7 @@ function Home() {
                   />
                 ))}
 
-                {activeFilter === ResultsFilter.GitHubCode && codeResults.map((cr, idx) => (
+                {activeFilter === ResultsFilter.GitHubCode && isGitHubConnected && codeResults.map((cr, idx) => (
                   <CodeItem
                     key={cr.repoFullName + cr.filePath}
                     codeResult={cr}

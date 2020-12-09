@@ -21,11 +21,15 @@ export interface CodeResult {
 let accessToken: string | null = null;
 
 export async function init(token?: string) {
-  accessToken = token || await getGithubAccessToken();
+  accessToken = token || accessToken || await getGithubAccessToken();
 
   if (!accessToken) {
     throw new Error('No access token found');
   }
+}
+
+export function getIsGitHubConnected() {
+  if (accessToken) return true;
 }
 
 export async function searchCode(query: string, pageSize?: number, page?: number): Promise<CodeResult[]> {
