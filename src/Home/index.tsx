@@ -32,6 +32,7 @@ import StackOverflowItem from './StackOverflow/StackOverflowItem';
 import CodeItem from './GitHub/CodeItem';
 import CodeModal from './GitHub/CodeModal';
 import useIPCRenderer from 'hooks/useIPCRenderer';
+import Button from 'components/Button';
 
 const Container = styled.div`
   height: 100%;
@@ -62,21 +63,14 @@ const GitHubConnect = styled.div`
   flex-direction: column;
 `;
 
-const ConnectGitHubButton = styled.div`
+const ConnectGitHubButton = styled(Button)`
   margin-bottom: 15px;
   padding: 10px 20px;
 
   font-size: 15px;
   font-weight: 500;
-  color: white;
 
-  user-select: none;
   border-radius: 5px;
-  background: #535BD7;
-
-  :hover {
-    cursor: pointer;
-  }
 `;
 
 const GitHubConnectTitle = styled(InfoMessage)`
