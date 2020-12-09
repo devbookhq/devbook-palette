@@ -20,6 +20,7 @@ import {
   searchCode as searchGitHubCode,
   CodeResult,
   init as initGitHub,
+  FilePreview,
 } from 'search/gitHub';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
@@ -188,13 +189,14 @@ function Home() {
     (soResults.length === 0 && activeFilter === ResultsFilter.StackOverflow) ||
     (codeResults.length === 0 && activeFilter === ResultsFilter.GitHubCode);
 
-  async function openFileInVSCode(path: string, content: string) {
+  async function openFileInVSCode(path: string, content: string, filePreviews: FilePreview[]) {
     const tmpPath = await createTmpFile({
       filePath: path,
       fileContent: content,
     });
     if (tmpPath) {
-      const vscodeFileURL = `vscode://file/${tmpPath}`;
+      const firstPreview = filePreviews[0];
+      const vscodeFileURL = firstPreview ? `vscode://file/${tmpPath}:${firstPreview.startLine + 3}` : `vscode://file/${tmpPath}`;
       await openLink(vscodeFileURL);
     } else {
       // TODO: Handle error for user.
@@ -327,7 +329,7 @@ function Home() {
       const item = codeResults[codeFocusedIdx.idx];
       if (!item) return;
 
-      openFileInVSCode(item.filePath, item.fileContent);
+      openFileInVSCode(item.filePath, item.fileContent, item.filePreviews);
     }
   }, [activeFilter, codeResults, codeFocusedIdx]);
 
