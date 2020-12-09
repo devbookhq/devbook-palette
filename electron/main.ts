@@ -234,11 +234,8 @@ app.once('ready', async () => {
     shouldOpenAtLogin: store.get('openAtLogin', true),
   });
 
-  // TODO: Remove!
-  onboardingWindow = new OnboardingWindow(PORT);
   if (isFirstRun) {
-    // TODO: Uncomment!
-    // onboardingWindow = new OnboardingWindow(PORT);
+    onboardingWindow = new OnboardingWindow(PORT);
   } else {
     createMainWindow();
   }
