@@ -23,12 +23,18 @@ const Section = styled.div`
 
 const HotkeyWrapper = styled.div<{ isClickable?: boolean }>`
   margin-right: 15px;
+  padding: 5px;
   display: flex;
   align-items: center;
 
-  :hover {
-    cursor: ${props => props.isClickable ? 'pointer' : 'default'};
-  }
+  border-radius: 5px;
+  ${props => props.isClickable && `
+    :hover {
+      transition: background 170ms ease-in;
+      cursor: pointer;
+      background: #434252;
+    }
+  `};
 `;
 
 const HotkeyText = styled.span`

@@ -474,7 +474,7 @@ function Home() {
             {isCodeModalOpened &&
               <HotkeysPanel
                 hotkeysLeft={[
-                  { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown] },
+                  { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
                 ]}
                 hotkeysRight={[
                   { text: 'Open in VSCode', hotkey: [Key.Command, 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
