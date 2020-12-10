@@ -14,10 +14,14 @@ theme.plain.backgroundColor = '#1C1B26';
 const Container = styled.div`
   width: 100%;
   height: 100%;
+
+  display: flex;
+  flex: 1;
 `;
 
 const Pre = styled.pre`
   height: 100%;
+  width: 100%;
   margin: 0;
   padding: 10px;
   display: flex;
@@ -41,7 +45,7 @@ const Pre = styled.pre`
 `;
 
 const InfoMessage = styled.div`
-  margin: 50px auto;
+  margin: auto;
 
   color: #5A5A6F;
   font-size: 16px;
@@ -130,7 +134,12 @@ function getHighlightedContent(ranges: number[][], content: string, startingOffs
 // tokens (Token[][]), and
 // getTokenProps ((input: TokenInputProps) => TokenOutputProps)
 // I cannot get the types from prism-react-renderer because they are not explicitly exported
-function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any, firstHighlightRef: React.RefObject<HTMLElement>, ref: any) {
+function getRenderableLines(
+  preview: FilePreview,
+  lines: any,
+  getTokenProps: any,
+  firstHighlightRef: React.RefObject<HTMLSpanElement>,
+  ref: React.RefObject<HTMLDivElement>) {
   const assembledLinesNos: JSX.Element[] = [];
   const assembledLines: JSX.Element[] = [];
 
@@ -202,7 +211,7 @@ function Code({
   isInModal,
 }: CodeProps) {
   const lineRef = useRef<HTMLDivElement>(null);
-  const firstHighlightRef = useRef<HTMLDivElement>(null);
+  const firstHighlightRef = useRef<HTMLSpanElement>(null);
 
   const [codeComponent, setCodeComponent] = useState<JSX.Element>();
 
@@ -245,10 +254,10 @@ function Code({
 
   return (
     <>
-      {isInModal && !codeComponent && <InfoMessage>Loading...</InfoMessage>}
       <Container
         className={className}
       >
+        {isInModal && !codeComponent && <InfoMessage>Loading...</InfoMessage>}
         {isInModal && codeComponent}
         {!isInModal &&
           <Prism

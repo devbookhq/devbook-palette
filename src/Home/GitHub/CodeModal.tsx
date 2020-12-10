@@ -20,9 +20,6 @@ const StyledModal = styled(Modal)`
 
   background: #1C1B26;
   border-radius: 20px 20px 0 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
 `;
 
 const StyledCode = styled(Code)`
