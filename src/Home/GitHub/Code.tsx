@@ -246,18 +246,19 @@ function Code({
       className={className}
     >
       {isAsync && codeComponent}
-      {!isAsync && <Prism
-        {...defaultProps}
-        code={filePreview.fragment}
-        theme={theme}
-        language="typescript" // TODO: Detect the fragment's language.
-      >
-        {({
-          className,
-          style,
-          tokens,
-          getTokenProps,
-        }) => (
+      {!isAsync &&
+        <Prism
+          {...defaultProps}
+          code={filePreview.fragment}
+          theme={theme}
+          language="typescript" // TODO: Detect the fragment's language.
+        >
+          {({
+            className,
+            style,
+            tokens,
+            getTokenProps,
+          }) => (
             <Pre
               className={className}
               style={style}
@@ -265,7 +266,8 @@ function Code({
               {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
             </Pre>
           )}
-      </Prism>}
+        </Prism>
+      }
     </Container>
   );
 };
