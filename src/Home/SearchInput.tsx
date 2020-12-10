@@ -80,6 +80,7 @@ const FilterButton = styled.button<{ selected?: boolean }>`
   border: none;
 
   :hover {
+    transition: background 170ms ease-in;
     cursor: pointer;
     color: white;
   }

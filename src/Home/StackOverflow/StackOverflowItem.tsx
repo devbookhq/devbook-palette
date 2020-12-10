@@ -62,7 +62,7 @@ const QuestionTitle = styled.span`
 
   color: #fff;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 14px;
   text-decoration: underline;
 
   :hover {
