@@ -26,8 +26,8 @@ const StyledModal = styled(Modal)`
 `;
 
 const StyledCode = styled(Code)`
-  // '5px' is basically a padding so the last line is readable because HotkeysPanel has box-shadow.
-  height: calc(100% - ${headerHeight}px - 5px);
+  // '6px' is basically a padding so the last line is readable because HotkeysPanel has box-shadow.
+  height: calc(100% - ${headerHeight}px - 6px);
 `;
 
 const Header = styled.div`

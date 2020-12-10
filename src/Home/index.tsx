@@ -43,8 +43,7 @@ const Container = styled.div`
 
 const SearchResults = styled.div`
   flex: 1;
-  margin-top: 15px;
-  padding: 10px 15px;
+  padding: 10px 15px 10px;
 
   overflow: hidden;
   overflow-y: overlay;
@@ -52,7 +51,7 @@ const SearchResults = styled.div`
 
 const InfoMessage = styled.div`
   margin: 100px auto 0;
-  
+
   color: #5A5A6F;
   font-size: 16px;
   font-weight: 600;

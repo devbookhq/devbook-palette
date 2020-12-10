@@ -14,6 +14,8 @@ const Container = styled.div`
   padding-top: 5px;
   display: flex;
   flex-direction: column;
+
+  background: #25252E;
 `;
 
 const InputWrapper = styled.div<{ isFocused?: boolean }>`
@@ -49,8 +51,7 @@ const StyledLoader = styled(Loader)`
 
 const Menu = styled.div`
   width: 100%;
-  margin-top: 10px;
-  padding: 0 10px;
+  padding: 10px;
 
   display: flex;
   justify-content: space-between;
@@ -71,13 +72,15 @@ const Filter = styled.div`
 
 const FilterButton = styled.button<{ selected?: boolean }>`
   color: ${props => props.selected ? 'white' : '#5A5A6F'};
-  font-size: 14px;
-  font-weight: 600;
+  font-family: 'Poppins';
+  font-size: 15px;
+  font-weight: 500;
 
   background: none;
   border: none;
 
   :hover {
+    transition: background 170ms ease-in;
     cursor: pointer;
     color: white;
   }

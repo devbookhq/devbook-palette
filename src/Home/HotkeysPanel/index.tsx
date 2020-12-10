@@ -5,7 +5,7 @@ import Hotkey, { HotkeyType } from './Hotkey';
 
 const Container = styled.div`
   width: 100%;
-  padding: 8px 15px;
+  padding: 4px 15px;
   z-index: 1;
 
   display: flex;
@@ -29,6 +29,7 @@ const HotkeyWrapper = styled.div<{ isClickable?: boolean }>`
 
   border-radius: 5px;
   ${props => props.isClickable && `
+    user-select: none;
     :hover {
       transition: background 170ms ease-in;
       cursor: pointer;
@@ -38,13 +39,11 @@ const HotkeyWrapper = styled.div<{ isClickable?: boolean }>`
 `;
 
 const HotkeyText = styled.span`
-  position: relative;
-  bottom: 1px;
   margin-right: 8px;
 
   color: #fff;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
 `;
 
 const SeparatedHotkey = styled(Hotkey)`
