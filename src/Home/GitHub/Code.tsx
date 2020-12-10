@@ -8,7 +8,6 @@ import Prism, { defaultProps } from 'prism-react-renderer';
 import theme from 'prism-react-renderer/themes/nightOwl';
 
 import { FilePreview } from 'search/gitHub';
-import { file } from 'tmp';
 
 theme.plain.backgroundColor = '#1C1B26';
 
@@ -182,17 +181,13 @@ function getRenderableLines(preview: FilePreview, lines: any, getTokenProps: any
 interface CodeProps {
   filePreview: FilePreview;
   className?: string;
-  isFocused?: boolean;
   isInModal?: boolean;
-  isAsync?: boolean;
 }
 
 function Code({
   filePreview,
   className,
-  isFocused,
   isInModal,
-  isAsync,
 }: CodeProps) {
   const lineRef = useRef<HTMLDivElement>(null);
   const firstHighlightRef = useRef<HTMLDivElement>(null);
@@ -200,53 +195,49 @@ function Code({
   const [codeComponent, setCodeComponent] = useState<JSX.Element>();
 
   useEffect(() => {
-    if (!isInModal) return;
-    lineRef?.current?.focus();
-  }, [isInModal]);
+    // setTimeout without any delay is a hack which puts it on the event loop stack and gives control to the event loop.
+    // I'm not sure why the hack is needed.
 
-  useEffect(() => {
-    if (isFocused && firstHighlightRef.current) {
-      // TODO/HACK: scrollIntoView is only working in the first opened code modal view when called normally.
-      // setTimeout without any delay is a hack which puts it on the event loop stack and gives control to the event loop.
-      // I'm not sure why the hack is needed.
-      setTimeout(() => {
-        firstHighlightRef.current?.scrollIntoView({ block: 'center', inline: 'end' })
-      });
-    }
-  }, [isFocused, firstHighlightRef, filePreview]);
+    // TODO/HACK: When rendering Prism component in the useEffect the initial rendering takes a long time
+    // and the hotkey panel is rendered after the whole Prism component.
+    setTimeout(() => {
+      if (isInModal && filePreview) {
+        const component = <Prism
+          {...defaultProps}
+          code={filePreview.fragment}
+          theme={theme}
+          language="typescript" // TODO: Detect the fragment's language.
+        >
+          {({
+            className,
+            style,
+            tokens,
+            getTokenProps,
+          }) => (
+              <Pre
+                className={className}
+                style={style}
+              >
+                {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
+              </Pre>
+            )}
+        </Prism>;
 
-  useEffect(() => {
-    if (isAsync && filePreview) {
-      const component = <Prism
-        {...defaultProps}
-        code={filePreview.fragment}
-        theme={theme}
-        language="typescript" // TODO: Detect the fragment's language.
-      >
-        {({
-          className,
-          style,
-          tokens,
-          getTokenProps,
-        }) => (
-            <Pre
-              className={className}
-              style={style}
-            >
-              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
-            </Pre>
-          )}
-      </Prism>;
-      setCodeComponent(component);
-    }
-  }, [isAsync, filePreview])
+        setCodeComponent(component);
+        // TODO/HACK: When using scrollIntoView without setTimeout, the scroll works only for the first opened modal view.
+        setTimeout(() => firstHighlightRef.current?.scrollIntoView({ block: 'center', inline: 'end' }));
+        lineRef?.current?.focus();
+      }
+    });
+  }, [isInModal, filePreview]);
 
   return (
     <Container
       className={className}
     >
-      {isAsync && codeComponent}
-      {!isAsync &&
+      {isInModal && codeComponent}
+      {isInModal && !codeComponent && <div>Loading...</div>}
+      {!isInModal &&
         <Prism
           {...defaultProps}
           code={filePreview.fragment}
@@ -259,13 +250,13 @@ function Code({
             tokens,
             getTokenProps,
           }) => (
-            <Pre
-              className={className}
-              style={style}
-            >
-              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
-            </Pre>
-          )}
+              <Pre
+                className={className}
+                style={style}
+              >
+                {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
+              </Pre>
+            )}
         </Prism>
       }
     </Container>

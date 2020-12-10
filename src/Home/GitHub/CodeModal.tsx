@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import styled from 'styled-components';
 
 import { openLink } from 'mainProcess';
@@ -9,7 +9,9 @@ import {
 import Modal from 'components/Modal';
 import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 
-import Code from './Code';
+// import Code from './Code';
+
+const Code = React.lazy(() => import('./Code'));
 
 const marginTop = 60;
 
@@ -24,6 +26,10 @@ const StyledModal = styled(Modal)`
 
 const StyledCode = styled(Code)`
   height: calc(100% - ${marginTop}px);
+`;
+
+const Loading = styled.div`
+  padding-top: 200px;
 `;
 
 const Header = styled.div`
@@ -137,12 +143,12 @@ function CodeModal({
         </FilePathWrapper>
       </Header>
 
-      <StyledCode
-        filePreview={filePreview}
-        isFocused={true}
-        isInModal={true}
-        isAsync={true}
-      />
+      <Suspense fallback={<Loading>Loading...</Loading>}>
+        <StyledCode
+          filePreview={filePreview}
+          isInModal
+        />
+      </Suspense>
 
     </StyledModal>
   );
