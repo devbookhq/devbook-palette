@@ -21,23 +21,43 @@ const Section = styled.div`
   align-items: center;
 `;
 
-const HotkeyWrapper = styled.div`
-  margin-right: 10px;
+const HotkeyWrapper = styled.div<{ isClickable?: boolean }>`
+  margin-right: 15px;
+  padding: 5px;
   display: flex;
   align-items: center;
+
+  border-radius: 5px;
+  ${props => props.isClickable && `
+    :hover {
+      transition: background 170ms ease-in;
+      cursor: pointer;
+      background: #434252;
+    }
+  `};
 `;
 
 const HotkeyText = styled.span`
-  margin-right: 5px;
+  position: relative;
+  bottom: 1px;
+  margin-right: 8px;
 
   color: #fff;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
+`;
+
+const SeparatedHotkey = styled(Hotkey)`
+  :not(:last-child) {
+    margin-right: 4px;
+  }
 `;
 
 export interface HotkeyWithText {
   text: string;
   hotkey: HotkeyType;
+  isSeparated?: boolean; // Separates hotkey's symbols that are listed in the 'hotkey' property.
+  onClick?: (e: any) => void;
 }
 
 interface HotkeysPanelProps {
@@ -46,31 +66,63 @@ interface HotkeysPanelProps {
 }
 
 function HotkeysPanel({ hotkeysLeft, hotkeysRight }: HotkeysPanelProps) {
+  function renderHotkey(h: HotkeyWithText) {
+    return (
+      <HotkeyWrapper
+        key={h.text}
+        isClickable={!!h.onClick}
+        onClick={h.onClick ? (() => (h as any).onClick()) : undefined}
+      >
+        <HotkeyText>{h.text}</HotkeyText>
+        {!h.isSeparated &&
+          <Hotkey
+            hotkey={h.hotkey}
+          />
+        }
+        {h.isSeparated &&
+          <>
+            {h.hotkey.map((el, idx) => (
+              <SeparatedHotkey
+                key={idx}
+                hotkey={[el]}
+              />
+            ))}
+          </>
+        }
+      </HotkeyWrapper>
+    );
+ }
+
   return (
     <Container>
       <Section>
-        {hotkeysLeft.map(h => (
-          <HotkeyWrapper
-            key={h.text}
-          >
-            <HotkeyText>{h.text}</HotkeyText>
-            <Hotkey
-              hotkey={h.hotkey}
-            />
-          </HotkeyWrapper>
-        ))}
+        {hotkeysLeft.map(h => renderHotkey(h))}
       </Section>
 
       <Section>
         {hotkeysRight.map(h => (
-          <HotkeyWrapper
-            key={h.text}
-          >
-            <HotkeyText>{h.text}</HotkeyText>
+        <HotkeyWrapper
+          key={h.text}
+          isClickable={!!h.onClick}
+          onClick={h.onClick ? (h as any).onClick : undefined}
+        >
+          <HotkeyText>{h.text}</HotkeyText>
+          {!h.isSeparated &&
             <Hotkey
               hotkey={h.hotkey}
             />
-          </HotkeyWrapper>
+          }
+          {h.isSeparated &&
+            <>
+              {h.hotkey.map((el, idx) => (
+                <SeparatedHotkey
+                  key={idx}
+                  hotkey={[el]}
+                />
+              ))}
+            </>
+          }
+        </HotkeyWrapper>
         ))}
       </Section>
     </Container>

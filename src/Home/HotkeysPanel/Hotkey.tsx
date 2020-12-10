@@ -9,7 +9,7 @@ import { ReactComponent as arrowUpKeyImg } from 'img/arrow-up-key.svg';
 import { ReactComponent as arrowDownKeyImg } from 'img/arrow-down-key.svg';
 
 const Container = styled.div`
-  height: 18px;
+  min-height: 20px;
   padding: 3px 7px;
   display: flex;
   align-items: center;
@@ -17,7 +17,7 @@ const Container = styled.div`
 
   color: white;
   border-radius: 5px;
-  background: #262736;
+  background: #434252;
 `;
 
 const ArrowUpKey = styled(arrowUpKeyImg)`
@@ -46,7 +46,7 @@ const ArrowDownKey = styled(arrowDownKeyImg)`
 
 const EnterKeyImg = styled(enterKeyImg)`
   width: auto;
-  height: 12px;
+  height: 13px;
   :not(:last-child) {
     margin-right: 5px;
   }
@@ -58,7 +58,7 @@ const EnterKeyImg = styled(enterKeyImg)`
 
 const CommandKeyImg = styled(cmdKeyImg)`
   width: auto;
-  height: 12px;
+  height: 13px;
   :not(:last-child) {
     margin-right: 5px;
   }
@@ -70,7 +70,7 @@ const CommandKeyImg = styled(cmdKeyImg)`
 
 const ShiftKeyImg = styled(shiftKeyImg)`
   width: auto;
-  height: 11px;
+  height: 12px;
   :not(:last-child) {
     margin-right: 7px;
   }
@@ -116,6 +116,7 @@ export enum Key {
 export type HotkeyType = (string | Key)[];
 
 interface HotkeyProps {
+  className?: string;
   hotkey: HotkeyType;
 }
 
@@ -132,9 +133,11 @@ function renderKey(key: Key) {
   );
 }
 
-function Hotkey({ hotkey }: HotkeyProps) {
+function Hotkey({ className, hotkey }: HotkeyProps) {
   return (
-    <Container>
+    <Container
+      className={className}
+    >
       {hotkey.map(el => (
         <React.Fragment key={el}>
           {Object.keys(Key).includes(el)
