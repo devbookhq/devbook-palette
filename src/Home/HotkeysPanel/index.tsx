@@ -38,13 +38,11 @@ const HotkeyWrapper = styled.div<{ isClickable?: boolean }>`
 `;
 
 const HotkeyText = styled.span`
-  position: relative;
-  bottom: 1px;
   margin-right: 8px;
 
   color: #fff;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
 `;
 
 const SeparatedHotkey = styled(Hotkey)`

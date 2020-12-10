@@ -1,4 +1,22 @@
  @font-face {
+  font-family: 'Poppins';
+  font-weight: 400;
+  src: local('Poppins-Regular'), url(./fonts/Poppins-Regular.ttf) format('truetype');
+ }
+
+ @font-face {
+  font-family: 'Poppins';
+  font-weight: 500;
+  src: local('Poppins-Medium'), url(./fonts/Poppins-Medium.ttf) format('truetype');
+ }
+
+ @font-face {
+  font-family: 'Poppins';
+  font-weight: 600;
+  src: local('Poppins-SemiBold'), url(./fonts/Poppins-SemiBold.ttf) format('truetype');
+ }
+
+ @font-face {
   font-family: 'Roboto Mono';
   font-weight: 400;
   src: local('RobotoMono-Regular'), url(./fonts/RobotoMono-Regular.ttf) format('truetype');
@@ -27,7 +45,7 @@ html, body {
   padding: 0;
 
   color: white;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   background: #1C1B26;
   overflow: hidden;
 }

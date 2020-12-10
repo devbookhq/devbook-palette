@@ -93,11 +93,8 @@ const AltKeyImg = styled(altKeyImg)`
 `;
 
 const TextKey = styled.div`
-  position: relative;
-  bottom: 1px;
-
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 500;
+  font-size: 15px;
 
   :not(:last-child) {
     margin-right: 7px;
