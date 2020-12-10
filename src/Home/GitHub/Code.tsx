@@ -1,12 +1,14 @@
 import React, {
   useRef,
   useEffect,
+  useState,
 } from 'react';
 import styled from 'styled-components';
 import Prism, { defaultProps } from 'prism-react-renderer';
 import theme from 'prism-react-renderer/themes/nightOwl';
 
 import { FilePreview } from 'search/gitHub';
+import { file } from 'tmp';
 
 theme.plain.backgroundColor = '#1C1B26';
 
@@ -182,6 +184,7 @@ interface CodeProps {
   className?: string;
   isFocused?: boolean;
   isInModal?: boolean;
+  isAsync?: boolean;
 }
 
 function Code({
@@ -189,9 +192,12 @@ function Code({
   className,
   isFocused,
   isInModal,
+  isAsync,
 }: CodeProps) {
   const lineRef = useRef<HTMLDivElement>(null);
   const firstHighlightRef = useRef<HTMLDivElement>(null);
+
+  const [codeComponent, setCodeComponent] = useState<JSX.Element>();
 
   useEffect(() => {
     if (!isInModal) return;
@@ -209,11 +215,9 @@ function Code({
     }
   }, [isFocused, firstHighlightRef, filePreview]);
 
-  return (
-    <Container
-      className={className}
-    >
-      <Prism
+  useEffect(() => {
+    if (isAsync && filePreview) {
+      const component = <Prism
         {...defaultProps}
         code={filePreview.fragment}
         theme={theme}
@@ -232,7 +236,36 @@ function Code({
               {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
             </Pre>
           )}
-      </Prism>
+      </Prism>;
+      setCodeComponent(component);
+    }
+  }, [isAsync, filePreview])
+
+  return (
+    <Container
+      className={className}
+    >
+      {isAsync && codeComponent}
+      {!isAsync && <Prism
+        {...defaultProps}
+        code={filePreview.fragment}
+        theme={theme}
+        language="typescript" // TODO: Detect the fragment's language.
+      >
+        {({
+          className,
+          style,
+          tokens,
+          getTokenProps,
+        }) => (
+            <Pre
+              className={className}
+              style={style}
+            >
+              {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
+            </Pre>
+          )}
+      </Prism>}
     </Container>
   );
 };

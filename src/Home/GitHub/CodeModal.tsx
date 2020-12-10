@@ -141,6 +141,7 @@ function CodeModal({
         filePreview={filePreview}
         isFocused={true}
         isInModal={true}
+        isAsync={true}
       />
 
     </StyledModal>
