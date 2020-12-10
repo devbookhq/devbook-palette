@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { openLink } from 'mainProcess';
@@ -9,9 +9,7 @@ import {
 import Modal from 'components/Modal';
 import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 
-// import Code from './Code';
-
-const Code = React.lazy(() => import('./Code'));
+import Code from './Code';
 
 const marginTop = 60;
 
@@ -22,14 +20,13 @@ const StyledModal = styled(Modal)`
 
   background: #1C1B26;
   border-radius: 20px 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 `;
 
 const StyledCode = styled(Code)`
   height: calc(100% - ${marginTop}px);
-`;
-
-const Loading = styled.div`
-  padding-top: 200px;
 `;
 
 const Header = styled.div`
@@ -49,6 +46,7 @@ const Header = styled.div`
 const RepoName = styled.div`
   margin-bottom: 5px;
   overflow: hidden;
+
   text-overflow: ellipsis;
   white-space: nowrap;
 
@@ -121,7 +119,7 @@ function CodeModal({
   async function handleOpenExternalLinkButton() {
     const firstPreview = codeResult.filePreviews[0];
     const gitHubFileURL = firstPreview ? `${codeResult.fileURL}#L${firstPreview.startLine + 3}` : codeResult.fileURL;
-    await openLink(gitHubFileURL);
+    return openLink(gitHubFileURL);
   }
 
   return (
@@ -143,12 +141,10 @@ function CodeModal({
         </FilePathWrapper>
       </Header>
 
-      <Suspense fallback={<Loading>Loading...</Loading>}>
-        <StyledCode
-          filePreview={filePreview}
-          isInModal
-        />
-      </Suspense>
+      <StyledCode
+        filePreview={filePreview}
+        isInModal
+      />
 
     </StyledModal>
   );

@@ -40,16 +40,26 @@ const Pre = styled.pre`
   }
 `;
 
+const InfoMessage = styled.div`
+  margin: 50px auto;
+
+  color: #5A5A6F;
+  font-size: 16px;
+  font-weight: 600;
+`;
+
 const LineNo = styled.div`
   padding-right: 1em;
-  user-select: none;
 
   color: #5A5A6F;
   text-align: right;
+
+  user-select: none;
 `;
 
 const LineContent = styled.div`
   margin-right: 1em;
+
   background: #1C1B26;
 `;
 
@@ -62,9 +72,11 @@ const LinesContentWrapper = styled.div`
 `;
 
 const HighlightedResult = styled.span`
-  font-weight: 600;
   background: #806416;
+
+  font-weight: 600;
   color: white;
+
   box-shadow: 0 0 0 1px #806416;
 `;
 
@@ -232,34 +244,36 @@ function Code({
   }, [isInModal, filePreview]);
 
   return (
-    <Container
-      className={className}
-    >
-      {isInModal && codeComponent}
-      {isInModal && !codeComponent && <div>Loading...</div>}
-      {!isInModal &&
-        <Prism
-          {...defaultProps}
-          code={filePreview.fragment}
-          theme={theme}
-          language="typescript" // TODO: Detect the fragment's language.
-        >
-          {({
-            className,
-            style,
-            tokens,
-            getTokenProps,
-          }) => (
-              <Pre
-                className={className}
-                style={style}
-              >
-                {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
-              </Pre>
-            )}
-        </Prism>
-      }
-    </Container>
+    <>
+      {isInModal && !codeComponent && <InfoMessage>Loading...</InfoMessage>}
+      <Container
+        className={className}
+      >
+        {isInModal && codeComponent}
+        {!isInModal &&
+          <Prism
+            {...defaultProps}
+            code={filePreview.fragment}
+            theme={theme}
+            language="typescript" // TODO: Detect the fragment's language.
+          >
+            {({
+              className,
+              style,
+              tokens,
+              getTokenProps,
+            }) => (
+                <Pre
+                  className={className}
+                  style={style}
+                >
+                  {getRenderableLines(filePreview, tokens, getTokenProps, firstHighlightRef, lineRef)}
+                </Pre>
+              )}
+          </Prism>
+        }
+      </Container>
+    </>
   );
 };
 

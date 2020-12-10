@@ -51,6 +51,7 @@ const SearchResults = styled.div`
 
 const InfoMessage = styled.div`
   margin: 100px auto 0;
+  
   color: #5A5A6F;
   font-size: 16px;
   font-weight: 600;
