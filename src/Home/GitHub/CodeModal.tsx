@@ -11,9 +11,12 @@ import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 
 import Code from './Code';
 
-const marginTop = 60;
+const marginTop = 110;
+const headerHeight = 58;
 
 const StyledModal = styled(Modal)`
+  position: relative;
+  bottom: 50px;
   width: 100%;
   height: calc(100vh - ${marginTop}px);
   margin-top: ${marginTop}px;
@@ -23,10 +26,12 @@ const StyledModal = styled(Modal)`
 `;
 
 const StyledCode = styled(Code)`
-  height: calc(100% - ${marginTop}px);
+  // '5px' is basically a padding so the last line is readable because HotkeysPanel has box-shadow.
+  height: calc(100% - ${headerHeight}px - 5px);
 `;
 
 const Header = styled.div`
+  header: ${headerHeight}px;
   width: 100%;
   max-width: 100%;
   padding: 10px;
@@ -142,7 +147,6 @@ function CodeModal({
         filePreview={filePreview}
         isInModal
       />
-
     </StyledModal>
   );
 }

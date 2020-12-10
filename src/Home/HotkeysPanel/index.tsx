@@ -5,7 +5,7 @@ import Hotkey, { HotkeyType } from './Hotkey';
 
 const Container = styled.div`
   width: 100%;
-  padding: 12px 15px;
+  padding: 8px 15px;
   z-index: 1;
 
   display: flex;
