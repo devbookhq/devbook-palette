@@ -17,7 +17,7 @@ const Container = styled.div`
 
   color: white;
   border-radius: 5px;
-  background: #262736;
+  background: #434252;
 `;
 
 const ArrowUpKey = styled(arrowUpKeyImg)`
@@ -116,6 +116,7 @@ export enum Key {
 export type HotkeyType = (string | Key)[];
 
 interface HotkeyProps {
+  className?: string;
   hotkey: HotkeyType;
 }
 
@@ -132,9 +133,11 @@ function renderKey(key: Key) {
   );
 }
 
-function Hotkey({ hotkey }: HotkeyProps) {
+function Hotkey({ className, hotkey }: HotkeyProps) {
   return (
-    <Container>
+    <Container
+      className={className}
+    >
       {hotkey.map(el => (
         <React.Fragment key={el}>
           {Object.keys(Key).includes(el)
