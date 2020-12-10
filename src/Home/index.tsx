@@ -2,7 +2,6 @@ import React, {
   useEffect,
   useState,
   useCallback,
-  useMemo,
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -143,12 +142,12 @@ function Home() {
     (soResults.length === 0 && activeFilter === ResultsFilter.StackOverflow) ||
     (codeResults.length === 0 && activeFilter === ResultsFilter.GitHubCode);
 
-  const openFocusedGitHubCodeItemInBrowser = useCallback(() => {
+  function openFocusedGitHubCodeItemInBrowser() {
     const item = codeResults[codeFocusedIdx.idx];
     const firstPreview = item?.filePreviews[0];
     const gitHubFileURL = firstPreview ? `${item.fileURL}#L${firstPreview.startLine + 3}` : item?.fileURL;
     if (gitHubFileURL) openLink(gitHubFileURL);
-  }, [codeResults, codeFocusedIdx]);
+  }
 
   const openFocusedSOItemInBrowser = useCallback(() => {
     const item = soResults[soFocusedIdx.idx];
