@@ -66,7 +66,7 @@ const oauth = new OAuth(
 
 oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
   mainWindow?.webContents.send('github-access-token', { accessToken });
-  await keytar.setPassword('devbook-github', 'default', accessToken);
+  await keytar.setPassword('com.foundrylabs.devbook.github', 'default', accessToken);
 });
 
 oauth.emitter.on('error', ({ message }: { message: string }) => {
@@ -295,7 +295,7 @@ ipcMain.on('github-oauth', () => {
 });
 
 ipcMain.handle('github-access-token', () => {
-  return keytar.getPassword('devbook-github', 'default');
+  return keytar.getPassword('com.foundrylabs.devbook.github', 'default');
 });
 
 ipcMain.handle('create-tmp-file', async (event, { filePath, fileContent }: { filePath: string, fileContent: string }) => {
