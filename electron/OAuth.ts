@@ -4,7 +4,6 @@ import { shell } from 'electron';
 import { EventEmitter } from 'events';
 import axios from 'axios';
 import querystring from 'querystring';
-import fs from 'fs';
 import path from 'path';
 import { app } from 'electron';
 import isdev from './isdev';
@@ -26,7 +25,7 @@ class OAuth {
     scope: '',
     allow_signup: 'true',
   };
-  private static redirectHTML = fs.readFileSync(path.join(app.getAppPath(), isdev ? '' : '..', 'resources', 'OAuthRedirect.html'), 'utf8').toString();
+  private static redirectHTMLPath = path.join(app.getAppPath(), isdev ? '' : '..', 'resources', 'OAuthRedirect');
 
   private stateTokens: { [state: string]: boolean } = {};
   private app = express();
@@ -34,6 +33,8 @@ class OAuth {
   public emitter = new EventEmitter();
 
   public constructor(private showApp: any, private hideApp: any) {
+    this.app.use('/redirect', express.static(OAuth.redirectHTMLPath));
+
     this.app.all('/', async (req, res) => {
       const code = req.query['code'] as string;
       const state = req.query['state'] as string;
@@ -45,7 +46,7 @@ class OAuth {
       try {
         const accessToken = await OAuth.getAccessToken(code, state);
         this.emitter.emit('access-token', { accessToken });
-        res.send(OAuth.redirectHTML);
+        res.redirect('/redirect');
       } catch (error) {
         console.error(error.message);
         this.emitter.emit('error', { message: error.message });
@@ -56,7 +57,9 @@ class OAuth {
       }
 
     });
-    this.app.listen(OAuth.PORT);
+
+    const server = this.app.listen(OAuth.PORT);
+    server.address
   }
 
   private static async getAccessToken(code: string, state: string) {
