@@ -205,15 +205,15 @@ function Code({
   }, [isInModal]);
 
   useEffect(() => {
-    if (isFocused && firstHighlightRef.current) {
-      // TODO/HACK: scrollIntoView is only working in the first opened code modal view when called normally.
+    if (isFocused) {
+      // TODO/HACK: When using scrollIntoView without setTimeout, the scroll works only for the first opened modal view.
       // setTimeout without any delay is a hack which puts it on the event loop stack and gives control to the event loop.
       // I'm not sure why the hack is needed.
       setTimeout(() => {
         firstHighlightRef.current?.scrollIntoView({ block: 'center', inline: 'end' })
       });
     }
-  }, [isFocused, firstHighlightRef, filePreview]);
+  }, [isFocused]);
 
   useEffect(() => {
     if (isAsync && filePreview) {
