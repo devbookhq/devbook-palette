@@ -16,6 +16,9 @@ import {
   trackOnboardingFinished,
   trackOnboardingStarted,
   trackSearch,
+  trackConnectGitHubFinished,
+  trackConnectGitHubStarted,
+  trackModalOpened,
 } from './analytics';
 import Tray from './tray';
 import OnboardingWindow from './OnboardingWindow';
@@ -79,6 +82,7 @@ oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }
   mainWindow?.webContents?.send('github-access-token', { accessToken });
   preferencesWindow?.webContents?.send('github-access-token', { accessToken });
   await keytar.setPassword('com.foundrylabs.devbook.github', 'default', accessToken);
+  trackConnectGitHubFinished();
 });
 
 oauth.emitter.on('error', ({ message }: { message: string }) => {
@@ -215,11 +219,18 @@ ipcMain.on('register-default-shortcut', () => {
   trySetGlobalShortcut(shortcut);
 });
 
-ipcMain.on('connect-github', () => oauth.requestOAuth());
+ipcMain.on('connect-github', () => {
+  oauth.requestOAuth();
+  trackConnectGitHubStarted();
+});
 
 ipcMain.on('open-preferences', () => openPreferences());
 
-ipcMain.on('track-search', (searchInfo: any) => trackSearch(searchInfo));
+ipcMain.on('open-preferences', () => openPreferences());
+
+ipcMain.on('track-search', (event, searchInfo: any) => trackSearch(searchInfo));
+
+ipcMain.on('track-modal-opened', (event, modalInfo: any) => trackModalOpened(modalInfo));
 
 ipcMain.handle('github-access-token', () => keytar.getPassword('com.foundrylabs.devbook.github', 'default'));
 

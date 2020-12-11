@@ -20,6 +20,25 @@ export function hideMainWindow() {
   electron.ipcRenderer.send('hide-window');
 }
 
+export function trackSearch(searchInfo: {
+  activeFilter: string,
+  query: string,
+  codeResultsLength: number,
+  soResultsLength: number,
+}) {
+  electron.ipcRenderer.send('track-search', searchInfo);
+}
+
+export function trackModalOpened(modalInfo: {
+  activeFilter: string,
+  resultIndex: number,
+  url: string;
+  query: string;
+  title?: string,
+}) {
+  electron.ipcRenderer.send('track-modal-opened', modalInfo);
+}
+
 export function userDidChangeShortcut(shortcut: string) {
   electron.ipcRenderer.send('user-did-change-shortcut', { shortcut });
 }

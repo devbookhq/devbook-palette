@@ -49,17 +49,44 @@ export function trackOnboardingFinished() {
   });
 }
 
-interface SearchInfo {
-
+export function trackConnectGitHubStarted() {
+  client.track({
+    event: 'Connecting GitHub started',
+    userId: userID,
+    properties: {
+      appVersion,
+    },
+  });
 }
 
-export function trackSearch(searchInfo: SearchInfo) {
+export function trackConnectGitHubFinished() {
+  client.track({
+    event: 'Connecting GitHub finished',
+    userId: userID,
+    properties: {
+      appVersion,
+    },
+  });
+}
+
+export function trackSearch(searchInfo: any) {
   client.track({
     event: 'Search',
     userId: userID,
     properties: {
       appVersion,
       ...searchInfo,
+    },
+  });
+}
+
+export function trackModalOpened(modalInfo: any) {
+  client.track({
+    event: 'Modal opened',
+    userId: userID,
+    properties: {
+      appVersion,
+      ...modalInfo,
     },
   });
 }
