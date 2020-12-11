@@ -12,7 +12,7 @@ class MainWindow {
     return this.window?.webContents;
   }
 
-  public constructor(PORT: number, store: ElectronStore, hideWindow: () => void) {
+  public constructor(PORT: number, store: ElectronStore, hideWindow: () => void, private trackShowApp: () => void) {
     const [mainWinWidth, mainWinHeight] = store.get('mainWinSize', [900, 500]);
     const [mainWinPosX, mainWinPosY] = store.get('mainWinPosition', [undefined, undefined]);
 
@@ -107,6 +107,7 @@ class MainWindow {
 
   public show() {
     this.window?.show();
+    this.trackShowApp();
   }
 
   public isVisible() {

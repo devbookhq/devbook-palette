@@ -11,6 +11,12 @@ import tmp from 'tmp';
 import keytar from 'keytar';
 
 import isdev from './isdev';
+import {
+  trackShowApp,
+  trackOnboardingFinished,
+  trackOnboardingStarted,
+  trackSearch,
+} from './analytics';
 import Tray from './tray';
 import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow from './PreferencesWindow';
@@ -66,7 +72,7 @@ const store = new Store();
 
 const oauth = new OAuth(
   () => mainWindow?.show(),
-  hideMainWindow,
+  () => hideMainWindow(),
 );
 
 oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
@@ -112,7 +118,7 @@ if (process.platform === 'darwin' && !isFirstRun) {
 // or just calls .show() or .hide() on an existing instance.
 function toggleVisibilityOnMainWindow() {
   if (!mainWindow) {
-    mainWindow = new MainWindow(PORT, store, hideMainWindow);
+    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
     onboardingWindow?.webContents?.send('did-show-main-window');
     return;
   }
@@ -173,8 +179,9 @@ app.once('ready', async () => {
 
   if (isFirstRun) {
     onboardingWindow = new OnboardingWindow(PORT);
+    trackOnboardingStarted();
   } else {
-    mainWindow = new MainWindow(PORT, store, hideMainWindow);
+    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
   }
 });
 
@@ -190,9 +197,7 @@ app.on('activate', () => {
 app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 
 /////////// IPC events ///////////
-ipcMain.on('view-ready', () => { });
-
-ipcMain.on('hide-window', hideMainWindow);
+ipcMain.on('hide-window', () => hideMainWindow());
 
 ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => trySetGlobalShortcut(shortcut));
 
@@ -202,6 +207,7 @@ ipcMain.on('finish-onboarding', () => {
   onboardingWindow?.hide();
   store.set('firstRun', false);
   if (process.platform === 'darwin') app.dock.hide();
+  trackOnboardingFinished();
 });
 
 ipcMain.on('register-default-shortcut', () => {
@@ -212,6 +218,8 @@ ipcMain.on('register-default-shortcut', () => {
 ipcMain.on('connect-github', () => oauth.requestOAuth());
 
 ipcMain.on('open-preferences', () => openPreferences());
+
+ipcMain.on('track-search', (searchInfo: any) => trackSearch(searchInfo));
 
 ipcMain.handle('github-access-token', () => keytar.getPassword('com.foundrylabs.devbook.github', 'default'));
 
@@ -236,7 +244,7 @@ ipcMain.handle('create-tmp-file', async (event, { filePath, fileContent }: { fil
           if (error) {
             return reject(error);
           }
-          return resolve({ name, fd })
+          return resolve({ name, fd });
         });
       });
     });
