@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import devbookPreviewImg from 'img/devbook-preview.png';
+import devbookPreviewSOImg from 'img/devbook-preview-so.png';
+import devbookPreviewCodeImg from 'img/devbook-preview-code.png';
 
 const Container = styled.div`
   width: 100%;
@@ -28,29 +29,88 @@ const Title = styled.span`
 const Explanation = styled.span`
   margin-top: 10px;
   color: white;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 400;
   text-align: center;
 `;
 
+const FeaturesWrapper = styled.div`
+  margin-top: 35px;
+  display: flex;
+  align-items: center;
+`;
+
+const Delimiter = styled.div`
+  margin 0 10px;
+
+  width: 25px;
+  height: 0px;
+  border: 1px solid #3B3A4A;
+  transform: rotate(90deg);
+`;
+
+const FeatureButton = styled.button<{ selected?: boolean }>`
+  color: ${props => props.selected ? 'white' : '#5A5A6F'};
+  font-family: 'Poppins';
+  font-size: 15px;
+  font-weight: 500;
+
+  background: none;
+  border: none;
+
+  :hover {
+    transition: background 170ms ease-in;
+    cursor: pointer;
+    color: white;
+  }
+`;
+
 const DevbookImg = styled.img`
-  margin-top: 20px;
   height: auto;
   max-width: 1000px;
   width: 100%;
 `;
 
+
+enum Feature {
+  StackOverflow,
+  GitHubCode,
+}
+
 function IntroductionPage() {
+  const [activeFeature, setActiveFeature] = useState<Feature>(Feature.StackOverflow);
+
   return (
     <Container>
       <Titles>
         <Title>Search engine for developers</Title>
         <Explanation>
-          Single place to search in StackOverflow and GitHub code.
+          Solve your problems faster and become a more productive developer
         </Explanation>
       </Titles>
 
-      <DevbookImg src={devbookPreviewImg} />
+      <FeaturesWrapper>
+        <FeatureButton
+          selected={activeFeature === Feature.StackOverflow}
+          onClick={() => setActiveFeature(Feature.StackOverflow)}
+        >
+          Search StackOverflow
+        </FeatureButton>
+        <Delimiter/>
+        <FeatureButton
+          selected={activeFeature === Feature.GitHubCode}
+          onClick={() => setActiveFeature(Feature.GitHubCode)}
+        >
+          Search code on GitHub
+        </FeatureButton>
+      </FeaturesWrapper>
+
+      {activeFeature === Feature.StackOverflow &&
+        <DevbookImg src={devbookPreviewSOImg} />
+      }
+      {activeFeature === Feature.GitHubCode &&
+        <DevbookImg src={devbookPreviewCodeImg} />
+      }
     </Container>
   );
 }
