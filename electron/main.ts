@@ -121,7 +121,7 @@ if (process.platform === 'darwin' && !isFirstRun) {
 // Checks whether the main window is already created and based on this value either creates a new instance
 // or just calls .show() or .hide() on an existing instance.
 function toggleVisibilityOnMainWindow() {
-  if (!mainWindow) {
+  if (!mainWindow || !mainWindow.window) {
     mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
     onboardingWindow?.webContents?.send('did-show-main-window');
     return;
