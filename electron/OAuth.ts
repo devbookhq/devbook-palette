@@ -44,7 +44,7 @@ class OAuth {
       }
 
       try {
-        const accessToken = await OAuth.getAccessToken(code, state);
+        const accessToken = await OAuth.getAccessToken(code);
         this.emitter.emit('access-token', { accessToken });
         res.redirect('/redirect');
       } catch (error) {
@@ -58,11 +58,10 @@ class OAuth {
 
     });
 
-    const server = this.app.listen(OAuth.PORT);
-    server.address
+    this.app.listen(OAuth.PORT);
   }
 
-  private static async getAccessToken(code: string, state: string) {
+  private static async getAccessToken(code: string) {
     const result = await axios.post('https://api.getsidekick.app/getOAuthAccessToken', {
       code,
     });

@@ -1,11 +1,10 @@
 import * as electron from 'electron';
 import * as path from 'path';
 import * as process from 'process';
+import isdev from './isdev';
 import { inspect } from 'util';
 
-import isdev from './isdev';
-
-class OnboardingWindow {
+class PreferencesWindow {
   public window: electron.BrowserWindow | undefined;
 
   public get webContents() {
@@ -14,8 +13,11 @@ class OnboardingWindow {
 
   public constructor(PORT: number) {
     this.window = new electron.BrowserWindow({
-      width: 1250,
-      height: process.platform === 'win32' ? 800 : 720,
+      width: 800,
+      height: 600,
+      minWidth: 600,
+      title: 'Devbook Preferencess',
+      minHeight: 400,
       backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
       webPreferences: {
@@ -35,20 +37,20 @@ class OnboardingWindow {
     });
 
     this.window.webContents.on('crashed', (event, killed) => {
-      console.error('onboarding window crashed', killed, inspect(event, { depth: null }));
+      console.error('main window crashed', killed, inspect(event, { depth: null }));
     });
 
     if (isdev) {
-      this.window.loadURL(`http://localhost:${PORT}/index.html#/onboarding`);
+      this.window.loadURL(`http://localhost:${PORT}/index.html#/preferences`);
       // Hot Reloading
       require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
         forceHardReset: true,
-        hardResetMethod: 'exit',
+        hardResetMethod: 'exit'
       });
       this.window.webContents.openDevTools();
     } else {
-      this.window.loadURL(`file://${__dirname}/../index.html#/onboarding`);
+      this.window.loadURL(`file://${__dirname}/../index.html#/preferences`);
     }
   }
 
@@ -59,6 +61,11 @@ class OnboardingWindow {
   public hide() {
     this.window?.hide();
   }
+
+  public show() {
+    this.window?.show();
+  }
 }
 
-export default OnboardingWindow;
+export default PreferencesWindow;
+

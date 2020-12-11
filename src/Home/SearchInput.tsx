@@ -8,6 +8,9 @@ import styled from 'styled-components';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Loader from 'components/Loader';
 import Hotkey, { Key } from './HotkeysPanel/Hotkey';
+import { openPreferences } from 'mainProcess';
+
+import { ReactComponent as PreferencesIcon } from 'img/preferences.svg';
 
 const Container = styled.div`
   width: 100%;
@@ -83,6 +86,24 @@ const FilterButton = styled.button<{ selected?: boolean }>`
     transition: background 170ms ease-in;
     cursor: pointer;
     color: white;
+  }
+`;
+
+const StyledPreferencesIcon = styled(PreferencesIcon)`
+  height: auto;
+  width: 20px;
+`;
+
+const PreferencesButton = styled.div`
+  margin: 0 5px 0 0;
+
+  display: flex;
+
+  :hover {
+    path {
+      stroke: white;
+    }
+    cursor: pointer;
   }
 `;
 
@@ -175,6 +196,9 @@ function SearchInput({
             </Filter>
           ))}
         </FiltersWrapper>
+        <PreferencesButton onClick={openPreferences}>
+          <StyledPreferencesIcon />
+        </PreferencesButton>
       </Menu>
     </Container>
   );

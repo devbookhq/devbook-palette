@@ -28,6 +28,10 @@ export async function init(token?: string) {
   }
 }
 
+export function disconnect() {
+  accessToken = null;
+}
+
 export function getIsGitHubConnected() {
   if (accessToken) return true;
 }

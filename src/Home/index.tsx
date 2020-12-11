@@ -21,6 +21,7 @@ import {
   searchCode as searchGitHubCode,
   CodeResult,
   init as initGitHub,
+  disconnect as disconnectGitHub,
   FilePreview,
 } from 'search/gitHub';
 
@@ -270,10 +271,10 @@ function Home() {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         openFocusedSOItemInBrowser();
-      break;
+        break;
       case ResultsFilter.GitHubCode:
         openFocusedGitHubCodeItemInBrowser();
-      break;
+        break;
     }
   }, [activeFilter, soResults, soFocusedIdx, codeResults, codeFocusedIdx]);
 
@@ -281,7 +282,7 @@ function Home() {
   // 'cmd+i' hotkey - open the GitHubCode result in a vscode.
   useHotkeys('Cmd+i', () => {
     if (activeFilter === ResultsFilter.GitHubCode) {
-       openFocusedGitHubCodeItemInVSCode();
+      openFocusedGitHubCodeItemInVSCode();
     }
   }, [activeFilter, codeResults, codeFocusedIdx]);
 
@@ -349,7 +350,13 @@ function Home() {
     if (!isGitHubConnected) checkGitHubAccount();
   }, [isGitHubConnected]);
 
-  useIPCRenderer('github-access-token', async (event, { accessToken }: { accessToken: string }) => {
+  useIPCRenderer('github-access-token', async (event, { accessToken }: { accessToken: string | null }) => {
+    if (accessToken === null) {
+      disconnectGitHub();
+      setIsGitHubConnected(false);
+      return;
+    }
+
     await initGitHub(accessToken);
     setIsGitHubConnected(true);
   });

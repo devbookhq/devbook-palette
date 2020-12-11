@@ -1,11 +1,9 @@
 import * as path from 'path';
 import * as process from 'process';
-import { inspect } from 'util';
 import * as electron from 'electron';
 import Store from 'electron-store';
 import fs from 'fs';
 import {
-  BrowserWindow,
   app,
   ipcMain,
 } from 'electron';
@@ -15,13 +13,15 @@ import keytar from 'keytar';
 import isdev from './isdev';
 import Tray from './tray';
 import OnboardingWindow from './OnboardingWindow';
+import PreferencesWindow from './PreferencesWindow';
 import OAuth from './OAuth';
+import MainWindow from './MainWindow';
 
 const PORT = 3000;
 
 // Set up logs so logging from the main process can be seen in the browser.
 function logInRendered(...args: any) {
-  mainWindow?.webContents.send('console', args);
+  mainWindow?.webContents?.send('console', args);
 }
 
 const oldLog = console.log;
@@ -41,6 +41,7 @@ tmp.setGracefulCleanup();
 
 // https://stackoverflow.com/questions/41664208/electron-tray-icon-change-depending-on-dark-theme
 let trayIcon: electron.NativeImage;
+
 if (isdev) {
   if (process.platform === 'darwin' || process.platform === 'linux') {
     trayIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), 'resources', 'TrayIconTemplate.png'));
@@ -55,28 +56,48 @@ if (isdev) {
     trayIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), '..', 'resources', 'TrayIconWindowsTemplate.png'));
   }
 }
+
 let tray: Tray;
-let mainWindow: BrowserWindow | undefined = undefined;
+let mainWindow: MainWindow | undefined = undefined;
 let onboardingWindow: OnboardingWindow | undefined = undefined;
+let preferencesWindow: PreferencesWindow | undefined = undefined;
+
+const store = new Store();
 
 const oauth = new OAuth(
   () => mainWindow?.show(),
-  () => electron.Menu.sendActionToFirstResponder('hide:'),
+  () => hideMainWindow(),
 );
 
 oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
-  mainWindow?.webContents.send('github-access-token', { accessToken });
+  mainWindow?.webContents?.send('github-access-token', { accessToken });
+  preferencesWindow?.webContents?.send('github-access-token', { accessToken });
   await keytar.setPassword('com.foundrylabs.devbook.github', 'default', accessToken);
 });
 
 oauth.emitter.on('error', ({ message }: { message: string }) => {
-  mainWindow?.webContents.send('github-error', { message });
+  mainWindow?.webContents?.send('github-error', { message });
+  preferencesWindow?.webContents?.send('github-error', { message });
 });
 
-const store = new Store();
-let isAppReady = false;
+function hideMainWindow() {
+  if (onboardingWindow?.window?.isVisible() || preferencesWindow?.window?.isVisible()) {
+    mainWindow?.hide();
+  } else {
+    electron.Menu.sendActionToFirstResponder('hide:');
+  }
+}
+
+function openPreferences() {
+  if (!preferencesWindow || !preferencesWindow.window) {
+    preferencesWindow = new PreferencesWindow(PORT);
+  }
+  preferencesWindow.show();
+  hideMainWindow();
+}
 
 const shouldOpenAtLogin = store.get('openAtLogin', true);
+
 app.setLoginItemSettings({ openAtLogin: shouldOpenAtLogin });
 
 let isFirstRun = store.get('firstRun', true);
@@ -86,104 +107,17 @@ if (process.platform === 'darwin' && !isFirstRun) {
   app.dock.hide();
 }
 
-function createMainWindow() {
-  const [mainWinWidth, mainWinHeight] = store.get('mainWinSize', [900, 500]);
-  const [mainWinPosX, mainWinPosY] = store.get('mainWinPosition', [undefined, undefined]);
-
-  mainWindow = new BrowserWindow({
-    x: mainWinPosX,
-    y: mainWinPosY,
-    width: mainWinWidth,
-    height: mainWinHeight,
-    minWidth: 700,
-    minHeight: 400,
-    backgroundColor: '#1C1B26',
-    alwaysOnTop: true,
-    frame: false,
-    fullscreenable: false,
-    skipTaskbar: true, // This makes sure that Devbook window isn't shown on the bottom taskbar on Windows.
-    webPreferences: {
-      nodeIntegration: true,
-      enableRemoteModule: true,
-      worldSafeExecuteJavaScript: true,
-      // devTools: isdev,
-      // nodeIntegrationInSubFrames: true,
-      // webSecurity: false,
-      // allowRunningInsecureContent: true,
-    },
-  });
-
-  mainWindow.on('restore', () => {
-    console.log('Window restored');
-    if (!mainWindow) { return; }
-  });
-
-  mainWindow.on('resize', () => {
-    if (mainWindow) {
-      const [width, height] = mainWindow.getSize();
-      store.set('mainWinSize', [width, height]);
-    }
-  });
-
-  mainWindow.on('moved', () => {
-    if (mainWindow) {
-      const [x, y] = mainWindow.getPosition();
-      store.set('mainWinPosition', [x, y]);
-    }
-  });
-
-  mainWindow.on('close', () => {
-    if (mainWindow) {
-      const [width, height] = mainWindow.getSize();
-      store.set('mainWinSize', [width, height]);
-      const [x, y] = mainWindow.getPosition();
-      store.set('mainWinPosition', [x, y]);
-    }
-  });
-
-  mainWindow.on('blur', () => {
-    if (!isdev) {
-      if (isFirstRun) mainWindow?.hide();
-      else electron.Menu.sendActionToFirstResponder('hide:');
-    }
-  });
-
-  mainWindow.on('closed', () => {
-    mainWindow = undefined;
-  });
-
-  mainWindow.webContents.on('crashed', (event, killed) => {
-    console.error('main window crashed', killed, inspect(event, { depth: null }));
-  });
-
-  if (isdev) {
-    console.log('Development');
-    mainWindow.loadURL(`http://localhost:${PORT}/index.html`);
-    // Hot Reloading
-    require('electron-reload')(__dirname, {
-      electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
-      forceHardReset: true,
-      hardResetMethod: 'exit',
-    });
-
-    mainWindow.webContents.openDevTools();
-  } else {
-    mainWindow.loadURL(`file://${__dirname}/../index.html#/`);
-  }
-}
-
 // Checks whether the main window is already created and based on this value either creates a new instance
 // or just calls .show() or .hide() on an existing instance.
 function toggleVisibilityOnMainWindow() {
   if (!mainWindow) {
-    createMainWindow();
+    mainWindow = new MainWindow(PORT, store, () => hideMainWindow());
     onboardingWindow?.webContents?.send('did-show-main-window');
     return;
   }
 
   if (mainWindow.isVisible()) {
-    if (isFirstRun) mainWindow.hide();
-    else electron.Menu.sendActionToFirstResponder('hide:');
+    hideMainWindow();
   } else {
     mainWindow.show();
     mainWindow.webContents?.send('did-show-main-window');
@@ -214,7 +148,6 @@ app.once('ready', async () => {
   }
 
   isFirstRun = store.get('firstRun', true);
-  isAppReady = true;
 
   // If user registered a global shortcut from the previos session, load it and register again.
   const savedShortcut = store.get('globalShortcut');
@@ -232,6 +165,7 @@ app.once('ready', async () => {
       store.set('openAtLogin', !currentVal);
       tray.setOpenAtLogin(!currentVal);
     },
+    openPreferences: () => openPreferences(),
     onQuitClick: () => app.quit(),
     shouldOpenAtLogin: store.get('openAtLogin', true),
   });
@@ -239,50 +173,33 @@ app.once('ready', async () => {
   if (isFirstRun) {
     onboardingWindow = new OnboardingWindow(PORT);
   } else {
-    createMainWindow();
+    mainWindow = new MainWindow(PORT, store, hideMainWindow);
   }
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('activate', () => {
-  if (!onboardingWindow?.window) {
-    onboardingWindow = new OnboardingWindow(PORT);
-  }
-  /*
-  if (isAppReady && !mainWindow) {
-    createMainWindow();
-  }
-  */
+  if (!onboardingWindow?.window) onboardingWindow = new OnboardingWindow(PORT);
 });
 
 app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 
 /////////// IPC events ///////////
-ipcMain.on('view-ready', () => {
-});
+ipcMain.on('view-ready', () => { });
 
-ipcMain.on('hide-window', () => {
-  if (isFirstRun) mainWindow?.hide();
-  else electron.Menu.sendActionToFirstResponder('hide:');
-});
+ipcMain.on('hide-window', () => hideMainWindow());
 
-ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => {
-  trySetGlobalShortcut(shortcut);
-});
+ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => trySetGlobalShortcut(shortcut));
 
 ipcMain.on('finish-onboarding', () => {
   // TODO: This should be onboardingWindow?.close() but it produces a runtime error when toggling
   // a visibility on the main window.
   onboardingWindow?.hide();
   store.set('firstRun', false);
-  if (process.platform === 'darwin') {
-    app.dock.hide();
-  }
+  if (process.platform === 'darwin') app.dock.hide();
 });
 
 ipcMain.on('register-default-shortcut', () => {
@@ -290,12 +207,16 @@ ipcMain.on('register-default-shortcut', () => {
   trySetGlobalShortcut(shortcut);
 });
 
-ipcMain.on('github-oauth', () => {
-  oauth.requestOAuth();
-});
+ipcMain.on('connect-github', () => oauth.requestOAuth());
 
-ipcMain.handle('github-access-token', () => {
-  return keytar.getPassword('com.foundrylabs.devbook.github', 'default');
+ipcMain.on('open-preferences', () => openPreferences());
+
+ipcMain.handle('github-access-token', () => keytar.getPassword('com.foundrylabs.devbook.github', 'default'));
+
+ipcMain.handle('remove-github', async () => {
+  await keytar.deletePassword('com.foundrylabs.devbook.github', 'default');
+  mainWindow?.webContents?.send('github-access-token', { accessToken: null });
+  preferencesWindow?.webContents?.send('github-access-token', { accessToken: null });
 });
 
 ipcMain.handle('create-tmp-file', async (event, { filePath, fileContent }: { filePath: string, fileContent: string }) => {

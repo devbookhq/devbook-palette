@@ -3,6 +3,7 @@ import * as electron from 'electron';
 interface TrayOptions {
   onShowDevbookClick: () => void;
   onOpenAtLoginClick: () => void;
+  openPreferences: () => void;
   onQuitClick: () => void;
   shouldOpenAtLogin: boolean;
 }
@@ -42,6 +43,10 @@ class Tray {
         type: 'checkbox',
         label: 'Should open at login',
         checked: this.opts.shouldOpenAtLogin,
+      },
+      {
+        click: this.opts.openPreferences,
+        label: 'Preferences',
       },
       {
         click: this.opts.onQuitClick,
