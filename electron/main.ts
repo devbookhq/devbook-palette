@@ -91,7 +91,11 @@ function hideMainWindow() {
 function openPreferences() {
   if (!preferencesWindow || !preferencesWindow.window) {
     preferencesWindow = new PreferencesWindow(PORT);
+    preferencesWindow.window?.on('close', () => {
+      if (process.platform === 'darwin') app.dock.hide();
+    });
   }
+  if (process.platform === 'darwin') app.dock.show();
   preferencesWindow.show();
   hideMainWindow();
 }
