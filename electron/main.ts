@@ -66,7 +66,7 @@ const store = new Store();
 
 const oauth = new OAuth(
   () => mainWindow?.show(),
-  () => hideMainWindow(),
+  hideMainWindow,
 );
 
 oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
@@ -81,9 +81,10 @@ oauth.emitter.on('error', ({ message }: { message: string }) => {
 });
 
 function hideMainWindow() {
-  if (onboardingWindow?.window?.isVisible() || preferencesWindow?.window?.isVisible()) {
-    mainWindow?.hide();
-  } else {
+  mainWindow?.hide();
+
+  if (!onboardingWindow?.window?.closable && !preferencesWindow?.window?.closable) {
+    // This action would hide the oboarding and preferences window too, but it is necessary for restoring focus when hiding mainWindow.
     electron.Menu.sendActionToFirstResponder('hide:');
   }
 }
@@ -111,7 +112,7 @@ if (process.platform === 'darwin' && !isFirstRun) {
 // or just calls .show() or .hide() on an existing instance.
 function toggleVisibilityOnMainWindow() {
   if (!mainWindow) {
-    mainWindow = new MainWindow(PORT, store, () => hideMainWindow());
+    mainWindow = new MainWindow(PORT, store, hideMainWindow);
     onboardingWindow?.webContents?.send('did-show-main-window');
     return;
   }
@@ -191,7 +192,7 @@ app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 /////////// IPC events ///////////
 ipcMain.on('view-ready', () => { });
 
-ipcMain.on('hide-window', () => hideMainWindow());
+ipcMain.on('hide-window', hideMainWindow);
 
 ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => trySetGlobalShortcut(shortcut));
 
