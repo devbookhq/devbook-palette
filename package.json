@@ -69,6 +69,7 @@
     "electron:build-mac": "npm run build && tsc -p electron && npx electron-builder build --mac"
   },
   "dependencies": {
+    "analytics-node": "^3.4.0-beta.3",
     "axios": "^0.21.0",
     "electron-store": "^5.2.0",
     "express": "^4.17.1",
@@ -79,9 +80,11 @@
     "react-hotkeys-hook": "^2.4.0",
     "react-router-dom": "^5.2.0",
     "styled-components": "^5.1.1",
-    "tmp": "^0.2.1"
+    "tmp": "^0.2.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@types/analytics-node": "^3.1.4",
     "@types/express": "^4.17.9",
     "@types/node": "^12.12.6",
     "@types/react": "^16.9.35",
@@ -89,6 +92,7 @@
     "@types/react-router-dom": "^5.1.6",
     "@types/styled-components": "^5.1.0",
     "@types/tmp": "^0.2.0",
+    "@types/uuid": "^8.3.0",
     "@types/webpack-env": "^1.15.2",
     "concurrently": "^5.2.0",
     "craco": "0.0.3",
