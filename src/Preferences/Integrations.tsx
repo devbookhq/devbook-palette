@@ -17,13 +17,22 @@ import Button from 'components/Button';
 import gitHubImg from 'img/github.png';
 
 const Container = styled.div`
-  padding: 57px 25px 0 15px;
+  padding: 15px 0;
   flex: 1;
 `;
 
 const Title = styled.div`
-  font-size: 15px;
-  font-weight: 400;
+  width: 100%;
+  padding: 0 15px 15px;
+
+  font-size: 17px;
+  font-weight: 500;
+
+  border-bottom: 1px solid #3B3A4A;
+`;
+
+const Content = styled.div`
+  padding: 15px;
 `;
 
 const InfoMessage = styled.div`
@@ -36,27 +45,30 @@ const InfoMessage = styled.div`
 
 const IntegrationsWrapper = styled.div`
   flex: 1;
-  padding: 30px 0px 0px 3px;
 `;
 
 const GitHubWrapper = styled.div`
-  display: flex;
   flex: 1;
+  display: flex;
   justify-content: space-between;
+  align-items: center;
 `;
 
 const GitHubTitleWrapper = styled.div`
   display: flex;
+  align-items: center;
 `;
 
 const GitHubLogo = styled.img`
   width: auto;
   height: 30px;
-  padding: 0px 10px 0 0;
+  padding: 0 10px 0 0;
 `;
 
 const GitHubTitle = styled.div`
   margin: auto 0;
+  font-size: 15px;
+  font-weight: 500;
 `;
 
 const ConnectGitHubButton = styled(Button)`
@@ -149,22 +161,26 @@ function Integrations() {
       <Title>
         Integrations
       </Title>
-      {isLoading && <InfoMessage>Loading...</InfoMessage>}
-      {!isLoading &&
-        <IntegrationsWrapper>
-          <GitHubWrapper>
-            <GitHubTitleWrapper>
-              <GitHubLogo src={gitHubImg}>
-              </GitHubLogo>
-              <GitHubTitle>
-                {gitHubLogin ? gitHubLogin : 'GitHub'}
-              </GitHubTitle>
-            </GitHubTitleWrapper>
-            {!gitHubLogin && <ConnectGitHubButton onClick={handleConnectGitHub}>Connect</ConnectGitHubButton>}
-            {gitHubLogin && <RemoveGitHubButton onClick={handleRemoveGitHub}>Remove</RemoveGitHubButton>}
-          </GitHubWrapper>
-        </IntegrationsWrapper>
-      }
+      <Content>
+        <>
+          {isLoading && <InfoMessage>Loading...</InfoMessage>}
+          {!isLoading &&
+            <IntegrationsWrapper>
+              <GitHubWrapper>
+                <GitHubTitleWrapper>
+                  <GitHubLogo src={gitHubImg}>
+                  </GitHubLogo>
+                  <GitHubTitle>
+                    {gitHubLogin ? gitHubLogin : 'GitHub'}
+                  </GitHubTitle>
+                </GitHubTitleWrapper>
+                {!gitHubLogin && <ConnectGitHubButton onClick={handleConnectGitHub}>Connect</ConnectGitHubButton>}
+                {gitHubLogin && <RemoveGitHubButton onClick={handleRemoveGitHub}>Remove</RemoveGitHubButton>}
+              </GitHubWrapper>
+            </IntegrationsWrapper>
+          }
+        </>
+      </Content>
     </Container>
   );
 }
