@@ -99,7 +99,7 @@ interface FocusIndex {
 }
 
 function Home() {
-  const [searchQuery, setSearchQuery] = useState('firestore where query');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
