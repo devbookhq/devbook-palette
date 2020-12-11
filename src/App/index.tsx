@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom';
 
 import Onboarding from 'Onboarding';
+import Preferences from 'Preferences';
 import Home from 'Home';
 
 // The electron window is set to be frameless.
@@ -47,6 +48,12 @@ function App() {
               exact
             >
               <Onboarding />
+            </Route>
+
+            <Route
+              path="/preferences"
+            >
+              <Preferences />
             </Route>
 
             <Route

@@ -5,7 +5,11 @@ export function openLink(url: string) {
 }
 
 export function connectGitHub() {
-  electron.ipcRenderer.send('github-oauth');
+  electron.ipcRenderer.send('connect-github');
+}
+
+export function removeGitHub() {
+  return electron.ipcRenderer.invoke('remove-github');
 }
 
 export function notifyViewReady() {
@@ -18,6 +22,10 @@ export function hideMainWindow() {
 
 export function userDidChangeShortcut(shortcut: string) {
   electron.ipcRenderer.send('user-did-change-shortcut', { shortcut });
+}
+
+export function openPreferences() {
+  electron.ipcRenderer.send('open-preferences');
 }
 
 export function finishOnboarding() {
