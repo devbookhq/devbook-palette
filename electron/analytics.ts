@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { app } from 'electron';
 import ElectronStore from 'electron-store';
 
-const client = new Analytics('BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf', { flushAt: 1 });
+const client = new Analytics('BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf', { flushAt: 5 });
 const store = new ElectronStore();
 
 const userID = store.get('userID', uuidv4());
