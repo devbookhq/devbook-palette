@@ -18,6 +18,7 @@ class OnboardingWindow {
       height: process.platform === 'win32' ? 800 : 720,
       backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
+      title: 'Devbook Onboarding',
       webPreferences: {
         nodeIntegration: true,
         enableRemoteModule: true,

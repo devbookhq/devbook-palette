@@ -36,9 +36,6 @@ class PreferencesWindow {
       this.window = undefined;
       electron.app.dock.hide();
     });
- 
-    this.webContents?.on('did-finish-load', () => {
-    });
 
     this.webContents?.on('crashed', (event, killed) => {
       console.error('main window crashed', killed, inspect(event, { depth: null }));
