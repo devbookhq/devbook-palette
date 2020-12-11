@@ -71,12 +71,10 @@ const GitHubTitle = styled.div`
   font-weight: 500;
 `;
 
-const ConnectGitHubButton = styled(Button)`
-  margin: auto 0;
-`;
+const ConnectGitHubButton = styled(Button)``;
 
 const RemoveGitHubButton = styled.div`
-  margin: auto 0;
+  margin: 8px 0;
 
   color: #FF5865;
   font-weight: 500;
