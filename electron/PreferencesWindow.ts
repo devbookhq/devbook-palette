@@ -34,9 +34,13 @@ class PreferencesWindow {
     //////// Window events ////////
     this.window.on('closed', () => {
       this.window = undefined;
+      electron.app.dock.hide();
+    });
+ 
+    this.webContents?.on('did-finish-load', () => {
     });
 
-    this.window.webContents.on('crashed', (event, killed) => {
+    this.webContents?.on('crashed', (event, killed) => {
       console.error('main window crashed', killed, inspect(event, { depth: null }));
     });
 
@@ -46,12 +50,13 @@ class PreferencesWindow {
       require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
         forceHardReset: true,
-        hardResetMethod: 'exit'
+        hardResetMethod: 'exit',
       });
       this.window.webContents.openDevTools();
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/preferences`);
     }
+    electron.app.dock.show();
   }
 
   public close() {

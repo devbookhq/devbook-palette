@@ -163,7 +163,7 @@ app.once('ready', async () => {
     onOpenAtLoginClick: () => {
       const currentVal = store.get('openAtLogin', true);
       store.set('openAtLogin', !currentVal);
-      tray.setOpenAtLogin(!currentVal);
+      tray.setOpenAtLogin(!currentVal);  
     },
     openPreferences: () => openPreferences(),
     onQuitClick: () => app.quit(),
@@ -182,7 +182,8 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  if (!onboardingWindow?.window) onboardingWindow = new OnboardingWindow(PORT);
+  if (!onboardingWindow?.window && isFirstRun) onboardingWindow = new OnboardingWindow(PORT);
+  else preferencesWindow?.show();
 });
 
 app.on('will-quit', () => electron.globalShortcut.unregisterAll());
