@@ -9,8 +9,11 @@
   "build": {
     "appId": "devbook.foundrylabs.com",
     "productName": "Devbook",
+    "afterSign": "scripts/notarize.js",
     "mac": {
-      "icon": "./build/icon.png"
+      "icon": "./build/icon.png",
+      "hardenedRuntime": true,
+      "entitlements": "./build/entitlements.mac.inherit.plist"
     },
     "win": {
       "target": [
@@ -98,6 +101,7 @@
     "craco": "0.0.3",
     "electron": "^10.1.3",
     "electron-builder": "^22.7.0",
+    "electron-notarize": "^1.0.0",
     "electron-reload": "^1.5.0",
     "react-scripts": "^3.4.1",
     "typescript": "^4.0.2",
