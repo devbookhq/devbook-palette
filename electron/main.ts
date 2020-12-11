@@ -91,11 +91,7 @@ function hideMainWindow() {
 function openPreferences() {
   if (!preferencesWindow || !preferencesWindow.window) {
     preferencesWindow = new PreferencesWindow(PORT);
-    preferencesWindow.window?.on('close', () => {
-      if (process.platform === 'darwin') app.dock.hide();
-    });
   }
-  if (process.platform === 'darwin') app.dock.show();
   preferencesWindow.show();
   hideMainWindow();
 }
@@ -167,7 +163,7 @@ app.once('ready', async () => {
     onOpenAtLoginClick: () => {
       const currentVal = store.get('openAtLogin', true);
       store.set('openAtLogin', !currentVal);
-      tray.setOpenAtLogin(!currentVal);  
+      tray.setOpenAtLogin(!currentVal);
     },
     openPreferences: () => openPreferences(),
     onQuitClick: () => app.quit(),
