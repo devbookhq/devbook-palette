@@ -69,14 +69,16 @@
     "build": "craco build",
     "postinstall": "electron-builder install-app-deps",
     "electron:dev": "concurrently \"BROWSER=none npm run start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && tsc -p electron && electron --enable-logging .\"",
-    "electron:build-mac": "npm run build && tsc -p electron && npx electron-builder build --mac"
+    "electron:build-dev-mac": "NOTARIZATION=none npm run build && tsc -p electron && npx electron-builder build --mac",
+    "electron:build-mac": "npm run build && tsc -p electron && npx electron-builder build --mac",
+    "upload:mac": "gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/Devbook-0.0.1.dmg gs://devbook-releases/Devbook-0.0.1.dmg",
+    "build-and-upload:mac": "npm run electron:build-mac && npm run upload:mac"
   },
   "dependencies": {
     "analytics-node": "^3.4.0-beta.3",
     "axios": "^0.21.0",
     "electron-store": "^5.2.0",
     "express": "^4.17.1",
-    "keytar": "^7.2.0",
     "prism-react-renderer": "^1.1.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

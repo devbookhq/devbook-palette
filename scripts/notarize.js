@@ -6,12 +6,17 @@ exports.default = async function notarizing(context) {
     return;
   }
 
+  if (process.env.NOTARIZATION === 'none') {
+    return;
+  }
+
+  const appleID = 'vasek.mlejnsky@gmail.com';
   const appName = context.packager.appInfo.productFilename;
 
   return await notarize({
     appBundleId: 'com.foundrylabs.devbook',
     appPath: `${appOutDir}/${appName}.app`,
-    appleId: process.env.APPLE_ID,
-    appleIdPassword: `@keychain:"Application Loader: ${process.env.APPLE_ID}"`,
+    appleId: appleID,
+    appleIdPassword: `@keychain:AC_PASSWORD`,
   });
 };

@@ -8,7 +8,6 @@ import {
   ipcMain,
 } from 'electron';
 import tmp from 'tmp';
-import keytar from 'keytar';
 
 import isdev from './isdev';
 import {
@@ -81,7 +80,7 @@ const oauth = new OAuth(
 oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
   mainWindow?.webContents?.send('github-access-token', { accessToken });
   preferencesWindow?.webContents?.send('github-access-token', { accessToken });
-  await keytar.setPassword('com.foundrylabs.devbook.github', 'default', accessToken);
+  store.set('github', accessToken);
   trackConnectGitHubFinished();
 });
 
@@ -232,10 +231,10 @@ ipcMain.on('track-search', (event, searchInfo: any) => trackSearch(searchInfo));
 
 ipcMain.on('track-modal-opened', (event, modalInfo: any) => trackModalOpened(modalInfo));
 
-ipcMain.handle('github-access-token', () => keytar.getPassword('com.foundrylabs.devbook.github', 'default'));
+ipcMain.handle('github-access-token', () => store.get('github', null));
 
 ipcMain.handle('remove-github', async () => {
-  await keytar.deletePassword('com.foundrylabs.devbook.github', 'default');
+  store.delete('github');
   mainWindow?.webContents?.send('github-access-token', { accessToken: null });
   preferencesWindow?.webContents?.send('github-access-token', { accessToken: null });
 });

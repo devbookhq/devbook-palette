@@ -81,17 +81,17 @@ const GitHubConnectTitle = styled(InfoMessage)`
   margin: 0 0 30px;
 `;
 
-const GitHubPrivacyLink = styled.div`
-  color: #535BD7;
-  font-size: 14px;
-  font-weight: 500;
+// const GitHubPrivacyLink = styled.div`
+//   color: #535BD7;
+//   font-size: 14px;
+//   font-weight: 500;
 
-  text-decoration: underline;
+//   text-decoration: underline;
 
-  :hover {
-    cursor: pointer;
-  }
-`;
+//   :hover {
+//     cursor: pointer;
+//   }
+// `;
 
 interface FocusIndex {
   idx: number;
@@ -108,10 +108,12 @@ function Home() {
     idx: 0,
     focusState: FocusState.NoScroll,
   });
+
   const [soFocusedIdx, setSOFocusedIdx] = useState<FocusIndex>({
     idx: 0,
     focusState: FocusState.NoScroll,
   });
+
   const trimmedSearchQuery = searchQuery.trim();
   const debouncedQuery = useDebounce(trimmedSearchQuery, 400);
 
@@ -142,47 +144,42 @@ function Home() {
     (soResults.length === 0 && activeFilter === ResultsFilter.StackOverflow) ||
     (codeResults.length === 0 && activeFilter === ResultsFilter.GitHubCode);
 
-  // const handleOpenSOModal = useCallback(() => {
+  useEffect(() => {
+    if (!isSOModalOpened || activeFilter !== ResultsFilter.StackOverflow) {
+      return;
+    }
 
-  //   const result = soResults.length > soFocusedIdx.idx ? soResults[soFocusedIdx.idx] : undefined;
+    const result = soResults.length > soFocusedIdx.idx ? soResults[soFocusedIdx.idx] : undefined;
 
-  //   console.log('modal', soResults.length);
+    if (result) {
+      trackModalOpened({
+        activeFilter: activeFilter.toString(),
+        query: debouncedQuery,
+        resultIndex: soFocusedIdx.idx,
+        title: result.question.title,
+        url: result.question.link,
 
-  //   if (result) {
-  //     trackModalOpened({
-  //       activeFilter: activeFilter.toString(),
-  //       query: debouncedQuery,
-  //       resultIndex: soFocusedIdx.idx,
-  //       title: result.question.title,
-  //       url: result.question.link,
-
-  //     });
-  //   }
-  // }, [soResults, soFocusedIdx, activeFilter, debouncedQuery]);
-
-  // const handleOpenCodeModal = useCallback(() => {
-  //   setIsCodeModalOpened(true);
-
-  //   const result = codeResults.length > codeFocusedIdx.idx ? codeResults[codeFocusedIdx.idx] : undefined;
-
-  //   if (result) {
-  //     trackModalOpened({
-  //       activeFilter: activeFilter.toString(),
-  //       query: debouncedQuery,
-  //       resultIndex: codeFocusedIdx.idx,
-  //       url: result.fileURL,
-  //     });
-  //   }
-  // }, [codeResults, codeFocusedIdx, activeFilter, debouncedQuery]);
+      });
+    }
+  }, [soResults, soFocusedIdx, activeFilter, debouncedQuery, isSOModalOpened]);
 
 
-  function handleOpenSOModal() {
-    setIsSOModalOpened(true);
-  }
+  useEffect(() => {
+    if (!isCodeModalOpened || activeFilter !== ResultsFilter.GitHubCode) {
+      return;
+    }
 
-  function handleOpenCodeModal() {
-    setIsCodeModalOpened(true);
-  }
+    const result = codeResults.length > codeFocusedIdx.idx ? codeResults[codeFocusedIdx.idx] : undefined;
+
+    if (result) {
+      trackModalOpened({
+        activeFilter: activeFilter.toString(),
+        query: debouncedQuery,
+        resultIndex: codeFocusedIdx.idx,
+        url: result.fileURL,
+      });
+    }
+  }, [codeResults, codeFocusedIdx, activeFilter, debouncedQuery, isCodeModalOpened]);
 
   function openFocusedGitHubCodeItemInBrowser() {
     const item = codeResults[codeFocusedIdx.idx];
@@ -279,10 +276,10 @@ function Home() {
   useHotkeys('enter', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
-        handleOpenSOModal();
+        setIsSOModalOpened(true);
         break;
       case ResultsFilter.GitHubCode:
-        handleOpenCodeModal();
+        setIsCodeModalOpened(true);
         break;
     }
   }, [activeFilter]);
@@ -385,7 +382,7 @@ function Home() {
       search(debouncedQuery, activeFilter);
     }
 
-    if (isGitHubConnected && !gitHubConnectedPreviousState) {
+    if (debouncedQuery && isGitHubConnected && !gitHubConnectedPreviousState) {
       setGitHubConnectedPreviousState(true);
       searchCode(debouncedQuery);
     }
@@ -416,10 +413,10 @@ function Home() {
     setIsGitHubConnected(true);
   });
 
-  async function openPrivacyTerms() {
-    // TODO: Add route describing privacy to our website address.
-    return openLink('https://usedevbook.com');
-  }
+  // async function openPrivacyTerms() {
+  //   // TODO: Add route describing privacy to our website address.
+  //   return openLink('https://usedevbook.com');
+  // }
 
   return (
     <>
@@ -459,9 +456,9 @@ function Home() {
             <ConnectGitHubButton onClick={() => connectGitHub()}>
               Connect my GitHub account
             </ConnectGitHubButton>
-            <GitHubPrivacyLink onClick={openPrivacyTerms}>
+            {/* <GitHubPrivacyLink onClick={openPrivacyTerms}>
               Read more about privacy and what access Devbook needs
-            </GitHubPrivacyLink>
+            </GitHubPrivacyLink> */}
           </GitHubConnect>
         }
 
@@ -475,7 +472,7 @@ function Home() {
                     soResult={sor}
                     focusState={soFocusedIdx.idx === idx ? soFocusedIdx.focusState : FocusState.None}
                     onHeaderClick={() => setSOFocusedIdx({ idx, focusState: FocusState.NoScroll })}
-                    onTitleClick={() => handleOpenSOModal()}
+                    onTitleClick={() => setIsSOModalOpened(true)}
                   />
                 ))}
 
@@ -485,7 +482,7 @@ function Home() {
                     codeResult={cr}
                     focusState={codeFocusedIdx.idx === idx ? codeFocusedIdx.focusState : FocusState.None}
                     onHeaderClick={() => setCodeFocusedIdx({ idx, focusState: FocusState.NoScroll })}
-                    onFilePathClick={() => handleOpenCodeModal()}
+                    onFilePathClick={() => setIsCodeModalOpened(true)}
                   />
                 ))}
               </>
@@ -496,7 +493,7 @@ function Home() {
               <HotkeysPanel
                 hotkeysLeft={[
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
-                  { text: 'Open', hotkey: [Key.Enter], onClick: () => handleOpenSOModal() },
+                  { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsSOModalOpened(true) },
                 ]}
                 hotkeysRight={[
                   { text: 'Open in browser', hotkey: [Key.Command, 'O'], onClick: openFocusedSOItemInBrowser },
@@ -508,7 +505,7 @@ function Home() {
               <HotkeysPanel
                 hotkeysLeft={[
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
-                  { text: 'Open', hotkey: [Key.Enter], onClick: () => handleOpenSOModal() },
+                  { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsSOModalOpened(true) },
                 ]}
                 hotkeysRight={[
                   { text: 'Open in browser', hotkey: [Key.Command, 'O'], onClick: openFocusedSOItemInBrowser },
@@ -524,7 +521,7 @@ function Home() {
               <HotkeysPanel
                 hotkeysLeft={[
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
-                  { text: 'Open', hotkey: [Key.Enter], onClick: () => handleOpenCodeModal() },
+                  { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsCodeModalOpened(true) },
                 ]}
                 hotkeysRight={[
                   { text: 'Open in VSCode', hotkey: [Key.Command, 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
