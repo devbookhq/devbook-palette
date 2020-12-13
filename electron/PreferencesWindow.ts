@@ -13,9 +13,9 @@ class PreferencesWindow {
 
   public constructor(PORT: number) {
     this.window = new electron.BrowserWindow({
-      width: 800,
+      width: 850,
       height: 600,
-      minWidth: 600,
+      minWidth: 800,
       title: 'Devbook Preferencess',
       minHeight: 400,
       backgroundColor: '#1C1B26',
