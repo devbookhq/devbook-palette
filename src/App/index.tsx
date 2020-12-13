@@ -10,7 +10,6 @@ import {
 import Onboarding from 'Onboarding';
 import Preferences from 'Preferences';
 import Home from 'Home';
-import { isDev } from 'mainProcess';
 
 // The electron window is set to be frameless.
 // Frameless window stops being draggable - this is the solution.

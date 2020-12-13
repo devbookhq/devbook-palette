@@ -16,25 +16,6 @@ import gitHubImg from 'img/github.png';
 
 import Base from './Base';
 
-const Container = styled.div`
-  padding: 15px 0;
-  flex: 1;
-`;
-
-const Title = styled.div`
-  width: 100%;
-  padding: 0 15px 15px;
-
-  font-size: 17px;
-  font-weight: 500;
-
-  border-bottom: 1px solid #3B3A4A;
-`;
-
-const Content = styled.div`
-  padding: 15px;
-`;
-
 const InfoMessage = styled.div`
   margin: auto;
 
