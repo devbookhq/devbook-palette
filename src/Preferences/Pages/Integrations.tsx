@@ -11,10 +11,10 @@ import {
   connectGitHub,
   removeGitHub,
 } from 'mainProcess';
-
 import Button from 'components/Button';
-
 import gitHubImg from 'img/github.png';
+
+import Base from './Base';
 
 const Container = styled.div`
   padding: 15px 0;
@@ -155,32 +155,26 @@ function Integrations() {
   }
 
   return (
-    <Container>
-      <Title>
-        Integrations
-      </Title>
-      <Content>
-        <>
-          {isLoading && <InfoMessage>Loading...</InfoMessage>}
-          {!isLoading &&
-            <IntegrationsWrapper>
-              <GitHubWrapper>
-                <GitHubTitleWrapper>
-                  <GitHubLogo src={gitHubImg}>
-                  </GitHubLogo>
-                  <GitHubTitle>
-                    {gitHubLogin ? gitHubLogin : 'GitHub'}
-                  </GitHubTitle>
-                </GitHubTitleWrapper>
-                {!gitHubLogin && <ConnectGitHubButton onClick={handleConnectGitHub}>Connect</ConnectGitHubButton>}
-                {gitHubLogin && <RemoveGitHubButton onClick={handleRemoveGitHub}>Remove</RemoveGitHubButton>}
-              </GitHubWrapper>
-            </IntegrationsWrapper>
-          }
-        </>
-      </Content>
-    </Container>
+    <Base title="Integrations">
+      {isLoading && <InfoMessage>Loading...</InfoMessage>}
+      {!isLoading &&
+        <IntegrationsWrapper>
+          <GitHubWrapper>
+            <GitHubTitleWrapper>
+              <GitHubLogo src={gitHubImg}>
+              </GitHubLogo>
+              <GitHubTitle>
+                {gitHubLogin ? gitHubLogin : 'GitHub'}
+              </GitHubTitle>
+            </GitHubTitleWrapper>
+            {!gitHubLogin && <ConnectGitHubButton onClick={handleConnectGitHub}>Connect</ConnectGitHubButton>}
+            {gitHubLogin && <RemoveGitHubButton onClick={handleRemoveGitHub}>Remove</RemoveGitHubButton>}
+          </GitHubWrapper>
+        </IntegrationsWrapper>
+      }
+    </Base>
   );
 }
 
 export default Integrations;
+
