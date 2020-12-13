@@ -19,7 +19,7 @@ import {
   trackConnectGitHubStarted,
   trackModalOpened,
 } from './analytics';
-import Tray from './tray';
+import Tray from './tray_';
 import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow from './PreferencesWindow';
 import OAuth from './OAuth';
