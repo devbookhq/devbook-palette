@@ -14,7 +14,7 @@ import {
   trackShowApp,
   trackOnboardingFinished,
   trackOnboardingStarted,
-  trackSearch,
+  trackSearchDebounced,
   trackConnectGitHubFinished,
   trackConnectGitHubStarted,
   trackModalOpened,
@@ -227,7 +227,7 @@ ipcMain.on('open-preferences', () => openPreferences());
 
 ipcMain.on('open-preferences', () => openPreferences());
 
-ipcMain.on('track-search', (event, searchInfo: any) => trackSearch(searchInfo));
+ipcMain.on('track-search', (event, searchInfo: any) => trackSearchDebounced(searchInfo));
 
 ipcMain.on('track-modal-opened', (event, modalInfo: any) => trackModalOpened(modalInfo));
 
