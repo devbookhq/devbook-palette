@@ -7,7 +7,8 @@ import {
 } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 
-import Integrations from './Integrations';
+import GeneralPreferences from './Pages/GeneralPreferences';
+import Integrations from './Pages/Integrations';
 
 import logo from 'img/logo.png';
 
@@ -23,19 +24,20 @@ const LinkButton = styled(NavLink)`
   padding: 5px 15px;
   width: 100%;
 
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 400;
-  color: #3B3A4A;
+  color: #fff;
   text-decoration: none;
 
   :hover {
     color: #fff;
     cursor: pointer;
+    background: #3B3A4A;
   }
 `;
 
 const DevbookWrapper = styled.div`
-  margin-top: 15px;
+  margin: 15px 0;
   padding: 0 15px 5px 8px;
 
   display: flex;
@@ -50,9 +52,8 @@ const DevbookLogo = styled.img`
 `;
 
 const DevbookTitle = styled.div`
-  font-weight: 500;
   font-size: 20px;
-  line-height: 24px;
+  font-weight: 600;
 `;
 
 const Title = styled.div`
@@ -85,14 +86,21 @@ function Preferences() {
           </DevbookTitle>
         </DevbookWrapper>
 
-        <Title>
-          Preferences
-        </Title>
         <LinkButton
+          replace
+          to="/preferences/general"
+          activeStyle={{
+            background: '#3B3A4A',
+          }}
+        >
+          Preferences
+        </LinkButton>
+
+        <LinkButton
+          replace
           to="/preferences/integrations"
           activeStyle={{
             background: '#3B3A4A',
-            color: '#fff',
           }}
         >
           Integrations
@@ -104,14 +112,20 @@ function Preferences() {
           path="/preferences"
           exact
         >
-          <Redirect to={{ pathname: "/preferences/integrations" }} />
+          <Redirect to="/preferences/general"/>
         </Route>
+
+        <Route
+          path="/preferences/general"
+          exact
+          component={GeneralPreferences}
+        />
+
         <Route
           path="/preferences/integrations"
           exact
           component={Integrations}
-        >
-        </Route>
+        />
       </Switch>
     </Container>
   );
