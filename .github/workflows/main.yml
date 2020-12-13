@@ -1,6 +1,6 @@
 name: Build release and upload to publish GCP bucket
 
-on:
+on: push
 #   create:
 #     tags:
 #       - v*
