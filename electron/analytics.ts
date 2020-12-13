@@ -11,8 +11,6 @@ const store = new ElectronStore();
 const userID = store.get('userID', uuidv4());
 store.set('userID', userID);
 
-const debouncedTrack = debounce(client.track, 2500);
-
 const appVersion = app.getVersion();
 
 client.identify({
@@ -73,8 +71,8 @@ export function trackConnectGitHubFinished() {
   });
 }
 
-export function trackSearch(searchInfo: any) {
-  debouncedTrack({
+function trackSearch(searchInfo: any) {
+  client.track({
     event: 'Search',
     userId: userID,
     properties: {
@@ -83,6 +81,8 @@ export function trackSearch(searchInfo: any) {
     },
   });
 }
+
+export const trackSearchDebounced = debounce(trackSearch, 3000);
 
 export function trackModalOpened(modalInfo: any) {
   client.track({
