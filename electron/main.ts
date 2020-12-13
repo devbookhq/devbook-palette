@@ -263,3 +263,8 @@ ipcMain.handle('create-tmp-file', async (event, { filePath, fileContent }: { fil
     console.error(error.message);
   }
 });
+
+ipcMain.handle('is-dev', () => {
+  return isDev;
+});
+

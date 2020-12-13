@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Loader from 'components/Loader';
 import Hotkey, { Key } from './HotkeysPanel/Hotkey';
-import { openPreferences } from 'mainProcess';
+import { openPreferences, isDev } from 'mainProcess';
 
 import { ReactComponent as PreferencesIcon } from 'img/preferences.svg';
 
@@ -107,6 +107,13 @@ const PreferencesButton = styled.div`
   }
 `;
 
+const Dev = styled.span`
+  margin: 0 15px;
+  color: #00FF41;
+  font-family: 'Roboto Mono';
+  font-weight: 600;
+`;
+
 export enum ResultsFilter {
   StackOverflow = 'StackOverflow',
   GitHubCode = 'Code',
@@ -135,6 +142,7 @@ function SearchInput({
 }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [isDevEnv, setIsDevEnv] = useState(false);
 
   function handleContentMouseDown(e: any) {
     // Prevent blur when user is clicking on the filter buttons under the input element.
@@ -155,6 +163,10 @@ function SearchInput({
   useIPCRenderer('did-show-main-window', () => {
     if (!isModalOpened) inputRef?.current?.focus();
   });
+
+  useEffect(() => {
+    isDev().then(setIsDevEnv);
+  }, []);
 
   useEffect(() => {
     if (isModalOpened) inputRef?.current?.blur();
@@ -196,6 +208,7 @@ function SearchInput({
             </Filter>
           ))}
         </FiltersWrapper>
+        {isDevEnv && <Dev>Dev build</Dev>}
         <PreferencesButton onClick={openPreferences}>
           <StyledPreferencesIcon />
         </PreferencesButton>
