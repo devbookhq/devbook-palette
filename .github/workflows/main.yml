@@ -1,0 +1,57 @@
+name: Build release and upload to publish GCP bucket
+
+on:
+#   create:
+#     tags:
+#       - v*
+
+jobs:
+  release:
+    if: github.event.base_ref == 'refs/heads/master'
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v1
+
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+
+      - name: Build/release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          # GitHub token, automatically provided to the action
+          # (No need to define this secret in the repo settings)
+          github_token: ${{ secrets.github_token }}
+
+          # If the commit is tagged with a version (e.g. "v1.0.0"),
+          # release the app after building
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
+      # Setup gcloud CLI
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          service_account_key: ${{ secrets.GCE_SA_KEY }}
+          project_id: ${{ secrets.GCE_PROJECT }}
+
+      - name: Install GCP Storage Uploader
+        uses: google-github-actions/upload-cloud-storage@v0.2.
+
+      - name: Upload new release archive
+        uses: google-github-actions/upload-cloud-storage@main
+        with:
+          path: dist/Devbook-*-mac.zip
+          destination: devbook-publish
+
+      - name: Update the release
+        uses: google-github-actions/upload-cloud-storage@main
+        with:
+          path: dist/latest-mac.yml
+          destination: devbook-publish
