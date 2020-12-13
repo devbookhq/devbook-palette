@@ -7,16 +7,46 @@ import {
 } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 
+import electron from 'mainProcess';
+import logo from 'img/logo.png';
+
 import GeneralPreferences from './Pages/GeneralPreferences';
 import Integrations from './Pages/Integrations';
 
-import logo from 'img/logo.png';
 
 const Container = styled.div`
   width: 100%;
   height: 100%;
   overflow: hidden;
   display: flex;
+`;
+
+const Sidebar = styled.div`
+  height: 100%;
+  padding: 25px 0 10px;
+  min-width: 230px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+
+  background: #23222D;
+  border-right: 1px solid #3B3A4A;
+`;
+
+const SidebarContent = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Version = styled.div`
+  padding: 0 15px;
+  width: 100%;
+  color: #959CB1;
+  font-size: 14px;
+  font-weight: 400;
 `;
 
 const LinkButton = styled(NavLink)`
@@ -56,48 +86,40 @@ const DevbookTitle = styled.div`
   font-weight: 600;
 `;
 
-const Sidebar = styled.div`
-  height: 100%;
-  padding: 25px 0;
-  min-width: 230px;
-
-  display: flex;
-  flex-direction: column;
-
-  background: #23222D;
-  border-right: 1px solid #3B3A4A;
-`;
 
 function Preferences() {
   return (
     <Container>
       <Sidebar>
-        <DevbookWrapper>
-          <DevbookLogo src={logo}/>
-          <DevbookTitle>
-            Devbook
-          </DevbookTitle>
-        </DevbookWrapper>
+        <SidebarContent>
+          <DevbookWrapper>
+            <DevbookLogo src={logo}/>
+            <DevbookTitle>
+              Devbook
+            </DevbookTitle>
+          </DevbookWrapper>
 
-        <LinkButton
-          replace
-          to="/preferences/general"
-          activeStyle={{
-            background: '#3B3A4A',
-          }}
-        >
-          Preferences
-        </LinkButton>
+          <LinkButton
+            replace
+            to="/preferences/general"
+            activeStyle={{
+              background: '#3B3A4A',
+            }}
+          >
+            Preferences
+          </LinkButton>
 
-        <LinkButton
-          replace
-          to="/preferences/integrations"
-          activeStyle={{
-            background: '#3B3A4A',
-          }}
-        >
-          Integrations
-        </LinkButton>
+          <LinkButton
+            replace
+            to="/preferences/integrations"
+            activeStyle={{
+              background: '#3B3A4A',
+            }}
+          >
+            Integrations
+          </LinkButton>
+        </SidebarContent>
+        <Version>v{electron.remote.app.getVersion()}</Version>
       </Sidebar>
 
       <Switch>
