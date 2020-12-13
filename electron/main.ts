@@ -218,6 +218,10 @@ ipcMain.on('register-default-shortcut', () => {
   trySetGlobalShortcut(shortcut);
 });
 
+ipcMain.handle('get-global-shortcut', () => {
+  return store.get('globalShortcut', 'Alt+Space');
+});
+
 ipcMain.on('connect-github', () => {
   oauth.requestOAuth();
   trackConnectGitHubStarted();

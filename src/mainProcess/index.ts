@@ -4,6 +4,10 @@ export function isDev() {
   return electron.ipcRenderer.invoke('is-dev') as Promise<boolean>;
 }
 
+export function getGlobalShortcut() {
+  return electron.ipcRenderer.invoke('get-global-shortcut') as Promise<string>;
+}
+
 export function openLink(url: string) {
   return electron.shell.openExternal(url);
 }
