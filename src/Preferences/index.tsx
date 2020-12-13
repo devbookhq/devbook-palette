@@ -56,13 +56,6 @@ const DevbookTitle = styled.div`
   font-weight: 600;
 `;
 
-const Title = styled.div`
-  margin-top: 15px;
-  padding: 0 15px;
-  font-size: 17px;
-  font-weight: 500;
-`;
-
 const Sidebar = styled.div`
   height: 100%;
   padding: 25px 0;
