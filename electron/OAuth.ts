@@ -6,7 +6,7 @@ import axios from 'axios';
 import querystring from 'querystring';
 import path from 'path';
 import { app } from 'electron';
-import isdev from './isdev';
+import isDev from './utils/isDev';
 
 function getRandomToken() {
   return crypto.randomBytes(48).toString('hex');
@@ -25,7 +25,7 @@ class OAuth {
     scope: '',
     allow_signup: 'true',
   };
-  private static redirectHTMLPath = path.join(app.getAppPath(), isdev ? '' : '..', 'resources', 'OAuthRedirect');
+  private static redirectHTMLPath = path.join(app.getAppPath(), isDev ? '' : '..', 'resources', 'OAuthRedirect');
 
   private stateTokens: { [state: string]: boolean } = {};
   private app = express();

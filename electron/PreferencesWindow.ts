@@ -1,7 +1,7 @@
 import * as electron from 'electron';
 import * as path from 'path';
 import * as process from 'process';
-import isdev from './isdev';
+import isDev from './utils/isDev';
 import { inspect } from 'util';
 
 class PreferencesWindow {
@@ -41,7 +41,7 @@ class PreferencesWindow {
       console.error('main window crashed', killed, inspect(event, { depth: null }));
     });
 
-    if (isdev) {
+    if (isDev) {
       this.window.loadURL(`http://localhost:${PORT}/index.html#/preferences`);
       // Hot Reloading
       require('electron-reload')(__dirname, {

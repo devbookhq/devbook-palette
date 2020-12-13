@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as process from 'process';
 import { inspect } from 'util';
 
-import isdev from './isdev';
+import isDev from './utils/isDev';
 
 class OnboardingWindow {
   public window: electron.BrowserWindow | undefined;
@@ -39,7 +39,7 @@ class OnboardingWindow {
       console.error('onboarding window crashed', killed, inspect(event, { depth: null }));
     });
 
-    if (isdev) {
+    if (isDev) {
       this.window.loadURL(`http://localhost:${PORT}/index.html#/onboarding`);
       // Hot Reloading
       require('electron-reload')(__dirname, {
