@@ -16,8 +16,9 @@ class OnboardingWindow {
     this.window = new electron.BrowserWindow({
       width: 1250,
       height: process.platform === 'win32' ? 800 : 720,
-      backgroundColor: '#1D1D1D',
+      backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
+      title: 'Devbook Onboarding',
       webPreferences: {
         nodeIntegration: true,
         enableRemoteModule: true,

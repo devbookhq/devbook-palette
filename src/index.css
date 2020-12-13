@@ -1,19 +1,37 @@
  @font-face {
-  font-family: 'Source Code Pro';
+  font-family: 'Poppins';
   font-weight: 400;
-  src: local('SourceCodePro-Regular'), url(./fonts/SourceCodePro-Regular.ttf) format('truetype');
+  src: local('Poppins-Regular'), url(./fonts/Poppins-Regular.ttf) format('truetype');
  }
 
  @font-face {
-  font-family: 'Source Code Pro';
+  font-family: 'Poppins';
   font-weight: 500;
-  src: local('SourceCodePro-Medium'), url(./fonts/SourceCodePro-Medium.ttf) format('truetype');
+  src: local('Poppins-Medium'), url(./fonts/Poppins-Medium.ttf) format('truetype');
  }
 
  @font-face {
-  font-family: 'Source Code Pro';
+  font-family: 'Poppins';
   font-weight: 600;
-  src: local('SourceCodePro-SemiBold'), url(./fonts/SourceCodePro-SemiBold.ttf) format('truetype');
+  src: local('Poppins-SemiBold'), url(./fonts/Poppins-SemiBold.ttf) format('truetype');
+ }
+
+ @font-face {
+  font-family: 'Roboto Mono';
+  font-weight: 400;
+  src: local('RobotoMono-Regular'), url(./fonts/RobotoMono-Regular.ttf) format('truetype');
+ }
+
+ @font-face {
+  font-family: 'Roboto Mono';
+  font-weight: 500;
+  src: local('RobotoMono-Medium'), url(./fonts/RobotoMono-Medium.ttf) format('truetype');
+ }
+
+ @font-face {
+  font-family: 'Roboto Mono';
+  font-weight: 600;
+  src: local('RobotoMono-SemiBold'), url(./fonts/RobotoMono-SemiBold.ttf) format('truetype');
  }
 
 * , *:before, *:after {
@@ -22,13 +40,14 @@
 }
 
 html, body {
-  color: white;
+  height: 100%;
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  background-color: #212122;
+
+  color: white;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background: #1C1B26;
+  overflow: hidden;
 }
 
 body {
@@ -39,7 +58,6 @@ body {
 #root {
   margin: 0 auto;
   height: 100%;
-  width: 100%;
 }
 
 *::-webkit-scrollbar {
@@ -52,7 +70,7 @@ body {
 
 *::-webkit-scrollbar-track {
   /* color of the tracking area */
-  background: rgba(29, 29, 29, 0.55);
+  /* background: rgba(29, 29, 29, 0.55); */
   background: transparent;
 }
 
@@ -62,16 +80,16 @@ body {
   background-clip: padding-box;
 
   /* color of the scroll thumb */
-  background-color: #6E7075;
+  background-color: #595A6F;
 
   /* roundness of the scroll thumb */
   /* 'border-radius' is required for compatibility and is tagged as a problem when omitted */
-  -webkit-border-radius: 10px;
-  border-radius: 10px;
+  -webkit-border-radius: 6px;
+  border-radius: 6px;
 }
 
 *::-webkit-scrollbar-corner {
-  /* background: transparent; */
+  background: transparent;
 }
 
 * {

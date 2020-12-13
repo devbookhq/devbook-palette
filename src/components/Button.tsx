@@ -1,24 +1,23 @@
 import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
-const Content = styled.div<{ disabled?: boolean }>`
+const Container = styled.div<{ disabled?: boolean }>`
   padding: 8px 20px;
   display: flex;
   align-items: center;
   justify-content: center;
 
-  color: #F28360;
+  color: #fff;
   font-weight: 500;
   font-size: 14px;
   user-select: none;
 
-  background: rgba(242, 131, 96, 0.1);
+  background: #535BD7;
   border-radius: 3px;
-  border: 1px solid #F28360;
 
   :hover {
     cursor: pointer;
-    background: rgba(242, 131, 96, 0.25);
+    background: #646CEA;
   }
 `;
 
@@ -33,11 +32,10 @@ const Button: FunctionComponent<ButtonProps> = ({
   className, children, onClick, disabled, onClickDisabled
 }) => {
   return (
-    <Content className={className} onClick={disabled ? (onClickDisabled || (() => { })) : onClick} disabled={disabled} >
+    <Container className={className} onClick={disabled ? (onClickDisabled || (() => { })) : onClick} disabled={disabled} >
       {children}
-    </Content >
+    </Container >
   );
 }
 
 export default Button;
-

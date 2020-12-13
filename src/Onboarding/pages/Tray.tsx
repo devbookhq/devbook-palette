@@ -5,7 +5,7 @@ import trayPreviewMacImg from 'img/tray-preview-mac.png';
 import trayPreviewWinImg from 'img/tray-preview-win.png';
 import trayPreviewDebImg from 'img/tray-preview-deb.png';
 
-const Content = styled.div`
+const Container = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
@@ -44,11 +44,11 @@ const TrayImg = styled.img`
 
 function TrayPage() {
   return (
-    <Content>
+    <Container>
       <Titles>
         <Title>How it works</Title>
         <Subtitle>
-          Sidekick runs in your tray bar in background.
+          Devbook runs in your tray bar in background.
         </Subtitle>
       </Titles>
 
@@ -62,9 +62,8 @@ function TrayPage() {
       {electron.remote.process.platform === 'win32' && (
         <TrayImg src={trayPreviewWinImg} />
       )}
-    </Content>
+    </Container>
   );
 }
 
 export default TrayPage;
-

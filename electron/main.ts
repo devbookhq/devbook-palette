@@ -1,23 +1,35 @@
 import * as path from 'path';
 import * as process from 'process';
-import { inspect } from 'util';
 import * as electron from 'electron';
 import Store from 'electron-store';
+import fs from 'fs';
 import {
-  BrowserWindow,
   app,
   ipcMain,
 } from 'electron';
+import tmp from 'tmp';
 
 import isdev from './isdev';
+import {
+  trackShowApp,
+  trackOnboardingFinished,
+  trackOnboardingStarted,
+  trackSearch,
+  trackConnectGitHubFinished,
+  trackConnectGitHubStarted,
+  trackModalOpened,
+} from './analytics';
 import Tray from './tray';
 import OnboardingWindow from './OnboardingWindow';
+import PreferencesWindow from './PreferencesWindow';
+import OAuth from './OAuth';
+import MainWindow from './MainWindow';
 
 const PORT = 3000;
 
 // Set up logs so logging from the main process can be seen in the browser.
 function logInRendered(...args: any) {
-  mainWindow?.webContents.send('console', args);
+  mainWindow?.webContents?.send('console', args);
 }
 
 const oldLog = console.log;
@@ -32,8 +44,12 @@ console.error = (...args: any) => {
   logInRendered('error', ...args);
 }
 
+// Automatically delete temporary files after the application exit.
+tmp.setGracefulCleanup();
+
 // https://stackoverflow.com/questions/41664208/electron-tray-icon-change-depending-on-dark-theme
 let trayIcon: electron.NativeImage;
+
 if (isdev) {
   if (process.platform === 'darwin' || process.platform === 'linux') {
     trayIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), 'resources', 'TrayIconTemplate.png'));
@@ -48,14 +64,50 @@ if (isdev) {
     trayIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), '..', 'resources', 'TrayIconWindowsTemplate.png'));
   }
 }
+
 let tray: Tray;
-let mainWindow: BrowserWindow | undefined = undefined;
+let mainWindow: MainWindow | undefined = undefined;
 let onboardingWindow: OnboardingWindow | undefined = undefined;
+let preferencesWindow: PreferencesWindow | undefined = undefined;
 
 const store = new Store();
-let isAppReady = false;
+
+const oauth = new OAuth(
+  () => mainWindow?.show(),
+  () => hideMainWindow(),
+);
+
+oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
+  mainWindow?.webContents?.send('github-access-token', { accessToken });
+  preferencesWindow?.webContents?.send('github-access-token', { accessToken });
+  store.set('github', accessToken);
+  trackConnectGitHubFinished();
+});
+
+oauth.emitter.on('error', ({ message }: { message: string }) => {
+  mainWindow?.webContents?.send('github-error', { message });
+  preferencesWindow?.webContents?.send('github-error', { message });
+});
+
+function hideMainWindow() {
+  mainWindow?.hide();
+
+  if (!onboardingWindow?.window?.closable && !preferencesWindow?.window?.closable) {
+    // This action would hide the oboarding and preferences window too, but it is necessary for restoring focus when hiding mainWindow.
+    electron.Menu.sendActionToFirstResponder('hide:');
+  }
+}
+
+function openPreferences() {
+  if (!preferencesWindow || !preferencesWindow.window) {
+    preferencesWindow = new PreferencesWindow(PORT);
+  }
+  preferencesWindow.show();
+  hideMainWindow();
+}
 
 const shouldOpenAtLogin = store.get('openAtLogin', true);
+
 app.setLoginItemSettings({ openAtLogin: shouldOpenAtLogin });
 
 let isFirstRun = store.get('firstRun', true);
@@ -65,106 +117,20 @@ if (process.platform === 'darwin' && !isFirstRun) {
   app.dock.hide();
 }
 
-function createMainWindow() {
-  const [mainWinWidth, mainWinHeight] = store.get('mainWinSize', [900, 500]);
-  const [mainWinPosX, mainWinPosY] = store.get('mainWinPosition', [undefined, undefined]);
-
-  mainWindow = new BrowserWindow({
-    x: mainWinPosX,
-    y: mainWinPosY,
-    width: mainWinWidth,
-    height: mainWinHeight,
-    minWidth: 700,
-    minHeight: 100,
-    backgroundColor: '#1D1D1D',
-    alwaysOnTop: true,
-    frame: false,
-    fullscreenable: false,
-    skipTaskbar: true, // This makes sure that Sidekick window isn't shown on the bottom taskbar on Windows.
-    webPreferences: {
-      nodeIntegration: true,
-      enableRemoteModule: true,
-      worldSafeExecuteJavaScript: true,
-      // devTools: isdev,
-      // nodeIntegrationInSubFrames: true,
-      // webSecurity: false,
-      // allowRunningInsecureContent: true,
-    },
-  });
-
-  mainWindow.on('restore', () => {
-    console.log('Window restored');
-    if (!mainWindow) { return; }
-  });
-
-  mainWindow.on('resize', () => {
-    if (mainWindow) {
-      const [width, height] = mainWindow.getSize();
-      store.set('mainWinSize', [width, height]);
-    }
-  });
-
-  mainWindow.on('moved', () => {
-    if (mainWindow) {
-      const [x, y] = mainWindow.getPosition();
-      store.set('mainWinPosition', [x, y]);
-    }
-  });
-
-  mainWindow.on('close', () => {
-    if (mainWindow) {
-      const [width, height] = mainWindow.getSize();
-      store.set('mainWinSize', [width, height]);
-      const [x, y] = mainWindow.getPosition();
-      store.set('mainWinPosition', [x, y]);
-    }
-  });
-
-  mainWindow.on('blur', () => {
-    if (!isdev) {
-      mainWindow?.hide();
-    }
-  });
-
-  mainWindow.on('closed', () => {
-    mainWindow = undefined;
-  });
-
-  mainWindow.webContents.on('crashed', (event, killed) => {
-    console.error('main window crashed', killed, inspect(event, { depth: null }));
-  });
-
-  if (isdev) {
-    mainWindow.loadURL(`http://localhost:${PORT}/index.html`);
-    // Hot Reloading
-    require('electron-reload')(__dirname, {
-      electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
-      forceHardReset: true,
-      hardResetMethod: 'exit',
-    });
-
-    mainWindow.webContents.openDevTools();
-  } else {
-    mainWindow.loadURL(`file://${__dirname}/../index.html#/`);
-  }
-}
-
 // Checks whether the main window is already created and based on this value either creates a new instance
 // or just calls .show() or .hide() on an existing instance.
 function toggleVisibilityOnMainWindow() {
-  if (!mainWindow) {
-    console.log('Main window is undefined. Need to create new main window.');
-    createMainWindow();
+  if (!mainWindow || !mainWindow.window) {
+    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
     onboardingWindow?.webContents?.send('did-show-main-window');
     return;
   }
 
   if (mainWindow.isVisible()) {
-    console.log('Main window is visible. Will hide main window.');
-    mainWindow.hide();
+    hideMainWindow();
   } else {
-    console.log('Main window is not visible. Will show main window.');
     mainWindow.show();
+    mainWindow.webContents?.send('did-show-main-window');
     onboardingWindow?.webContents?.send('did-show-main-window');
   }
 }
@@ -184,83 +150,116 @@ function trySetGlobalShortcut(shortcut: string) {
 
 /////////// App Events ///////////
 app.once('ready', async () => {
-  // Load react dev tools.
-  await electron.session.defaultSession.loadExtension(
-    path.join(__dirname, '..', '..', 'react-dev-tools-4.9.0_26'),
-  );
+  if (isdev) {
+    // Load react dev tools.
+    await electron.session.defaultSession.loadExtension(
+      path.join(__dirname, '..', '..', 'react-dev-tools-4.9.0_26'),
+    );
+  }
 
   isFirstRun = store.get('firstRun', true);
-  isAppReady = true;
 
   // If user registered a global shortcut from the previos session, load it and register again.
   const savedShortcut = store.get('globalShortcut');
   if (savedShortcut) {
     // TODO: Since we still don't offer for a user to change the shortcut after onboarding
-    // this might fail and user won't be able to show Sidekick through a shortcut ever again.
+    // this might fail and user won't be able to show Devbook through a shortcut ever again.
     trySetGlobalShortcut(savedShortcut);
   }
 
   tray = new Tray(trayIcon, {
-    onShowSidekickClick: toggleVisibilityOnMainWindow,
+    onShowDevbookClick: toggleVisibilityOnMainWindow,
     // TODO: What if the main window is undefined?
     onOpenAtLoginClick: () => {
       const currentVal = store.get('openAtLogin', true);
       store.set('openAtLogin', !currentVal);
       tray.setOpenAtLogin(!currentVal);
     },
+    openPreferences: () => openPreferences(),
     onQuitClick: () => app.quit(),
     shouldOpenAtLogin: store.get('openAtLogin', true),
   });
 
   if (isFirstRun) {
     onboardingWindow = new OnboardingWindow(PORT);
+    trackOnboardingStarted();
   } else {
-    createMainWindow();
+    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
   }
 });
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('activate', () => {
-  if (!onboardingWindow?.window) {
-    onboardingWindow = new OnboardingWindow(PORT);
-  }
-  /*
-  if (isAppReady && !mainWindow) {
-    createMainWindow();
-  }
-  */
+  if (!onboardingWindow?.window && isFirstRun) onboardingWindow = new OnboardingWindow(PORT);
+  else preferencesWindow?.show();
 });
 
 app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 
 /////////// IPC events ///////////
-ipcMain.on('view-ready', () => {
-});
+ipcMain.on('hide-window', () => hideMainWindow());
 
-ipcMain.on('hide-window', () => {
-  mainWindow?.hide();
-});
-
-ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => {
-  trySetGlobalShortcut(shortcut);
-});
+ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => trySetGlobalShortcut(shortcut));
 
 ipcMain.on('finish-onboarding', () => {
   // TODO: This should be onboardingWindow?.close() but it produces a runtime error when toggling
   // a visibility on the main window.
   onboardingWindow?.hide();
   store.set('firstRun', false);
-  if (process.platform === 'darwin') {
-    app.dock.hide();
-  }
+  if (process.platform === 'darwin') app.dock.hide();
+  trackOnboardingFinished();
 });
 
 ipcMain.on('register-default-shortcut', () => {
   const shortcut = store.get('globalShortcut', 'Alt+Space');
   trySetGlobalShortcut(shortcut);
+});
+
+ipcMain.on('connect-github', () => {
+  oauth.requestOAuth();
+  trackConnectGitHubStarted();
+});
+
+ipcMain.on('open-preferences', () => openPreferences());
+
+ipcMain.on('open-preferences', () => openPreferences());
+
+ipcMain.on('track-search', (event, searchInfo: any) => trackSearch(searchInfo));
+
+ipcMain.on('track-modal-opened', (event, modalInfo: any) => trackModalOpened(modalInfo));
+
+ipcMain.handle('github-access-token', () => store.get('github', null));
+
+ipcMain.handle('remove-github', async () => {
+  store.delete('github');
+  mainWindow?.webContents?.send('github-access-token', { accessToken: null });
+  preferencesWindow?.webContents?.send('github-access-token', { accessToken: null });
+});
+
+ipcMain.handle('create-tmp-file', async (event, { filePath, fileContent }: { filePath: string, fileContent: string }) => {
+  const basename = path.basename(filePath);
+  try {
+    const { name } = await new Promise<{ name: string, fd: number }>((resolve, reject) => {
+      tmp.file({
+        template: `tmp-XXXXXX-${basename}`,
+      }, (error, name, fd) => {
+        if (error) {
+          return reject(error);
+        }
+
+        fs.write(fd, fileContent, (error) => {
+          if (error) {
+            return reject(error);
+          }
+          return resolve({ name, fd });
+        });
+      });
+    });
+    return name;
+  } catch (error) {
+    console.error(error.message);
+  }
 });

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ReactComponent as CheckIcon } from 'img/check.svg';
 
-const Content = styled.div`
+const Container = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
@@ -49,7 +49,7 @@ const Step = styled.div`
   display: flex;
   align-items: center;
   color: white;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-size: 16px;
   font-weight: 500;
 `;
@@ -57,7 +57,7 @@ const Step = styled.div`
 const Shortcut = styled.div`
   margin: 0 5px;
   color: #4FA1ED;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-size: 16px;
   font-weight: 500;
 `;
@@ -68,7 +68,7 @@ const Select = styled.select`
   border-radius: 3px;
   background: #1A1D25;
   color: white;
-  font-family: 'Source Code Pro';
+  font-family: 'Roboto Mono';
   font-size: 16px;
   font-weight: 500;
   :hover {
@@ -108,11 +108,11 @@ function TrayPage(props: TrayPageProps) {
   }
 
   return (
-    <Content>
+    <Container>
       <Titles>
         <Title>How it works</Title>
         <Subtitle>
-          You can access Sidekick from anywhere by hitting a shortcut on your keyboard. Try it now!
+          You can access Devbook from anywhere by hitting a shortcut on your keyboard. Try it now!
         </Subtitle>
       </Titles>
 
@@ -134,11 +134,11 @@ function TrayPage(props: TrayPageProps) {
           <Step>
             {props.didHitShortcut && <CheckIconDone />}
             {!props.didHitShortcut && <CheckIconNotDone />}
-            2. Hit <Shortcut>{selectedShortcut}</Shortcut> to show Sidekick
+            2. Hit <Shortcut>{selectedShortcut}</Shortcut> to show Devbook
           </Step>
         </StepWrapper>
       </Steps>
-    </Content>
+    </Container>
   );
 }
 

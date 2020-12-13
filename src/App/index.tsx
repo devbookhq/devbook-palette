@@ -7,9 +7,8 @@ import {
   Redirect,
 } from 'react-router-dom';
 
-import { hideMainWindow } from 'mainProcess';
-import useOnKeyPress from 'hooks/useOnKeyPress';
 import Onboarding from 'Onboarding';
+import Preferences from 'Preferences';
 import Home from 'Home';
 
 // The electron window is set to be frameless.
@@ -25,28 +24,23 @@ const DragHeader = styled.div`
   -webkit-user-select: non: el.values[0],;
 `;
 
-const Content = styled.div`
+const Container = styled.div`
   height: 100%;
-  width: 100%;
-  max-width: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 `;
 
-const AppDiv = styled.div`
-  height: 100%;
-  width: 100%;
-  display: flex;
-`;
-
 function App() {
-  useOnKeyPress(null, 'Escape', hideMainWindow);
+  function handleDragHeaderClick(e: any) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
 
   return (
-    <AppDiv>
-      <DragHeader />
-      <Content>
+    <>
+      <DragHeader onClick={handleDragHeaderClick} />
+      <Container>
         <Router>
           <Switch>
             <Route
@@ -54,6 +48,12 @@ function App() {
               exact
             >
               <Onboarding />
+            </Route>
+
+            <Route
+              path="/preferences"
+            >
+              <Preferences />
             </Route>
 
             <Route
@@ -68,13 +68,11 @@ function App() {
             >
               <Home />
             </Route>
-
           </Switch>
         </Router>
-      </Content>
-    </AppDiv>
+      </Container>
+    </>
   );
 }
 
 export default App;
-
