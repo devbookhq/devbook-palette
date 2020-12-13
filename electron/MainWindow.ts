@@ -3,7 +3,7 @@ import ElectronStore from 'electron-store';
 import * as path from 'path';
 import { inspect } from 'util';
 
-import isdev from './isdev';
+import isDev from './utils/isDev';
 
 class MainWindow {
   public window: electron.BrowserWindow | undefined;
@@ -33,7 +33,7 @@ class MainWindow {
         nodeIntegration: true,
         enableRemoteModule: true,
         worldSafeExecuteJavaScript: true,
-        // devTools: isdev,
+        // devTools: isDev,
         // nodeIntegrationInSubFrames: true,
         // webSecurity: false,
         // allowRunningInsecureContent: true,
@@ -69,7 +69,7 @@ class MainWindow {
     });
 
     this.window.on('blur', () => {
-      if (!isdev) {
+      if (!isDev) {
         hideWindow();
       }
     });
@@ -82,7 +82,7 @@ class MainWindow {
       console.error('main window crashed', killed, inspect(event, { depth: null }));
     });
 
-    if (isdev) {
+    if (isDev) {
       this.window.loadURL(`http://localhost:${PORT}/index.html`);
       // Hot Reloading
       require('electron-reload')(__dirname, {

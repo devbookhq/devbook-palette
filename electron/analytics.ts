@@ -3,11 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { app } from 'electron';
 import ElectronStore from 'electron-store';
 
+import debounce from './utils/debounce';
+
 const client = new Analytics('BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf', { flushAt: 5 });
 const store = new ElectronStore();
 
 const userID = store.get('userID', uuidv4());
 store.set('userID', userID);
+
+const debouncedTrack = debounce(client.track, 2500);
 
 const appVersion = app.getVersion();
 
@@ -70,7 +74,7 @@ export function trackConnectGitHubFinished() {
 }
 
 export function trackSearch(searchInfo: any) {
-  client.track({
+  debouncedTrack({
     event: 'Search',
     userId: userID,
     properties: {

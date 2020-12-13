@@ -9,7 +9,7 @@ import {
 } from 'electron';
 import tmp from 'tmp';
 
-import isdev from './isdev';
+import isDev from './utils/isDev';
 import {
   trackShowApp,
   trackOnboardingFinished,
@@ -50,7 +50,7 @@ tmp.setGracefulCleanup();
 // https://stackoverflow.com/questions/41664208/electron-tray-icon-change-depending-on-dark-theme
 let trayIcon: electron.NativeImage;
 
-if (isdev) {
+if (isDev) {
   if (process.platform === 'darwin' || process.platform === 'linux') {
     trayIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), 'resources', 'TrayIconTemplate.png'));
   } else if (process.platform === 'win32') {
@@ -150,7 +150,7 @@ function trySetGlobalShortcut(shortcut: string) {
 
 /////////// App Events ///////////
 app.once('ready', async () => {
-  if (isdev) {
+  if (isDev) {
     // Load react dev tools.
     await electron.session.defaultSession.loadExtension(
       path.join(__dirname, '..', '..', 'react-dev-tools-4.9.0_26'),
