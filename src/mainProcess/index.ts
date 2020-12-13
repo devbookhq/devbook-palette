@@ -1,5 +1,9 @@
 const electron = window.require('electron') as typeof import('electron');
 
+export function isDev() {
+  return electron.ipcRenderer.invoke('is-dev') as Promise<boolean>;
+}
+
 export function openLink(url: string) {
   return electron.shell.openExternal(url);
 }

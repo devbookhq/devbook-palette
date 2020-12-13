@@ -12,3 +12,4 @@ const getFromEnv = parseInt(process.env.ELECTRON_IS_DEV || '0', 10) === 1;
 const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
 
 export default isDev;
+
