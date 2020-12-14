@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 
 import { openLink } from 'mainProcess';
@@ -75,12 +75,14 @@ const Body = styled.div`
 
 interface StackOverflowBodyProps {
   className?: string;
+  html?: string;
   dangerouslySetInnerHTML?: any;
   tabIndex?: number;
 }
 
 const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProps>(({
   className,
+  html,
   dangerouslySetInnerHTML,
   tabIndex,
 }, ref) => {
@@ -99,6 +101,13 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
       e.preventDefault();
     }
   }
+
+  useEffect(() => {
+    if (!html) return;
+    const el = document.createElement('html');
+    el.innerHTML = html;
+    console.log(el);
+  }, [html]);
 
   return (
     <Body
