@@ -55,6 +55,7 @@ class OnboardingWindow {
 
   public close() {
     this.window?.close();
+    this.window = undefined;
   }
 
   public hide() {

@@ -55,8 +55,20 @@ export function openPreferences() {
   electron.ipcRenderer.send('open-preferences');
 }
 
+export function postponeUpdate() {
+  electron.ipcRenderer.send('postpone-update');
+}
+
 export function finishOnboarding() {
   electron.ipcRenderer.send('finish-onboarding');
+}
+
+export function restartAndUpdate() {
+  electron.ipcRenderer.send('restart-and-update');
+}
+
+export function getUpdateStatus(): Promise<boolean> {
+  return electron.ipcRenderer.invoke('update-status');
 }
 
 export function getGithubAccessToken(): Promise<string | null> {
