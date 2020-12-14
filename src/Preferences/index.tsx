@@ -1,4 +1,7 @@
-import React from 'react';
+import React, {
+  useEffect,
+  useState,
+} from 'react';
 import styled from 'styled-components';
 import {
   Route,
@@ -7,11 +10,14 @@ import {
 } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 
-import electron from 'mainProcess';
+import electron, { getUpdateStatus, restartAndUpdate } from 'mainProcess';
 import logo from 'img/logo.png';
+
+import Button from 'components/Button';
 
 import GeneralPreferences from './Pages/GeneralPreferences';
 import Integrations from './Pages/Integrations';
+import useIPCRenderer from 'hooks/useIPCRenderer';
 
 
 const Container = styled.div`
@@ -86,14 +92,44 @@ const DevbookTitle = styled.div`
   font-weight: 600;
 `;
 
+const UpdateWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const UpdateButton = styled(Button)`
+  /* align-self: center; */
+
+  margin: 0px 15px 10px;
+`;
 
 function Preferences() {
+  const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
+
+  useEffect(() => {
+    async function checkUpdateStatus() {
+      const isNewUpdateAvailable = await getUpdateStatus();
+      if (isNewUpdateAvailable) {
+        setIsUpdateAvailable(true);
+      }
+    }
+    checkUpdateStatus();
+  }, []);
+
+  useIPCRenderer('update-available', () => {
+    setIsUpdateAvailable(true);
+  });
+
+  function handleUpdate() {
+    restartAndUpdate();
+  }
+
   return (
     <Container>
       <Sidebar>
         <SidebarContent>
           <DevbookWrapper>
-            <DevbookLogo src={logo}/>
+            <DevbookLogo src={logo} />
             <DevbookTitle>
               Devbook
             </DevbookTitle>
@@ -119,7 +155,14 @@ function Preferences() {
             Integrations
           </LinkButton>
         </SidebarContent>
-        <Version>v{electron.remote.app.getVersion()}</Version>
+        <UpdateWrapper>
+          {isUpdateAvailable &&
+            <UpdateButton onClick={handleUpdate}>
+              {'Restart & Update'}
+            </UpdateButton>
+          }
+          <Version>v{electron.remote.app.getVersion()}</Version>
+        </UpdateWrapper>
       </Sidebar>
 
       <Switch>
@@ -127,7 +170,7 @@ function Preferences() {
           path="/preferences"
           exact
         >
-          <Redirect to="/preferences/general"/>
+          <Redirect to="/preferences/general" />
         </Route>
 
         <Route

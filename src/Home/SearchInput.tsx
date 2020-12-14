@@ -8,9 +8,16 @@ import styled from 'styled-components';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Loader from 'components/Loader';
 import Hotkey, { Key } from './HotkeysPanel/Hotkey';
-import { openPreferences, isDev } from 'mainProcess';
+import {
+  openPreferences,
+  isDev,
+  getUpdateStatus,
+  restartAndUpdate,
+  postponeUpdate,
+} from 'mainProcess';
 
 import { ReactComponent as PreferencesIcon } from 'img/preferences.svg';
+import { ReactComponent as closeImg } from 'img/close.svg';
 
 const Container = styled.div`
   width: 100%;
@@ -114,6 +121,48 @@ const Dev = styled.span`
   font-weight: 600;
 `;
 
+const UpdatePanel = styled.div`
+  height: 38px;
+  width: 100%;
+
+  display: flex;
+  justify-content: space-between;
+
+  background: #7739DD;
+`;
+
+const Disclaimer = styled.div`
+  font-size: 16px;
+  font-weight: 500;
+  margin: auto 15px;
+
+  :hover {
+    cursor: pointer;
+  }
+`;
+
+const CancelButton = styled.div`
+  margin: auto 15px;
+
+  :hover {
+    cursor: pointer;
+    path {
+      stroke: #FFFFFF;
+    }
+  }
+`;
+
+const CloseImg = styled(closeImg)`
+  width: auto;
+  height: 18px;
+
+  display: block;
+
+  path {
+    stroke: #FFFFFF;
+  }
+`;
+
 export enum ResultsFilter {
   StackOverflow = 'StackOverflow',
   GitHubCode = 'Code',
@@ -143,6 +192,8 @@ function SearchInput({
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [isDevEnv, setIsDevEnv] = useState(false);
+  const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
+  const [isUpdatePanelOpened, setIsUpdatePanelOpened] = useState(true);
 
   function handleContentMouseDown(e: any) {
     // Prevent blur when user is clicking on the filter buttons under the input element.
@@ -160,9 +211,33 @@ function SearchInput({
     if (e.keyCode === 38 || e.keyCode === 40) e.preventDefault();
   }
 
+  function handleUpdate() {
+    restartAndUpdate();
+  }
+
+  function handleCloseUpdatePanel() {
+    setIsUpdatePanelOpened(false);
+    postponeUpdate();
+  }
+
   useIPCRenderer('did-show-main-window', () => {
     if (!isModalOpened) inputRef?.current?.focus();
   });
+
+  useIPCRenderer('update-available', () => {
+    setIsUpdateAvailable(true);
+    setIsUpdatePanelOpened(true);
+  });
+
+  useEffect(() => {
+    async function checkUpdateStatus() {
+      const isNewUpdateAvailable = await getUpdateStatus();
+      if (isNewUpdateAvailable) {
+        setIsUpdateAvailable(true);
+      }
+    }
+    checkUpdateStatus();
+  }, []);
 
   useEffect(() => {
     isDev().then(setIsDevEnv);
@@ -213,6 +288,18 @@ function SearchInput({
           <StyledPreferencesIcon />
         </PreferencesButton>
       </Menu>
+      {isUpdateAvailable && isUpdatePanelOpened &&
+        <UpdatePanel>
+          <Disclaimer onClick={handleUpdate}>
+            {'New version is available. Click here to update & restart.'}
+          </Disclaimer>
+          <CancelButton
+            onClick={handleCloseUpdatePanel}
+          >
+            <CloseImg />
+          </CancelButton>
+        </UpdatePanel>
+      }
     </Container>
   );
 }

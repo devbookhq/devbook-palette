@@ -8,6 +8,7 @@ import {
   ipcMain,
 } from 'electron';
 import tmp from 'tmp';
+import { autoUpdater } from 'electron-updater';
 
 import isDev from './utils/isDev';
 import {
@@ -42,6 +43,46 @@ const oldError = console.error;
 console.error = (...args: any) => {
   oldError(...args);
   logInRendered('error', ...args);
+}
+
+// Auto-updating
+let isUpdateAvailable = false;
+
+if (!isDev) {
+  autoUpdater.requestHeaders = null;
+
+  app.on('ready', () => {
+    setInterval(() => {
+      autoUpdater.checkForUpdates();
+    }, 15 * 60 * 1000);
+  });
+
+  autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+    isUpdateAvailable = true;
+
+    mainWindow?.webContents?.send('update-available');
+    preferencesWindow?.webContents?.send('update-available');
+
+    tray?.setIsUpdateAvailable(true);
+  });
+
+  autoUpdater.on('error', (message) => {
+    console.error('There was a problem updating the application');
+    console.error(message);
+  });
+}
+
+async function restartAndUpdate() {
+  if (isUpdateAvailable) {
+    try {
+      setImmediate(() => {
+        autoUpdater.quitAndInstall();
+      });
+
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
 }
 
 // Automatically delete temporary files after the application exit.
@@ -150,6 +191,10 @@ function trySetGlobalShortcut(shortcut: string) {
 
 /////////// App Events ///////////
 app.once('ready', async () => {
+  if (!isDev) {
+    autoUpdater.checkForUpdates();
+  }
+
   if (isDev) {
     // Load react dev tools.
     await electron.session.defaultSession.loadExtension(
@@ -178,6 +223,9 @@ app.once('ready', async () => {
     openPreferences: () => openPreferences(),
     onQuitClick: () => app.quit(),
     shouldOpenAtLogin: store.get('openAtLogin', true),
+    version: app.getVersion(),
+    restartAndUpdate,
+    isUpdateAvailable,
   });
 
   if (isFirstRun) {
@@ -229,13 +277,28 @@ ipcMain.on('connect-github', () => {
 
 ipcMain.on('open-preferences', () => openPreferences());
 
-ipcMain.on('open-preferences', () => openPreferences());
+ipcMain.on('restart-and-update', () => {
+  restartAndUpdate();
+});
 
 ipcMain.on('track-search', (event, searchInfo: any) => trackSearchDebounced(searchInfo));
 
 ipcMain.on('track-modal-opened', (event, modalInfo: any) => trackModalOpened(modalInfo));
 
 ipcMain.handle('github-access-token', () => store.get('github', null));
+
+let postponeHandler: NodeJS.Timeout | undefined;
+
+ipcMain.on('postpone-update', () => {
+  if (isUpdateAvailable) {
+    if (postponeHandler) {
+      clearTimeout(postponeHandler);
+    }
+    postponeHandler = setTimeout(() => {
+      mainWindow?.webContents?.send('update-available');
+    }, 19 * 60 * 60 * 1000);
+  }
+});
 
 ipcMain.handle('remove-github', async () => {
   store.delete('github');
@@ -272,3 +335,6 @@ ipcMain.handle('is-dev', () => {
   return isDev;
 });
 
+ipcMain.handle('update-status', () => {
+  return isUpdateAvailable;
+});

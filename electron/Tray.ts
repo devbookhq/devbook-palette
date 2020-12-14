@@ -6,15 +6,24 @@ interface TrayOptions {
   openPreferences: () => void;
   onQuitClick: () => void;
   shouldOpenAtLogin: boolean;
+  version: string;
+  restartAndUpdate: () => void;
+  isUpdateAvailable: boolean;
 }
 
 class Tray {
-  tray: electron.Tray;
-  contextMenu: electron.Menu | undefined;
+  private tray: electron.Tray;
+  private contextMenu: electron.Menu | undefined;
+
+  private shouldOpenAtLogin = false;
+  private isUpdateAvailable = false;
 
   public constructor(icon: electron.NativeImage, private opts: TrayOptions) {
     this.tray = new electron.Tray(icon);
     this.tray.setIgnoreDoubleClickEvents(true);
+
+    this.shouldOpenAtLogin = opts.shouldOpenAtLogin;
+    this.isUpdateAvailable = opts.isUpdateAvailable;
 
     this.buildContextMenu();
     this.setContextMenu();
@@ -42,7 +51,7 @@ class Tray {
         click: this.opts.onOpenAtLoginClick,
         type: 'checkbox',
         label: 'Should open at login',
-        checked: this.opts.shouldOpenAtLogin,
+        checked: this.shouldOpenAtLogin,
       },
       {
         click: this.opts.openPreferences,
@@ -53,12 +62,28 @@ class Tray {
         label: 'Quit',
         role: 'quit',
       },
+      { type: 'separator' },
+      {
+        type: 'normal',
+        label: this.isUpdateAvailable ? 'Restart && Update' : 'v' + this.opts.version,
+        click: this.opts.restartAndUpdate,
+        enabled: this.isUpdateAvailable,
+      }
     ]);
   }
 
   public setOpenAtLogin(checked: boolean) {
     if (this.contextMenu) {
-      this.contextMenu.items[0].checked = checked;
+      this.shouldOpenAtLogin = checked;
+      this.buildContextMenu();
+      this.setContextMenu();
+    }
+  }
+
+  public setIsUpdateAvailable(isUpdateAvailable: boolean) {
+    if (this.contextMenu) {
+      this.isUpdateAvailable = isUpdateAvailable;
+      this.buildContextMenu();
       this.setContextMenu();
     }
   }

@@ -2,7 +2,7 @@ import React, { FunctionComponent } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div<{ disabled?: boolean }>`
-  padding: 8px 20px;
+  padding: 6px 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -13,7 +13,7 @@ const Container = styled.div<{ disabled?: boolean }>`
   user-select: none;
 
   background: #535BD7;
-  border-radius: 3px;
+  border-radius: 5px;
 
   :hover {
     cursor: pointer;
