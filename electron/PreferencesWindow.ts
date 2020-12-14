@@ -32,13 +32,13 @@ class PreferencesWindow {
     }
 
     //////// Window events ////////
+    this.webContents?.on('crashed', (event, killed) => {
+      console.error('main window crashed', killed, inspect(event, { depth: null }));
+    });
+
     this.window.on('closed', () => {
       this.window = undefined;
       electron.app.dock.hide();
-    });
-
-    this.webContents?.on('crashed', (event, killed) => {
-      console.error('main window crashed', killed, inspect(event, { depth: null }));
     });
 
     if (isDev) {
@@ -55,7 +55,7 @@ class PreferencesWindow {
     }
     electron.app.dock.show();
   }
-
+  
   public close() {
     this.window?.close();
   }
