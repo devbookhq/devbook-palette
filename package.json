@@ -52,7 +52,7 @@
     "electron:dev": "concurrently \"BROWSER=none npm run start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && tsc -p electron && electron --enable-logging .\"",
     "electron:build-dev": "npm run build && NOTARIZATION=none electron-builder build --mac --publish always",
     "electron:build": "npm run build && electron-builder build --mac --publish always",
-    "release": "rm -rf dist && npm run electron:build && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://devbook-publish"
+    "release": "rm -rf dist && npm run electron:build && gsutil cp gs://devbook-publish/latest-mac.yml gs://devbook-publish/archive/$(date +%Y-%M-%d-%H%M)-latest-mac.yml && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://devbook-publish"
   },
   "dependencies": {
     "analytics-node": "^3.4.0-beta.3",
