@@ -55,7 +55,7 @@ const GitHubTitle = styled.div`
 const ConnectGitHubButton = styled(Button)``;
 
 const RemoveGitHubButton = styled.div`
-  margin: 8px 0;
+  margin: 6px 0;
 
   color: #FF5865;
   font-weight: 500;

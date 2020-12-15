@@ -52,16 +52,18 @@ if (!isDev) {
   autoUpdater.requestHeaders = null;
 
   app.on('ready', () => {
+    // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron
     setInterval(() => {
-      autoUpdater.checkForUpdates();
-    }, 15 * 60 * 1000);
+      console.log('updates checked');
+      autoUpdater.checkForUpdatesAndNotify();
+    }, 20 * 60 * 1000);
   });
 
-  autoUpdater.on('update-downloaded', (event, releaseNotes, releaseName) => {
+  autoUpdater.on('update-downloaded', () => {
     isUpdateAvailable = true;
 
-    mainWindow?.webContents?.send('update-available');
-    preferencesWindow?.webContents?.send('update-available');
+    mainWindow?.webContents?.send('update-available', {});
+    preferencesWindow?.webContents?.send('update-available', {});
 
     tray?.setIsUpdateAvailable(true);
   });
@@ -74,14 +76,13 @@ if (!isDev) {
 
 async function restartAndUpdate() {
   if (isUpdateAvailable) {
-    try {
-      setImmediate(() => {
+    setImmediate(() => {
+      try {
         autoUpdater.quitAndInstall();
-      });
-
-    } catch (error) {
-      console.error(error.message);
-    }
+      } catch (error) {
+        console.error(error.message);
+      }
+    });
   }
 }
 
@@ -192,7 +193,7 @@ function trySetGlobalShortcut(shortcut: string) {
 /////////// App Events ///////////
 app.once('ready', async () => {
   if (!isDev) {
-    autoUpdater.checkForUpdates();
+    autoUpdater.checkForUpdatesAndNotify();
   }
 
   if (isDev) {
@@ -294,8 +295,9 @@ ipcMain.on('postpone-update', () => {
     if (postponeHandler) {
       clearTimeout(postponeHandler);
     }
+    // TODO: Switch setTimeout for a cron job - https://github.com/kelektiv/node-cron
     postponeHandler = setTimeout(() => {
-      mainWindow?.webContents?.send('update-available');
+      mainWindow?.webContents?.send('update-available', { isReminder: true });
     }, 19 * 60 * 60 * 1000);
   }
 });
