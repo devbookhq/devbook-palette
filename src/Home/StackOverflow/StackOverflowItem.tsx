@@ -206,7 +206,13 @@ function StackOverflowItem ({
       minute: '2-digit',
     });
     const [dayMonth, year, time] = date.split(', ');
-    return `${dayMonth} '${year} at ${time}`;
+    if (dayMonth && year && time) {
+      return `${dayMonth} '${year} at ${time}`;
+    } else if (!time) {
+      return `${dayMonth} '${year}`;
+    } else {
+      return '';
+    }
   }
 
   useEffect(() => {
