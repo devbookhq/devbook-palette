@@ -42,7 +42,6 @@ export function saveQuery(query: string) {
 
 export function trackSearch(searchInfo: {
   activeFilter: string,
-  query: string,
   codeResultsLength: number,
   soResultsLength: number,
 }) {
