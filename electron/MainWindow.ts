@@ -40,6 +40,8 @@ class MainWindow {
       },
     });
 
+    this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true }); 
+
     this.window.on('restore', () => {
       console.log('Window restored');
       if (!this.window) { return; }
