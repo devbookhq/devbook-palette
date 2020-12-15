@@ -13,6 +13,7 @@ import {
   createTmpFile,
   trackModalOpened,
   trackSearch,
+  trackShortcut,
 } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -216,12 +217,18 @@ function Home() {
 
   // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys('Cmd+1', () => {
-    if (!isModalOpened) setActiveFilter(ResultsFilter.StackOverflow);
+    if (!isModalOpened) {
+      setActiveFilter(ResultsFilter.StackOverflow);
+      trackShortcut({ hotkey: 'Cmd+1', action: 'Change filter to SO' });
+    }
   }, { filter: () => true }, [isModalOpened]);
 
   // 'cmd+2' hotkey - change search filter to GitHub Code search.
   useHotkeys('Cmd+2', () => {
-    if (!isModalOpened) setActiveFilter(ResultsFilter.GitHubCode);
+    if (!isModalOpened) {
+      setActiveFilter(ResultsFilter.GitHubCode);
+      trackShortcut({ hotkey: 'Cmd+2', action: 'Change filter to Code' });
+    }
   }, { filter: () => true }, [isModalOpened]);
 
   // 'up arrow' hotkey - navigation.
@@ -235,6 +242,7 @@ function Home() {
             idx: current.idx - 1,
             focusState: FocusState.WithScroll,
           }));
+          trackShortcut({ hotkey: 'up', action: 'Navigate results up' });
         }
         break;
       case ResultsFilter.GitHubCode:
@@ -243,6 +251,7 @@ function Home() {
             idx: current.idx - 1,
             focusState: FocusState.WithScroll,
           }));
+          trackShortcut({ hotkey: 'up', action: 'Navigate results up' });
         }
         break;
     }
@@ -259,6 +268,7 @@ function Home() {
             idx: current.idx + 1,
             focusState: FocusState.WithScroll
           }));
+          trackShortcut({ hotkey: 'down', action: 'Navigate results down' });
         };
         break;
       case ResultsFilter.GitHubCode:
@@ -267,6 +277,7 @@ function Home() {
             idx: current.idx + 1,
             focusState: FocusState.WithScroll
           }));
+          trackShortcut({ hotkey: 'down', action: 'Navigate results down' });
         }
         break;
     }
@@ -274,31 +285,40 @@ function Home() {
 
   // 'enter' hotkey - open the focused result in a modal.
   useHotkeys('enter', () => {
+
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         setIsSOModalOpened(true);
+        trackShortcut({ hotkey: 'enter', action: 'Open modal' });
         break;
       case ResultsFilter.GitHubCode:
         setIsCodeModalOpened(true);
+        trackShortcut({ hotkey: 'enter', action: 'Open modal' });
         break;
     }
   }, [activeFilter]);
 
   // 'esc' hotkey - close modal or hide main window.
   useHotkeys('esc', () => {
+
+
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         if (!isSOModalOpened) {
           hideMainWindow();
+          trackShortcut({ hotkey: 'esc', action: 'Hide main window' });
         } else {
           setIsSOModalOpened(false);
+          trackShortcut({ hotkey: 'esc', action: 'Close modal' });
         }
         break;
       case ResultsFilter.GitHubCode:
         if (!isCodeModalOpened) {
           hideMainWindow();
+          trackShortcut({ hotkey: 'esc', action: 'Hide main window' });
         } else {
           setIsCodeModalOpened(false);
+          trackShortcut({ hotkey: 'esc', action: 'Close modal' });
         }
         break;
     }
@@ -309,9 +329,11 @@ function Home() {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         openFocusedSOItemInBrowser();
+        trackShortcut({ hotkey: 'Cmd+o', action: 'Open SO item in browser' });
         break;
       case ResultsFilter.GitHubCode:
         openFocusedGitHubCodeItemInBrowser();
+        trackShortcut({ hotkey: 'Cmd+o', action: 'Open Code item in browser' });
         break;
     }
   }, [activeFilter, soResults, soFocusedIdx, codeResults, codeFocusedIdx]);
@@ -321,6 +343,7 @@ function Home() {
   useHotkeys('Cmd+i', () => {
     if (activeFilter === ResultsFilter.GitHubCode) {
       openFocusedGitHubCodeItemInVSCode();
+      trackShortcut({ hotkey: 'Cmd+i', action: 'Open code in VSCode' });
     }
   }, [activeFilter, codeResults, codeFocusedIdx]);
 

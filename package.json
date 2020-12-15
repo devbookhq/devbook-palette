@@ -58,6 +58,7 @@
     "analytics-node": "^3.4.0-beta.3",
     "axios": "^0.21.0",
     "electron-store": "^5.2.0",
+    "electron-updater": "^4.3.5",
     "express": "^4.17.1",
     "prism-react-renderer": "^1.1.1",
     "react": "^16.13.1",
@@ -65,7 +66,6 @@
     "react-hotkeys-hook": "^2.4.0",
     "react-router-dom": "^5.2.0",
     "styled-components": "^5.1.1",
-    "electron-updater": "^4.3.5",
     "tmp": "^0.2.1",
     "uuid": "^8.3.2"
   },

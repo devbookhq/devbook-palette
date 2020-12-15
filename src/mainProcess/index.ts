@@ -24,6 +24,10 @@ export function notifyViewReady() {
   electron.ipcRenderer.send('view-ready');
 }
 
+export function trackShortcut(shortcutInfo: { hotkey: string, action: string }) {
+  electron.ipcRenderer.send('track-shortcut', { shortcutInfo });
+}
+
 export function hideMainWindow() {
   electron.ipcRenderer.send('hide-window');
 }

@@ -19,6 +19,7 @@ import {
   trackConnectGitHubFinished,
   trackConnectGitHubStarted,
   trackModalOpened,
+  trackShortcut,
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
@@ -265,6 +266,10 @@ ipcMain.on('finish-onboarding', () => {
 ipcMain.on('register-default-shortcut', () => {
   const shortcut = store.get('globalShortcut', 'Alt+Space');
   trySetGlobalShortcut(shortcut);
+});
+
+ipcMain.on('track-shortcut', (event, shortcutInfo: { hotkey: string, action: string }) => {
+  trackShortcut(shortcutInfo);
 });
 
 ipcMain.handle('get-global-shortcut', () => {

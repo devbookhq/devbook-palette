@@ -71,6 +71,16 @@ export function trackConnectGitHubFinished() {
   });
 }
 
+export function trackShortcut(shortcutInfo: { action: string, hotkey: string }) {
+  client.track({
+    event: 'Shortcut used',
+    userId: userID,
+    properties: {
+      ...shortcutInfo,
+    },
+  });
+}
+
 function trackSearch(searchInfo: any) {
   client.track({
     event: 'Search',
