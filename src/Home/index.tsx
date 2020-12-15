@@ -418,7 +418,6 @@ function Home() {
       saveQuery(query);
       trackSearch({
         activeFilter: activeFilter.toString(),
-        query,
         codeResultsLength,
         soResultsLength,
       });
