@@ -224,9 +224,11 @@ function SearchInput({
     if (!isModalOpened) inputRef?.current?.focus();
   });
 
-  useIPCRenderer('update-available', () => {
+  useIPCRenderer('update-available', (event, { isReminder }: { isReminder?: boolean }) => {
     setIsUpdateAvailable(true);
-    setIsUpdatePanelOpened(true);
+    if (isReminder) {
+      setIsUpdatePanelOpened(true);
+    }
   });
 
   useEffect(() => {
