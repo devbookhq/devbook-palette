@@ -20,6 +20,10 @@ export function removeGitHub() {
   return electron.ipcRenderer.invoke('remove-github');
 }
 
+export function getSavedQuery() {
+  return electron.ipcRenderer.invoke('get-saved-query');
+}
+
 export function notifyViewReady() {
   electron.ipcRenderer.send('view-ready');
 }
@@ -30,6 +34,10 @@ export function trackShortcut(shortcutInfo: { hotkey: string, action: string }) 
 
 export function hideMainWindow() {
   electron.ipcRenderer.send('hide-window');
+}
+
+export function saveQuery(query: string) {
+  electron.ipcRenderer.send('save-query', query)
 }
 
 export function trackSearch(searchInfo: {

@@ -14,6 +14,8 @@ import {
   trackModalOpened,
   trackSearch,
   trackShortcut,
+  saveQuery,
+  getSavedQuery,
 } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -144,6 +146,14 @@ function Home() {
   const hasEmptyResults =
     (soResults.length === 0 && activeFilter === ResultsFilter.StackOverflow) ||
     (codeResults.length === 0 && activeFilter === ResultsFilter.GitHubCode);
+
+  useEffect(() => {
+    async function restoreLastQuery() {
+      const lastQuery = await getSavedQuery();
+      setSearchQuery(lastQuery);
+    }
+    restoreLastQuery();
+  }, []);
 
   useEffect(() => {
     if (!isSOModalOpened || activeFilter !== ResultsFilter.StackOverflow) {
@@ -392,6 +402,7 @@ function Home() {
         }
         soResultsLength = await searchSO(query);
       }
+      saveQuery(query);
       trackSearch({
         activeFilter: activeFilter.toString(),
         query,
@@ -408,6 +419,10 @@ function Home() {
     if (debouncedQuery && isGitHubConnected && !gitHubConnectedPreviousState) {
       setGitHubConnectedPreviousState(true);
       searchCode(debouncedQuery);
+    }
+
+    if (debouncedQuery === '' && debouncedQuery !== currentResultsQuery) {
+      saveQuery('');
     }
 
   }, [debouncedQuery, currentResultsQuery, activeFilter, isGitHubConnected, gitHubConnectedPreviousState]);

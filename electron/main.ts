@@ -26,6 +26,7 @@ import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow from './PreferencesWindow';
 import OAuth from './OAuth';
 import MainWindow from './MainWindow';
+import debounce from './utils/debounce';
 
 const PORT = 3000;
 
@@ -291,6 +292,14 @@ ipcMain.on('track-search', (event, searchInfo: any) => trackSearchDebounced(sear
 
 ipcMain.on('track-modal-opened', (event, modalInfo: any) => trackModalOpened(modalInfo));
 
+const debouncedSaveQuery = debounce((query: string) => {
+  store.set('lastQuery', query);
+}, 2000);
+
+ipcMain.on('save-query', (event, query: string) => {
+  debouncedSaveQuery(query);
+});
+
 ipcMain.handle('github-access-token', () => store.get('github', null));
 
 let postponeHandler: NodeJS.Timeout | undefined;
@@ -340,6 +349,10 @@ ipcMain.handle('create-tmp-file', async (event, { filePath, fileContent }: { fil
 
 ipcMain.handle('is-dev', () => {
   return isDev;
+});
+
+ipcMain.handle('get-saved-query', () => {
+  return store.get('lastQuery', '');
 });
 
 ipcMain.handle('update-status', () => {
