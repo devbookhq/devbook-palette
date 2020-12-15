@@ -120,6 +120,8 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
   }
 
   return (
+    <>
+    {renderBodyHTML(dangerouslySetInnerHTML)}
     <Body
       ref={ref}
       tabIndex={tabIndex}
@@ -127,6 +129,7 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
       dangerouslySetInnerHTML={{__html: renderBodyHTML(html!) as string}}
       onClick={handleBodyClick}
     />
+    </>
   );
 });
 
