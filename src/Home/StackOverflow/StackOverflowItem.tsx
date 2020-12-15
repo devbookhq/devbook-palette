@@ -273,12 +273,9 @@ function StackOverflowItem ({
           </AnswerMetadata>
 
           <StackOverflowBody
-            html={activeAnswer.html}
-            /*
             dangerouslySetInnerHTML={{
               __html: activeAnswer.html
             }}
-            */
           />
         </Answer>
       }
