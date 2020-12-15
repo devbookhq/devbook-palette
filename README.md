@@ -2,11 +2,11 @@
 
 ## How to set up release environment
 
-1. Download the Apple Developer Certificate to your local machine (https://support.staffbase.com/hc/en-us/articles/115003458931-Creating-the-iOS-Distribution-Certificate). Start with the step "Preparing the Signing of the Certificate" - there is already an existing certificate created online.
+1. Download the Apple Developer Certificate to your local machine (https://developer.apple.com/account/resources/certificates/download/4H4W828NVL).
 
 2. Create an app specific password for the notarization process (https://support.apple.com/en-us/HT204397).
 
-3. Save the app specific password with the command `security add-generic-password -a "vasek.mlejnsky@gmail.com" -w <app_specific_password> -s "AC_PASSWORD"`.
+3. Add the app specific password with the command `security add-generic-password -a "vasek.mlejnsky@gmail.com" -w <app_specific_password> -s "AC_PASSWORD"`.
 
 ## How to release
 
