@@ -359,33 +359,46 @@ function Home() {
 
   useEffect(() => {
     async function searchSO(query: string) {
-      setIsLoadingSO(true);
-      setSOResults([]);
-      const results = await searchStackOverflow(query);
-      setIsSOModalOpened(false);
+      try {
+        setIsSOModalOpened(false);
+        setIsLoadingSO(true);
+        setSOResults([]);
 
-      setSOResults(results);
-      setSOFocusedIdx({
-        idx: 0,
-        focusState: FocusState.WithScroll,
-      });
-      setIsLoadingSO(false);
-      return results.length;
+        const results = await searchStackOverflow(query);
+        setSOResults(results);
+        return results.length;
+      } catch (error) {
+
+      } finally {
+
+        setSOFocusedIdx({
+          idx: 0,
+          focusState: FocusState.WithScroll,
+        });
+        setIsLoadingSO(false);
+      }
+      return 0;
     }
 
     async function searchCode(query: string) {
-      setIsLoadingCode(true);
-      setCodeResults([]);
-      const results = await searchGitHubCode(query);
-      setIsCodeModalOpened(false);
+      try {
+        setIsCodeModalOpened(false);
+        setIsLoadingCode(true);
+        setCodeResults([]);
 
-      setCodeResults(results);
-      setCodeFocusedIdx({
-        idx: 0,
-        focusState: FocusState.WithScroll,
-      });
-      setIsLoadingCode(false);
-      return results.length;
+        const results = await searchGitHubCode(query);
+        setCodeResults(results);
+        return results.length;
+      } catch (error) {
+        console.error(error.message);
+      } finally {
+        setCodeFocusedIdx({
+          idx: 0,
+          focusState: FocusState.WithScroll,
+        });
+        setIsLoadingCode(false);
+      }
+      return 0;
     }
 
     async function search(query: string, activeFilter: ResultsFilter) {
