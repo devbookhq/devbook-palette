@@ -1,7 +1,7 @@
 {
   "name": "com.foundrylabs.devbook",
   "author": "FoundryLabs, Inc.",
-  "version": "0.0.4",
+  "version": "0.0.2",
   "private": true,
   "homepage": ".",
   "description": "",
@@ -18,9 +18,6 @@
       "icon": "./build/icon.png",
       "hardenedRuntime": true,
       "entitlements": "./build/entitlements.mac.inherit.plist"
-    },
-    "dmg": {
-      "writeUpdateInfo": false
     },
     "extends": null,
     "files": [
@@ -61,7 +58,6 @@
     "analytics-node": "^3.4.0-beta.3",
     "axios": "^0.21.0",
     "electron-store": "^5.2.0",
-    "electron-updater": "^4.3.5",
     "express": "^4.17.1",
     "prism-react-renderer": "^1.1.1",
     "react": "^16.13.1",
@@ -69,6 +65,7 @@
     "react-hotkeys-hook": "^2.4.0",
     "react-router-dom": "^5.2.0",
     "styled-components": "^5.1.1",
+    "electron-updater": "^4.3.5",
     "tmp": "^0.2.1",
     "uuid": "^8.3.2"
   },
@@ -85,8 +82,8 @@
     "@types/webpack-env": "^1.15.2",
     "concurrently": "^5.2.0",
     "craco": "0.0.3",
-    "electron": "^10.1.3",
-    "electron-builder": "^22.7.0",
+    "electron": "^11.1.0",
+    "electron-builder": "^22.9.1",
     "electron-notarize": "^1.0.0",
     "electron-reload": "^1.5.0",
     "react-scripts": "^3.4.1",
