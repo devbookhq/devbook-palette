@@ -237,9 +237,7 @@ function StackOverflowModal({
         </Header>
 
         <QuestionBody
-          dangerouslySetInnerHTML={{
-            __html: soResult.question.html,
-          }}
+          html={soResult.question.html}
         />
       </Question>
 
@@ -262,9 +260,7 @@ function StackOverflowModal({
 
             <AnswerBody
               // tabIndex={0}
-              dangerouslySetInnerHTML={{
-                __html: a.html,
-              }}
+              html={a.html}
             />
           </Answer>
         ))}

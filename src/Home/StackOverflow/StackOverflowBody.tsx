@@ -3,6 +3,8 @@ import styled from 'styled-components';
 
 import { openLink } from 'mainProcess';
 
+import Prism from 'prismjs';
+
 const Body = styled.div`
   * {
     font-size: 14px;
@@ -73,15 +75,58 @@ const Body = styled.div`
   }
 `;
 
+const H1 = styled.h1`
+  font-size: 15px;
+`;
+
+const H2 = styled.h2`
+  font-size: 14px;
+  font-weight: 600;
+`;
+
+const H3 = styled.h2`
+  font-size: 14px;
+`;
+
+const Paragraph = styled.p`
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6em;
+  color: #fff;
+`;
+
+const Pre = styled.pre`
+  padding: 10px;
+  overflow-y: auto;
+
+  background: #23222D;
+  border-radius: 3px;
+
+  code {
+    padding: 0;
+    background: transparent;
+    line-height: 18px;
+  }
+`;
+
+const Link = styled.a`
+  color: #4CACD6;
+  text-decoration: underline;
+`;
+
+const Img = styled.img`
+  max-width: 100%;
+`;
+
 interface StackOverflowBodyProps {
   className?: string;
-  dangerouslySetInnerHTML?: any;
+  html?: string;
   tabIndex?: number;
 }
 
 const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProps>(({
   className,
-  dangerouslySetInnerHTML,
+  html,
   tabIndex,
 }, ref) => {
   // Open all links in the browser.
@@ -100,41 +145,30 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
     }
   }
 
-  /*
-  useEffect(() => {
-    if (!html) return;
-
-    const el = document.createElement('html');
-    el.innerHTML = html;
-    console.log(el);
-  }, [html]);
-  */
 
   function renderBodyHTML(html: string) {
     const el = document.createElement('html');
     el.innerHTML = html;
 
-
-    const els = el.getElementsByTagName('body');
-    if (els.length > 0) {
-      let body = els[0];
-      console.log(body);
-    } else {
-      // TODO: Handle.
+    const codes = el.getElementsByTagName('code');
+    for (const code of codes) {
+      const codeText = code.childNodes[0].nodeValue;
+      if (codeText) {
+        const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
+        code.innerHTML = codeHTML;
+      }
     }
+    return el.outerHTML;
   }
 
   return (
-    <>
-    {renderBodyHTML(dangerouslySetInnerHTML)}
     <Body
       ref={ref}
       tabIndex={tabIndex}
       className={className}
-      dangerouslySetInnerHTML={dangerouslySetInnerHTML}
+      dangerouslySetInnerHTML={{__html: renderBodyHTML(html!) as string}}
       onClick={handleBodyClick}
     />
-    </>
   );
 });
 
