@@ -17,3 +17,5 @@ Run `npm run electron:build` if you want to test the notarized version of the ap
 
 Run `npm run release` if you want to build and upload the notarized app to the bucket. This command also cleans up the `dist/` directory before building the app.
 EVERY USER WITH APP VERSION >=0.0.2 WILL DOWNLOAD THIS UPDATE!
+
+You have to manually update download links on the landing page after the release. In theory user can download any app with version >= 0.0.2 and it will auto update to the latest, but we still shoudl set up a proxy link that point to the latest release.
