@@ -78,7 +78,7 @@ const Body = styled.div`
 
 interface StackOverflowBodyProps {
   className?: string;
-  html?: string;
+  html: string;
   tabIndex?: number;
 }
 
@@ -103,8 +103,7 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
     }
   }
 
-
-  function renderBodyHTML(html: string) {
+  function highlightCode(html: string) {
     const el = document.createElement('html');
     el.innerHTML = html;
 
@@ -120,16 +119,13 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
   }
 
   return (
-    <>
-    {renderBodyHTML(dangerouslySetInnerHTML)}
     <Body
       ref={ref}
       tabIndex={tabIndex}
       className={className}
-      dangerouslySetInnerHTML={{__html: renderBodyHTML(html!) as string}}
+      dangerouslySetInnerHTML={{__html: highlightCode(html) as string}}
       onClick={handleBodyClick}
     />
-    </>
   );
 });
 
