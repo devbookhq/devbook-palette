@@ -29,9 +29,9 @@ const Pre = styled.pre`
 
   background: transparent;
 
-  font-family: 'Roboto Mono';
-  font-weight: 500;
-  font-size: 13px;
+  font-family: 'Roboto Mono' !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
   line-height: 19px;
   text-align: left;
 
