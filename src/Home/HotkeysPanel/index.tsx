@@ -66,11 +66,15 @@ interface HotkeysPanelProps {
 
 function HotkeysPanel({ hotkeysLeft, hotkeysRight }: HotkeysPanelProps) {
   function renderHotkey(h: HotkeyWithText) {
+    function handleOnClick() {
+      (h as any).onClick?.();
+    }
+
     return (
       <HotkeyWrapper
         key={h.text}
         isClickable={!!h.onClick}
-        onClick={h.onClick ? (() => (h as any).onClick()) : undefined}
+        onClick={handleOnClick}
       >
         <HotkeyText>{h.text}</HotkeyText>
         {!h.isSeparated &&
@@ -90,7 +94,7 @@ function HotkeysPanel({ hotkeysLeft, hotkeysRight }: HotkeysPanelProps) {
         }
       </HotkeyWrapper>
     );
- }
+  }
 
   return (
     <Container>
@@ -99,30 +103,7 @@ function HotkeysPanel({ hotkeysLeft, hotkeysRight }: HotkeysPanelProps) {
       </Section>
 
       <Section>
-        {hotkeysRight.map(h => (
-        <HotkeyWrapper
-          key={h.text}
-          isClickable={!!h.onClick}
-          onClick={h.onClick ? (h as any).onClick : undefined}
-        >
-          <HotkeyText>{h.text}</HotkeyText>
-          {!h.isSeparated &&
-            <Hotkey
-              hotkey={h.hotkey}
-            />
-          }
-          {h.isSeparated &&
-            <>
-              {h.hotkey.map((el, idx) => (
-                <SeparatedHotkey
-                  key={idx}
-                  hotkey={[el]}
-                />
-              ))}
-            </>
-          }
-        </HotkeyWrapper>
-        ))}
+        {hotkeysRight.map(h => renderHotkey(h))}
       </Section>
     </Container>
   );
