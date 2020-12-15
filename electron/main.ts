@@ -55,7 +55,7 @@ if (!isDev) {
     // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron
     setInterval(() => {
       console.log('updates checked');
-      autoUpdater.checkForUpdatesAndNotify();
+      autoUpdater.checkForUpdates();
     }, 20 * 60 * 1000);
   });
 
@@ -193,7 +193,7 @@ function trySetGlobalShortcut(shortcut: string) {
 /////////// App Events ///////////
 app.once('ready', async () => {
   if (!isDev) {
-    autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.checkForUpdates();
   }
 
   if (isDev) {
