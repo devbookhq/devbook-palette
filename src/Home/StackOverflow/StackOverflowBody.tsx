@@ -37,6 +37,25 @@ const Body = styled.div`
     border-radius: 3px;
   }
 
+  blockquote {
+    margin: 0 5px 0 10px;
+    position: relative;
+    padding: 0 15px;
+    color: rgba(255, 255, 255, 0.8);
+
+    :before {
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 4px;
+      border-radius: 8px;
+      background: #555a5e;
+    }
+  }
+
   /* Code block */
   pre {
     padding: 10px;
