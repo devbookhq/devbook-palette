@@ -100,7 +100,33 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
     }
   }
 
+  /*
+  useEffect(() => {
+    if (!html) return;
+
+    const el = document.createElement('html');
+    el.innerHTML = html;
+    console.log(el);
+  }, [html]);
+  */
+
+  function renderBodyHTML(html: string) {
+    const el = document.createElement('html');
+    el.innerHTML = html;
+
+
+    const els = el.getElementsByTagName('body');
+    if (els.length > 0) {
+      let body = els[0];
+      console.log(body);
+    } else {
+      // TODO: Handle.
+    }
+  }
+
   return (
+    <>
+    {renderBodyHTML(dangerouslySetInnerHTML)}
     <Body
       ref={ref}
       tabIndex={tabIndex}
@@ -108,6 +134,7 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
       dangerouslySetInnerHTML={dangerouslySetInnerHTML}
       onClick={handleBodyClick}
     />
+    </>
   );
 });
 
