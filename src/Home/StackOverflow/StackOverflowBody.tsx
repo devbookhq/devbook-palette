@@ -75,48 +75,6 @@ const Body = styled.div`
   }
 `;
 
-const H1 = styled.h1`
-  font-size: 15px;
-`;
-
-const H2 = styled.h2`
-  font-size: 14px;
-  font-weight: 600;
-`;
-
-const H3 = styled.h2`
-  font-size: 14px;
-`;
-
-const Paragraph = styled.p`
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.6em;
-  color: #fff;
-`;
-
-const Pre = styled.pre`
-  padding: 10px;
-  overflow-y: auto;
-
-  background: #23222D;
-  border-radius: 3px;
-
-  code {
-    padding: 0;
-    background: transparent;
-    line-height: 18px;
-  }
-`;
-
-const Link = styled.a`
-  color: #4CACD6;
-  text-decoration: underline;
-`;
-
-const Img = styled.img`
-  max-width: 100%;
-`;
 
 interface StackOverflowBodyProps {
   className?: string;
