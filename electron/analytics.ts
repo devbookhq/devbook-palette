@@ -76,6 +76,7 @@ export function trackShortcut(shortcutInfo: { action: string, hotkey: string }) 
     event: 'Shortcut used',
     userId: userID,
     properties: {
+      appVersion,
       ...shortcutInfo,
     },
   });
