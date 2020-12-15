@@ -52,6 +52,10 @@ const Input = styled.input`
   border: none;
   outline: none;
   background: transparent;
+
+  ::placeholder {
+    color: #5A5A6F;
+  }
 `;
 
 const StyledLoader = styled(Loader)`

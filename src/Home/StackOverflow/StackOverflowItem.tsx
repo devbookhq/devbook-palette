@@ -279,6 +279,10 @@ function StackOverflowItem ({
           </AnswerMetadata>
 
           <StackOverflowBody
+<<<<<<< HEAD
+=======
+            html={activeAnswer.html}
+>>>>>>> Change input's placeholder color so it matches with the rest of the app
             dangerouslySetInnerHTML={{
               __html: activeAnswer.html
             }}
