@@ -2,7 +2,7 @@
   "name": "com.foundrylabs.devbook",
   "author": "FoundryLabs, Inc.",
   "description": "Search engine made for developers",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": true,
   "homepage": ".",
   "main": "build/electron/main.js",
