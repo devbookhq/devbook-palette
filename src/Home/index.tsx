@@ -252,7 +252,6 @@ function Home() {
             idx: current.idx - 1,
             focusState: FocusState.WithScroll,
           }));
-          trackShortcut({ hotkey: 'up', action: 'Navigate results up' });
         }
         break;
       case ResultsFilter.GitHubCode:
@@ -261,7 +260,6 @@ function Home() {
             idx: current.idx - 1,
             focusState: FocusState.WithScroll,
           }));
-          trackShortcut({ hotkey: 'up', action: 'Navigate results up' });
         }
         break;
     }
@@ -278,7 +276,6 @@ function Home() {
             idx: current.idx + 1,
             focusState: FocusState.WithScroll
           }));
-          trackShortcut({ hotkey: 'down', action: 'Navigate results down' });
         };
         break;
       case ResultsFilter.GitHubCode:
@@ -287,7 +284,6 @@ function Home() {
             idx: current.idx + 1,
             focusState: FocusState.WithScroll
           }));
-          trackShortcut({ hotkey: 'down', action: 'Navigate results down' });
         }
         break;
     }
