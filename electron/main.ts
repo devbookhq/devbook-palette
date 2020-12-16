@@ -294,7 +294,7 @@ ipcMain.on('track-modal-opened', (event, modalInfo: any) => trackModalOpened(mod
 
 const debouncedSaveQuery = debounce((query: string) => {
   store.set('lastQuery', query);
-}, 2000);
+}, 1000);
 
 ipcMain.on('save-query', (event, query: string) => {
   debouncedSaveQuery(query);
