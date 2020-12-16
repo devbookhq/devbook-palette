@@ -12,7 +12,7 @@ class MainWindow {
     return this.window?.webContents;
   }
 
-  public constructor(PORT: number, store: ElectronStore, hideWindow: () => void, private trackShowApp: () => void) {
+  public constructor(PORT: number, store: ElectronStore, hideWindow: () => void, private trackShowApp: () => void, startHidden?: boolean) {
     const [mainWinWidth, mainWinHeight] = store.get('mainWinSize', [900, 500]);
     const [mainWinPosX, mainWinPosY] = store.get('mainWinPosition', [undefined, undefined]);
 
@@ -40,7 +40,11 @@ class MainWindow {
       },
     });
 
-    this?.window?.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+
+    if (startHidden) {
+      this.window.hide();
+    }
 
     this.window.on('restore', () => {
       console.log('Window restored');

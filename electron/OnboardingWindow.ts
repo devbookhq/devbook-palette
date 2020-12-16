@@ -15,7 +15,7 @@ class OnboardingWindow {
   public constructor(PORT: number) {
     this.window = new electron.BrowserWindow({
       width: 1250,
-      height: process.platform === 'win32' ? 800 : 720,
+      height: 720,
       backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
       title: 'Devbook Onboarding',
@@ -29,8 +29,8 @@ class OnboardingWindow {
     if (process.platform === 'win32' || process.platform === 'linux') {
       this.window.removeMenu();
     }
-    
-    this.window?.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+
+    this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
     //////// Window events ////////
     this.window.on('closed', () => {
@@ -53,6 +53,7 @@ class OnboardingWindow {
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/onboarding`);
     }
+    electron.app.dock.show();
   }
 
   public close() {

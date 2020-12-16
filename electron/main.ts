@@ -143,7 +143,7 @@ function hideMainWindow() {
 
 function openPreferences() {
   if (!preferencesWindow || !preferencesWindow.window) {
-    preferencesWindow = new PreferencesWindow(PORT);
+    preferencesWindow = new PreferencesWindow(PORT, () => onboardingWindow?.window?.isVisible());
   }
   preferencesWindow.show();
   hideMainWindow();
@@ -232,19 +232,17 @@ app.once('ready', async () => {
 
   if (isFirstRun) {
     onboardingWindow = new OnboardingWindow(PORT);
+    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp(), true);
     trackOnboardingStarted();
   } else {
     mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
   }
 });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
-});
-
 app.on('activate', () => {
-  if (!onboardingWindow?.window && isFirstRun) onboardingWindow = new OnboardingWindow(PORT);
-  else preferencesWindow?.show();
+  if (onboardingWindow?.window || !isFirstRun) {
+    preferencesWindow?.show();
+  }
 });
 
 app.on('will-quit', () => electron.globalShortcut.unregisterAll());
@@ -260,7 +258,9 @@ ipcMain.on('finish-onboarding', () => {
   onboardingWindow?.hide();
   store.set('firstRun', false);
   isFirstRun = false;
-  if (process.platform === 'darwin') app.dock.hide();
+  if (!preferencesWindow?.window?.isVisible()) {
+    app.dock.hide();
+  }
   trackOnboardingFinished();
 });
 
