@@ -11,7 +11,7 @@ class PreferencesWindow {
     return this.window?.webContents;
   }
 
-  public constructor(PORT: number, private isOnboardingActive: () => boolean | undefined) {
+  public constructor(PORT: number, isOnboardingVisible: () => boolean | undefined) {
     this.window = new electron.BrowserWindow({
       width: 850,
       height: 600,
@@ -38,7 +38,7 @@ class PreferencesWindow {
 
     this.window.on('closed', () => {
       this.window = undefined;
-      if (!this.isOnboardingActive()) {
+      if (!isOnboardingVisible()) {
         electron.app.dock.hide();
       }
     });
@@ -57,7 +57,7 @@ class PreferencesWindow {
     }
     electron.app.dock.show();
   }
-  
+
   public close() {
     this.window?.close();
   }

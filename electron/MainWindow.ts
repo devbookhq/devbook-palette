@@ -40,11 +40,11 @@ class MainWindow {
       },
     });
 
-    this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-
     if (startHidden) {
       this.window.hide();
     }
+
+    this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
     this.window.on('restore', () => {
       console.log('Window restored');

@@ -239,10 +239,15 @@ app.once('ready', async () => {
   }
 });
 
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit();
+});
+
 app.on('activate', () => {
-  if (onboardingWindow?.window || !isFirstRun) {
-    preferencesWindow?.show();
+  if (!onboardingWindow?.window && isFirstRun) {
+
   }
+  else preferencesWindow?.show();
 });
 
 app.on('will-quit', () => electron.globalShortcut.unregisterAll());

@@ -53,7 +53,6 @@ class OnboardingWindow {
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/onboarding`);
     }
-    electron.app.dock.show();
   }
 
   public close() {
