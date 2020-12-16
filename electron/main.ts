@@ -57,7 +57,7 @@ if (!isDev) {
     // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron
     setInterval(() => {
       autoUpdater.checkForUpdates();
-    }, 20 * 60 * 1000);
+    }, 10 * 60 * 1000);
   });
 
   autoUpdater.on('update-downloaded', () => {
