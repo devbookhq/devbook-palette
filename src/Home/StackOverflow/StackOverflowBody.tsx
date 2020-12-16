@@ -128,6 +128,7 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
 
     const codes = el.getElementsByTagName('code');
     for (const code of codes) {
+      if (code.childNodes.length === 0) continue;
       const codeText = code.childNodes[0].nodeValue;
       if (codeText) {
         const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
