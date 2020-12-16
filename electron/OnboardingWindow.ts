@@ -29,6 +29,8 @@ class OnboardingWindow {
     if (process.platform === 'win32' || process.platform === 'linux') {
       this.window.removeMenu();
     }
+    
+    this.window?.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
     //////// Window events ////////
     this.window.on('closed', () => {

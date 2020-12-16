@@ -56,7 +56,6 @@ if (!isDev) {
   app.on('ready', () => {
     // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron
     setInterval(() => {
-      console.log('updates checked');
       autoUpdater.checkForUpdates();
     }, 20 * 60 * 1000);
   });
@@ -260,6 +259,7 @@ ipcMain.on('finish-onboarding', () => {
   // a visibility on the main window.
   onboardingWindow?.hide();
   store.set('firstRun', false);
+  isFirstRun = false;
   if (process.platform === 'darwin') app.dock.hide();
   trackOnboardingFinished();
 });
