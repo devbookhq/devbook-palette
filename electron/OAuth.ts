@@ -55,7 +55,6 @@ class OAuth {
         delete this.stateTokens[state];
         this.showApp();
       }
-
     });
 
     this.app.listen(OAuth.PORT);
