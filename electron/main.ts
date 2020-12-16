@@ -135,8 +135,8 @@ oauth.emitter.on('error', ({ message }: { message: string }) => {
 function hideMainWindow() {
   mainWindow?.hide();
 
-  if (!onboardingWindow?.window?.closable && !preferencesWindow?.window?.closable) {
-    // This action would hide the oboarding and preferences window too, but it is necessary for restoring focus when hiding mainWindow.
+  if (!onboardingWindow?.window?.isVisible() && !preferencesWindow?.window?.isVisible()) {
+    // This action would hide the onboarding and preferences window too, but it is necessary for restoring focus when hiding mainWindow.
     electron.Menu.sendActionToFirstResponder('hide:');
   }
 }
