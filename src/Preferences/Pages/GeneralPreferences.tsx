@@ -87,6 +87,8 @@ function GeneralPreferences() {
               <option value="Control+Space">Control+Space</option>
               <option value="Shift+Space">Shift+Space</option>
               <option value="Command+Space">Command+Space</option>
+              <option value="Command+Shift+Space">Command+Shift+Space</option>
+              <option value="Command+Alt+Space">Command+Alt+Space</option>
             </StyledSelect>
           </Item>
         }
