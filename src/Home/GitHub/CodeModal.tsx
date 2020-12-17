@@ -12,7 +12,7 @@ import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 import Code from './Code';
 
 const marginTop = 110;
-const headerHeight = 58;
+const headerHeight = 63;
 
 const StyledModal = styled(Modal)`
   position: relative;

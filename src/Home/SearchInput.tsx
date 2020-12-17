@@ -21,7 +21,7 @@ import { ReactComponent as closeImg } from 'img/close.svg';
 
 const Container = styled.div`
   width: 100%;
-  padding-top: 5px;
+  padding-top: 10px;
   display: flex;
   flex-direction: column;
 
