@@ -41,7 +41,7 @@ export async function searchCode(query: string, pageSize?: number, page?: number
     await init();
   }
 
-  const url = 'https://api.getsidekick.app/search/github/code';
+  const url = 'https://api.usedevbook.com/search/github/code';
   // const url = 'http://localhost:3002/search/github/code';
 
   const result = await axios.post(url, {
