@@ -12,13 +12,17 @@ class OnboardingWindow {
     return this.window?.webContents;
   }
 
-  public constructor(PORT: number) {
+  public constructor(PORT: number, taskBarIcon: electron.NativeImage) {
+
     this.window = new electron.BrowserWindow({
       width: 1250,
       height: 720,
+      minWidth: 800,
+      minHeight: 400,
       backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
       title: 'Devbook Onboarding',
+      icon: taskBarIcon,
       webPreferences: {
         nodeIntegration: true,
         enableRemoteModule: true,
@@ -26,7 +30,7 @@ class OnboardingWindow {
       },
     });
 
-    if (process.platform === 'win32' || process.platform === 'linux') {
+    if (process.platform === 'linux') {
       this.window.removeMenu();
     }
 

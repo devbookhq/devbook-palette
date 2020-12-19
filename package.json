@@ -1,23 +1,40 @@
 {
   "name": "com.foundrylabs.devbook",
-  "author": "FoundryLabs, Inc.",
   "description": "Search engine made for developers",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "private": true,
+  "author": {
+    "name": "FoundryLabs, Inc.",
+    "email": "vasek@usedevbook.com",
+    "url": "https://usedevbook.com"
+  },
   "homepage": ".",
   "main": "build/electron/main.js",
   "build": {
     "publish": {
       "provider": "generic",
-      "url": "https://storage.googleapis.com/devbook-publish/"
+      "url": "https://storage.googleapis.com/publish-test/"
     },
     "appId": "devbook.foundrylabs.com",
     "productName": "Devbook",
     "afterSign": "scripts/notarize.js",
     "mac": {
+      "artifactName": "${productName}-${version}.${ext}",
       "icon": "./build/icon.png",
       "hardenedRuntime": true,
       "entitlements": "./build/entitlements.mac.inherit.plist"
+    },
+    "linux": {
+      "artifactName": "${productName}-${version}.${ext}",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "./build/icon.png"
     },
     "extends": null,
     "files": [
@@ -50,9 +67,13 @@
     "build": "craco build && tsc -p electron",
     "postinstall": "electron-builder install-app-deps",
     "electron:dev": "concurrently \"BROWSER=none npm run start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && tsc -p electron && electron --enable-logging .\"",
-    "electron:build-dev": "npm run build && NOTARIZATION=none electron-builder build --mac --publish always",
-    "electron:build": "npm run build && electron-builder build --mac --publish always",
-    "release": "rm -rf dist && npm run electron:build && gsutil cp gs://devbook-publish/latest-mac.yml gs://devbook-publish/archive/$(date +%Y-%M-%d-%H%M)-latest-mac.yml && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://devbook-publish"
+    "electron:build-mac-dev": "npm run build && NOTARIZATION=none electron-builder build --mac --publish always",
+    "electron:build-linux-dev": "npm run build && electron-builder build --linux --publish always",
+    "electron:build": "npm run build && electron-builder build --mac --linux --publish always",
+    "upload:mac": "BUCKET=publish-test && gsutil cp gs://$BUCKET/latest-mac.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-mac.yml && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
+    "upload:linux": "BUCKET=publish-test && gsutil cp gs://$BUCKET/latest-linux.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-linux.yml && echo Devbook-*.AppImage latest-linux.yml | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
+    "upload": "npm run upload:mac && npm run upload:linux",
+    "release": "rm -rf dist && npm run electron:build && npm run upload"
   },
   "dependencies": {
     "analytics-node": "^3.4.0-beta.3",

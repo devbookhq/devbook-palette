@@ -92,19 +92,21 @@ tmp.setGracefulCleanup();
 
 // https://stackoverflow.com/questions/41664208/electron-tray-icon-change-depending-on-dark-theme
 let trayIcon: electron.NativeImage;
+let taskBarIcon: electron.NativeImage;
 
 if (isDev) {
   if (process.platform === 'darwin' || process.platform === 'linux') {
     trayIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), 'resources', 'TrayIconTemplate.png'));
-  } else if (process.platform === 'win32') {
-    trayIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), 'resources', 'TrayIconWindowsTemplate.png'));
+  }
+  if (process.platform === 'linux') {
+    taskBarIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), 'resources', 'icon.png'));
   }
 } else {
   if (process.platform === 'darwin' || process.platform === 'linux') {
     trayIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), '..', 'resources', 'TrayIconTemplate.png'));
-  } else if (process.platform === 'win32') {
-    // We have a different tray icon for Windows.
-    trayIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), '..', 'resources', 'TrayIconWindowsTemplate.png'));
+  }
+  if (process.platform === 'linux') {
+    taskBarIcon = electron.nativeImage.createFromPath(path.join(app.getAppPath(), '..', 'resources', 'icon.png'));
   }
 }
 
@@ -135,7 +137,7 @@ oauth.emitter.on('error', ({ message }: { message: string }) => {
 function hideMainWindow() {
   mainWindow?.hide();
 
-  if (!onboardingWindow?.window?.isVisible() && !preferencesWindow?.window?.isVisible()) {
+  if (!onboardingWindow?.window?.isVisible() && !preferencesWindow?.window?.isVisible() && process.platform === 'darwin') {
     // This action would hide the onboarding and preferences window too, but it is necessary for restoring focus when hiding mainWindow.
     electron.Menu.sendActionToFirstResponder('hide:');
   }
@@ -143,7 +145,7 @@ function hideMainWindow() {
 
 function openPreferences() {
   if (!preferencesWindow || !preferencesWindow.window) {
-    preferencesWindow = new PreferencesWindow(PORT, () => onboardingWindow?.window?.isVisible());
+    preferencesWindow = new PreferencesWindow(PORT, () => onboardingWindow?.window?.isVisible(), taskBarIcon);
   }
   preferencesWindow.show();
   hideMainWindow();
@@ -172,8 +174,8 @@ function toggleVisibilityOnMainWindow() {
   if (mainWindow.isVisible()) {
     hideMainWindow();
   } else {
-    mainWindow.show();
-    mainWindow.webContents?.send('did-show-main-window');
+    mainWindow?.show();
+    mainWindow?.webContents?.send('did-show-main-window');
     onboardingWindow?.webContents?.send('did-show-main-window');
   }
 }
@@ -231,7 +233,7 @@ app.once('ready', async () => {
   });
 
   if (isFirstRun) {
-    onboardingWindow = new OnboardingWindow(PORT);
+    onboardingWindow = new OnboardingWindow(PORT, taskBarIcon);
     mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp(), true);
     trackOnboardingStarted();
   } else {
@@ -263,7 +265,7 @@ ipcMain.on('finish-onboarding', () => {
   onboardingWindow?.hide();
   store.set('firstRun', false);
   isFirstRun = false;
-  if (!preferencesWindow?.window?.isVisible()) {
+  if (!preferencesWindow?.window?.isVisible() && process.platform === 'darwin') {
     app.dock.hide();
   }
   trackOnboardingFinished();

@@ -11,13 +11,14 @@ class PreferencesWindow {
     return this.window?.webContents;
   }
 
-  public constructor(PORT: number, isOnboardingVisible: () => boolean | undefined) {
+  public constructor(PORT: number, isOnboardingVisible: () => boolean | undefined, taskBarIcon: electron.NativeImage) {
     this.window = new electron.BrowserWindow({
       width: 850,
       height: 600,
       minWidth: 800,
-      title: 'Devbook Preferencess',
       minHeight: 400,
+      title: 'Devbook Preferencess',
+      icon: taskBarIcon,
       backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
       webPreferences: {
@@ -27,7 +28,7 @@ class PreferencesWindow {
       },
     });
 
-    if (process.platform === 'win32' || process.platform === 'linux') {
+    if (process.platform === 'linux') {
       this.window.removeMenu();
     }
 
@@ -38,7 +39,7 @@ class PreferencesWindow {
 
     this.window.on('closed', () => {
       this.window = undefined;
-      if (!isOnboardingVisible()) {
+      if (!isOnboardingVisible() && process.platform === 'darwin') {
         electron.app.dock.hide();
       }
     });
@@ -55,7 +56,10 @@ class PreferencesWindow {
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/preferences`);
     }
-    electron.app.dock.show();
+
+    if (process.platform === 'darwin') {
+      electron.app.dock.show();
+    }
   }
 
   public close() {
