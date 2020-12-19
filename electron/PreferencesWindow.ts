@@ -33,6 +33,8 @@ class PreferencesWindow {
       this.window.removeMenu();
     }
 
+    this.window.setIcon(taskBarIcon);
+
     //////// Window events ////////
     this.webContents?.on('crashed', (event, killed) => {
       console.error('main window crashed', killed, inspect(event, { depth: null }));

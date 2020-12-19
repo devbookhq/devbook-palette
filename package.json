@@ -25,6 +25,7 @@
       "entitlements": "./build/entitlements.mac.inherit.plist"
     },
     "linux": {
+      "icon": "./build/icon.png",
       "target": [
         {
           "target": "AppImage",

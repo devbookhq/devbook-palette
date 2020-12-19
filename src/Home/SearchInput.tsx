@@ -283,9 +283,12 @@ function SearchInput({
                 onClick={() => onFilterSelect(f)}
               >{f}
               </FilterButton>
-              <Hotkey
+              {process.platform === 'darwin' && <Hotkey
                 hotkey={[Key.Command, `${idx + 1}`]}
-              />
+              />}
+              {process.platform === 'linux' && <Hotkey
+                hotkey={[Key.Alt, `${idx + 1}`]}
+              />}
             </Filter>
           ))}
         </FiltersWrapper>

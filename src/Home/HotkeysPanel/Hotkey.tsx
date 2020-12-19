@@ -148,4 +148,3 @@ function Hotkey({ className, hotkey }: HotkeyProps) {
 }
 
 export default Hotkey;
-

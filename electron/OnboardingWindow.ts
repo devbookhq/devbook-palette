@@ -30,6 +30,8 @@ class OnboardingWindow {
       },
     });
 
+    this.window.setIcon(taskBarIcon);
+
     if (process.platform === 'linux') {
       this.window.removeMenu();
     }

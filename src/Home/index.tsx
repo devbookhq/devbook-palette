@@ -226,18 +226,18 @@ function Home() {
   }
 
   // 'cmd+1' hotkey - change search filter to SO questions.
-  useHotkeys('Cmd+1', () => {
+  useHotkeys(process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
     if (!isModalOpened) {
       setActiveFilter(ResultsFilter.StackOverflow);
-      trackShortcut({ hotkey: 'Cmd+1', action: 'Change filter to SO' });
+      trackShortcut({ action: 'Change filter to SO' });
     }
   }, { filter: () => true }, [isModalOpened]);
 
   // 'cmd+2' hotkey - change search filter to GitHub Code search.
-  useHotkeys('Cmd+2', () => {
+  useHotkeys(process.platform === 'darwin' ? 'Cmd+2' : 'alt+1', () => {
     if (!isModalOpened) {
       setActiveFilter(ResultsFilter.GitHubCode);
-      trackShortcut({ hotkey: 'Cmd+2', action: 'Change filter to Code' });
+      trackShortcut({ action: 'Change filter to Code' });
     }
   }, { filter: () => true }, [isModalOpened]);
 
@@ -295,11 +295,11 @@ function Home() {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         setIsSOModalOpened(true);
-        trackShortcut({ hotkey: 'enter', action: 'Open modal' });
+        trackShortcut({ action: 'Open modal' });
         break;
       case ResultsFilter.GitHubCode:
         setIsCodeModalOpened(true);
-        trackShortcut({ hotkey: 'enter', action: 'Open modal' });
+        trackShortcut({ action: 'Open modal' });
         break;
     }
   }, [activeFilter]);
@@ -312,44 +312,44 @@ function Home() {
       case ResultsFilter.StackOverflow:
         if (!isSOModalOpened) {
           hideMainWindow();
-          trackShortcut({ hotkey: 'esc', action: 'Hide main window' });
+          trackShortcut({ action: 'Hide main window' });
         } else {
           setIsSOModalOpened(false);
-          trackShortcut({ hotkey: 'esc', action: 'Close modal' });
+          trackShortcut({ action: 'Close modal' });
         }
         break;
       case ResultsFilter.GitHubCode:
         if (!isCodeModalOpened) {
           hideMainWindow();
-          trackShortcut({ hotkey: 'esc', action: 'Hide main window' });
+          trackShortcut({ action: 'Hide main window' });
         } else {
           setIsCodeModalOpened(false);
-          trackShortcut({ hotkey: 'esc', action: 'Close modal' });
+          trackShortcut({ action: 'Close modal' });
         }
         break;
     }
   }, [isSOModalOpened, isCodeModalOpened, activeFilter]);
 
   // 'cmd+o' hotkey - open the focused result in a browser.
-  useHotkeys('Cmd+o', () => {
+  useHotkeys(process.platform === 'darwin' ? 'Cmd+o' : 'ctrl+o', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         openFocusedSOItemInBrowser();
-        trackShortcut({ hotkey: 'Cmd+o', action: 'Open SO item in browser' });
+        trackShortcut({ action: 'Open SO item in browser' });
         break;
       case ResultsFilter.GitHubCode:
         openFocusedGitHubCodeItemInBrowser();
-        trackShortcut({ hotkey: 'Cmd+o', action: 'Open Code item in browser' });
+        trackShortcut({ action: 'Open Code item in browser' });
         break;
     }
   }, [activeFilter, soResults, soFocusedIdx, codeResults, codeFocusedIdx]);
 
 
   // 'cmd+i' hotkey - open the GitHubCode result in a vscode.
-  useHotkeys('Cmd+i', () => {
+  useHotkeys(process.platform === 'darwin' ? 'Cmd+i' : 'ctrl+i', () => {
     if (activeFilter === ResultsFilter.GitHubCode) {
       openFocusedGitHubCodeItemInVSCode();
-      trackShortcut({ hotkey: 'Cmd+i', action: 'Open code in VSCode' });
+      trackShortcut({ action: 'Open code in VSCode' });
     }
   }, [activeFilter, codeResults, codeFocusedIdx]);
 
@@ -542,7 +542,7 @@ function Home() {
                   { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsSOModalOpened(true) },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in browser', hotkey: [Key.Command, 'O'], onClick: openFocusedSOItemInBrowser },
+                  { text: 'Open in browser', hotkey: process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedSOItemInBrowser },
                 ]}
               />
             }
@@ -553,7 +553,7 @@ function Home() {
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in browser', hotkey: [Key.Command, 'O'], onClick: openFocusedSOItemInBrowser },
+                  { text: 'Open in browser', hotkey: process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedSOItemInBrowser },
                   { text: 'Close', hotkey: ['Esc'], onClick: () => setIsSOModalOpened(false) },
                 ]}
               />
@@ -569,8 +569,8 @@ function Home() {
                   { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsCodeModalOpened(true) },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in VSCode', hotkey: [Key.Command, 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
-                  { text: 'Open in browser', hotkey: [Key.Command, 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
+                  { text: 'Open in VSCode', hotkey: process.platform === 'darwin' ? [Key.Command, 'I'] : [Key.Alt, 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
+                  { text: 'Open in browser', hotkey: process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
                 ]}
               />
             }
@@ -581,8 +581,8 @@ function Home() {
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in VSCode', hotkey: [Key.Command, 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
-                  { text: 'Open in browser', hotkey: [Key.Command, 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
+                  { text: 'Open in VSCode', hotkey: process.platform === 'darwin' ? [Key.Command, 'I'] : [Key.Alt, 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
+                  { text: 'Open in browser', hotkey: process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
                   { text: 'Close', hotkey: ['Esc'], onClick: () => setIsCodeModalOpened(false) },
                 ]}
               />

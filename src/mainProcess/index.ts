@@ -28,7 +28,7 @@ export function notifyViewReady() {
   electron.ipcRenderer.send('view-ready');
 }
 
-export function trackShortcut(shortcutInfo: { hotkey: string, action: string }) {
+export function trackShortcut(shortcutInfo: { action: string }) {
   electron.ipcRenderer.send('track-shortcut', { shortcutInfo });
 }
 
