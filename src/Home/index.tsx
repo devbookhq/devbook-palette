@@ -331,7 +331,7 @@ function Home() {
   }, [isSOModalOpened, isCodeModalOpened, activeFilter]);
 
   // 'cmd+o' hotkey - open the focused result in a browser.
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+o' : 'ctrl+o', () => {
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+o' : 'alt+o', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         openFocusedSOItemInBrowser();
@@ -346,7 +346,7 @@ function Home() {
 
 
   // 'cmd+i' hotkey - open the GitHubCode result in a vscode.
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+i' : 'ctrl+i', () => {
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+i' : 'alt+i', () => {
     if (activeFilter === ResultsFilter.GitHubCode) {
       openFocusedGitHubCodeItemInVSCode();
       trackShortcut({ action: 'Open code in VSCode' });
@@ -542,7 +542,7 @@ function Home() {
                   { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsSOModalOpened(true) },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt', 'O'], onClick: openFocusedSOItemInBrowser },
+                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'], onClick: openFocusedSOItemInBrowser },
                 ]}
               />
             }
@@ -553,7 +553,7 @@ function Home() {
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt', 'O'], onClick: openFocusedSOItemInBrowser },
+                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'], onClick: openFocusedSOItemInBrowser },
                   { text: 'Close', hotkey: ['Esc'], onClick: () => setIsSOModalOpened(false) },
                 ]}
               />
@@ -569,8 +569,8 @@ function Home() {
                   { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsCodeModalOpened(true) },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in VSCode', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : ['Alt', 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
-                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt', 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
+                  { text: 'Open in VSCode', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : ['Alt +', 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
+                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
                 ]}
               />
             }
@@ -581,8 +581,8 @@ function Home() {
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in VSCode', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : ['Alt', 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
-                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt', 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
+                  { text: 'Open in VSCode', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : ['Alt +', 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
+                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
                   { text: 'Close', hotkey: ['Esc'], onClick: () => setIsCodeModalOpened(false) },
                 ]}
               />

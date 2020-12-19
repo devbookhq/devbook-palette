@@ -118,6 +118,8 @@ interface HotkeyProps {
 }
 
 function renderKey(key: Key) {
+  console.log('key', Object.values(Key));
+
   return (
     <>
       {key === Key.Alt && <AltKeyImg />}
@@ -137,7 +139,7 @@ function Hotkey({ className, hotkey }: HotkeyProps) {
     >
       {hotkey.map(el => (
         <React.Fragment key={el}>
-          {Object.keys(Key).includes(el)
+          {Object.values(Key).includes(el as Key)
             ? renderKey(el as Key)
             : <TextKey>{el as string}</TextKey>
           }
