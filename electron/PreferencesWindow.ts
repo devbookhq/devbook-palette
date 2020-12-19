@@ -12,13 +12,13 @@ class PreferencesWindow {
   }
 
   public constructor(PORT: number, isOnboardingVisible: () => boolean | undefined, taskBarIcon: electron.NativeImage) {
+
     this.window = new electron.BrowserWindow({
       width: 850,
       height: 600,
       minWidth: 800,
       minHeight: 400,
       title: 'Devbook Preferencess',
-      icon: taskBarIcon,
       backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
       webPreferences: {
@@ -76,4 +76,3 @@ class PreferencesWindow {
 }
 
 export default PreferencesWindow;
-

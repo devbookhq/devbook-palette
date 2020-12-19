@@ -13,7 +13,6 @@ class OnboardingWindow {
   }
 
   public constructor(PORT: number, taskBarIcon: electron.NativeImage) {
-
     this.window = new electron.BrowserWindow({
       width: 1250,
       height: 720,

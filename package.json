@@ -33,8 +33,7 @@
             "x64"
           ]
         }
-      ],
-      "icon": "./build/icon.png"
+      ]
     },
     "extends": null,
     "files": [

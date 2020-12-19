@@ -23,6 +23,7 @@ class MainWindow {
       height: mainWinHeight,
       minWidth: 700,
       minHeight: 400,
+      show: !startHidden,
       backgroundColor: '#1C1B26',
       alwaysOnTop: true,
       frame: false,
@@ -40,12 +41,7 @@ class MainWindow {
       },
     });
 
-    
-    this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-    
-    if (startHidden) {
-      this.window.hide();
-    }
+    this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true }); 
 
     this.window.on('restore', () => {
       console.log('Window restored');
@@ -101,6 +97,7 @@ class MainWindow {
       this.webContents?.openDevTools();
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/`);
+      "Fira Code, Roboto Mono, Menlo, Monaco, 'Courier New', monospace"
     }
   }
 
