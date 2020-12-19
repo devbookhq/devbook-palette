@@ -34,6 +34,7 @@ class MainWindow {
         nodeIntegration: true,
         enableRemoteModule: true,
         worldSafeExecuteJavaScript: true,
+        contextIsolation: false,
         // devTools: isDev,
         // nodeIntegrationInSubFrames: true,
         // webSecurity: false,
@@ -41,6 +42,7 @@ class MainWindow {
       },
     });
 
+    this.window.setSkipTaskbar(true);
     this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true }); 
 
     this.window.on('restore', () => {
@@ -97,7 +99,6 @@ class MainWindow {
       this.webContents?.openDevTools();
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/`);
-      "Fira Code, Roboto Mono, Menlo, Monaco, 'Courier New', monospace"
     }
   }
 

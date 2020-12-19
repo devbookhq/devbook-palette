@@ -20,9 +20,10 @@ class OnboardingWindow {
       minHeight: 400,
       backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
-      title: 'Devbook Onboarding',
       icon: taskBarIcon,
+      title: 'Devbook Onboarding',
       webPreferences: {
+        contextIsolation: false,
         nodeIntegration: true,
         enableRemoteModule: true,
         worldSafeExecuteJavaScript: true,

@@ -12,7 +12,6 @@ class PreferencesWindow {
   }
 
   public constructor(PORT: number, isOnboardingVisible: () => boolean | undefined, taskBarIcon: electron.NativeImage) {
-
     this.window = new electron.BrowserWindow({
       width: 850,
       height: 600,
@@ -20,8 +19,10 @@ class PreferencesWindow {
       minHeight: 400,
       title: 'Devbook Preferencess',
       backgroundColor: '#1C1B26',
+      icon: taskBarIcon,
       titleBarStyle: 'hiddenInset',
       webPreferences: {
+        contextIsolation: false,
         nodeIntegration: true,
         enableRemoteModule: true,
         worldSafeExecuteJavaScript: true,
