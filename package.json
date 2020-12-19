@@ -11,21 +11,20 @@
   "homepage": ".",
   "main": "build/electron/main.js",
   "build": {
+    "productName": "Devbook",
+    "appId": "devbook.foundrylabs.com",
+    "artifactName": "${productName}-${version}.${ext}",
     "publish": {
       "provider": "generic",
       "url": "https://storage.googleapis.com/publish-test/"
     },
-    "appId": "devbook.foundrylabs.com",
-    "productName": "Devbook",
     "afterSign": "scripts/notarize.js",
+    "icon": "./build/icon.png",
     "mac": {
-      "artifactName": "${productName}-${version}.${ext}",
-      "icon": "./build/icon.png",
       "hardenedRuntime": true,
       "entitlements": "./build/entitlements.mac.inherit.plist"
     },
     "linux": {
-      "artifactName": "${productName}-${version}.${ext}",
       "target": [
         {
           "target": "AppImage",

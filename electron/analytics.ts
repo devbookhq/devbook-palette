@@ -12,10 +12,13 @@ const userID = store.get('userID', uuidv4());
 store.set('userID', userID);
 
 const appVersion = app.getVersion();
+const platform = process.platform;
+
 
 client.identify({
   userId: userID,
   traits: {
+    platform,
     name: userID,
     appVersion,
   },
@@ -26,6 +29,7 @@ export function trackShowApp() {
     event: 'Showed app',
     userId: userID,
     properties: {
+      platform,
       appVersion,
     },
   });
@@ -36,6 +40,7 @@ export function trackOnboardingStarted() {
     event: 'Onboarding started',
     userId: userID,
     properties: {
+      platform,
       appVersion,
     },
   });
@@ -46,6 +51,7 @@ export function trackOnboardingFinished() {
     event: 'Onboarding finished',
     userId: userID,
     properties: {
+      platform,
       appVersion,
     },
   });
@@ -56,6 +62,7 @@ export function trackConnectGitHubStarted() {
     event: 'Connecting GitHub started',
     userId: userID,
     properties: {
+      platform,
       appVersion,
     },
   });
@@ -66,6 +73,7 @@ export function trackConnectGitHubFinished() {
     event: 'Connecting GitHub finished',
     userId: userID,
     properties: {
+      platform,
       appVersion,
     },
   });
@@ -76,6 +84,7 @@ export function trackShortcut(shortcutInfo: { action: string, hotkey: string }) 
     event: 'Shortcut used',
     userId: userID,
     properties: {
+      platform,
       appVersion,
       ...shortcutInfo,
     },
@@ -87,6 +96,7 @@ function trackSearch(searchInfo: any) {
     event: 'Search',
     userId: userID,
     properties: {
+      platform,
       appVersion,
       ...searchInfo,
     },
@@ -100,6 +110,7 @@ export function trackModalOpened(modalInfo: any) {
     event: 'Modal opened',
     userId: userID,
     properties: {
+      platform,
       appVersion,
       ...modalInfo,
     },

@@ -47,6 +47,28 @@ console.error = (...args: any) => {
   logInRendered('error', ...args);
 }
 
+// Disallow running multiple instances of Devbook
+const isFirstInstance = app.requestSingleInstanceLock();
+
+if (!isFirstInstance) {
+  app.exit(0);
+} else {
+  app.on('second-instance', () => {
+    if (onboardingWindow?.window) {
+      onboardingWindow.window.restore();
+      onboardingWindow.window.focus();
+    } else if (preferencesWindow?.window) {
+      preferencesWindow.window.restore();
+      preferencesWindow.window.focus();
+    } else if (mainWindow?.window) {
+      mainWindow.window.restore();
+      mainWindow.window.focus();
+    } else {
+      mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
+    }
+  });
+}
+
 // Auto-updating
 let isUpdateAvailable = false;
 
@@ -235,6 +257,7 @@ app.once('ready', async () => {
   if (isFirstRun) {
     onboardingWindow = new OnboardingWindow(PORT, taskBarIcon);
     mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp(), true);
+    onboardingWindow?.window?.focus();
     trackOnboardingStarted();
   } else {
     mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
