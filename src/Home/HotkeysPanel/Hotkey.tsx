@@ -102,12 +102,12 @@ const TextKey = styled.div`
 `;
 
 export enum Key {
-  Alt = 'Alt',
-  Shift = 'Shift',
-  Command = 'Command',
-  Enter = 'Enter',
-  ArrowUp = 'ArrowUp',
-  ArrowDown = 'ArrowDown',
+  Alt = 'KeyAlt',
+  Shift = 'KeyShift',
+  Command = 'KeyCommand',
+  Enter = 'KeyEnter',
+  ArrowUp = 'KeyArrowUp',
+  ArrowDown = 'KeyArrowDown',
 }
 
 export type HotkeyType = (string | Key)[];

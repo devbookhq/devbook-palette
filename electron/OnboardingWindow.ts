@@ -20,7 +20,7 @@ class OnboardingWindow {
       minHeight: 400,
       backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
-      icon: taskBarIcon,
+      icon: process.platform === 'linux' ? taskBarIcon : undefined,
       title: 'Devbook Onboarding',
       webPreferences: {
         contextIsolation: false,
@@ -29,8 +29,6 @@ class OnboardingWindow {
         worldSafeExecuteJavaScript: true,
       },
     });
-
-    this.window.setIcon(taskBarIcon);
 
     if (process.platform === 'linux') {
       this.window.removeMenu();

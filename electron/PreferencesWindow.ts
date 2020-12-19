@@ -19,7 +19,7 @@ class PreferencesWindow {
       minHeight: 400,
       title: 'Devbook Preferencess',
       backgroundColor: '#1C1B26',
-      icon: taskBarIcon,
+      icon: process.platform === 'linux' ? taskBarIcon : undefined,
       titleBarStyle: 'hiddenInset',
       webPreferences: {
         contextIsolation: false,
@@ -32,8 +32,6 @@ class PreferencesWindow {
     if (process.platform === 'linux') {
       this.window.removeMenu();
     }
-
-    this.window.setIcon(taskBarIcon);
 
     //////// Window events ////////
     this.webContents?.on('crashed', (event, killed) => {

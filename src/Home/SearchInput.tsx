@@ -287,7 +287,7 @@ function SearchInput({
                 hotkey={[Key.Command, `${idx + 1}`]}
               />}
               {electron.remote.process.platform === 'linux' && <Hotkey
-                hotkey={[Key.Alt, `${idx + 1}`]}
+                hotkey={['Alt', `${idx + 1}`]}
               />}
             </Filter>
           ))}
