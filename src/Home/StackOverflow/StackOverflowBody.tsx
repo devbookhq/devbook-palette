@@ -91,6 +91,9 @@ const Body = styled.div`
 
   img {
     max-width: 100%;
+    :hover {
+      cursor: pointer;
+    }
   }
 `;
 
@@ -109,8 +112,11 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
   // Open all links in the browser.
   function handleBodyClick(e: any) {
     const target = e.target || e.srcElement;
-    if (target.tagName === 'A') {
-      const url = target.getAttribute('href');
+    // The 'target.parentNode' handles a case when <a> element contains a <code> element.
+    // If <code> element is inside the <a> element the event's target is actually the
+    // <code> element and not the <a> element. So we have to check if its parent is <a>.
+    if (target.tagName === 'A' || target.parentNode.tagName === 'A') {
+      const url = target.getAttribute('href') || target.parentNode.getAttribute('href');
       openLink(url);
       e.preventDefault();
     }
