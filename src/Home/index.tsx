@@ -6,7 +6,7 @@ import React, {
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import {
+import electron, {
   hideMainWindow,
   connectGitHub,
   openLink,
@@ -226,7 +226,7 @@ function Home() {
   }
 
   // 'cmd+1' hotkey - change search filter to SO questions.
-  useHotkeys(process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
     if (!isModalOpened) {
       setActiveFilter(ResultsFilter.StackOverflow);
       trackShortcut({ action: 'Change filter to SO' });
@@ -234,7 +234,7 @@ function Home() {
   }, { filter: () => true }, [isModalOpened]);
 
   // 'cmd+2' hotkey - change search filter to GitHub Code search.
-  useHotkeys(process.platform === 'darwin' ? 'Cmd+2' : 'alt+1', () => {
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+2' : 'alt+1', () => {
     if (!isModalOpened) {
       setActiveFilter(ResultsFilter.GitHubCode);
       trackShortcut({ action: 'Change filter to Code' });
@@ -331,7 +331,7 @@ function Home() {
   }, [isSOModalOpened, isCodeModalOpened, activeFilter]);
 
   // 'cmd+o' hotkey - open the focused result in a browser.
-  useHotkeys(process.platform === 'darwin' ? 'Cmd+o' : 'ctrl+o', () => {
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+o' : 'ctrl+o', () => {
     switch (activeFilter) {
       case ResultsFilter.StackOverflow:
         openFocusedSOItemInBrowser();
@@ -346,7 +346,7 @@ function Home() {
 
 
   // 'cmd+i' hotkey - open the GitHubCode result in a vscode.
-  useHotkeys(process.platform === 'darwin' ? 'Cmd+i' : 'ctrl+i', () => {
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+i' : 'ctrl+i', () => {
     if (activeFilter === ResultsFilter.GitHubCode) {
       openFocusedGitHubCodeItemInVSCode();
       trackShortcut({ action: 'Open code in VSCode' });
@@ -542,7 +542,7 @@ function Home() {
                   { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsSOModalOpened(true) },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in browser', hotkey: process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedSOItemInBrowser },
+                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedSOItemInBrowser },
                 ]}
               />
             }
@@ -553,7 +553,7 @@ function Home() {
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in browser', hotkey: process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedSOItemInBrowser },
+                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedSOItemInBrowser },
                   { text: 'Close', hotkey: ['Esc'], onClick: () => setIsSOModalOpened(false) },
                 ]}
               />
@@ -569,8 +569,8 @@ function Home() {
                   { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsCodeModalOpened(true) },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in VSCode', hotkey: process.platform === 'darwin' ? [Key.Command, 'I'] : [Key.Alt, 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
-                  { text: 'Open in browser', hotkey: process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
+                  { text: 'Open in VSCode', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : [Key.Alt, 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
+                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
                 ]}
               />
             }
@@ -581,8 +581,8 @@ function Home() {
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in VSCode', hotkey: process.platform === 'darwin' ? [Key.Command, 'I'] : [Key.Alt, 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
-                  { text: 'Open in browser', hotkey: process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
+                  { text: 'Open in VSCode', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : [Key.Alt, 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
+                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : [Key.Alt, 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
                   { text: 'Close', hotkey: ['Esc'], onClick: () => setIsCodeModalOpened(false) },
                 ]}
               />

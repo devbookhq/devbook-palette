@@ -127,14 +127,14 @@ function TrayPage(props: TrayPageProps) {
             <option value="Alt+Space">Alt+Space</option>
             <option value="Control+Space">Control+Space</option>
             <option value="Shift+Space">Shift+Space</option>
-            {process.platform === 'darwin' &&
+            {electron.remote.process.platform === 'darwin' &&
               <>
                 <option value="Command+Space">Command+Space</option>
                 <option value="Command+Shift+Space">Command+Shift+Space</option>
                 <option value="Command+Alt+Space">Command+Alt+Space</option>
               </>
             }
-            {process.platform === 'linux' &&
+            {electron.remote.process.platform === 'linux' &&
               <>
                 <option value="Control+Shift+Space">Command+Shift+Space</option>
                 <option value="Control+Alt+Space">Command+Alt+Space</option>

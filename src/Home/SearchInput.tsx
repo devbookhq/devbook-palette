@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Loader from 'components/Loader';
 import Hotkey, { Key } from './HotkeysPanel/Hotkey';
-import {
+import electron, {
   openPreferences,
   isDev,
   getUpdateStatus,
@@ -283,10 +283,10 @@ function SearchInput({
                 onClick={() => onFilterSelect(f)}
               >{f}
               </FilterButton>
-              {process.platform === 'darwin' && <Hotkey
+              {electron.remote.process.platform === 'darwin' && <Hotkey
                 hotkey={[Key.Command, `${idx + 1}`]}
               />}
-              {process.platform === 'linux' && <Hotkey
+              {electron.remote.process.platform === 'linux' && <Hotkey
                 hotkey={[Key.Alt, `${idx + 1}`]}
               />}
             </Filter>
