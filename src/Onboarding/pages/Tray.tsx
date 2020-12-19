@@ -52,14 +52,14 @@ function TrayPage() {
         </Subtitle>
       </Titles>
 
-      {electron.remote.electron.remote.process.platform === 'darwin' && (
+      {electron.remote.process.platform === 'darwin' && (
         <TrayImg src={trayPreviewMacImg} />
       )}
       {/* TODO: Add image for Ubuntu */}
-      {electron.remote.electron.remote.process.platform === 'linux' && (
+      {electron.remote.process.platform === 'linux' && (
         <TrayImg src={trayPreviewDebImg} />
       )}
-      {electron.remote.electron.remote.process.platform === 'win32' && (
+      {electron.remote.process.platform === 'win32' && (
         <TrayImg src={trayPreviewWinImg} />
       )}
     </Container>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ReactComponent as CheckIcon } from 'img/check.svg';
+import electron from 'mainProcess';
 
 const Container = styled.div`
   width: 100%;
