@@ -111,12 +111,10 @@ function Integrations() {
     console.log('access', accessToken);
     try {
       if (accessToken === null) {
-        console.log('Github Account removed');
         setGitHubLogin(undefined);
         return;
       }
       setIsLoading(true);
-      console.log()
       const login = await getGitHubLogin(accessToken);
       setGitHubLogin(login);
     } catch (error) {
@@ -158,4 +156,3 @@ function Integrations() {
 }
 
 export default Integrations;
-

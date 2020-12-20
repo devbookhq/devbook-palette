@@ -14,13 +14,12 @@ store.set('userID', userID);
 const appVersion = app.getVersion();
 const platform = process.platform;
 
-
 client.identify({
   userId: userID,
   traits: {
     platform,
-    name: userID,
     appVersion,
+    name: userID,
   },
 });
 

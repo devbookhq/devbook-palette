@@ -118,8 +118,6 @@ interface HotkeyProps {
 }
 
 function renderKey(key: Key) {
-  console.log('key', Object.values(Key));
-
   return (
     <>
       {key === Key.Alt && <AltKeyImg />}
