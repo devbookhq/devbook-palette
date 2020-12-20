@@ -1,5 +1,5 @@
 {
-  "name": "Devbook",
+  "name": "com.foundrylabs.devbook",
   "description": "Search engine made for developers",
   "version": "0.0.9",
   "private": true,
