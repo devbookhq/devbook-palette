@@ -137,8 +137,8 @@ function TrayPage(props: TrayPageProps) {
             }
             {electron.remote.process.platform === 'linux' &&
               <>
-                <option value="Control+Shift+Space">Command+Shift+Space</option>
-                <option value="Control+Alt+Space">Command+Alt+Space</option>
+                <option value="Control+Shift+Space">Control+Shift+Space</option>
+                <option value="Control+Alt+Space">Control+Alt+Space</option>
               </>
             }
           </Select>

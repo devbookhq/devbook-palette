@@ -21,7 +21,7 @@ class MainWindow {
       y: mainWinPosY,
       width: mainWinWidth,
       height: mainWinHeight,
-      minWidth: 700,
+      minWidth: 720,
       minHeight: 400,
       show: !startHidden,
       backgroundColor: '#1C1B26',

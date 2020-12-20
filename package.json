@@ -1,5 +1,5 @@
 {
-  "name": "com.foundrylabs.devbook",
+  "name": "Devbook",
   "description": "Search engine made for developers",
   "version": "0.0.9",
   "private": true,
@@ -25,7 +25,6 @@
       "entitlements": "./build/entitlements.mac.inherit.plist"
     },
     "linux": {
-      "executableName":"Devbook",
       "icon": "./build/icon.png",
       "target": [
         {
@@ -34,10 +33,7 @@
             "x64"
           ]
         }
-      ],
-      "desktop": {
-        "Name":"Devbook"
-      }
+      ]
     },
     "extends": null,
     "files": [
@@ -73,8 +69,8 @@
     "electron:build-mac-dev": "npm run build && NOTARIZATION=none electron-builder build --mac --publish always",
     "electron:build-linux-dev": "npm run build && electron-builder build --linux --publish always",
     "electron:build": "npm run build && electron-builder build --mac --linux --publish always",
-    "upload:mac": "BUCKET=publish-test && gsutil cp gs://$BUCKET/latest-mac.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-mac.yml && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp ./dist/{} gs://$BUCKET",
-    "upload:linux": "BUCKET=publish-test && gsutil cp gs://$BUCKET/latest-linux.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-linux.yml && echo Devbook-*.AppImage | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp ./dist/{} gs://$BUCKET",
+    "upload:mac": "BUCKET=publish-test && gsutil cp gs://$BUCKET/latest-mac.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-mac.yml && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
+    "upload:linux": "BUCKET=publish-test && gsutil cp gs://$BUCKET/latest-linux.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-linux.yml && echo Devbook-*.AppImage latest-linux.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
     "upload": "npm run upload:mac && npm run upload:linux",
     "release": "rm -rf dist && npm run electron:build && npm run upload"
   },
