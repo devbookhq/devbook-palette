@@ -2,6 +2,7 @@ import React, {
   useEffect,
   useState,
   useCallback,
+  useReducer,
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
@@ -96,13 +97,68 @@ const GitHubConnectTitle = styled(InfoMessage)`
 //   }
 // `;
 
+
 interface FocusIndex {
   idx: number;
   focusState: FocusState;
 }
 
+enum ReducerActionType {
+  SetSearchQuery,
+  // SetSearchFilter,
+  /*
+  OpenModal,
+
+  PerformHotkey,
+
+  SetError,
+  */
+}
+
+interface State {
+  search: {
+    query: string;
+  };
+}
+
+interface SetSearchQuery {
+  type: ReducerActionType.SetSearchQuery,
+  payload: {
+    query: string;
+  };
+}
+
+type ReducerAction = SetSearchQuery;
+
+function stateReducer(state: State, reducerAction: ReducerAction): State {
+  switch (reducerAction.type) {
+    case ReducerActionType.SetSearchQuery: {
+      const { query } = reducerAction.payload;
+      return {
+        ...state,
+        search: {
+          ...state.search,
+          query,
+        },
+      };
+    }
+    default:
+      return state;
+  }
+}
+
+function initialState(): State {
+  return {
+    search: {
+      query: '',
+    },
+  };
+}
+
 function Home() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [state, dispatch] = useReducer(stateReducer, initialState());
+  // const [searchQuery, setSearchQuery] = useState('');
+  const debouncedQuery = useDebounce(state.search.query, 400);
 
   const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
   const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
@@ -117,9 +173,6 @@ function Home() {
     focusState: FocusState.NoScroll,
   });
 
-  const trimmedSearchQuery = searchQuery.trim();
-  const debouncedQuery = useDebounce(trimmedSearchQuery, 400);
-
   const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
 
   const [isLoadingSO, setIsLoadingSO] = useState(false);
@@ -131,8 +184,7 @@ function Home() {
   const [currentResultsQuery, setCurrentResultsQuery] = useState('');
 
   const [isGitHubConnected, setIsGitHubConnected] = useState(false);
-  // TODO: There is surely a better way to write this, probably a reducer.
-  // We will refactor this when we have the time.
+  // TODO: There is probably a better way to write this - a reducer?
   const [gitHubConnectedPreviousState, setGitHubConnectedPreviousState] = useState(false);
 
   const isModalOpened =
@@ -147,9 +199,20 @@ function Home() {
     (soResults.length === 0 && activeFilter === ResultsFilter.StackOverflow) ||
     (codeResults.length === 0 && activeFilter === ResultsFilter.GitHubCode);
 
+ // Dispatch helpers
+ const setSearchQuery = useCallback((query: string) => {
+  dispatch({
+    type: ReducerActionType.SetSearchQuery,
+    payload: { query: query.trim() },
+  });
+ }, []);
+ /////////
+
   useEffect(() => {
+    // TODO: This probably should be a reducer action.
     async function restoreLastQuery() {
       const lastQuery = await getSavedQuery();
+      // TODO: Set the last saved search query.
       setSearchQuery(lastQuery);
     }
     restoreLastQuery();
@@ -483,7 +546,7 @@ function Home() {
       <Container>
         <SearchInput
           placeholder="Question or code"
-          value={searchQuery}
+          value={state.search.query}
           onChange={e => setSearchQuery(e.target.value)}
           activeFilter={activeFilter}
           onFilterSelect={f => setActiveFilter(f)}
@@ -491,8 +554,8 @@ function Home() {
           isModalOpened={isModalOpened}
         />
 
-        {!searchQuery && (isGitHubConnected || activeFilter === ResultsFilter.StackOverflow) && !isLoading && <InfoMessage>Type your search query</InfoMessage>}
-        {searchQuery && (isGitHubConnected || activeFilter === ResultsFilter.StackOverflow) && hasEmptyResults && !isLoading && <InfoMessage>Nothing found</InfoMessage>}
+        {!state.search.query && (isGitHubConnected || activeFilter === ResultsFilter.StackOverflow) && !isLoading && <InfoMessage>Type your search query</InfoMessage>}
+        {state.search.query && (isGitHubConnected || activeFilter === ResultsFilter.StackOverflow) && hasEmptyResults && !isLoading && <InfoMessage>Nothing found</InfoMessage>}
 
         {activeFilter === ResultsFilter.GitHubCode && !isGitHubConnected &&
           <GitHubConnect>
@@ -508,7 +571,7 @@ function Home() {
           </GitHubConnect>
         }
 
-        {searchQuery && !hasEmptyResults && !isLoading &&
+        {state.search.query && !hasEmptyResults && !isLoading &&
           <>
             <SearchResults>
               <>
