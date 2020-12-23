@@ -7,13 +7,10 @@ import { notifyViewReady, } from './mainProcess';
 import * as serviceWorker from './serviceWorker';
 import App from './App';
 
-
 ReactDOM.render(
-  <>
-  {/* <React.StrictMode> */}
+  <React.StrictMode>
     <App />
-  {/*</React.StrictMode> */}
-  </>
+  </React.StrictMode>
   ,
   document.getElementById('root'),
 );

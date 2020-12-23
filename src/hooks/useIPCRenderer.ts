@@ -7,7 +7,7 @@ function useIPCRenderer(eventName: string, handler: (paramObj: any, ...args: any
     return () => {
       electron.ipcRenderer.removeListener(eventName, handler);
     };
-  }, [eventName, handler, ...deps]);
+  }, [eventName, handler, deps]);
 }
 
 export default useIPCRenderer;

@@ -233,7 +233,7 @@ function StackOverflowItem ({
   }, [soResult]);
 
   useEffect(() => {
-    // if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
+    if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
   }, [focusState]);
 
   return (

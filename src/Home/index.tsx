@@ -1,7 +1,5 @@
 import React, {
-  useRef,
   useEffect,
-  useState,
   useCallback,
   useReducer,
   useMemo,
@@ -356,6 +354,8 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
           ...state.search,
           filter,
         },
+        // TODO: https://github.com/DevbookHQ/devbook/issues/7
+        /*
         results: {
           ...state.results,
           [filter]: {
@@ -370,6 +370,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
             },
           },
         },
+        */
       };
     }
     case ReducerActionType.StartSearching: {
@@ -501,9 +502,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
   }
 }
 
-
 function Home() {
-  const searchResultsWrapperEl = useRef<HTMLDivElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
   const debouncedQuery = useDebounce(state.search.query.trim(), 400);
@@ -541,25 +540,6 @@ function Home() {
       payload: { filter, scrollTopPosition },
     });
   }, []);
-
-  const setSearchFilter = useCallback((filter: ResultsFilter) => {
-    if (searchResultsWrapperEl?.current) {
-      // Cache the scroll bar position for the current active filter.
-      const currentScrollTop = searchResultsWrapperEl.current.scrollTop;
-      console.log('CURRENT', currentScrollTop);
-      cacheScrollTopPosition(state.search.filter, currentScrollTop);
-
-      // Set the scroll bar position for the filter that a user wants
-      // to set as an active.
-      const newScrollTop = state.results[filter].scrollTopPosition;
-      searchResultsWrapperEl.current.scrollTo(0, newScrollTop);
-    }
-
-    dispatch({
-      type: ReducerActionType.SetSearchFilter,
-      payload: { filter },
-    });
-  }, [state.search.filter, state.results]);
 
   const cacheSearchQuery = useCallback((query: string) => {
     dispatch({
@@ -601,6 +581,34 @@ function Home() {
      payload: { filter, idx, focusState },
    });
   }, []);
+
+  const setSearchFilter = useCallback((filter: ResultsFilter) => {
+    // TODO: Save the scroll bar's position and load it later.
+    // https://github.com/DevbookHQ/devbook/issues/7
+    /*
+    if (searchResultsWrapperEl?.current) {
+      // Cache the scroll bar position for the current active filter.
+      const currentScrollTop = searchResultsWrapperEl.current.scrollTop;
+      console.log('CURRENT', currentScrollTop);
+      cacheScrollTopPosition(state.search.filter, currentScrollTop);
+
+      // Set the scroll bar position for the filter that a user wants
+      // to set as an active.
+      const newScrollTop = state.results[filter].scrollTopPosition;
+      searchResultsWrapperEl.current.scrollTo(0, newScrollTop);
+    }
+    */
+
+    dispatch({
+      type: ReducerActionType.SetSearchFilter,
+      payload: { filter },
+    });
+
+    // Temporary solution that sets scrollbar's position to the currently
+    // focused item for the given filter.
+    const idx = state.results[filter].focusedIdx.idx;
+    focusResultItem(filter, idx, FocusState.WithScroll);
+  }, [state.results, focusResultItem]);
 
   const openModal = useCallback((item: SearchResultItem) => {
     let url = '';
@@ -748,10 +756,6 @@ function Home() {
     setSearchQuery(e.target.value);
   }
 
-  function handleSearchResultsWrapperScroll() {
-    // User manually s
-  }
-
   /* HOTKEYS */
   // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
@@ -814,9 +818,7 @@ function Home() {
         trackShortcut({ action: 'Open Code item in browser' });
         break;
     }
-  // TODO: This will stop working now.
-  // }, [state.search.filter, soResults, soFocusedIdx, codeResults, codeFocusedIdx]);
-  }, [activeFilter]);
+  }, [activeFilter, openFocusedGitHubCodeItemInBrowser, openFocusedGitHubCodeItemInBrowser]);
 
   // 'cmd+i' hotkey - open the GitHubCode result in a vscode.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+i' : 'alt+i', () => {
@@ -824,9 +826,7 @@ function Home() {
       openFocusedGitHubCodeItemInVSCode();
       trackShortcut({ action: 'Open code in VSCode' });
     }
-  // TODO: This will stop working now.
-  // }, [state.search.filter, codeResults, codeFocusedIdx]);
-  }, [activeFilter]);
+  }, [activeFilter, openFocusedGitHubCodeItemInVSCode]);
   /* //////////////////// */
 
   useIPCRenderer('github-access-token', async (event, { accessToken }: { accessToken: string | null }) => {
@@ -846,6 +846,8 @@ function Home() {
     }
     restoreLastQuery();
     tryToLoadGitHubAccount();
+  // We want to run this only during the first render.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -865,7 +867,12 @@ function Home() {
     trackSearch({
       activeFilter: activeFilter.toString(),
     });
-  }, [debouncedQuery, debouncedLastSearchedQuery, activeFilter, state.gitHubAccount.isConnected]);
+  }, [
+    debouncedQuery,
+    debouncedLastSearchedQuery,
+    activeFilter,
+    state.gitHubAccount.isConnected,
+  ]);
 
   return (
     <>
@@ -925,10 +932,7 @@ function Home() {
 
         {!hasActiveFilterEmptyResults && !isActiveFilterLoading &&
           <>
-            <SearchResultsWrapper
-              ref={searchResultsWrapperEl}
-              onScroll={handleSearchResultsWrapperScroll}
-            >
+            <SearchResultsWrapper>
               {activeFilter === ResultsFilter.StackOverflow
                && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
                 <StackOverflowItem
