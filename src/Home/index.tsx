@@ -31,6 +31,10 @@ import {
   disconnect as disconnectGitHub,
   FilePreview,
 } from 'search/gitHub';
+import {
+  search as searchDocumentations,
+  DocResult,
+} from 'search/docs';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
 import HotkeysPanel from './HotkeysPanel';
@@ -86,21 +90,38 @@ const GitHubConnectTitle = styled(InfoMessage)`
   margin: 0 0 30px;
 `;
 
-// const GitHubPrivacyLink = styled.div`
-//   color: #535BD7;
-//   font-size: 14px;
-//   font-weight: 500;
+/////////////////////// DOC ITEMS //////
+// TODO: Move to a separate file.
 
-//   text-decoration: underline;
+const DocsWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-start;
+`;
 
-//   :hover {
-//     cursor: pointer;
-//   }
-// `;
+const DocsTypeSelection = styled.div`
+  height: 100%;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  background: #262736;
+`;
 
+const DocItem = styled.div<{ isFocused?: boolean }>`
+  padding: 10px;
+  background: ${props => props.isFocused ? '#3A41AF' : 'transparent'};
+  font-size: 12px;
+  font-weight: 400;
+`;
 
-type SearchResultItem = StackOverflowResult | CodeResult;
-type SearchResultItems = StackOverflowResult[] | CodeResult[];
+const DocsPage = styled.div`
+  flex: 1;
+  height: 100%;
+`;
+
+type SearchResultItem = StackOverflowResult | CodeResult | DocResult;
+type SearchResultItems = StackOverflowResult[] | CodeResult[] | DocResult[];
 type SearchResults = {
   [key in ResultsFilter]: {
     items: SearchResultItems;
@@ -281,6 +302,15 @@ const initialState: State = {
       },
     },
     [ResultsFilter.GitHubCode]: {
+      items: [],
+      isLoading: false,
+      scrollTopPosition: 0,
+      focusedIdx: {
+        idx: 0,
+        focusState: FocusState.NoScroll,
+      },
+    },
+    [ResultsFilter.Docs]: {
       items: [],
       isLoading: false,
       scrollTopPosition: 0,
@@ -709,6 +739,7 @@ function Home() {
       searchingFail(ResultsFilter.GitHubCode, error.message);
     }
   }
+
   async function searchSO(query: string) {
     try {
       startSearching(ResultsFilter.StackOverflow);
@@ -719,10 +750,21 @@ function Home() {
     }
   }
 
+  async function searchDocs(query: string) {
+    try {
+      startSearching(ResultsFilter.Docs);
+      const results = await searchDocumentations(query);
+      searchingSuccess(ResultsFilter.Docs, results);
+    } catch (error) {
+      searchingFail(ResultsFilter.Docs, error.message);
+    }
+  }
+
   async function searchAll(query: string, filter: ResultsFilter, isGitHubConnected: boolean) {
     switch (filter) {
       case ResultsFilter.StackOverflow:
         await searchSO(query);
+        await searchDocs(query);
         if (isGitHubConnected) {
           await searchGHCode(query);
         }
@@ -733,6 +775,15 @@ function Home() {
           await searchGHCode(query);
         }
         await searchSO(query);
+        await searchDocs(query);
+      break;
+
+      case ResultsFilter.Docs:
+        await searchDocs(query);
+        await searchSO(query);
+        if (isGitHubConnected) {
+          await searchGHCode(query);
+        }
       break;
     }
   }
@@ -769,6 +820,13 @@ function Home() {
     if (state.modalItem) return;
     setSearchFilter(ResultsFilter.GitHubCode);
     trackShortcut({ action: 'Change filter to Code' });
+  }, { filter: () => true }, [state.modalItem, setSearchFilter]);
+
+  // 'cmd+3' hotkey - change search filter to Docs search.
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+3' : 'alt+3', () => {
+    if (state.modalItem) return;
+    setSearchFilter(ResultsFilter.Docs);
+    trackShortcut({ action: 'Change filter to Docs' });
   }, { filter: () => true }, [state.modalItem, setSearchFilter]);
 
   // 'up arrow' hotkey - navigation.
@@ -955,6 +1013,25 @@ function Home() {
                   onFilePathClick={() => openModal(cr)}
                 />
               ))}
+
+              {activeFilter === ResultsFilter.Docs &&
+                <DocsWrapper>
+                  <DocsTypeSelection>
+                    {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
+                      <DocItem
+                        key={idx}
+                        // TODO: Use FocusState like with StackOverflowItem and CodeItem.
+                        isFocused={activeFocusedIdx.idx === idx}
+                      >
+                        {d.record.categories.join(' ')}
+                      </DocItem>
+                    ))}
+                  </DocsTypeSelection>
+                  <DocsPage
+                    dangerouslySetInnerHTML={{__html: (activeFocusedItem as DocResult).record.html}}
+                  />
+                </DocsWrapper>
+              }
             </SearchResultsWrapper>
 
             {/* StackOverflow search results + StackOverflow modal hotkeys */}

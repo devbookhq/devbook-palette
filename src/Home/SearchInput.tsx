@@ -170,6 +170,7 @@ const CloseImg = styled(closeImg)`
 export enum ResultsFilter {
   StackOverflow = 'StackOverflow',
   GitHubCode = 'Code',
+  Docs = 'Docs',
 }
 
 interface SearchInputProps {

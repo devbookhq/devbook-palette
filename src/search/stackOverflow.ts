@@ -1,3 +1,4 @@
+import { isDev } from 'mainProcess';
 import axios from 'axios';
 
 export enum AnswerType {
@@ -32,10 +33,10 @@ export interface StackOverflowResult {
 }
 
 export async function search(query: string): Promise<StackOverflowResult[]> {
-  const url = `https://api.usedevbook.com/search/stackoverflow`;
-  // const url = 'http://localhost:3002/search/stackoverflow';
+  let url = 'https://api.usedevbook.com/search/stackoverflow';
+  if (isDev) url = 'https://dev.usedevbook.com/search/stackoverflow';
 
   const result = await axios.post(url, { query });
-
   return result.data.results;
 }
+
