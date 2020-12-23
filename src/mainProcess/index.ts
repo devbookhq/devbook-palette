@@ -42,8 +42,6 @@ export function saveQuery(query: string) {
 
 export function trackSearch(searchInfo: {
   activeFilter: string,
-  codeResultsLength: number,
-  soResultsLength: number,
 }) {
   electron.ipcRenderer.send('track-search', searchInfo);
 }

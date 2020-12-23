@@ -3,11 +3,13 @@ import React, {
   useState,
   useCallback,
   useReducer,
+  useMemo,
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import electron, {
+  isDev,
   hideMainWindow,
   connectGitHub,
   openLink,
@@ -98,42 +100,201 @@ const GitHubConnectTitle = styled(InfoMessage)`
 // `;
 
 
-interface FocusIndex {
-  idx: number;
-  focusState: FocusState;
+type SearchResultItem = StackOverflowResult | CodeResult;
+type SearchResultItems = StackOverflowResult[] | CodeResult[];
+type SearchResults = {
+  [key in ResultsFilter]: {
+    items: SearchResultItems;
+    isLoading: boolean;
+    focusedIdx: {
+      idx: number;
+      focusState: FocusState;
+    };
+  }
 }
 
 enum ReducerActionType {
   SetSearchQuery,
-  // SetSearchFilter,
-  /*
+  SetSearchFilter,
+
+  StartSearching,
+  SearchingSuccess,
+  SearchingFail,
+
+  FocusResultItem,
+
   OpenModal,
+  CloseModal,
 
-  PerformHotkey,
-
-  SetError,
-  */
-}
-
-interface State {
-  search: {
-    query: string;
-  };
+  StartConnectingGitHub,
+  ConnectingGitHubSuccess,
+  ConnectingGitHubFail,
+  DisconnectGitHubAccount,
 }
 
 interface SetSearchQuery {
-  type: ReducerActionType.SetSearchQuery,
+  type: ReducerActionType.SetSearchQuery;
   payload: {
     query: string;
   };
 }
 
-type ReducerAction = SetSearchQuery;
+interface SetSearchFilter {
+  type: ReducerActionType.SetSearchFilter;
+  payload: {
+    filter: ResultsFilter;
+  };
+}
+
+interface StartSearching {
+  type: ReducerActionType.StartSearching;
+  payload: {
+    filter: ResultsFilter;
+  };
+}
+
+interface SearchingSuccess {
+  type: ReducerActionType.SearchingSuccess;
+  payload: {
+    filter: ResultsFilter;
+    items: SearchResultItems;
+  };
+}
+
+interface SearchingFail {
+  type: ReducerActionType.SearchingFail;
+  payload: {
+    filter: ResultsFilter;
+    errorMessage: string;
+  };
+}
+
+interface FocusResultItem {
+  type: ReducerActionType.FocusResultItem;
+  payload: {
+    filter: ResultsFilter;
+    idx: number;
+    focusState: FocusState;
+  };
+}
+
+interface OpenModal {
+  type: ReducerActionType.OpenModal;
+  payload: {
+    item: SearchResultItem;
+  };
+}
+
+interface CloseModal {
+  type: ReducerActionType.CloseModal;
+}
+
+interface StartConnectingGitHub {
+  type: ReducerActionType.StartConnectingGitHub;
+}
+
+interface ConnectingGitHubSuccess {
+  type: ReducerActionType.ConnectingGitHubSuccess;
+}
+
+interface ConnectingGitHubFail {
+  type: ReducerActionType.ConnectingGitHubFail;
+  payload: {
+    errorMessage: string;
+  };
+}
+
+interface DisconnectGitHubAccount {
+  type: ReducerActionType.DisconnectGitHubAccount;
+}
+
+type ReducerAction = SetSearchQuery
+  | SetSearchFilter
+  | StartSearching
+  | SearchingSuccess
+  | SearchingFail
+  | FocusResultItem
+  | OpenModal
+  | CloseModal
+  | StartConnectingGitHub
+  | ConnectingGitHubSuccess
+  | ConnectingGitHubFail
+  | DisconnectGitHubAccount;
+
+interface State {
+  search: {
+    query: string;
+    lastSearchedQuery: string;
+    filter: ResultsFilter;
+  };
+  results: SearchResults;
+  modalItem: SearchResultItem | undefined;
+  gitHubAccount: {
+    isLoading: boolean;
+    isConnected: boolean;
+  },
+  errorMessage: string;
+}
+
+const initialState: State = {
+  search: {
+    query: '',
+    lastSearchedQuery: '',
+    // TODO: Since we load the last saved search query we should also load
+    // the last saved results filter.
+    filter: ResultsFilter.StackOverflow,
+  },
+  results: {
+    [ResultsFilter.StackOverflow]: {
+      items: [],
+      isLoading: false,
+      focusedIdx: {
+        idx: 0,
+        focusState: FocusState.NoScroll,
+      },
+    },
+    [ResultsFilter.GitHubCode]: {
+      items: [],
+      isLoading: false,
+      focusedIdx: {
+        idx: 0,
+        focusState: FocusState.NoScroll,
+      },
+    },
+  },
+  modalItem: undefined,
+  gitHubAccount: {
+    isLoading: false,
+    isConnected: false,
+  },
+  errorMessage: '',
+}
 
 function stateReducer(state: State, reducerAction: ReducerAction): State {
+  if (isDev()) {
+    console.log(ReducerActionType[reducerAction.type], state);
+  }
+
   switch (reducerAction.type) {
     case ReducerActionType.SetSearchQuery: {
       const { query } = reducerAction.payload;
+      // User explicitely deleted the query. We should remove all results.
+      if (!query) {
+        return {
+          ...state,
+          search: {
+            ...state.search,
+            query: '',
+            lastSearchedQuery: '',
+          },
+          results: {
+            // TODO: For some reason when a user changes to the
+            // GitHubCode filter there are still results.
+            ...initialState.results,
+          },
+        };
+      }
+
       return {
         ...state,
         search: {
@@ -142,84 +303,264 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         },
       };
     }
+    case ReducerActionType.SetSearchFilter: {
+      const { filter } = reducerAction.payload;
+      return {
+        ...state,
+        search: {
+          ...state.search,
+          filter,
+        },
+      };
+    }
+    case ReducerActionType.StartSearching: {
+      const { filter } = reducerAction.payload;
+      return {
+        ...state,
+        results: {
+          ...state.results,
+          [filter]: {
+            ...state.results[filter],
+            items: [],
+            isLoading: true,
+          },
+        },
+      };
+    }
+    case ReducerActionType.SearchingSuccess: {
+      const { filter, items } = reducerAction.payload;
+      return {
+        ...state,
+        search: {
+          ...state.search,
+          lastSearchedQuery: state.search.query,
+        },
+        results: {
+          ...state.results,
+          [filter]: {
+            ...state.results[filter],
+            isLoading: false,
+            items,
+            focusedIdx: {
+              idx: 0,
+              state: FocusState.NoScroll,
+            },
+          },
+        },
+      };
+    }
+    case ReducerActionType.SearchingFail: {
+      const { filter, errorMessage } = reducerAction.payload;
+      return {
+        ...state,
+        errorMessage,
+        results: {
+          ...state.results,
+          [filter]: {
+            ...state.results[filter],
+            isLoading: false,
+            items: [],
+          },
+        },
+      };
+    }
+    case ReducerActionType.FocusResultItem: {
+      const { filter, idx, focusState } = reducerAction.payload;
+      return {
+        ...state,
+        results: {
+          ...state.results,
+          [filter]: {
+            ...state.results[filter],
+            focusedIdx: {
+              ...state.results[filter].focusedIdx,
+              idx,
+              focusState,
+            },
+          },
+        },
+      };
+    }
+    case ReducerActionType.OpenModal: {
+      const { item } = reducerAction.payload;
+      return {
+        ...state,
+        modalItem: item,
+      };
+    }
+    case ReducerActionType.CloseModal: {
+      return {
+        ...state,
+        modalItem: undefined,
+      };
+    }
+    case ReducerActionType.StartConnectingGitHub: {
+      return {
+        ...state,
+        gitHubAccount: {
+          ...state.gitHubAccount,
+          isLoading: true,
+          isConnected: false,
+        },
+      };
+    }
+    case ReducerActionType.ConnectingGitHubSuccess: {
+      return {
+        ...state,
+        gitHubAccount: {
+          ...state.gitHubAccount,
+          isLoading: false,
+          isConnected: true,
+        },
+      };
+    }
+    case ReducerActionType.ConnectingGitHubFail: {
+      const { errorMessage } = reducerAction.payload;
+      return {
+        ...state,
+        errorMessage,
+        gitHubAccount: {
+          ...state.gitHubAccount,
+          isLoading: false,
+          isConnected: false,
+        },
+      };
+    }
+    case ReducerActionType.DisconnectGitHubAccount: {
+      return {
+        ...state,
+        gitHubAccount: {
+          ...state.gitHubAccount,
+          isLoading: false,
+          isConnected: false,
+        },
+      };
+    }
     default:
       return state;
   }
 }
 
-function initialState(): State {
-  return {
-    search: {
-      query: '',
-    },
-  };
-}
 
 function Home() {
-  const [state, dispatch] = useReducer(stateReducer, initialState());
-  // const [searchQuery, setSearchQuery] = useState('');
-  const debouncedQuery = useDebounce(state.search.query, 400);
+  const [state, dispatch] = useReducer(stateReducer, initialState);
 
-  const [codeResults, setCodeResults] = useState<CodeResult[]>([]);
-  const [soResults, setSOResults] = useState<StackOverflowResult[]>([]);
-
-  const [codeFocusedIdx, setCodeFocusedIdx] = useState<FocusIndex>({
-    idx: 0,
-    focusState: FocusState.NoScroll,
-  });
-
-  const [soFocusedIdx, setSOFocusedIdx] = useState<FocusIndex>({
-    idx: 0,
-    focusState: FocusState.NoScroll,
-  });
-
-  const [activeFilter, setActiveFilter] = useState<ResultsFilter>(ResultsFilter.StackOverflow);
-
-  const [isLoadingSO, setIsLoadingSO] = useState(false);
-  const [isLoadingCode, setIsLoadingCode] = useState(false);
-
-  const [isSOModalOpened, setIsSOModalOpened] = useState(false);
-  const [isCodeModalOpened, setIsCodeModalOpened] = useState(false);
+  const debouncedQuery = useDebounce(state.search.query.trim(), 400);
+  const debouncedLastSearchedQuery = useDebounce(state.search.lastSearchedQuery.trim(), 400);
 
   const [currentResultsQuery, setCurrentResultsQuery] = useState('');
 
-  const [isGitHubConnected, setIsGitHubConnected] = useState(false);
-  // TODO: There is probably a better way to write this - a reducer?
-  const [gitHubConnectedPreviousState, setGitHubConnectedPreviousState] = useState(false);
+  // const [isGitHubConnected, setIsGitHubConnected] = useState(false);
+  // TODO: There is probably a better way to write this   type: ReducerActionType.StartConnectingGitHub;- a reducer?
+  // const [gitHubConnectedPreviousState, setGitHubConnectedPreviousState] = useState(false);
 
-  const isModalOpened =
-    (isSOModalOpened && activeFilter === ResultsFilter.StackOverflow) ||
-    (isCodeModalOpened && activeFilter === ResultsFilter.GitHubCode);
+  ////////////////////////////
 
-  const isLoading =
-    (isLoadingSO && activeFilter === ResultsFilter.StackOverflow) ||
-    (isLoadingCode && activeFilter === ResultsFilter.GitHubCode);
+  const activeFilter = useMemo(() => state.search.filter, [state.search.filter]);
 
-  const hasEmptyResults =
-    (soResults.length === 0 && activeFilter === ResultsFilter.StackOverflow) ||
-    (codeResults.length === 0 && activeFilter === ResultsFilter.GitHubCode);
+  const activeFocusedIdx = useMemo(() => {
+    return state.results[activeFilter].focusedIdx;
+  }, [state.results, activeFilter]);
 
- // Dispatch helpers
- const setSearchQuery = useCallback((query: string) => {
-  dispatch({
-    type: ReducerActionType.SetSearchQuery,
-    payload: { query: query.trim() },
-  });
- }, []);
- /////////
+  const activeFocusedItem = useMemo(() => {
+    return state.results[activeFilter].items[activeFocusedIdx.idx];
+  }, [state.results, activeFilter, activeFocusedIdx]);
 
-  useEffect(() => {
-    // TODO: This probably should be a reducer action.
-    async function restoreLastQuery() {
-      const lastQuery = await getSavedQuery();
-      // TODO: Set the last saved search query.
-      setSearchQuery(lastQuery);
-    }
-    restoreLastQuery();
+  const hasActiveFilterEmptyResults = useMemo(() => {
+    return state.results[activeFilter].items.length === 0;
+  }, [state.results, activeFilter]);
+
+  const isActiveFilterLoading = useMemo(() => {
+    return state.results[activeFilter].isLoading;
+  }, [state.results, activeFilter]);
+
+  // Dispatch helpers
+  const setSearchQuery = useCallback((query: string) => {
+   dispatch({
+     type: ReducerActionType.SetSearchQuery,
+     payload: { query },
+   });
   }, []);
 
+  const setSearchFilter = useCallback((filter: ResultsFilter) => {
+   dispatch({
+     type: ReducerActionType.SetSearchFilter,
+     payload: { filter },
+   });
+  }, []);
+
+  const startSearching = useCallback((filter: ResultsFilter) => {
+   dispatch({
+     type: ReducerActionType.StartSearching,
+     payload: { filter },
+   });
+  }, []);
+
+  const searchingSuccess = useCallback((filter: ResultsFilter, items: SearchResultItems) => {
+   dispatch({
+     type: ReducerActionType.SearchingSuccess,
+     payload: { filter, items },
+   });
+  }, []);
+
+  const searchingFail = useCallback((filter: ResultsFilter, errorMessage: string) => {
+   dispatch({
+     type: ReducerActionType.SearchingFail,
+     payload: { filter, errorMessage },
+   });
+  }, []);
+
+  const focusResultItem = useCallback((filter: ResultsFilter, idx: number, focusState: FocusState) => {
+   dispatch({
+     type: ReducerActionType.FocusResultItem,
+     payload: { filter, idx, focusState },
+   });
+  }, []);
+
+  const openModal = useCallback((item: SearchResultItem) => {
+    dispatch({
+      type: ReducerActionType.OpenModal,
+      payload: { item },
+    });
+  }, []);
+
+  const closeModal = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.CloseModal,
+    });
+  }, []);
+
+  const startConnectingGitHub = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.StartConnectingGitHub,
+    });
+  }, []);
+
+  const connectingGitHubSuccess = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.ConnectingGitHubSuccess,
+    });
+  }, []);
+
+  const connectingGitHubFail = useCallback((errorMessage: string) => {
+    dispatch({
+      type: ReducerActionType.ConnectingGitHubFail,
+      payload: { errorMessage },
+    });
+  }, []);
+
+  const disconnectGitHubAccount = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.DisconnectGitHubAccount,
+    });
+  }, []);
+  /////////
+
+
+  // TODO: This is for tracking when user opens the SO modal.
+  /*
   useEffect(() => {
-    if (!isSOModalOpened || activeFilter !== ResultsFilter.StackOverflow) {
+    if (!isSOModalOpened || state.search.filter !== ResultsFilter.StackOverflow) {
       return;
     }
 
@@ -227,7 +568,7 @@ function Home() {
 
     if (result) {
       trackModalOpened({
-        activeFilter: activeFilter.toString(),
+        activeFilter: state.search.filter.toString(),
         query: debouncedQuery,
         resultIndex: soFocusedIdx.idx,
         title: result.question.title,
@@ -235,11 +576,14 @@ function Home() {
 
       });
     }
-  }, [soResults, soFocusedIdx, activeFilter, debouncedQuery, isSOModalOpened]);
+  }, [soResults, soFocusedIdx, state.search.filter, debouncedQuery, isSOModalOpened]);
+  */
 
 
+  // TODO: This is for tracking when user opens the code modal.
+  /*
   useEffect(() => {
-    if (!isCodeModalOpened || activeFilter !== ResultsFilter.GitHubCode) {
+      if (!isCodeModalOpened || state.search.filter !== ResultsFilter.GitHubCode) {
       return;
     }
 
@@ -247,31 +591,35 @@ function Home() {
 
     if (result) {
       trackModalOpened({
-        activeFilter: activeFilter.toString(),
+        activeFilter: state.search.filter.toString(),
         query: debouncedQuery,
         resultIndex: codeFocusedIdx.idx,
         url: result.fileURL,
       });
     }
-  }, [codeResults, codeFocusedIdx, activeFilter, debouncedQuery, isCodeModalOpened]);
+  }, [codeResults, codeFocusedIdx, state.search.filter, debouncedQuery, isCodeModalOpened]);
+  */
+
+  const openFocusedSOItemInBrowser = useCallback(() => {
+    const idx = state.results[ResultsFilter.StackOverflow].focusedIdx.idx;
+    const item = state.results[ResultsFilter.StackOverflow].items[idx] as StackOverflowResult;
+    if (item) openLink(item.question.link);
+  }, [state.results]);
+
+  const openFocusedGitHubCodeItemInVSCode = useCallback(() => {
+    const idx = state.results[ResultsFilter.GitHubCode].focusedIdx.idx;
+    const item = state.results[ResultsFilter.GitHubCode].items[idx] as CodeResult;
+    if (!item) return;
+    openFileInVSCode(item.filePath, item.fileContent, item.filePreviews);
+  }, [state.results]);
 
   function openFocusedGitHubCodeItemInBrowser() {
-    const item = codeResults[codeFocusedIdx.idx];
+    const idx = state.results[ResultsFilter.GitHubCode].focusedIdx.idx
+    const item = state.results[ResultsFilter.GitHubCode].items[idx] as CodeResult;
     const firstPreview = item?.filePreviews[0];
     const gitHubFileURL = firstPreview ? `${item.fileURL}#L${firstPreview.startLine + 3}` : item?.fileURL;
     if (gitHubFileURL) openLink(gitHubFileURL);
   }
-
-  const openFocusedSOItemInBrowser = useCallback(() => {
-    const item = soResults[soFocusedIdx.idx];
-    if (item) openLink(item.question.link);
-  }, [soResults, soFocusedIdx]);
-
-  const openFocusedGitHubCodeItemInVSCode = useCallback(() => {
-    const item = codeResults[codeFocusedIdx.idx];
-    if (!item) return;
-    openFileInVSCode(item.filePath, item.fileContent, item.filePreviews);
-  }, [codeResults, codeFocusedIdx]);
 
   async function openFileInVSCode(path: string, content: string, filePreviews: FilePreview[]) {
     const tmpPath = await createTmpFile({
@@ -288,110 +636,64 @@ function Home() {
     }
   }
 
+  async function tryToLoadGitHubAccount() {
+    try {
+      startConnectingGitHub();
+      await initGitHub();
+      connectingGitHubSuccess();
+    } catch (error) {
+      connectingGitHubFail(`GitHub account either isn't connected or there was an error loading credentials. ${error.message}`);
+    }
+  }
+
   // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
-    if (!isModalOpened) {
-      setActiveFilter(ResultsFilter.StackOverflow);
-      trackShortcut({ action: 'Change filter to SO' });
-    }
-  }, { filter: () => true }, [isModalOpened]);
+    if (state.modalItem) return;
+    setSearchFilter(ResultsFilter.StackOverflow);
+    trackShortcut({ action: 'Change filter to SO' });
+  }, { filter: () => true }, [state.modalItem]);
 
   // 'cmd+2' hotkey - change search filter to GitHub Code search.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+2' : 'alt+2', () => {
-    if (!isModalOpened) {
-      setActiveFilter(ResultsFilter.GitHubCode);
-      trackShortcut({ action: 'Change filter to Code' });
-    }
-  }, { filter: () => true }, [isModalOpened]);
+    if (state.modalItem) return;
+    setSearchFilter(ResultsFilter.GitHubCode);
+    trackShortcut({ action: 'Change filter to Code' });
+  }, { filter: () => true }, [state.modalItem]);
 
   // 'up arrow' hotkey - navigation.
   useHotkeys('up', () => {
-    if (isModalOpened) return;
-
-    switch (activeFilter) {
-      case ResultsFilter.StackOverflow:
-        if (soFocusedIdx.idx > 0) {
-          setSOFocusedIdx(current => ({
-            idx: current.idx - 1,
-            focusState: FocusState.WithScroll,
-          }));
-        }
-        break;
-      case ResultsFilter.GitHubCode:
-        if (codeFocusedIdx.idx > 0) {
-          setCodeFocusedIdx(current => ({
-            idx: current.idx - 1,
-            focusState: FocusState.WithScroll,
-          }));
-        }
-        break;
+    if (state.modalItem) return;
+    const idx = state.results[activeFilter].focusedIdx.idx;
+    if (idx > 0) {
+      focusResultItem(activeFilter, idx - 1, FocusState.WithScroll);
     }
-  }, { filter: () => true }, [soFocusedIdx, codeFocusedIdx.idx, activeFilter, isModalOpened]);
+  }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'down arrow' hotkey - navigation.
   useHotkeys('down', () => {
-    if (isModalOpened) return;
-
-    switch (activeFilter) {
-      case ResultsFilter.StackOverflow:
-        if (soFocusedIdx.idx < soResults.length - 1) {
-          setSOFocusedIdx(current => ({
-            idx: current.idx + 1,
-            focusState: FocusState.WithScroll
-          }));
-        };
-        break;
-      case ResultsFilter.GitHubCode:
-        if (codeFocusedIdx.idx < codeResults.length - 1) {
-          setCodeFocusedIdx(current => ({
-            idx: current.idx + 1,
-            focusState: FocusState.WithScroll
-          }));
-        }
-        break;
+    if (state.modalItem) return;
+    const idx = state.results[activeFilter].focusedIdx.idx;
+    if (idx < state.results[activeFilter].items.length - 1) {
+      focusResultItem(activeFilter, idx + 1, FocusState.WithScroll);
     }
-  }, { filter: () => true }, [soFocusedIdx, soResults, codeFocusedIdx, codeResults, activeFilter, isModalOpened]);
+  }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'enter' hotkey - open the focused result in a modal.
   useHotkeys('enter', () => {
-
-    switch (activeFilter) {
-      case ResultsFilter.StackOverflow:
-        setIsSOModalOpened(true);
-        trackShortcut({ action: 'Open modal' });
-        break;
-      case ResultsFilter.GitHubCode:
-        setIsCodeModalOpened(true);
-        trackShortcut({ action: 'Open modal' });
-        break;
-    }
-  }, [activeFilter]);
+    openModal(state.results[activeFilter].items[activeFocusedIdx.idx]);
+    trackShortcut({ action: 'Open modal' });
+  }, [state.results, activeFilter, activeFocusedIdx]);
 
   // 'esc' hotkey - close modal or hide main window.
   useHotkeys('esc', () => {
-
-
-    switch (activeFilter) {
-      case ResultsFilter.StackOverflow:
-        if (!isSOModalOpened) {
-          hideMainWindow();
-          trackShortcut({ action: 'Hide main window' });
-        } else {
-          setIsSOModalOpened(false);
-          trackShortcut({ action: 'Close modal' });
-        }
-        break;
-      case ResultsFilter.GitHubCode:
-        if (!isCodeModalOpened) {
-          hideMainWindow();
-          trackShortcut({ action: 'Hide main window' });
-        } else {
-          setIsCodeModalOpened(false);
-          trackShortcut({ action: 'Close modal' });
-        }
-        break;
+    if (!state.modalItem) {
+      hideMainWindow();
+      trackShortcut({ action: 'Hide main window' });
+    } else {
+      closeModal();
+      trackShortcut({ action: 'Close modal' });
     }
-  }, [isSOModalOpened, isCodeModalOpened, activeFilter]);
+  }, [state.modalItem]);
 
   // 'cmd+o' hotkey - open the focused result in a browser.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+o' : 'alt+o', () => {
@@ -405,8 +707,9 @@ function Home() {
         trackShortcut({ action: 'Open Code item in browser' });
         break;
     }
-  }, [activeFilter, soResults, soFocusedIdx, codeResults, codeFocusedIdx]);
-
+  // TODO: This will stop working now.
+  // }, [state.search.filter, soResults, soFocusedIdx, codeResults, codeFocusedIdx]);
+  }, [activeFilter]);
 
   // 'cmd+i' hotkey - open the GitHubCode result in a vscode.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+i' : 'alt+i', () => {
@@ -414,150 +717,150 @@ function Home() {
       openFocusedGitHubCodeItemInVSCode();
       trackShortcut({ action: 'Open code in VSCode' });
     }
-  }, [activeFilter, codeResults, codeFocusedIdx]);
+  // TODO: This will stop working now.
+  // }, [state.search.filter, codeResults, codeFocusedIdx]);
+  }, [activeFilter]);
 
-  useEffect(() => {
+    async function searchGHCode(query: string) {
+      try {
+        startSearching(ResultsFilter.GitHubCode);
+        const results = await searchGitHubCode(query);
+        searchingSuccess(ResultsFilter.GitHubCode, results);
+      } catch (error) {
+        searchingFail(ResultsFilter.GitHubCode, error.message);
+      }
+    }
     async function searchSO(query: string) {
       try {
-        setIsSOModalOpened(false);
-        setIsLoadingSO(true);
-        setSOResults([]);
-
+        startSearching(ResultsFilter.StackOverflow);
         const results = await searchStackOverflow(query);
-        setSOResults(results);
-        return results.length;
+        searchingSuccess(ResultsFilter.StackOverflow, results);
       } catch (error) {
-
-      } finally {
-
-        setSOFocusedIdx({
-          idx: 0,
-          focusState: FocusState.WithScroll,
-        });
-        setIsLoadingSO(false);
+        searchingFail(ResultsFilter.StackOverflow, error.message);
       }
-      return 0;
     }
 
-    async function searchCode(query: string) {
-      try {
-        setIsCodeModalOpened(false);
-        setIsLoadingCode(true);
-        setCodeResults([]);
+    async function searchAll(query: string, filter: ResultsFilter, isGitHubConnected: boolean) {
+      switch (filter) {
+        case ResultsFilter.StackOverflow:
+          await searchSO(query);
+          if (isGitHubConnected) {
+            await searchGHCode(query);
+          }
+        break;
 
-        const results = await searchGitHubCode(query);
-        setCodeResults(results);
-        return results.length;
-      } catch (error) {
-        console.error(error.message);
-      } finally {
-        setCodeFocusedIdx({
-          idx: 0,
-          focusState: FocusState.WithScroll,
-        });
-        setIsLoadingCode(false);
+        case ResultsFilter.GitHubCode:
+          if (isGitHubConnected) {
+            await searchGHCode(query);
+          }
+          await searchSO(query);
+        break;
       }
-      return 0;
-    }
 
-    async function search(query: string, activeFilter: ResultsFilter) {
-      let codeResultsLength: number = 0;
-      let soResultsLength: number = 0;
-      if (activeFilter === ResultsFilter.StackOverflow) {
-        soResultsLength = await searchSO(query);
-        if (isGitHubConnected) {
-          codeResultsLength = await searchCode(query);
-        }
-      } else if (activeFilter === ResultsFilter.GitHubCode) {
-        if (isGitHubConnected) {
-          codeResultsLength = await searchCode(query);
-        }
-        soResultsLength = await searchSO(query);
-      }
       saveQuery(query);
       trackSearch({
         activeFilter: activeFilter.toString(),
-        codeResultsLength,
-        soResultsLength,
       });
     }
 
+  useEffect(() => {
+    async function restoreLastQuery() {
+      const lastQuery = await getSavedQuery();
+      setSearchQuery(lastQuery);
+    }
+    restoreLastQuery();
+    tryToLoadGitHubAccount();
+  }, []);
+
+  useEffect(() => {
+    if (!state.errorMessage) return;
+    console.error(state.errorMessage);
+  }, [state.errorMessage]);
+
+  useEffect(() => {
+    if (!debouncedQuery) {
+      // TODO: This doesn't work.
+      saveQuery('');
+      return;
+    }
+    if (debouncedQuery === debouncedLastSearchedQuery) return;
+
+    searchAll(debouncedQuery, activeFilter, state.gitHubAccount.isConnected);
+  }, [debouncedQuery, debouncedLastSearchedQuery, activeFilter, state.gitHubAccount.isConnected]);
+
+
+  // useEffect(() => {
+    /*
     if (debouncedQuery && debouncedQuery !== currentResultsQuery) {
       setCurrentResultsQuery(debouncedQuery);
-      search(debouncedQuery, activeFilter);
+      searchAll(debouncedQuery, activeFilter);
     }
 
     if (debouncedQuery && isGitHubConnected && !gitHubConnectedPreviousState) {
       setGitHubConnectedPreviousState(true);
-      searchCode(debouncedQuery);
+      searchGitHubCode(debouncedQuery);
     }
 
     if (debouncedQuery === '' && debouncedQuery !== currentResultsQuery) {
       saveQuery('');
     }
+    */
+  // }, [debouncedQuery, currentResultsQuery, activeFilter, isGitHubConnected, gitHubConnectedPreviousState]);
 
-  }, [debouncedQuery, currentResultsQuery, activeFilter, isGitHubConnected, gitHubConnectedPreviousState]);
-
-  useEffect(() => {
-    async function checkGitHubAccount() {
-      try {
-        await initGitHub();
-        setIsGitHubConnected(true);
-      } catch (error) {
-        console.error('Cannot find connected GitHub Account');
-      }
-    }
-
-    if (!isGitHubConnected) checkGitHubAccount();
-  }, [isGitHubConnected]);
 
   useIPCRenderer('github-access-token', async (event, { accessToken }: { accessToken: string | null }) => {
     if (accessToken === null) {
       disconnectGitHub();
-      setIsGitHubConnected(false);
+      disconnectGitHubAccount(); // The state reducer's action.
       return;
     }
-
-    await initGitHub(accessToken);
-    setIsGitHubConnected(true);
-  });
-
-  // async function openPrivacyTerms() {
-  //   // TODO: Add route describing privacy to our website address.
-  //   return openLink('https://usedevbook.com');
-  // }
+    tryToLoadGitHubAccount();
+    if (debouncedQuery) searchGHCode(debouncedQuery);
+  }, [debouncedQuery]);
 
   return (
     <>
-      {isSOModalOpened && soResults[soFocusedIdx.idx] &&
+      {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
         <StackOverflowModal
-          soResult={soResults[soFocusedIdx.idx]}
-          onCloseRequest={() => setIsSOModalOpened(false)}
+          soResult={state.modalItem as StackOverflowResult}
+          onCloseRequest={closeModal}
         />
       }
 
-      {isCodeModalOpened && codeResults[codeFocusedIdx.idx] &&
+      {state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
         <CodeModal
-          codeResult={codeResults[codeFocusedIdx.idx]}
-          onCloseRequest={() => setIsCodeModalOpened(false)}
+          codeResult={state.modalItem as CodeResult}
+          onCloseRequest={closeModal}
         />
       }
 
       <Container>
         <SearchInput
-          placeholder="Question or code"
+          placeholder="Search StackOverflow and code on GitHub"
           value={state.search.query}
           onChange={e => setSearchQuery(e.target.value)}
           activeFilter={activeFilter}
-          onFilterSelect={f => setActiveFilter(f)}
-          isLoading={isLoading}
-          isModalOpened={isModalOpened}
+          onFilterSelect={f => setSearchFilter(f)}
+          isLoading={isActiveFilterLoading}
+          isModalOpened={!!state.modalItem}
         />
 
-        {!state.search.query && (isGitHubConnected || activeFilter === ResultsFilter.StackOverflow) && !isLoading && <InfoMessage>Type your search query</InfoMessage>}
-        {state.search.query && (isGitHubConnected || activeFilter === ResultsFilter.StackOverflow) && hasEmptyResults && !isLoading && <InfoMessage>Nothing found</InfoMessage>}
+        {!state.search.query
+         && (state.gitHubAccount.isConnected || activeFilter === ResultsFilter.StackOverflow)
+         && !isActiveFilterLoading
+         &&
+          <InfoMessage>Type your search query</InfoMessage>
+        }
 
-        {activeFilter === ResultsFilter.GitHubCode && !isGitHubConnected &&
+        {state.search.query
+         && (state.gitHubAccount.isConnected || activeFilter === ResultsFilter.StackOverflow)
+         && hasActiveFilterEmptyResults
+         && !isActiveFilterLoading
+         &&
+          <InfoMessage>Nothing found</InfoMessage>
+        }
+
+        {activeFilter === ResultsFilter.GitHubCode && !state.gitHubAccount.isConnected &&
           <GitHubConnect>
             <GitHubConnectTitle>
               Connect your GitHub account to search on GitHub
@@ -571,53 +874,70 @@ function Home() {
           </GitHubConnect>
         }
 
-        {state.search.query && !hasEmptyResults && !isLoading &&
+        {!hasActiveFilterEmptyResults && !isActiveFilterLoading &&
           <>
             <SearchResults>
-              <>
-                {activeFilter === ResultsFilter.StackOverflow && soResults.map((sor, idx) => (
-                  <StackOverflowItem
-                    key={sor.question.html} // TODO: Not sure if setting HTML as a key is a good idea.
-                    soResult={sor}
-                    focusState={soFocusedIdx.idx === idx ? soFocusedIdx.focusState : FocusState.None}
-                    onHeaderClick={() => setSOFocusedIdx({ idx, focusState: FocusState.NoScroll })}
-                    onTitleClick={() => setIsSOModalOpened(true)}
-                  />
-                ))}
+              {activeFilter === ResultsFilter.StackOverflow
+               && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
+                <StackOverflowItem
+                  key={idx}
+                  soResult={sor}
+                  focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+                  onHeaderClick={() => focusResultItem(ResultsFilter.StackOverflow, idx, FocusState.NoScroll)}
+                  onTitleClick={() => openModal(sor)}
+                />
+              ))}
 
-                {activeFilter === ResultsFilter.GitHubCode && isGitHubConnected && codeResults.map((cr, idx) => (
-                  <CodeItem
-                    key={cr.repoFullName + cr.filePath}
-                    codeResult={cr}
-                    focusState={codeFocusedIdx.idx === idx ? codeFocusedIdx.focusState : FocusState.None}
-                    onHeaderClick={() => setCodeFocusedIdx({ idx, focusState: FocusState.NoScroll })}
-                    onFilePathClick={() => setIsCodeModalOpened(true)}
-                  />
-                ))}
-              </>
+              {activeFilter === ResultsFilter.GitHubCode
+               && state.gitHubAccount.isConnected
+               && (state.results[ResultsFilter.GitHubCode].items as CodeResult[]).map((cr, idx) => (
+                <CodeItem
+                  key={idx}
+                  codeResult={cr}
+                  focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+                  onHeaderClick={() => focusResultItem(ResultsFilter.GitHubCode, idx, FocusState.NoScroll)}
+                  onFilePathClick={() => openModal(cr)}
+                />
+              ))}
             </SearchResults>
 
             {/* StackOverflow search results + StackOverflow modal hotkeys */}
-            {!isModalOpened && activeFilter === ResultsFilter.StackOverflow &&
+            {!state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
               <HotkeysPanel
                 hotkeysLeft={[
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
-                  { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsSOModalOpened(true) },
+                  { text: 'Open', hotkey: [Key.Enter], onClick: () => openModal(activeFocusedItem) },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'], onClick: openFocusedSOItemInBrowser },
+                  {
+                    text: 'Open in browser',
+                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'],
+                    onClick: openFocusedSOItemInBrowser
+                  },
                 ]}
               />
             }
 
-            {isSOModalOpened &&
+            {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
               <HotkeysPanel
                 hotkeysLeft={[
-                  { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
+                  {
+                    text: 'Navigate',
+                    hotkey: [Key.ArrowUp, Key.ArrowDown],
+                    isSeparated: true,
+                  },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'], onClick: openFocusedSOItemInBrowser },
-                  { text: 'Close', hotkey: ['Esc'], onClick: () => setIsSOModalOpened(false) },
+                  {
+                    text: 'Open in browser',
+                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'],
+                    onClick: openFocusedSOItemInBrowser
+                  },
+                  {
+                    text: 'Close',
+                    hotkey: ['Esc'],
+                    onClick: closeModal
+                  },
                 ]}
               />
             }
@@ -625,28 +945,52 @@ function Home() {
 
 
             {/* GitHub search results + GitHub modal hotkeys */}
-            {!isModalOpened && activeFilter === ResultsFilter.GitHubCode &&
+            {!state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
               <HotkeysPanel
                 hotkeysLeft={[
                   { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
-                  { text: 'Open', hotkey: [Key.Enter], onClick: () => setIsCodeModalOpened(true) },
+                  { text: 'Open', hotkey: [Key.Enter], onClick: () => openModal(activeFocusedItem) },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in VSCode', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : ['Alt +', 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
-                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
+                  {
+                    text: 'Open in VSCode',
+                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : ['Alt +', 'I'],
+                    onClick: openFocusedGitHubCodeItemInVSCode
+                  },
+                  {
+                    text: 'Open in browser',
+                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'],
+                    onClick: openFocusedGitHubCodeItemInBrowser
+                  },
                 ]}
               />
             }
 
-            {isCodeModalOpened &&
+            {state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
               <HotkeysPanel
                 hotkeysLeft={[
-                  { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
+                  {
+                    text: 'Navigate',
+                    hotkey: [Key.ArrowUp, Key.ArrowDown],
+                    isSeparated: true
+                  },
                 ]}
                 hotkeysRight={[
-                  { text: 'Open in VSCode', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : ['Alt +', 'I'], onClick: openFocusedGitHubCodeItemInVSCode },
-                  { text: 'Open in browser', hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'], onClick: openFocusedGitHubCodeItemInBrowser },
-                  { text: 'Close', hotkey: ['Esc'], onClick: () => setIsCodeModalOpened(false) },
+                  {
+                    text: 'Open in VSCode',
+                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : ['Alt +', 'I'],
+                    onClick: openFocusedGitHubCodeItemInVSCode
+                  },
+                  {
+                    text: 'Open in browser',
+                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'],
+                    onClick: openFocusedGitHubCodeItemInBrowser
+                  },
+                  {
+                    text: 'Close',
+                    hotkey: ['Esc'],
+                    onClick: closeModal,
+                  },
                 ]}
               />
             }
