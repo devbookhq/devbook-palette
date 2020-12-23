@@ -1,8 +1,9 @@
 const electron = window.require('electron') as typeof import('electron');
 
-export function isDev() {
-  return electron.ipcRenderer.invoke('is-dev') as Promise<boolean>;
-}
+const app = electron.app || electron.remote.app;
+const isEnvSet = 'ELECTRON_IS_DEV' in electron.remote.process.env;
+const getFromEnv = parseInt(electron.remote.process.env.ELECTRON_IS_DEV || '0', 10) === 1;
+export const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
 
 export function getGlobalShortcut() {
   return electron.ipcRenderer.invoke('get-global-shortcut') as Promise<string>;
@@ -48,10 +49,7 @@ export function trackSearch(searchInfo: {
 
 export function trackModalOpened(modalInfo: {
   activeFilter: string,
-  resultIndex: number,
   url: string;
-  query: string;
-  title?: string,
 }) {
   electron.ipcRenderer.send('track-modal-opened', modalInfo);
 }

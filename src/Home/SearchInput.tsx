@@ -195,7 +195,6 @@ function SearchInput({
 }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [isDevEnv, setIsDevEnv] = useState(false);
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [isUpdatePanelOpened, setIsUpdatePanelOpened] = useState(true);
 
@@ -246,10 +245,6 @@ function SearchInput({
   }, []);
 
   useEffect(() => {
-    isDev().then(setIsDevEnv);
-  }, []);
-
-  useEffect(() => {
     if (isModalOpened) inputRef?.current?.blur();
     else inputRef?.current?.focus();
   }, [isModalOpened]);
@@ -292,7 +287,7 @@ function SearchInput({
             </Filter>
           ))}
         </FiltersWrapper>
-        {isDevEnv && <Dev>Dev build</Dev>}
+        {isDev && <Dev>Dev build</Dev>}
         <PreferencesButton onClick={openPreferences}>
           <StyledPreferencesIcon />
         </PreferencesButton>

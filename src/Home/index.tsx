@@ -1,4 +1,5 @@
 import React, {
+  useRef,
   useEffect,
   useState,
   useCallback,
@@ -50,7 +51,7 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-const SearchResults = styled.div`
+const SearchResultsWrapper = styled.div`
   flex: 1;
   padding: 10px 15px 10px;
 
@@ -106,6 +107,7 @@ type SearchResults = {
   [key in ResultsFilter]: {
     items: SearchResultItems;
     isLoading: boolean;
+    scrollTopPosition: number;
     focusedIdx: {
       idx: number;
       focusState: FocusState;
@@ -116,6 +118,10 @@ type SearchResults = {
 enum ReducerActionType {
   SetSearchQuery,
   SetSearchFilter,
+
+  CacheScrollTopPosition,
+  CacheSearchQuery,
+  ClearResults,
 
   StartSearching,
   SearchingSuccess,
@@ -144,6 +150,25 @@ interface SetSearchFilter {
   payload: {
     filter: ResultsFilter;
   };
+}
+
+interface CacheScrollTopPosition {
+  type: ReducerActionType.CacheScrollTopPosition;
+  payload: {
+    filter: ResultsFilter;
+    scrollTopPosition: number;
+  };
+}
+
+interface CacheSearchQuery {
+  type: ReducerActionType.CacheSearchQuery;
+  payload: {
+    query: string;
+  };
+}
+
+interface ClearResults {
+  type: ReducerActionType.ClearResults;
 }
 
 interface StartSearching {
@@ -210,6 +235,9 @@ interface DisconnectGitHubAccount {
 
 type ReducerAction = SetSearchQuery
   | SetSearchFilter
+  | CacheScrollTopPosition
+  | CacheSearchQuery
+  | ClearResults
   | StartSearching
   | SearchingSuccess
   | SearchingFail
@@ -248,6 +276,7 @@ const initialState: State = {
     [ResultsFilter.StackOverflow]: {
       items: [],
       isLoading: false,
+      scrollTopPosition: 0,
       focusedIdx: {
         idx: 0,
         focusState: FocusState.NoScroll,
@@ -256,6 +285,7 @@ const initialState: State = {
     [ResultsFilter.GitHubCode]: {
       items: [],
       isLoading: false,
+      scrollTopPosition: 0,
       focusedIdx: {
         idx: 0,
         focusState: FocusState.NoScroll,
@@ -271,30 +301,13 @@ const initialState: State = {
 }
 
 function stateReducer(state: State, reducerAction: ReducerAction): State {
-  if (isDev()) {
-    console.log(ReducerActionType[reducerAction.type], state);
+  if (isDev) {
+    console.log(ReducerActionType[reducerAction.type], (reducerAction as any).payload || {}, state);
   }
 
   switch (reducerAction.type) {
     case ReducerActionType.SetSearchQuery: {
       const { query } = reducerAction.payload;
-      // User explicitely deleted the query. We should remove all results.
-      if (!query) {
-        return {
-          ...state,
-          search: {
-            ...state.search,
-            query: '',
-            lastSearchedQuery: '',
-          },
-          results: {
-            // TODO: For some reason when a user changes to the
-            // GitHubCode filter there are still results.
-            ...initialState.results,
-          },
-        };
-      }
-
       return {
         ...state,
         search: {
@@ -303,6 +316,38 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         },
       };
     }
+    case ReducerActionType.ClearResults: {
+      return {
+        ...state,
+        search: {
+          ...state.search,
+          query: '',
+          lastSearchedQuery: '',
+        },
+        results: {
+          ...initialState.results,
+        },
+      };
+    }
+    case ReducerActionType.CacheScrollTopPosition: {
+      const { filter, scrollTopPosition } = reducerAction.payload;
+      return {
+        ...state,
+        results: {
+          ...state.results,
+          [filter]: {
+            ...state.results[filter],
+            scrollTopPosition,
+          },
+        },
+      };
+    }
+    case ReducerActionType.CacheSearchQuery: {
+      // TODO: Should this be a reducer action?
+      const { query } = reducerAction.payload;
+      saveQuery(query);
+      return { ...state };
+    }
     case ReducerActionType.SetSearchFilter: {
       const { filter } = reducerAction.payload;
       return {
@@ -310,6 +355,20 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         search: {
           ...state.search,
           filter,
+        },
+        results: {
+          ...state.results,
+          [filter]: {
+            ...state.results[filter],
+            focusedIdx: {
+              ...state.results[filter].focusedIdx,
+              // We want to disable automatic scrolling to the focused
+              // element. When a user is changing filters we should
+              // respect the cached scroll position instead. This position
+              // might be different then the position of a focused element.
+              state: FocusState.NoScroll,
+            },
+          },
         },
       };
     }
@@ -342,6 +401,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
             isLoading: false,
             items,
             focusedIdx: {
+              ...state.results[filter].focusedIdx,
               idx: 0,
               state: FocusState.NoScroll,
             },
@@ -443,18 +503,11 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
 
 
 function Home() {
+  const searchResultsWrapperEl = useRef<HTMLDivElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
   const debouncedQuery = useDebounce(state.search.query.trim(), 400);
   const debouncedLastSearchedQuery = useDebounce(state.search.lastSearchedQuery.trim(), 400);
-
-  const [currentResultsQuery, setCurrentResultsQuery] = useState('');
-
-  // const [isGitHubConnected, setIsGitHubConnected] = useState(false);
-  // TODO: There is probably a better way to write this   type: ReducerActionType.StartConnectingGitHub;- a reducer?
-  // const [gitHubConnectedPreviousState, setGitHubConnectedPreviousState] = useState(false);
-
-  ////////////////////////////
 
   const activeFilter = useMemo(() => state.search.filter, [state.search.filter]);
 
@@ -476,24 +529,56 @@ function Home() {
 
   // Dispatch helpers
   const setSearchQuery = useCallback((query: string) => {
-   dispatch({
-     type: ReducerActionType.SetSearchQuery,
-     payload: { query },
-   });
+    dispatch({
+      type: ReducerActionType.SetSearchQuery,
+      payload: { query },
+    });
+  }, []);
+
+  const cacheScrollTopPosition = useCallback((filter: ResultsFilter, scrollTopPosition: number) => {
+    dispatch({
+      type: ReducerActionType.CacheScrollTopPosition,
+      payload: { filter, scrollTopPosition },
+    });
   }, []);
 
   const setSearchFilter = useCallback((filter: ResultsFilter) => {
-   dispatch({
-     type: ReducerActionType.SetSearchFilter,
-     payload: { filter },
-   });
+    if (searchResultsWrapperEl?.current) {
+      // Cache the scroll bar position for the current active filter.
+      const currentScrollTop = searchResultsWrapperEl.current.scrollTop;
+      console.log('CURRENT', currentScrollTop);
+      cacheScrollTopPosition(state.search.filter, currentScrollTop);
+
+      // Set the scroll bar position for the filter that a user wants
+      // to set as an active.
+      const newScrollTop = state.results[filter].scrollTopPosition;
+      searchResultsWrapperEl.current.scrollTo(0, newScrollTop);
+    }
+
+    dispatch({
+      type: ReducerActionType.SetSearchFilter,
+      payload: { filter },
+    });
+  }, [state.search.filter, state.results]);
+
+  const cacheSearchQuery = useCallback((query: string) => {
+    dispatch({
+      type: ReducerActionType.CacheSearchQuery,
+      payload: { query },
+    });
+  }, []);
+
+  const clearResults = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.ClearResults,
+    });
   }, []);
 
   const startSearching = useCallback((filter: ResultsFilter) => {
-   dispatch({
-     type: ReducerActionType.StartSearching,
-     payload: { filter },
-   });
+    dispatch({
+      type: ReducerActionType.StartSearching,
+      payload: { filter },
+    });
   }, []);
 
   const searchingSuccess = useCallback((filter: ResultsFilter, items: SearchResultItems) => {
@@ -518,11 +603,25 @@ function Home() {
   }, []);
 
   const openModal = useCallback((item: SearchResultItem) => {
+    let url = '';
+    // TODO: This isn't a very good differentiation.
+    // Can we do it better in a more TypeScript way?
+    if ((item as StackOverflowResult).question) {
+      // Item is StackOverflowResult.
+      url = (item as StackOverflowResult).question.link;
+    } else if ((item as CodeResult).fileURL) {
+      // Item is CodeResult.
+      url = (item as CodeResult).fileURL;
+    }
+    trackModalOpened({
+      activeFilter: activeFilter.toString(),
+      url,
+    });
     dispatch({
       type: ReducerActionType.OpenModal,
       payload: { item },
     });
-  }, []);
+  }, [activeFilter]);
 
   const closeModal = useCallback(() => {
     dispatch({
@@ -556,50 +655,6 @@ function Home() {
   }, []);
   /////////
 
-
-  // TODO: This is for tracking when user opens the SO modal.
-  /*
-  useEffect(() => {
-    if (!isSOModalOpened || state.search.filter !== ResultsFilter.StackOverflow) {
-      return;
-    }
-
-    const result = soResults.length > soFocusedIdx.idx ? soResults[soFocusedIdx.idx] : undefined;
-
-    if (result) {
-      trackModalOpened({
-        activeFilter: state.search.filter.toString(),
-        query: debouncedQuery,
-        resultIndex: soFocusedIdx.idx,
-        title: result.question.title,
-        url: result.question.link,
-
-      });
-    }
-  }, [soResults, soFocusedIdx, state.search.filter, debouncedQuery, isSOModalOpened]);
-  */
-
-
-  // TODO: This is for tracking when user opens the code modal.
-  /*
-  useEffect(() => {
-      if (!isCodeModalOpened || state.search.filter !== ResultsFilter.GitHubCode) {
-      return;
-    }
-
-    const result = codeResults.length > codeFocusedIdx.idx ? codeResults[codeFocusedIdx.idx] : undefined;
-
-    if (result) {
-      trackModalOpened({
-        activeFilter: state.search.filter.toString(),
-        query: debouncedQuery,
-        resultIndex: codeFocusedIdx.idx,
-        url: result.fileURL,
-      });
-    }
-  }, [codeResults, codeFocusedIdx, state.search.filter, debouncedQuery, isCodeModalOpened]);
-  */
-
   const openFocusedSOItemInBrowser = useCallback(() => {
     const idx = state.results[ResultsFilter.StackOverflow].focusedIdx.idx;
     const item = state.results[ResultsFilter.StackOverflow].items[idx] as StackOverflowResult;
@@ -621,6 +676,7 @@ function Home() {
     if (gitHubFileURL) openLink(gitHubFileURL);
   }
 
+  // TODO: Create a reducer action.
   async function openFileInVSCode(path: string, content: string, filePreviews: FilePreview[]) {
     const tmpPath = await createTmpFile({
       filePath: path,
@@ -636,6 +692,43 @@ function Home() {
     }
   }
 
+  async function searchGHCode(query: string) {
+    try {
+      startSearching(ResultsFilter.GitHubCode);
+      const results = await searchGitHubCode(query);
+      searchingSuccess(ResultsFilter.GitHubCode, results);
+    } catch (error) {
+      searchingFail(ResultsFilter.GitHubCode, error.message);
+    }
+  }
+  async function searchSO(query: string) {
+    try {
+      startSearching(ResultsFilter.StackOverflow);
+      const results = await searchStackOverflow(query);
+      searchingSuccess(ResultsFilter.StackOverflow, results);
+    } catch (error) {
+      searchingFail(ResultsFilter.StackOverflow, error.message);
+    }
+  }
+
+  async function searchAll(query: string, filter: ResultsFilter, isGitHubConnected: boolean) {
+    switch (filter) {
+      case ResultsFilter.StackOverflow:
+        await searchSO(query);
+        if (isGitHubConnected) {
+          await searchGHCode(query);
+        }
+      break;
+
+      case ResultsFilter.GitHubCode:
+        if (isGitHubConnected) {
+          await searchGHCode(query);
+        }
+        await searchSO(query);
+      break;
+    }
+  }
+
   async function tryToLoadGitHubAccount() {
     try {
       startConnectingGitHub();
@@ -646,19 +739,33 @@ function Home() {
     }
   }
 
+  function handleSearchInputChange(e: any) {
+    // User explicitely deleted the query. We should remove all results.
+    if (!e.target.value) {
+      clearResults();
+      return;
+    }
+    setSearchQuery(e.target.value);
+  }
+
+  function handleSearchResultsWrapperScroll() {
+    // User manually s
+  }
+
+  /* HOTKEYS */
   // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
     if (state.modalItem) return;
     setSearchFilter(ResultsFilter.StackOverflow);
     trackShortcut({ action: 'Change filter to SO' });
-  }, { filter: () => true }, [state.modalItem]);
+  }, { filter: () => true }, [state.modalItem, setSearchFilter]);
 
   // 'cmd+2' hotkey - change search filter to GitHub Code search.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+2' : 'alt+2', () => {
     if (state.modalItem) return;
     setSearchFilter(ResultsFilter.GitHubCode);
     trackShortcut({ action: 'Change filter to Code' });
-  }, { filter: () => true }, [state.modalItem]);
+  }, { filter: () => true }, [state.modalItem, setSearchFilter]);
 
   // 'up arrow' hotkey - navigation.
   useHotkeys('up', () => {
@@ -720,48 +827,17 @@ function Home() {
   // TODO: This will stop working now.
   // }, [state.search.filter, codeResults, codeFocusedIdx]);
   }, [activeFilter]);
+  /* //////////////////// */
 
-    async function searchGHCode(query: string) {
-      try {
-        startSearching(ResultsFilter.GitHubCode);
-        const results = await searchGitHubCode(query);
-        searchingSuccess(ResultsFilter.GitHubCode, results);
-      } catch (error) {
-        searchingFail(ResultsFilter.GitHubCode, error.message);
-      }
+  useIPCRenderer('github-access-token', async (event, { accessToken }: { accessToken: string | null }) => {
+    if (accessToken === null) {
+      disconnectGitHub();
+      disconnectGitHubAccount(); // The state reducer's action.
+      return;
     }
-    async function searchSO(query: string) {
-      try {
-        startSearching(ResultsFilter.StackOverflow);
-        const results = await searchStackOverflow(query);
-        searchingSuccess(ResultsFilter.StackOverflow, results);
-      } catch (error) {
-        searchingFail(ResultsFilter.StackOverflow, error.message);
-      }
-    }
-
-    async function searchAll(query: string, filter: ResultsFilter, isGitHubConnected: boolean) {
-      switch (filter) {
-        case ResultsFilter.StackOverflow:
-          await searchSO(query);
-          if (isGitHubConnected) {
-            await searchGHCode(query);
-          }
-        break;
-
-        case ResultsFilter.GitHubCode:
-          if (isGitHubConnected) {
-            await searchGHCode(query);
-          }
-          await searchSO(query);
-        break;
-      }
-
-      saveQuery(query);
-      trackSearch({
-        activeFilter: activeFilter.toString(),
-      });
-    }
+    tryToLoadGitHubAccount();
+    if (debouncedQuery) searchGHCode(debouncedQuery);
+  }, [debouncedQuery]);
 
   useEffect(() => {
     async function restoreLastQuery() {
@@ -779,44 +855,17 @@ function Home() {
 
   useEffect(() => {
     if (!debouncedQuery) {
-      // TODO: This doesn't work.
-      saveQuery('');
+      cacheSearchQuery('');
       return;
     }
     if (debouncedQuery === debouncedLastSearchedQuery) return;
 
     searchAll(debouncedQuery, activeFilter, state.gitHubAccount.isConnected);
+    cacheSearchQuery(debouncedQuery);
+    trackSearch({
+      activeFilter: activeFilter.toString(),
+    });
   }, [debouncedQuery, debouncedLastSearchedQuery, activeFilter, state.gitHubAccount.isConnected]);
-
-
-  // useEffect(() => {
-    /*
-    if (debouncedQuery && debouncedQuery !== currentResultsQuery) {
-      setCurrentResultsQuery(debouncedQuery);
-      searchAll(debouncedQuery, activeFilter);
-    }
-
-    if (debouncedQuery && isGitHubConnected && !gitHubConnectedPreviousState) {
-      setGitHubConnectedPreviousState(true);
-      searchGitHubCode(debouncedQuery);
-    }
-
-    if (debouncedQuery === '' && debouncedQuery !== currentResultsQuery) {
-      saveQuery('');
-    }
-    */
-  // }, [debouncedQuery, currentResultsQuery, activeFilter, isGitHubConnected, gitHubConnectedPreviousState]);
-
-
-  useIPCRenderer('github-access-token', async (event, { accessToken }: { accessToken: string | null }) => {
-    if (accessToken === null) {
-      disconnectGitHub();
-      disconnectGitHubAccount(); // The state reducer's action.
-      return;
-    }
-    tryToLoadGitHubAccount();
-    if (debouncedQuery) searchGHCode(debouncedQuery);
-  }, [debouncedQuery]);
 
   return (
     <>
@@ -838,7 +887,7 @@ function Home() {
         <SearchInput
           placeholder="Search StackOverflow and code on GitHub"
           value={state.search.query}
-          onChange={e => setSearchQuery(e.target.value)}
+          onChange={handleSearchInputChange}
           activeFilter={activeFilter}
           onFilterSelect={f => setSearchFilter(f)}
           isLoading={isActiveFilterLoading}
@@ -876,7 +925,10 @@ function Home() {
 
         {!hasActiveFilterEmptyResults && !isActiveFilterLoading &&
           <>
-            <SearchResults>
+            <SearchResultsWrapper
+              ref={searchResultsWrapperEl}
+              onScroll={handleSearchResultsWrapperScroll}
+            >
               {activeFilter === ResultsFilter.StackOverflow
                && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
                 <StackOverflowItem
@@ -899,7 +951,7 @@ function Home() {
                   onFilePathClick={() => openModal(cr)}
                 />
               ))}
-            </SearchResults>
+            </SearchResultsWrapper>
 
             {/* StackOverflow search results + StackOverflow modal hotkeys */}
             {!state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
