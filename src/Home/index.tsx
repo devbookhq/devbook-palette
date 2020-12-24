@@ -106,6 +106,9 @@ const DocsTypeSelection = styled.div`
   display: flex;
   flex-direction: column;
   background: #262736;
+
+  overflow: hidden;
+  overflow-y: overlay;
 `;
 
 const DocItem = styled.div<{ isFocused?: boolean }>`
@@ -118,6 +121,9 @@ const DocItem = styled.div<{ isFocused?: boolean }>`
 const DocsPage = styled.div`
   flex: 1;
   height: 100%;
+
+  overflow: hidden;
+  overflow-y: overlay;
 `;
 
 type SearchResultItem = StackOverflowResult | CodeResult | DocResult;
@@ -990,49 +996,50 @@ function Home() {
 
         {!hasActiveFilterEmptyResults && !isActiveFilterLoading &&
           <>
-            <SearchResultsWrapper>
-              {activeFilter === ResultsFilter.StackOverflow
-               && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
-                <StackOverflowItem
-                  key={idx}
-                  soResult={sor}
-                  focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
-                  onHeaderClick={() => focusResultItem(ResultsFilter.StackOverflow, idx, FocusState.NoScroll)}
-                  onTitleClick={() => openModal(sor)}
-                />
-              ))}
-
-              {activeFilter === ResultsFilter.GitHubCode
-               && state.gitHubAccount.isConnected
-               && (state.results[ResultsFilter.GitHubCode].items as CodeResult[]).map((cr, idx) => (
-                <CodeItem
-                  key={idx}
-                  codeResult={cr}
-                  focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
-                  onHeaderClick={() => focusResultItem(ResultsFilter.GitHubCode, idx, FocusState.NoScroll)}
-                  onFilePathClick={() => openModal(cr)}
-                />
-              ))}
-
-              {activeFilter === ResultsFilter.Docs &&
-                <DocsWrapper>
-                  <DocsTypeSelection>
-                    {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
-                      <DocItem
-                        key={idx}
-                        // TODO: Use FocusState like with StackOverflowItem and CodeItem.
-                        isFocused={activeFocusedIdx.idx === idx}
-                      >
-                        {d.record.categories.join(' ')}
-                      </DocItem>
-                    ))}
-                  </DocsTypeSelection>
-                  <DocsPage
-                    dangerouslySetInnerHTML={{__html: (activeFocusedItem as DocResult).record.html}}
+            {(activeFilter === ResultsFilter.StackOverflow || activeFilter === ResultsFilter.GitHubCode) &&
+              <SearchResultsWrapper>
+                {activeFilter === ResultsFilter.StackOverflow
+                 && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
+                  <StackOverflowItem
+                    key={idx}
+                    soResult={sor}
+                    focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+                    onHeaderClick={() => focusResultItem(ResultsFilter.StackOverflow, idx, FocusState.NoScroll)}
+                    onTitleClick={() => openModal(sor)}
                   />
-                </DocsWrapper>
-              }
-            </SearchResultsWrapper>
+                ))}
+
+                {activeFilter === ResultsFilter.GitHubCode
+                 && state.gitHubAccount.isConnected
+                 && (state.results[ResultsFilter.GitHubCode].items as CodeResult[]).map((cr, idx) => (
+                  <CodeItem
+                    key={idx}
+                    codeResult={cr}
+                    focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+                    onHeaderClick={() => focusResultItem(ResultsFilter.GitHubCode, idx, FocusState.NoScroll)}
+                    onFilePathClick={() => openModal(cr)}
+                  />
+                ))}
+              </SearchResultsWrapper>
+            }
+            {activeFilter === ResultsFilter.Docs &&
+              <DocsWrapper>
+                <DocsTypeSelection>
+                  {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
+                    <DocItem
+                      key={idx}
+                      // TODO: Use FocusState like with StackOverflowItem and CodeItem.
+                      isFocused={activeFocusedIdx.idx === idx}
+                    >
+                      {d.record.categories.join(' ')}
+                    </DocItem>
+                  ))}
+                </DocsTypeSelection>
+                <DocsPage
+                  dangerouslySetInnerHTML={{__html: (activeFocusedItem as DocResult).record.html}}
+                />
+              </DocsWrapper>
+            }
 
             {/* StackOverflow search results + StackOverflow modal hotkeys */}
             {!state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
