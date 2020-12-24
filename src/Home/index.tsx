@@ -37,8 +37,14 @@ import {
 } from 'search/docs';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
-import HotkeysPanel from './HotkeysPanel';
-import { Key } from './HotkeysPanel/Hotkey';
+import {
+  StackOverflowSearchHotkeysPanel,
+  StackOverflowModalHotkeysPanel,
+  GitHubCodeSearchHotkeysPanel,
+  GitHubCodeModalHotkeysPanel,
+  DocsSearchHotkeysPanel,
+  DocsModalHotkeysPanel,
+} from './HotkeysPanel';
 import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
@@ -1043,42 +1049,15 @@ function Home() {
 
             {/* StackOverflow search results + StackOverflow modal hotkeys */}
             {!state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
-              <HotkeysPanel
-                hotkeysLeft={[
-                  { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
-                  { text: 'Open', hotkey: [Key.Enter], onClick: () => openModal(activeFocusedItem) },
-                ]}
-                hotkeysRight={[
-                  {
-                    text: 'Open in browser',
-                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'],
-                    onClick: openFocusedSOItemInBrowser
-                  },
-                ]}
+              <StackOverflowSearchHotkeysPanel
+                onOpenClick={() => openModal(activeFocusedItem)}
+                onOpenInBrowserClick={openFocusedSOItemInBrowser}
               />
             }
-
             {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
-              <HotkeysPanel
-                hotkeysLeft={[
-                  {
-                    text: 'Navigate',
-                    hotkey: [Key.ArrowUp, Key.ArrowDown],
-                    isSeparated: true,
-                  },
-                ]}
-                hotkeysRight={[
-                  {
-                    text: 'Open in browser',
-                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'],
-                    onClick: openFocusedSOItemInBrowser
-                  },
-                  {
-                    text: 'Close',
-                    hotkey: ['Esc'],
-                    onClick: closeModal
-                  },
-                ]}
+              <StackOverflowModalHotkeysPanel
+                onOpenInBrowserClick={openFocusedSOItemInBrowser}
+                onCloseClick={closeModal}
               />
             }
             {/*-------------------------------------------------------------*/}
@@ -1086,52 +1065,17 @@ function Home() {
 
             {/* GitHub search results + GitHub modal hotkeys */}
             {!state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
-              <HotkeysPanel
-                hotkeysLeft={[
-                  { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
-                  { text: 'Open', hotkey: [Key.Enter], onClick: () => openModal(activeFocusedItem) },
-                ]}
-                hotkeysRight={[
-                  {
-                    text: 'Open in VSCode',
-                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : ['Alt +', 'I'],
-                    onClick: openFocusedGitHubCodeItemInVSCode
-                  },
-                  {
-                    text: 'Open in browser',
-                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'],
-                    onClick: openFocusedGitHubCodeItemInBrowser
-                  },
-                ]}
+              <GitHubCodeSearchHotkeysPanel
+                onOpenClick={() => openModal(activeFocusedItem)}
+                onOpenInVSCodeClick={openFocusedGitHubCodeItemInVSCode}
+                onOpenInBrowserClick={openFocusedGitHubCodeItemInBrowser}
               />
             }
-
             {state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
-              <HotkeysPanel
-                hotkeysLeft={[
-                  {
-                    text: 'Navigate',
-                    hotkey: [Key.ArrowUp, Key.ArrowDown],
-                    isSeparated: true
-                  },
-                ]}
-                hotkeysRight={[
-                  {
-                    text: 'Open in VSCode',
-                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'I'] : ['Alt +', 'I'],
-                    onClick: openFocusedGitHubCodeItemInVSCode
-                  },
-                  {
-                    text: 'Open in browser',
-                    hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'],
-                    onClick: openFocusedGitHubCodeItemInBrowser
-                  },
-                  {
-                    text: 'Close',
-                    hotkey: ['Esc'],
-                    onClick: closeModal,
-                  },
-                ]}
+              <GitHubCodeModalHotkeysPanel
+                onOpenInVSCodeClick={openFocusedGitHubCodeItemInVSCode}
+                onOpenInBrowserClick={openFocusedGitHubCodeItemInBrowser}
+                onCloseClick={closeModal}
               />
             }
             {/*-------------------------------------------------------------*/}
