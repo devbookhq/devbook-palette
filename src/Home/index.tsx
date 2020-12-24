@@ -104,6 +104,7 @@ const DocsWrapper = styled.div`
   height: 100%;
   display: flex;
   align-items: flex-start;
+  overflow: hidden;
 `;
 
 const DocsTypeSelection = styled.div`
@@ -1076,6 +1077,17 @@ function Home() {
                 onOpenInVSCodeClick={openFocusedGitHubCodeItemInVSCode}
                 onOpenInBrowserClick={openFocusedGitHubCodeItemInBrowser}
                 onCloseClick={closeModal}
+              />
+            }
+            {/*-------------------------------------------------------------*/}
+
+            {/* Docs search results + Dosc modal hotkeys */}
+            {!state.modalItem && activeFilter === ResultsFilter.Docs &&
+              <DocsSearchHotkeysPanel
+              />
+            }
+            {state.modalItem && activeFilter === ResultsFilter.Docs &&
+              <DocsModalHotkeysPanel
               />
             }
             {/*-------------------------------------------------------------*/}
