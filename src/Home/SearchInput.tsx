@@ -288,7 +288,7 @@ function SearchInput({
             </Filter>
           ))}
         </FiltersWrapper>
-        {isDev && <Dev>Dev build</Dev>}
+        {isDev && <Dev>[dev build]</Dev>}
         <PreferencesButton onClick={openPreferences}>
           <StyledPreferencesIcon />
         </PreferencesButton>
@@ -310,3 +310,4 @@ function SearchInput({
 }
 
 export default SearchInput;
+

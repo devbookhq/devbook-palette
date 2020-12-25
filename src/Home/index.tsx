@@ -35,6 +35,8 @@ import {
   search as searchDocumentations,
   DocResult,
 } from 'search/docs';
+import useIPCRenderer from 'hooks/useIPCRenderer';
+import Button from 'components/Button';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
 import {
@@ -50,8 +52,7 @@ import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
 import CodeItem from './GitHub/CodeItem';
 import CodeModal from './GitHub/CodeModal';
-import useIPCRenderer from 'hooks/useIPCRenderer';
-import Button from 'components/Button';
+import { DocSearchResultItem, DocPage } from './Docs';
 
 const Container = styled.div`
   height: 100%;
@@ -61,7 +62,7 @@ const Container = styled.div`
 
 const SearchResultsWrapper = styled.div`
   flex: 1;
-  padding: 10px 15px 10px;
+  padding: 10px 15px;
 
   overflow: hidden;
   overflow-y: overlay;
@@ -96,9 +97,6 @@ const GitHubConnectTitle = styled(InfoMessage)`
   margin: 0 0 30px;
 `;
 
-/////////////////////// DOC ITEMS //////
-// TODO: Move to a separate file.
-
 const DocsWrapper = styled.div`
   width: 100%;
   height: 100%;
@@ -107,27 +105,13 @@ const DocsWrapper = styled.div`
   overflow: hidden;
 `;
 
-const DocsTypeSelection = styled.div`
+// TODO: Make width of this element adjustable by dragging its right border.
+const DocSearchResults = styled.div`
   height: 100%;
   width: 200px;
   display: flex;
   flex-direction: column;
   background: #262736;
-
-  overflow: hidden;
-  overflow-y: overlay;
-`;
-
-const DocItem = styled.div<{ isFocused?: boolean }>`
-  padding: 10px;
-  background: ${props => props.isFocused ? '#3A41AF' : 'transparent'};
-  font-size: 12px;
-  font-weight: 400;
-`;
-
-const DocsPage = styled.div`
-  flex: 1;
-  height: 100%;
 
   overflow: hidden;
   overflow-y: overlay;
@@ -1031,19 +1015,21 @@ function Home() {
             }
             {activeFilter === ResultsFilter.Docs &&
               <DocsWrapper>
-                <DocsTypeSelection>
+                <DocSearchResults>
                   {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
-                    <DocItem
+                    <DocSearchResultItem
                       key={idx}
+                      // TODO: We probably don't need the whole DocResult object.
+                      // We need just a certain type of preview that user sees in
+                      // the search results list.
+                      docResult={d}
                       // TODO: Use FocusState like with StackOverflowItem and CodeItem.
                       isFocused={activeFocusedIdx.idx === idx}
-                    >
-                      {d.record.categories.join(' ')}
-                    </DocItem>
+                    />
                   ))}
-                </DocsTypeSelection>
-                <DocsPage
-                  dangerouslySetInnerHTML={{__html: (activeFocusedItem as DocResult).record.html}}
+                </DocSearchResults>
+                <DocPage
+                  html={(activeFocusedItem as DocResult).record.html}
                 />
               </DocsWrapper>
             }

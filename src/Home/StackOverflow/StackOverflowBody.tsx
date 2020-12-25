@@ -95,6 +95,10 @@ const Body = styled.div`
       cursor: pointer;
     }
   }
+
+  .live {
+    background: #fff;
+  }
 `;
 
 
