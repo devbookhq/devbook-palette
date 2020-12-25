@@ -25,6 +25,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
 
+  border-bottom: 1px solid #3B3A4A;
   background: #25252E;
 `;
 
@@ -169,7 +170,7 @@ const CloseImg = styled(closeImg)`
 
 export enum ResultsFilter {
   StackOverflow = 'StackOverflow',
-  GitHubCode = 'Code',
+  GitHubCode = 'GitHubCode',
   Docs = 'Docs',
 }
 

@@ -16,8 +16,10 @@ import electron, {
   trackModalOpened,
   trackSearch,
   trackShortcut,
-  saveQuery,
-  getSavedQuery,
+  saveSearchQuery,
+  saveSearchFilter,
+  getSavedSearchQuery,
+  getSavedSearchFilter,
 } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -111,10 +113,12 @@ const DocSearchResults = styled.div`
   width: 200px;
   display: flex;
   flex-direction: column;
-  background: #262736;
 
   overflow: hidden;
   overflow-y: overlay;
+
+  border-right: 2px solid #3B3A4A;
+  background: #262736;
 `;
 
 type SearchResultItem = StackOverflowResult | CodeResult | DocResult;
@@ -137,6 +141,7 @@ enum ReducerActionType {
 
   CacheScrollTopPosition,
   CacheSearchQuery,
+  CacheSearchFilter,
   ClearResults,
 
   StartSearching,
@@ -180,6 +185,13 @@ interface CacheSearchQuery {
   type: ReducerActionType.CacheSearchQuery;
   payload: {
     query: string;
+  };
+}
+
+interface CacheSearchFilter {
+  type: ReducerActionType.CacheSearchFilter,
+  payload: {
+    filter: ResultsFilter;
   };
 }
 
@@ -253,6 +265,7 @@ type ReducerAction = SetSearchQuery
   | SetSearchFilter
   | CacheScrollTopPosition
   | CacheSearchQuery
+  | CacheSearchFilter
   | ClearResults
   | StartSearching
   | SearchingSuccess
@@ -369,8 +382,18 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
     }
     case ReducerActionType.CacheSearchQuery: {
       // TODO: Should this be a reducer action?
+      // It feels wrong to not do anything with the state
+      // and just return it as it is.
       const { query } = reducerAction.payload;
-      saveQuery(query);
+      saveSearchQuery(query);
+      return { ...state };
+    }
+    case ReducerActionType.CacheSearchFilter: {
+      // TODO: Should this be a reducer action?
+      // It feels wrong to not do anything with the state
+      // and just return it as it is.
+      const { filter } = reducerAction.payload;
+      saveSearchFilter(filter)
       return { ...state };
     }
     case ReducerActionType.SetSearchFilter: {
@@ -572,6 +595,13 @@ function Home() {
     dispatch({
       type: ReducerActionType.CacheSearchQuery,
       payload: { query },
+    });
+  }, []);
+
+  const cacheSearchFilter = useCallback((filter: ResultsFilter) => {
+    dispatch({
+      type: ReducerActionType.CacheSearchFilter,
+      payload: { filter },
     });
   }, []);
 
@@ -895,11 +925,14 @@ function Home() {
   }, [debouncedQuery]);
 
   useEffect(() => {
-    async function restoreLastQuery() {
-      const lastQuery = await getSavedQuery();
+    async function loadCachedData() {
+      const filter = await getSavedSearchFilter();
+      setSearchFilter(filter);
+
+      const lastQuery = await getSavedSearchQuery();
       setSearchQuery(lastQuery);
     }
-    restoreLastQuery();
+    loadCachedData();
     tryToLoadGitHubAccount();
   // We want to run this only during the first render.
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -910,9 +943,14 @@ function Home() {
     console.error(state.errorMessage);
   }, [state.errorMessage]);
 
+  // TODO: Separate searching on a search filter change + query change
+  // and caching the query and caching active filter.
+
+  // Search when the debounced query changes or when
+  // a user changes the active filter.
   useEffect(() => {
     if (!debouncedQuery) {
-      cacheSearchQuery('');
+      // cacheSearchQuery('');
       return;
     }
     if (debouncedQuery === debouncedLastSearchedQuery) return;
@@ -928,6 +966,21 @@ function Home() {
     activeFilter,
     state.gitHubAccount.isConnected,
   ]);
+
+  useEffect(() => {
+    cacheSearchFilter(activeFilter);
+  }, [activeFilter])
+
+  /*
+  // Cache the debounced query.
+  useEffect(() => {
+    if (!debouncedQuery) {
+      cacheSearchQuery('');
+      return;
+    }
+    if (debouncedQuery === debouncedLastSearchedQuery) return;
+  }, [debouncedQuery, debouncedLastSearchedQuery]);
+  */
 
   return (
     <>

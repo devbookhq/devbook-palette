@@ -26,7 +26,6 @@ import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow from './PreferencesWindow';
 import OAuth from './OAuth';
 import MainWindow from './MainWindow';
-import debounce from './utils/debounce';
 
 const PORT = 3000;
 
@@ -324,12 +323,12 @@ ipcMain.on('track-search', (event, searchInfo: any) => trackSearchDebounced(sear
 
 ipcMain.on('track-modal-opened', (event, modalInfo: any) => trackModalOpened(modalInfo));
 
-const debouncedSaveQuery = debounce((query: string) => {
+ipcMain.on('save-search-query', (event, query: string) => {
   store.set('lastQuery', query);
-}, 1000);
+});
 
-ipcMain.on('save-query', (event, query: string) => {
-  debouncedSaveQuery(query);
+ipcMain.on('save-search-filter', (event, filter: string) => {
+  store.set('searchFilter', filter);
 });
 
 ipcMain.handle('github-access-token', () => store.get('github', null));
@@ -383,8 +382,12 @@ ipcMain.handle('is-dev', () => {
   return isDev;
 });
 
-ipcMain.handle('get-saved-query', () => {
+ipcMain.handle('get-saved-search-query', () => {
   return store.get('lastQuery', '');
+});
+
+ipcMain.handle('get-saved-search-filter', () => {
+  return store.get('searchFilter', '');
 });
 
 ipcMain.handle('update-status', () => {

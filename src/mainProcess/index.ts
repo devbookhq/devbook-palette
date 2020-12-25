@@ -1,3 +1,5 @@
+import { ResultsFilter } from 'Home/SearchInput';
+
 const electron = window.require('electron') as typeof import('electron');
 
 const app = electron.app || electron.remote.app;
@@ -21,8 +23,23 @@ export function removeGitHub() {
   return electron.ipcRenderer.invoke('remove-github');
 }
 
-export function getSavedQuery() {
-  return electron.ipcRenderer.invoke('get-saved-query');
+export function getSavedSearchQuery() {
+  return electron.ipcRenderer.invoke('get-saved-search-query');
+}
+
+export async function getSavedSearchFilter(): Promise<ResultsFilter> {
+  const filter = await (electron.ipcRenderer.invoke('get-saved-search-filter') as Promise<string>);
+  // TODO: Change TS target from ES5 to ES2017
+  if ((<any>Object).values(ResultsFilter).includes(filter)) {
+    if (filter === 'StackOverflow') return ResultsFilter.StackOverflow;
+    if (filter === 'GitHubCode') return ResultsFilter.GitHubCode;
+    if (filter === 'Docs') return ResultsFilter.Docs;
+    /*
+    console.log('ResultsFilter[filter]', ResultsFilter[filter as keyof typeof ResultsFilter]);
+    return ResultsFilter[filter as keyof typeof ResultsFilter];
+    */
+  }
+  return ResultsFilter.StackOverflow;
 }
 
 export function notifyViewReady() {
@@ -37,8 +54,12 @@ export function hideMainWindow() {
   electron.ipcRenderer.send('hide-window');
 }
 
-export function saveQuery(query: string) {
-  electron.ipcRenderer.send('save-query', query)
+export function saveSearchQuery(query: string) {
+  electron.ipcRenderer.send('save-search-query', query)
+}
+
+export function saveSearchFilter(filter: ResultsFilter) {
+  electron.ipcRenderer.send('save-search-filter', filter.toString());
 }
 
 export function trackSearch(searchInfo: {
