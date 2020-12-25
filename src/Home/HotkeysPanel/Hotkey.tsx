@@ -101,6 +101,12 @@ const TextKey = styled.div`
   }
 `;
 
+const VisualConcatPlus = styled.div`
+  width: auto;
+  height: 12px;
+  margin: 0 7px;
+`;
+
 export enum Key {
   Alt = 'KeyAlt',
   Shift = 'KeyShift',
@@ -110,7 +116,11 @@ export enum Key {
   ArrowDown = 'KeyArrowDown',
 }
 
-export type HotkeyType = (string | Key)[];
+export enum VisualConcat {
+  Plus,
+}
+
+export type HotkeyType = (string | Key | VisualConcat)[];
 
 interface HotkeyProps {
   className?: string;
@@ -128,6 +138,22 @@ function renderKey(key: Key) {
       {key === Key.ArrowDown && <ArrowDownKey />}
     </>
   );
+}
+
+function renderVisualConcat(vc: VisualConcat) {
+  return (
+    <>
+      {vc === VisualConcat.Plus && <VisualConcatPlus/>}
+    </>
+  );
+}
+
+function renderHotkeyType(ht: HotkeyType) {
+  /*
+  if (Key[ht as Key]) {
+
+  }
+  */
 }
 
 function Hotkey({ className, hotkey }: HotkeyProps) {
@@ -148,3 +174,4 @@ function Hotkey({ className, hotkey }: HotkeyProps) {
 }
 
 export default Hotkey;
+

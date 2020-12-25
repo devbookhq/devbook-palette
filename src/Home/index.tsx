@@ -924,6 +924,10 @@ function Home() {
     if (debouncedQuery) searchGHCode(debouncedQuery);
   }, [debouncedQuery]);
 
+  // Run only on the initial render.
+  // Get the cached search query and search filter.
+  // Try to load GitHub account if user linked their
+  // GitHub in the past.
   useEffect(() => {
     async function loadCachedData() {
       const filter = await getSavedSearchFilter();
@@ -938,25 +942,17 @@ function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Log error messages.
   useEffect(() => {
     if (!state.errorMessage) return;
     console.error(state.errorMessage);
   }, [state.errorMessage]);
 
-  // TODO: Separate searching on a search filter change + query change
-  // and caching the query and caching active filter.
-
-  // Search when the debounced query changes or when
-  // a user changes the active filter.
+  // Search when the debounced query changes.
   useEffect(() => {
-    if (!debouncedQuery) {
-      // cacheSearchQuery('');
-      return;
-    }
-    if (debouncedQuery === debouncedLastSearchedQuery) return;
+    if (!debouncedQuery || debouncedQuery === debouncedLastSearchedQuery) return;
 
     searchAll(debouncedQuery, activeFilter, state.gitHubAccount.isConnected);
-    cacheSearchQuery(debouncedQuery);
     trackSearch({
       activeFilter: activeFilter.toString(),
     });
@@ -967,20 +963,17 @@ function Home() {
     state.gitHubAccount.isConnected,
   ]);
 
-  useEffect(() => {
-    cacheSearchFilter(activeFilter);
-  }, [activeFilter])
-
-  /*
   // Cache the debounced query.
   useEffect(() => {
-    if (!debouncedQuery) {
-      cacheSearchQuery('');
-      return;
+    if (debouncedQuery !== debouncedLastSearchedQuery) {
+      cacheSearchQuery(debouncedQuery);
     }
-    if (debouncedQuery === debouncedLastSearchedQuery) return;
   }, [debouncedQuery, debouncedLastSearchedQuery]);
-  */
+
+  // Cache the currently active filter.
+  useEffect(() => {
+    cacheSearchFilter(activeFilter);
+  }, [activeFilter]);
 
   return (
     <>
@@ -1138,3 +1131,4 @@ function Home() {
 }
 
 export default Home;
+

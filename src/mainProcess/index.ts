@@ -24,22 +24,12 @@ export function removeGitHub() {
 }
 
 export function getSavedSearchQuery() {
-  return electron.ipcRenderer.invoke('get-saved-search-query');
+  return electron.ipcRenderer.invoke('get-saved-search-query') as Promise<string>;
 }
 
 export async function getSavedSearchFilter(): Promise<ResultsFilter> {
   const filter = await (electron.ipcRenderer.invoke('get-saved-search-filter') as Promise<string>);
-  // TODO: Change TS target from ES5 to ES2017
-  if ((<any>Object).values(ResultsFilter).includes(filter)) {
-    if (filter === 'StackOverflow') return ResultsFilter.StackOverflow;
-    if (filter === 'GitHubCode') return ResultsFilter.GitHubCode;
-    if (filter === 'Docs') return ResultsFilter.Docs;
-    /*
-    console.log('ResultsFilter[filter]', ResultsFilter[filter as keyof typeof ResultsFilter]);
-    return ResultsFilter[filter as keyof typeof ResultsFilter];
-    */
-  }
-  return ResultsFilter.StackOverflow;
+  return ResultsFilter[filter as ResultsFilter] || ResultsFilter.StackOverflow;
 }
 
 export function notifyViewReady() {
@@ -107,10 +97,11 @@ export function createTmpFile(options: { fileContent: string, filePath: string }
   return electron.ipcRenderer.invoke('create-tmp-file', options);
 }
 
-// So we see logs from the main process in the Chrome debug tools
+// So we see logs from the main process in the Chrome debug tools.
 electron.ipcRenderer.on('console', (event, args) => {
   const [type, ...consoleArgs] = args;
   console[type as 'log' | 'error']?.('[main]:', ...consoleArgs);
 });
 
 export default electron;
+
