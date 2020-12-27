@@ -4,10 +4,17 @@ import styled from 'styled-components';
 import { DocResult } from 'search/docs';
 
 const Container = styled.div<{ isFocused?: boolean }>`
+  width: 100%;
   padding: 10px;
-  background: ${props => props.isFocused ? '#3A41AF' : 'transparent'};
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 12px;
   font-weight: 400;
+
+  background: ${props => props.isFocused ? '#3A41AF' : 'transparent'};
 `;
 
 interface SearchResultItemProps {
