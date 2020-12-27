@@ -82,6 +82,7 @@
     "express": "^4.17.1",
     "prism-react-renderer": "^1.1.1",
     "prismjs": "^1.22.0",
+    "re-resizable": "^6.9.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-hotkeys-hook": "^2.4.0",

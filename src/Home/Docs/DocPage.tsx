@@ -3,8 +3,10 @@ import styled from 'styled-components';
 
 const Container = styled.div`
   flex: 1;
-  padding: 10px 15px;
+  padding: 10px 15px 20px;
   height: 100%;
+  width: 100%;
+  min-width: 1px;
 
   overflow: hidden;
   overflow-y: overlay;

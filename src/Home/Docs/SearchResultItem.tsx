@@ -26,7 +26,7 @@ function SearchResultItem({
     <Container
       isFocused={isFocused}
     >
-      {docResult.record.categories.map(c => c.charAt(0).toUpperCase() + c.slice(1)).join(' / ')}
+      {docResult.record.name}
     </Container>
   );
 }

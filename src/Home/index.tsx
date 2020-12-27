@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { Resizable } from 're-resizable';
 
 import electron, {
   isDev,
@@ -107,10 +108,18 @@ const DocsWrapper = styled.div`
   overflow: hidden;
 `;
 
-// TODO: Make width of this element adjustable by dragging its right border.
+const resizableStyle = {
+  borderRight: '2px solid #3B3A4A',
+  background: '#262736',
+}
+
 const DocSearchResults = styled.div`
+  width: 100%;
   height: 100%;
-  width: 200px;
+
+  padding: 10px 0 20px;
+  margin: 0;
+
   display: flex;
   flex-direction: column;
 
@@ -1061,7 +1070,16 @@ function Home() {
             }
             {activeFilter === ResultsFilter.Docs &&
               <DocsWrapper>
-                <DocSearchResults>
+                <Resizable
+                  defaultSize={{
+                    width: 200,
+                    height: "100%"
+                  }}
+                  maxWidth="50%"
+                  minWidth="200"
+                  enable={{right: true}}
+                >
+                  <DocSearchResults>
                   {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
                     <DocSearchResultItem
                       key={idx}
@@ -1073,7 +1091,8 @@ function Home() {
                       isFocused={activeFocusedIdx.idx === idx}
                     />
                   ))}
-                </DocSearchResults>
+                  </DocSearchResults>
+                </Resizable>
                 <DocPage
                   html={(activeFocusedItem as DocResult).record.html}
                 />
