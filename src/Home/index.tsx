@@ -18,9 +18,11 @@ import electron, {
   trackSearch,
   trackShortcut,
   saveSearchQuery,
-  saveSearchFilter,
   getSavedSearchQuery,
+  saveSearchFilter,
   getSavedSearchFilter,
+  saveDocSearchResultsDefaultWidth,
+  getDocSearchResultsDefaultWidth,
 } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -166,6 +168,9 @@ enum ReducerActionType {
   ConnectingGitHubSuccess,
   ConnectingGitHubFail,
   DisconnectGitHubAccount,
+
+  SetDocSearchResultsDefaultWidth,
+  CacheDocSearchResultsWidth,
 }
 
 interface SetSearchQuery {
@@ -270,6 +275,20 @@ interface DisconnectGitHubAccount {
   type: ReducerActionType.DisconnectGitHubAccount;
 }
 
+interface SetDocSearchResultsDefaultWidth {
+  type: ReducerActionType.SetDocSearchResultsDefaultWidth;
+  payload: {
+    width: number;
+  };
+}
+
+interface CacheDocSearchResultsWidth {
+  type: ReducerActionType.CacheDocSearchResultsWidth;
+  payload: {
+    width: number;
+  };
+}
+
 type ReducerAction = SetSearchQuery
   | SetSearchFilter
   | CacheScrollTopPosition
@@ -285,7 +304,9 @@ type ReducerAction = SetSearchQuery
   | StartConnectingGitHub
   | ConnectingGitHubSuccess
   | ConnectingGitHubFail
-  | DisconnectGitHubAccount;
+  | DisconnectGitHubAccount
+  | SetDocSearchResultsDefaultWidth
+  | CacheDocSearchResultsWidth;
 
 interface State {
   search: {
@@ -300,6 +321,9 @@ interface State {
     isConnected: boolean;
   },
   errorMessage: string;
+  layout: {
+    docSearchResultsDefaultWidth: number;
+  }
 }
 
 const initialState: State = {
@@ -345,6 +369,9 @@ const initialState: State = {
     isConnected: false,
   },
   errorMessage: '',
+  layout: {
+    docSearchResultsDefaultWidth: 200,
+  }
 }
 
 function stateReducer(state: State, reducerAction: ReducerAction): State {
@@ -556,6 +583,24 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         },
       };
     }
+    case ReducerActionType.SetDocSearchResultsDefaultWidth: {
+      const { width } = reducerAction.payload;
+      return {
+        ...state,
+        layout: {
+          ...state.layout,
+          docSearchResultsDefaultWidth: width,
+        },
+      };
+    }
+    case ReducerActionType.CacheDocSearchResultsWidth: {
+      // TODO: Should this be a reducer action?
+      // It feels wrong to not do anything with the state
+      // and just return it as it is.
+      const { width } = reducerAction.payload;
+      saveDocSearchResultsDefaultWidth(width);
+      return { ...state };
+    }
     default:
       return state;
   }
@@ -727,6 +772,20 @@ function Home() {
       type: ReducerActionType.DisconnectGitHubAccount,
     });
   }, []);
+
+  const setDocSearchResultsDefaultWidth = useCallback((width: number) => {
+    dispatch({
+      type: ReducerActionType.SetDocSearchResultsDefaultWidth,
+      payload: { width },
+    });
+  }, []);
+
+  const cacheDocSearchResultsWidth = useCallback((width: number) => {
+    dispatch({
+      type: ReducerActionType.CacheDocSearchResultsWidth,
+      payload: { width },
+    });
+  }, []);
   /////////
 
   const openFocusedSOItemInBrowser = useCallback(() => {
@@ -843,6 +902,11 @@ function Home() {
     setSearchQuery(e.target.value);
   }
 
+  function handleDocSearchResultsResizeStop(e: any, dir: any, elRef: HTMLElement) {
+    // TODO: Cache the docSearchResultsEl width
+    cacheDocSearchResultsWidth(elRef.clientWidth);
+  }
+
   /* HOTKEYS */
   // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
@@ -944,6 +1008,9 @@ function Home() {
 
       const lastQuery = await getSavedSearchQuery();
       setSearchQuery(lastQuery);
+
+      const width = await getDocSearchResultsDefaultWidth();
+      setDocSearchResultsDefaultWidth(width);
     }
     loadCachedData();
     tryToLoadGitHubAccount();
@@ -1072,12 +1139,13 @@ function Home() {
               <DocsWrapper>
                 <Resizable
                   defaultSize={{
-                    width: 200,
+                    width: state.layout.docSearchResultsDefaultWidth,
                     height: "100%"
                   }}
                   maxWidth="50%"
                   minWidth="200"
                   enable={{right: true}}
+                  onResizeStop={(e, dir, ref) => handleDocSearchResultsResizeStop(e, dir, ref)}
                 >
                   <DocSearchResults>
                   {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (

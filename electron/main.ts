@@ -9,7 +9,6 @@ import {
 } from 'electron';
 import tmp from 'tmp';
 import { autoUpdater } from 'electron-updater';
-
 import isDev from './utils/isDev';
 import {
   trackShowApp,
@@ -392,4 +391,12 @@ ipcMain.handle('get-saved-search-filter', () => {
 
 ipcMain.handle('update-status', () => {
   return isUpdateAvailable;
+});
+
+ipcMain.on('save-doc-search-results-default-width', (event, width: number) => {
+  store.set('docSearchResultsDefaultWidth', width);
+});
+
+ipcMain.handle('get-doc-search-results-default-width', () => {
+  return store.get('docSearchResultsDefaultWidth', 200);
 });

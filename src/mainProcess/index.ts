@@ -23,8 +23,8 @@ export function removeGitHub() {
   return electron.ipcRenderer.invoke('remove-github');
 }
 
-export function getSavedSearchQuery() {
-  return electron.ipcRenderer.invoke('get-saved-search-query') as Promise<string>;
+export function getSavedSearchQuery(): Promise<string> {
+  return electron.ipcRenderer.invoke('get-saved-search-query');
 }
 
 export async function getSavedSearchFilter(): Promise<ResultsFilter> {
@@ -95,6 +95,14 @@ export function getGithubAccessToken(): Promise<string | null> {
 
 export function createTmpFile(options: { fileContent: string, filePath: string }): Promise<string | undefined> {
   return electron.ipcRenderer.invoke('create-tmp-file', options);
+}
+
+export function saveDocSearchResultsDefaultWidth(width: number) {
+  electron.ipcRenderer.send('save-doc-search-results-default-width', width);
+}
+
+export function getDocSearchResultsDefaultWidth(): Promise<number> {
+  return electron.ipcRenderer.invoke('get-doc-search-results-default-width');
 }
 
 // So we see logs from the main process in the Chrome debug tools.
