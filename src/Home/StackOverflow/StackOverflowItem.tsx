@@ -173,7 +173,7 @@ const NoAnswer = styled.span`
 
 interface StackOverflowItemProps {
   soResult: StackOverflowResult;
-  focusState?: FocusState;
+  focusState: FocusState;
   onHeaderClick: (e: any) => void;
   onTitleClick: (e: any) => void;
 }

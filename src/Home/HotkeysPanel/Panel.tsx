@@ -22,7 +22,7 @@ const Section = styled.div`
 `;
 
 const HotkeyWrapper = styled.div<{ isClickable?: boolean }>`
-  margin-right: 15px;
+  margin-right: 5px;
   padding: 5px;
   display: flex;
   align-items: center;
@@ -42,7 +42,7 @@ const HotkeyText = styled.span`
   margin-right: 8px;
 
   color: #fff;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
 `;
 

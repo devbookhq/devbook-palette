@@ -1068,7 +1068,7 @@ function Home() {
 
       <Container>
         <SearchInput
-          placeholder="Search StackOverflow and code on GitHub"
+          placeholder="Search StackOverflow, code on GitHub, and docs"
           value={state.search.query}
           onChange={handleSearchInputChange}
           activeFilter={activeFilter}
@@ -1150,18 +1150,15 @@ function Home() {
                   {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
                     <DocSearchResultItem
                       key={idx}
-                      // TODO: We probably don't need the whole DocResult object.
-                      // We need just a certain type of preview that user sees in
-                      // the search results list.
                       docResult={d}
-                      // TODO: Use FocusState like with StackOverflowItem and CodeItem.
-                      isFocused={activeFocusedIdx.idx === idx}
+                      focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+                      onClick={() => focusResultItem(ResultsFilter.Docs, idx, FocusState.NoScroll)}
                     />
                   ))}
                   </DocSearchResults>
                 </Resizable>
                 <DocPage
-                  html={(activeFocusedItem as DocResult).record.html}
+                  html={(activeFocusedItem as DocResult).page.html}
                 />
               </DocsWrapper>
             }

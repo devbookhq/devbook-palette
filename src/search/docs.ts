@@ -3,7 +3,9 @@ import axios from 'axios';
 
 interface Page {
   route: string[];
+  breadcrumbs: string[];
   html: string;
+  documentation: string;
   name: string;
   summary: string;
 }
@@ -11,8 +13,8 @@ interface Page {
 export interface DocResult {
   score: number;
   id: string;
-  highlight: string[];
-  record: Page;
+  highlights: string[];
+  page: Page;
 }
 
 export async function search(query: string): Promise<DocResult[]> {
@@ -20,7 +22,6 @@ export async function search(query: string): Promise<DocResult[]> {
   if (isDev) url = 'https://dev.usedevbook.com/search/docs';
 
   const result = await axios.post(url, { query });
-  console.log('docs', result.data.results);
   return result.data.results;
 }
 

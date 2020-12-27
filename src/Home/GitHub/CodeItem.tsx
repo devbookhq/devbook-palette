@@ -121,7 +121,7 @@ const Delimiter = styled.div`
 
 export interface CodeItemProps {
   codeResult: CodeResult;
-  focusState?: FocusState;
+  focusState: FocusState;
   onHeaderClick: (e: any) => void;
   onFilePathClick: (e: any) => void;
 }

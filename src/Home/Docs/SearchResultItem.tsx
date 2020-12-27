@@ -1,44 +1,100 @@
-import React from 'react';
+import React, {
+  useRef,
+  useMemo,
+  useEffect,
+} from 'react';
 import styled from 'styled-components';
 
 import { DocResult } from 'search/docs';
 
+import FocusState from '../SearchItemFocusState';
+
+const maxSummaryLength = 180;
+
 const Container = styled.div<{ isFocused?: boolean }>`
+  // min-height: 80px;
+  // max-height: 120px;
   width: 100%;
-  min-height: 35px;
-  max-height: 35px;
   padding: 10px;
 
-  overflow: hidden;
-
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
   background: ${props => props.isFocused ? '#3A41AF' : 'transparent'};
+  border-bottom: 1px solid #3B3A4A;
+
+  :hover {
+    background: ${props => props.isFocused ? '#3A41AF' : '#2C2F5A'};
+    cursor: pointer;
+  }
+`;
+
+const EllipsisText = styled.span`
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const DocumentationName = styled(EllipsisText)`
+  margin-bottom: 3px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #a2a1a1;
+`;
+
+const PageName = styled(EllipsisText)`
+  margin-bottom: 5px;
+  color: #e6e6e6;
+  font-family: 'Roboto Mono';
+  font-size: 16px;
+  font-weight: 600;
+`;
+
+const Summary = styled.div`
+  font-size: 14px;
+  font-weight: 400;
 `;
 
 interface SearchResultItemProps {
-  // TODO: We probably don't need the whole DocResult object.
-  // We need just a certain type of preview that user sees in
-  // the search results list.
   docResult: DocResult;
-  isFocused?: boolean;
+  focusState: FocusState;
+  onClick: (e: any) => void;
 }
 
 function SearchResultItem({
   docResult,
-  isFocused,
+  focusState,
+  onClick,
 }: SearchResultItemProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const truncatedSummary = useMemo(() => {
+    const summary = docResult.page.summary;
+    if (summary.length <= maxSummaryLength) return summary;
+    return summary.slice(0, 177) + ' ...';
+  }, [docResult]);
+
+  useEffect(() => {
+    if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
+  }, [focusState]);
+
   return (
     <Container
-      isFocused={isFocused}
+      ref={containerRef}
+      isFocused={focusState !== FocusState.None}
+      onClick={onClick}
     >
-      {docResult.record.name}
+      <DocumentationName>{docResult.page.breadcrumbs.join(' / ')}</DocumentationName>
+      <PageName>{docResult.page.name}</PageName>
+      <Summary>{truncatedSummary}</Summary>
     </Container>
   );
 }
 
-export default SearchResultItem;
+export default React.memo(SearchResultItem);
 
