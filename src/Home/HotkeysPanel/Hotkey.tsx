@@ -9,7 +9,7 @@ import { ReactComponent as arrowUpKeyImg } from 'img/arrow-up-key.svg';
 import { ReactComponent as arrowDownKeyImg } from 'img/arrow-down-key.svg';
 
 const Container = styled.div`
-  min-height: 18px;
+  min-height: 30px;
   padding: 3px 7px;
   display: flex;
   align-items: center;
@@ -38,7 +38,6 @@ const ArrowDownKey = styled(arrowDownKeyImg)`
   :not(:last-child) {
     margin-right: 5px;
   }
-
   path {
     stroke: white;
   }
@@ -101,10 +100,13 @@ const TextKey = styled.div`
   }
 `;
 
-const VisualConcatPlus = styled.div`
-  width: auto;
-  height: 12px;
-  margin: 0 7px;
+const VisualConcatEl = styled.div`
+  color: #fff;
+  font-size: 18px;
+
+  :not(:last-child) {
+    margin-right: 4px;
+  }
 `;
 
 export enum Key {
@@ -116,11 +118,27 @@ export enum Key {
   ArrowDown = 'KeyArrowDown',
 }
 
+
+// TODO: Naming of enums, types, and interfaces here is not great.
+// If someone can come up with better names please go ahead and change them.
+
+/*
+export enum Key {
+  Alt,
+  Shift,
+  Command,
+  Enter,
+  ArrowUp,
+  ArrowDown,
+}
+*/
+
 export enum VisualConcat {
-  Plus,
+  Plus = 'VisualConcatPlus',
 }
 
-export type HotkeyType = (string | Key | VisualConcat)[];
+export type HotkeyElement = (string | Key | VisualConcat)
+export type HotkeyType = HotkeyElement[];
 
 interface HotkeyProps {
   className?: string;
@@ -130,46 +148,53 @@ interface HotkeyProps {
 function renderKey(key: Key) {
   return (
     <>
-      {key === Key.Alt && <AltKeyImg />}
-      {key === Key.Shift && <ShiftKeyImg />}
-      {key === Key.Command && <CommandKeyImg />}
-      {key === Key.Enter && <EnterKeyImg />}
-      {key === Key.ArrowUp && <ArrowUpKey />}
-      {key === Key.ArrowDown && <ArrowDownKey />}
+      {key === Key.Alt && <AltKeyImg/>}
+      {key === Key.Shift && <ShiftKeyImg/>}
+      {key === Key.Command && <CommandKeyImg/>}
+      {key === Key.Enter && <EnterKeyImg/>}
+      {key === Key.ArrowUp && <ArrowUpKey/>}
+      {key === Key.ArrowDown && <ArrowDownKey/>}
     </>
   );
 }
 
 function renderVisualConcat(vc: VisualConcat) {
   return (
-    <>
-      {vc === VisualConcat.Plus && <VisualConcatPlus/>}
-    </>
+    <VisualConcatEl key={vc}>
+      {vc === VisualConcat.Plus && <>+</>}
+    </VisualConcatEl>
   );
-}
-
-function renderHotkeyType(ht: HotkeyType) {
-  /*
-  if (Key[ht as Key]) {
-
-  }
-  */
 }
 
 function Hotkey({ className, hotkey }: HotkeyProps) {
   return (
-    <Container
-      className={className}
-    >
-      {hotkey.map(el => (
-        <React.Fragment key={el}>
-          {Object.values(Key).includes(el as Key)
-            ? renderKey(el as Key)
-            : <TextKey>{el as string}</TextKey>
-          }
-        </React.Fragment>
-      ))}
-    </Container>
+    <>
+      {/* Special case when only a single HotkeyType is passed*/}
+      {hotkey.length === 1 &&
+        <>
+          {Object.values(VisualConcat).includes(hotkey[0] as VisualConcat) ? (
+            renderVisualConcat(hotkey[0] as VisualConcat)
+          ) : (
+            <Container className={className}>
+              {renderKey(hotkey[0] as Key)}
+            </Container>
+          )}
+        </>
+      }
+
+      {hotkey.length > 1 &&
+        <Container className={className}>
+          {hotkey.map(el => (
+            <React.Fragment key={el}>
+              {Object.values(Key).includes(el as Key)
+                ? renderKey(el as Key)
+                : <TextKey>{el as string}</TextKey>
+              }
+            </React.Fragment>
+          ))}
+        </Container>
+      }
+    </>
   );
 }
 

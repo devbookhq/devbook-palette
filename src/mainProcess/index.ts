@@ -106,7 +106,7 @@ export function getDocSearchResultsDefaultWidth(): Promise<number> {
 }
 
 // So we see logs from the main process in the Chrome debug tools.
-electron.ipcRenderer.on('console', (event, args) => {
+electron.ipcRenderer.on('console', (_, args) => {
   const [type, ...consoleArgs] = args;
   console[type as 'log' | 'error']?.('[main]:', ...consoleArgs);
 });

@@ -50,7 +50,6 @@ import {
   GitHubCodeSearchHotkeysPanel,
   GitHubCodeModalHotkeysPanel,
   DocsSearchHotkeysPanel,
-  DocsModalHotkeysPanel,
 } from './HotkeysPanel';
 import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
@@ -1200,13 +1199,9 @@ function Home() {
             }
             {/*-------------------------------------------------------------*/}
 
-            {/* Docs search results + Dosc modal hotkeys */}
+            {/* Docs search results */}
             {!state.modalItem && activeFilter === ResultsFilter.Docs &&
               <DocsSearchHotkeysPanel
-              />
-            }
-            {state.modalItem && activeFilter === ResultsFilter.Docs &&
-              <DocsModalHotkeysPanel
               />
             }
             {/*-------------------------------------------------------------*/}

@@ -352,7 +352,7 @@ ipcMain.handle('remove-github', async () => {
   preferencesWindow?.webContents?.send('github-access-token', { accessToken: null });
 });
 
-ipcMain.handle('create-tmp-file', async (event, { filePath, fileContent }: { filePath: string, fileContent: string }) => {
+ipcMain.handle('create-tmp-file', async (_, { filePath, fileContent }: { filePath: string, fileContent: string }) => {
   const basename = path.basename(filePath);
   try {
     const { name } = await new Promise<{ name: string, fd: number }>((resolve, reject) => {
@@ -393,7 +393,7 @@ ipcMain.handle('update-status', () => {
   return isUpdateAvailable;
 });
 
-ipcMain.on('save-doc-search-results-default-width', (event, width: number) => {
+ipcMain.on('save-doc-search-results-default-width', (_, width: number) => {
   store.set('docSearchResultsDefaultWidth', width);
 });
 

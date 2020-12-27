@@ -4,5 +4,4 @@ export { default as DocsSearchHotkeysPanel } from './Docs/SearchHotkeysPanel';
 
 export { default as StackOverflowModalHotkeysPanel } from './StackOverflow/ModalHotkeysPanel';
 export { default as GitHubCodeModalHotkeysPanel } from './GitHubCode/ModalHotkeysPanel';
-export { default as DocsModalHotkeysPanel } from './Docs/ModalHotkeysPanel';
 
