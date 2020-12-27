@@ -5,6 +5,8 @@ import { DocResult } from 'search/docs';
 
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
+  min-height: 35px;
+  max-height: 35px;
   padding: 10px;
 
   overflow: hidden;
