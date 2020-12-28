@@ -13,7 +13,8 @@ const Container = styled.div`
   justify-content: space-between;
 
   background: #2E303D;
-  box-shadow: 0px -4px 30px 5px #1C1B26;
+  // box-shadow: 0px -4px 30px 5px #1C1B26;
+  border-top: 1px solid #3B3A4A;
 `;
 
 const Section = styled.div`
