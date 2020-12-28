@@ -165,6 +165,9 @@ enum ReducerActionType {
 
   SetDocSearchResultsDefaultWidth,
   CacheDocSearchResultsWidth,
+
+  SearchInDocPage,
+  CancelSearchInDocPage,
 }
 
 interface SetSearchQuery {
@@ -283,6 +286,14 @@ interface CacheDocSearchResultsWidth {
   };
 }
 
+interface SearchInDocPage {
+  type: ReducerActionType.SearchInDocPage;
+}
+
+interface CancelSearchInDocPage {
+  type: ReducerActionType.CancelSearchInDocPage;
+}
+
 type ReducerAction = SetSearchQuery
   | SetSearchFilter
   | CacheScrollTopPosition
@@ -300,7 +311,9 @@ type ReducerAction = SetSearchQuery
   | ConnectingGitHubFail
   | DisconnectGitHubAccount
   | SetDocSearchResultsDefaultWidth
-  | CacheDocSearchResultsWidth;
+  | CacheDocSearchResultsWidth
+  | SearchInDocPage
+  | CancelSearchInDocPage;
 
 interface State {
   search: {
@@ -318,6 +331,7 @@ interface State {
   layout: {
     docSearchResultsDefaultWidth: number;
   }
+  isSearchingInDocPage: boolean;
 }
 
 const initialState: State = {
@@ -365,7 +379,8 @@ const initialState: State = {
   errorMessage: '',
   layout: {
     docSearchResultsDefaultWidth: 200,
-  }
+  },
+  isSearchingInDocPage: false,
 }
 
 function stateReducer(state: State, reducerAction: ReducerAction): State {
@@ -595,6 +610,18 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
       saveDocSearchResultsDefaultWidth(width);
       return { ...state };
     }
+    case ReducerActionType.SearchInDocPage: {
+      return {
+        ...state,
+        isSearchingInDocPage: true,
+      };
+    }
+    case ReducerActionType.CancelSearchInDocPage: {
+      return {
+        ...state,
+        isSearchingInDocPage: false,
+      };
+    }
     default:
       return state;
   }
@@ -780,6 +807,18 @@ function Home() {
       payload: { width },
     });
   }, []);
+
+  const searchInDocPage = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.SearchInDocPage,
+    });
+  }, []);
+
+  const cancelSearchInDocPage = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.CancelSearchInDocPage,
+    });
+  }, [])
   /////////
 
   const openFocusedSOItemInBrowser = useCallback(() => {
@@ -970,14 +1009,21 @@ function Home() {
 
   // 'esc' hotkey - close modal or hide main window.
   useHotkeys('esc', () => {
-    if (!state.modalItem) {
-      hideMainWindow();
-      trackShortcut({ action: 'Hide main window' });
-    } else {
+    if (state.modalItem) {
       closeModal();
       trackShortcut({ action: 'Close modal' });
+      return;
     }
-  }, [state.modalItem]);
+
+    if (state.isSearchingInDocPage) {
+      cancelSearchInDocPage();
+      trackShortcut({ action: 'Cancel search in doc page' });
+      return;
+    }
+
+    hideMainWindow();
+    trackShortcut({ action: 'Hide main window' });
+  }, [state.modalItem, state.isSearchingInDocPage]);
 
   // 'cmd+o' hotkey - open the focused result in a browser.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+o' : 'alt+o', () => {
@@ -1000,6 +1046,13 @@ function Home() {
       trackShortcut({ action: 'Open code in VSCode' });
     }
   }, [activeFilter, openFocusedGitHubCodeItemInVSCode]);
+
+  // 'cmd+f' hotkey - search in a doc page.
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+f' : 'alt+f', () => {
+    if (activeFilter !== ResultsFilter.Docs) return;
+    searchInDocPage();
+    trackShortcut({ action: 'Search in doc page' });
+  }, [activeFilter, searchInDocPage]);
   /* //////////////////// */
 
   useIPCRenderer('github-access-token', async (_, { accessToken }: { accessToken: string | null }) => {
@@ -1174,6 +1227,7 @@ function Home() {
                   </DocSearchResults>
                 </Resizable>
                 <DocPage
+                  isSearchingInDocPage={state.isSearchingInDocPage}
                   html={(activeFocusedItem as DocResult).page.html}
                 />
               </DocsWrapper>
@@ -1216,7 +1270,7 @@ function Home() {
             {!state.modalItem && activeFilter === ResultsFilter.Docs &&
               <DocsSearchHotkeysPanel
                 onFilterDocsClick={() => {}}
-                onSearchInDocPageClick={() => {}}
+                onSearchInDocPageClick={searchInDocPage}
               />
             }
             {/*-------------------------------------------------------------*/}

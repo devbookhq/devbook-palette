@@ -110,11 +110,30 @@ const Container = styled.div`
   }
 `;
 
+const DocPageSearchInput = styled.input`
+  position: absolute;
+  top: 115px;
+  right: 55px;
+  width: 180px;
+  padding: 10px;
+
+  color: white;
+
+  background: black;
+  border: none;
+  border-radius: 5px;
+  outline: none;
+`;
+
 interface DocPageProps {
+  isSearchingInDocPage?: boolean;
   html: string;
 }
 
-function DocPage({ html }: DocPageProps) {
+function DocPage({
+  isSearchingInDocPage,
+  html,
+}: DocPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -150,11 +169,19 @@ function DocPage({ html }: DocPageProps) {
   }
 
   return (
-    <Container
-      ref={containerRef}
-      tabIndex={0}
-      dangerouslySetInnerHTML={{__html: highlightCode(html) as string}}
-    />
+    <>
+      {isSearchingInDocPage &&
+        <DocPageSearchInput
+          autoFocus
+          placeholder="Search on page"
+        />
+      }
+      <Container
+        ref={containerRef}
+        tabIndex={0}
+        dangerouslySetInnerHTML={{__html: highlightCode(html) as string}}
+      />
+    </>
   );
 }
 
