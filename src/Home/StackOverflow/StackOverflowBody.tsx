@@ -145,7 +145,7 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
         code.innerHTML = codeHTML;
       }
     }
-    return el.outerHTML;
+    return el.outerHTML || '<html></html>';
   }
 
   return (
@@ -153,7 +153,7 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
       ref={ref}
       tabIndex={tabIndex}
       className={className}
-      dangerouslySetInnerHTML={{__html: highlightCode(html) as string}}
+      dangerouslySetInnerHTML={{__html: highlightCode(html)}}
       onClick={handleBodyClick}
     />
   );

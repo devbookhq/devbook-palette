@@ -1,5 +1,9 @@
-import React from 'react';
+import React, {
+  useRef,
+  useEffect,
+} from 'react';
 import styled from 'styled-components';
+import Prism from 'prismjs';
 
 const Container = styled.div`
   flex: 1;
@@ -100,6 +104,10 @@ const Container = styled.div`
       cursor: pointer;
     }
   }
+
+  iframe {
+    height: inherit;
+  }
 `;
 
 interface DocPageProps {
@@ -107,9 +115,45 @@ interface DocPageProps {
 }
 
 function DocPage({ html }: DocPageProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    containerRef?.current?.focus();
+  }, [html]);
+
+  function highlightCode(html: string) {
+    const el = document.createElement('html');
+    el.innerHTML = html;
+
+    const codes = el.getElementsByTagName('code');
+    for (const code of codes) {
+      if (code.childNodes.length === 0) continue;
+      const codeText = code.childNodes[0].nodeValue;
+      if (codeText) {
+        const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
+        code.innerHTML = codeHTML;
+      }
+    }
+
+    const pres = el.getElementsByTagName('pre');
+    for (const pre of pres) {
+      if (pre.childNodes.length === 0) return;
+      const text = pre.childNodes[0].nodeValue;
+      if (text) {
+        // TODO: We could use the correct langague highlight based on the documentation.
+        const codeHTML = Prism.highlight(text, Prism.languages.clike, 'clike');
+        pre.innerHTML = codeHTML;
+      }
+    }
+
+    return el.outerHTML || '<html></html>';
+  }
+
   return (
     <Container
-      dangerouslySetInnerHTML={{__html: html}}
+      ref={containerRef}
+      tabIndex={0}
+      dangerouslySetInnerHTML={{__html: highlightCode(html) as string}}
     />
   );
 }

@@ -109,11 +109,6 @@ const DocsWrapper = styled.div`
   overflow: hidden;
 `;
 
-const resizableStyle = {
-  borderRight: '2px solid #3B3A4A',
-  background: '#262736',
-}
-
 const DocSearchResults = styled.div`
   width: 100%;
   height: 100%;
@@ -1007,7 +1002,7 @@ function Home() {
   }, [activeFilter, openFocusedGitHubCodeItemInVSCode]);
   /* //////////////////// */
 
-  useIPCRenderer('github-access-token', async (event, { accessToken }: { accessToken: string | null }) => {
+  useIPCRenderer('github-access-token', async (_, { accessToken }: { accessToken: string | null }) => {
     if (accessToken === null) {
       disconnectGitHub();
       disconnectGitHubAccount(); // The state reducer's action.
