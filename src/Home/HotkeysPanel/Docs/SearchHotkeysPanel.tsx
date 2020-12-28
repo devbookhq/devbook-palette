@@ -4,16 +4,20 @@ import electron from 'mainProcess';
 import { Key, VisualConcat } from '../Hotkey';
 import Panel from '../Panel';
 
-interface SearchHotkeysPanelProps {
-  onFilterDocsClick: (e: any) => void;
-  onSearchInDocPageClick: (e:  any) => void;
-}
-
 const cmdModifier = electron.remote.process.platform === 'darwin' ? Key.Command : Key.Alt;
 
+interface SearchHotkeysPanelProps {
+  isSearchingInDocPage?: boolean;
+  onFilterDocsClick: (e: any) => void;
+  onSearchInDocPageClick: (e:  any) => void;
+  onCancelSearchInDocPageClick: (e: any) => void;
+}
+
 function SearchHotkeysPanel({
+  isSearchingInDocPage,
   onFilterDocsClick,
   onSearchInDocPageClick,
+  onCancelSearchInDocPageClick,
 }: SearchHotkeysPanelProps) {
   return (
     <Panel
@@ -36,9 +40,9 @@ function SearchHotkeysPanel({
           isSeparated: true
         },
         {
-          text: 'Search in page',
-          hotkey: [cmdModifier, 'F'],
-          onClick: onSearchInDocPageClick,
+          text: isSearchingInDocPage ? 'Cancel search in page' : 'Search in page',
+          hotkey: isSearchingInDocPage ? ['ESC'] : [cmdModifier, 'F'],
+          onClick: isSearchingInDocPage ? onCancelSearchInDocPageClick : onSearchInDocPageClick,
         },
       ]}
     />

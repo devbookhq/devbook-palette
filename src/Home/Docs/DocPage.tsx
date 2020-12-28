@@ -120,7 +120,7 @@ const DocPageSearchInput = styled.input`
   color: white;
 
   background: black;
-  border: none;
+  border: 1px solid #3B3A4A;
   border-radius: 5px;
   outline: none;
 `;
@@ -173,7 +173,7 @@ function DocPage({
       {isSearchingInDocPage &&
         <DocPageSearchInput
           autoFocus
-          placeholder="Search on page"
+          placeholder="Search in page"
         />
       }
       <Container

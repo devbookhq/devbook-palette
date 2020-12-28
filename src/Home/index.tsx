@@ -1269,8 +1269,10 @@ function Home() {
             {/* Docs search results */}
             {!state.modalItem && activeFilter === ResultsFilter.Docs &&
               <DocsSearchHotkeysPanel
+                isSearchingInDocPage={state.isSearchingInDocPage}
                 onFilterDocsClick={() => {}}
                 onSearchInDocPageClick={searchInDocPage}
+                onCancelSearchInDocPageClick={cancelSearchInDocPage}
               />
             }
             {/*-------------------------------------------------------------*/}

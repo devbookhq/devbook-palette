@@ -172,13 +172,25 @@ function Hotkey({ className, hotkey }: HotkeyProps) {
       {/* Special case when only a single HotkeyType is passed*/}
       {hotkey.length === 1 &&
         <>
-          {Object.values(VisualConcat).includes(hotkey[0] as VisualConcat) ? (
+          {/* TODO: If the hotkey isn't */}
+          {Object.values(VisualConcat).includes(hotkey[0] as VisualConcat) &&
             renderVisualConcat(hotkey[0] as VisualConcat)
-          ) : (
+          }
+
+          {Object.values(Key).includes(hotkey[0] as Key) &&
             <Container className={className}>
               {renderKey(hotkey[0] as Key)}
             </Container>
-          )}
+          }
+
+
+          {!Object.values(VisualConcat).includes(hotkey[0] as VisualConcat)
+           && !Object.values(Key).includes(hotkey[0] as Key)
+           &&
+            <Container className={className}>
+              <TextKey>{hotkey[0] as string}</TextKey>
+            </Container>
+          }
         </>
       }
 
