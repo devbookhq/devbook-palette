@@ -20,7 +20,7 @@ function SearchHotkeysPanel({
       hotkeysLeft={[
         {
           text: 'Navigate results',
-          hotkey: [cmdModifier, VisualConcat.Plus, Key.ArrowUp, Key.ArrowDown],
+          hotkey: [Key.Shift, VisualConcat.Plus, Key.ArrowUp, Key.ArrowDown],
           isSeparated: true
         },
         {

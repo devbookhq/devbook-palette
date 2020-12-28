@@ -922,16 +922,16 @@ function Home() {
     trackShortcut({ action: 'Change filter to Docs' });
   }, { filter: () => true }, [state.modalItem, setSearchFilter]);
 
-  // 'cmd + up arrow' - navigate docs search results.
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+up' : 'alt+up', () => {
+  // 'shift + up arrow' - navigate docs search results.
+  useHotkeys('shift+up', () => {
     const idx = state.results[activeFilter].focusedIdx.idx;
     if (idx > 0) {
       focusResultItem(activeFilter, idx - 1, FocusState.WithScroll);
     }
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
-  // 'cmd + down arrow' - navigate docs search results.
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+down' : 'alt+down', () => {
+  // 'shift + down arrow' - navigate docs search results.
+  useHotkeys('shift+down', () => {
     const idx = state.results[activeFilter].focusedIdx.idx;
     if (idx < state.results[activeFilter].items.length - 1) {
       focusResultItem(activeFilter, idx + 1, FocusState.WithScroll);
