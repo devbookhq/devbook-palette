@@ -902,7 +902,6 @@ function Home() {
   }
 
   function handleDocSearchResultsResizeStop(e: any, dir: any, elRef: HTMLElement) {
-    // TODO: Cache the docSearchResultsEl width
     cacheDocSearchResultsWidth(elRef.clientWidth);
   }
 
@@ -928,9 +927,28 @@ function Home() {
     trackShortcut({ action: 'Change filter to Docs' });
   }, { filter: () => true }, [state.modalItem, setSearchFilter]);
 
+  // 'cmd + up arrow' - navigate docs search results.
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+up' : 'alt+up', () => {
+    const idx = state.results[activeFilter].focusedIdx.idx;
+    if (idx > 0) {
+      focusResultItem(activeFilter, idx - 1, FocusState.WithScroll);
+    }
+  }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
+
+  // 'cmd + down arrow' - navigate docs search results.
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+down' : 'alt+down', () => {
+    const idx = state.results[activeFilter].focusedIdx.idx;
+    if (idx < state.results[activeFilter].items.length - 1) {
+      focusResultItem(activeFilter, idx + 1, FocusState.WithScroll);
+    }
+  }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
+
   // 'up arrow' hotkey - navigation.
   useHotkeys('up', () => {
     if (state.modalItem) return;
+    // The docs search filter uses 'cmd + arrow' for the search navigation.
+    if (activeFilter === ResultsFilter.Docs) return;
+
     const idx = state.results[activeFilter].focusedIdx.idx;
     if (idx > 0) {
       focusResultItem(activeFilter, idx - 1, FocusState.WithScroll);
@@ -940,6 +958,9 @@ function Home() {
   // 'down arrow' hotkey - navigation.
   useHotkeys('down', () => {
     if (state.modalItem) return;
+    // The docs search filter uses 'cmd + arrow' for the search navigation.
+    if (activeFilter === ResultsFilter.Docs) return;
+
     const idx = state.results[activeFilter].focusedIdx.idx;
     if (idx < state.results[activeFilter].items.length - 1) {
       focusResultItem(activeFilter, idx + 1, FocusState.WithScroll);
@@ -1199,6 +1220,8 @@ function Home() {
             {/* Docs search results */}
             {!state.modalItem && activeFilter === ResultsFilter.Docs &&
               <DocsSearchHotkeysPanel
+                onFilterDocsClick={() => {}}
+                onSearchInDocPageClick={() => {}}
               />
             }
             {/*-------------------------------------------------------------*/}

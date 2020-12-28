@@ -5,21 +5,28 @@ import { Key, VisualConcat } from '../Hotkey';
 import Panel from '../Panel';
 
 interface SearchHotkeysPanelProps {
-
+  onFilterDocsClick: (e: any) => void;
+  onSearchInDocPageClick: (e:  any) => void;
 }
 
-function SearchHotkeysPanel() {
+const cmdModifier = electron.remote.process.platform === 'darwin' ? Key.Command : Key.Alt;
+
+function SearchHotkeysPanel({
+  onFilterDocsClick,
+  onSearchInDocPageClick,
+}: SearchHotkeysPanelProps) {
   return (
     <Panel
       hotkeysLeft={[
         {
           text: 'Navigate results',
-          hotkey: [Key.Command, VisualConcat.Plus, Key.ArrowUp, Key.ArrowDown],
+          hotkey: [cmdModifier, VisualConcat.Plus, Key.ArrowUp, Key.ArrowDown],
           isSeparated: true
         },
         {
           text: 'Filter docs',
-          hotkey: [Key.Command, Key.Shift, 'F']
+          hotkey: [cmdModifier, Key.Shift, 'F'],
+          onClick: onFilterDocsClick,
         },
       ]}
       hotkeysRight={[
@@ -30,7 +37,8 @@ function SearchHotkeysPanel() {
         },
         {
           text: 'Search in page',
-          hotkey: [Key.Command, 'F']
+          hotkey: [cmdModifier, 'F'],
+          onClick: onSearchInDocPageClick,
         },
       ]}
     />
