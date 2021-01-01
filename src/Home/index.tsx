@@ -1005,6 +1005,7 @@ function Home() {
 
   // 'enter' hotkey - open the focused result in a modal.
   useHotkeys('enter', () => {
+    if (activeFilter === ResultsFilter.Docs) return;
     openModal(state.results[activeFilter].items[activeFocusedIdx.idx]);
     trackShortcut({ action: 'Open modal' });
   }, [state.results, activeFilter, activeFocusedIdx]);

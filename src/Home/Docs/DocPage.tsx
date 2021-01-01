@@ -124,6 +124,11 @@ const Container = styled.div`
 
     font-size: inherit;
     font-weight: inherit;
+    transition: none;
+  }
+
+  .devbook-highlight.selected {
+    background: #e46804;
   }
 `;
 
@@ -290,6 +295,23 @@ function highlightPattern(textNodes: Node[], startIdx: number, pattern: string) 
   return nodes;
 }
 
+function selectHighlight(highlight: Highlight) {
+  highlight.nodes.forEach(n => {
+    (n as HTMLElement).classList.add('selected');
+  });
+}
+
+function deselectHighlight(highlight: Highlight) {
+  highlight.nodes.forEach(n => {
+    (n as HTMLElement).classList.remove('selected');
+  });
+}
+
+interface Highlight {
+  index: number;
+  nodes: Node[];
+}
+
 interface DocPageProps {
   isSearchingInDocPage?: boolean;
   html: string;
@@ -305,9 +327,8 @@ function DocPage({
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 0);
 
-  const [highlightedNodes, setHighlightedNodes] = useState<Node[]>([]);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [selectedIdx, setSelectedIdx] = useState(0);
-  const [hitCount, setHitCount] = useState(0);
 
   function highlightCode(html: string) {
     const el = document.createElement('html');
@@ -344,17 +365,44 @@ function DocPage({
     return el.outerHTML || '<html></html>';
   }
 
+  function selectNextHighlight() {
+    if (selectedIdx < highlights.length - 1) {
+      deselectHighlight(highlights[selectedIdx]);
+      selectHighlight(highlights[selectedIdx+1]);
+      setSelectedIdx(c => c += 1);
+    }
+  }
+
+  function selectPreviousHighlight() {
+    if (selectedIdx > 0) {
+      deselectHighlight(highlights[selectedIdx]);
+      selectHighlight(highlights[selectedIdx-1]);
+      setSelectedIdx(c => c -= 1);
+    }
+  }
+
+  function handleSearchInputKeyDown(e: any) {
+    // Enter pressed.
+    if (e.keyCode === 13) {
+      if (e.shiftKey) {
+        selectPreviousHighlight();
+      } else {
+        selectNextHighlight();
+      }
+    }
+  }
 
   useEffect(() => {
     containerRef?.current?.focus();
   }, [html]);
 
   useEffect(() => {
-    highlightedNodes.forEach(n => {
-      removeHighlight(n);
+    highlights.forEach(h => {
+      h.nodes.forEach(removeHighlight);
     });
-    setHighlightedNodes([]);
-    setHitCount(0);
+    setHighlights([]);
+    setSelectedIdx(0);
+
     if (!debouncedSearchQuery || !containerRef?.current) return;
 
     const textNodes = getTextNodeChildren(containerRef.current as Node);
@@ -368,12 +416,18 @@ function DocPage({
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string.
     const re = new RegExp(escaped, 'g');
     let match: RegExpExecArray | null;
+    let highlightIndex = 0;
     while ((match = re.exec(wholeText.toLowerCase())) !== null) {
       const nodes = highlightPattern([...textNodes], match.index, debouncedSearchQuery);
-      setHighlightedNodes(c => c.concat(nodes));
-      setHitCount(c => c+=1);
+
+      const highlight: Highlight = { index: highlightIndex++, nodes };
+      setHighlights(c => c.concat(highlight));
+
+      // Select the first highlight
+      if (highlight.index === 0) selectHighlight(highlight);
+      //highlightIndex += 1;
     }
-  }, [setHighlightedNodes, debouncedSearchQuery]);
+  }, [setHighlights, debouncedSearchQuery]);
 
   return (
     <>
@@ -385,20 +439,33 @@ function DocPage({
             placeholder="Search in page"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearchInputKeyDown}
           />
           <HitCount>
             <>
             {searchQuery &&
-              <span>0/{hitCount}</span>
+              <>
+                {highlights.length > 0 &&
+                  <span>{selectedIdx+1}/{highlights.length}</span>
+                }
+                {highlights.length === 0 &&
+                  <span>0/0</span>
+                }
+              </>
             }
             </>
           </HitCount>
           <SearchDelimiter/>
           <SearchControls>
-            <ChevronButton>
+            <ChevronButton
+              onClick={selectNextHighlight}
+            >
               <ChevronDown/>
             </ChevronButton>
-            <ChevronButton>
+
+            <ChevronButton
+              onClick={selectPreviousHighlight}
+            >
               <ChevronUp/>
             </ChevronButton>
           </SearchControls>
