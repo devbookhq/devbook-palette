@@ -180,119 +180,14 @@ function getTextNodeChildren(node: Node) {
   return nodes;
 }
 
-
-// processTextNode processes a single TEXT_NODE node
-// and returns an array of nodes.
-// The nodes array is meant to replace the TEXT_NODE
-// with nodes where pattern is highlighted.
-// The highlight feature is accomplished by wrapping
-// the matched text in a <span> element.
-/*
-function highlightTextNode(node: Node, pattern: string) {
-  if (node.nodeType !== Node.TEXT_NODE) throw Error('Cannot highlight a node that is not of the type TEXT_NODE');
-  if (!node.nodeValue?.toLowerCase().includes(pattern.toLowerCase())) { return [] };
-
-  // The text node may contain multiple occurences of the pattern.
-  // We use regexp to find starting indexes of all these matches.
-  const escaped = pattern.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string.
-  const re = new RegExp(escaped, 'g');
-  let match: RegExpExecArray | null;
-
-  let start = 0;
-  const nodes: Node[] = [];
-  while ((match = re.exec(node.nodeValue.toLowerCase())) !== null) {
-    const beforeHit = node.nodeValue.slice(start, match.index);
-    if (beforeHit) {
-      nodes.push(document.createTextNode(beforeHit));
-    }
-
-    const hit = node.nodeValue.slice(match.index, match.index + pattern.length);
-    if (hit) {
-      const highlightEl = document.createElement('span');
-      highlightEl.classList.add('devbook-highlight');
-      highlightEl.innerText = hit;
-      nodes.push(highlightEl as Node);
-    }
-
-    // We update the start variable so we can correctly
-    // slice node's value in the following iteration.
-    start = match.index + pattern.length;
-  }
-  if (start !== 0) {
-    const rest = node.nodeValue.slice(start);
-    if (rest) {
-      nodes.push(document.createTextNode(rest));
-    }
-  }
-  return nodes;
-}
-*/
-
-/*
-function highlightNode(node: Node, { start, end }: { start: number, end: number}) {
-  console.log('highlightNode', node, start, end);
-
-  if (!node.textContent) return [];
-  const nodes: Node[] = [];
-
-  const beforeHit = node.textContent.slice(0, start);
-  if (beforeHit) {
-    nodes.push(document.createTextNode(beforeHit));
-  }
-
-  const hit = node.textContent.slice(start, end);
-  if (hit) {
-    const highlightEl = document.createElement('span');
-    highlightEl.classList.add('devbook-highlight');
-    highlightEl.innerText = hit;
-    nodes.push(highlightEl as Node);
-  }
-
-  const rest = node.textContent.slice(end);
-  if (rest) {
-    nodes.push(document.createTextNode(rest));
-  }
-  return nodes;
-}
-*/
-
-// TODO: Add comments. Specifically, explain why we are removing siblings and concatenating texts.
-/*
-function removeHighlights(nodes: Node[]) {
-  console.log('removing', nodes);
-  nodes.forEach(n => {
-    let text = '';
-
-    if (n.previousSibling?.nodeType === Node.TEXT_NODE && n.previousSibling.nodeValue) {
-      text = n.previousSibling.nodeValue;
-      n.parentNode?.removeChild(n.previousSibling);
-    }
-
-    text += n.childNodes[0].nodeValue!;
-
-    if (n.nextSibling?.nodeType === Node.TEXT_NODE && n.nextSibling.nodeValue) {
-      text += n.nextSibling.nodeValue;
-      n.parentNode?.removeChild(n.nextSibling);
-    }
-
-    n.parentNode?.replaceChild(document.createTextNode(text), n);
-  });
-}
-*/
-
 function DocPage({
   isSearchingInDocPage,
   html,
 }: DocPageProps) {
-  const webviewRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 0);
 
-  interface CachedNode {
-    tagName: string;
-    className: string;
-  }
   const [highlightedNodes, setHighlightedNodes] = useState<Node[]>([]);
 
 
@@ -338,8 +233,6 @@ function DocPage({
     if (textNode.nodeType !== Node.TEXT_NODE || !textNode.nodeValue)
       throw new Error('Cannot remove highlight on a node that does not have a text node.');
 
-    //const leftNode = node.previousSibling;
-    // const rightNode = node.nextSibling;
     node.parentNode.insertBefore(document.createTextNode(textNode.nodeValue), node.nextSibling);
     node.parentNode.removeChild(node);
   }
@@ -366,16 +259,11 @@ function DocPage({
     }
 
     if (textNode.parentNode) {
-      const cp = textNode.parentNode.cloneNode();
-      // TODO: Cache textNode.parentNode and a copy of the textNode so later we can remove highlights.
-      // setHighlightedNodes(c => c.concat([{ parent: textNode.parentNode!.cloneNode(true), node: textNode }]));
-
       nodes.forEach(newN => {
         textNode.parentNode!.insertBefore(newN, textNode);
       });
       setHighlightedNodes(c => c.concat([highlightEl as Node]));
       if (nodes.length > 0) {
-        const p = textNode.parentNode;
         textNode.parentNode.removeChild(textNode);
       }
     }
@@ -384,7 +272,6 @@ function DocPage({
   function highlightPattern(textNodes: Node[], startIdx: number, pattern: string) {
     let matchedLength = 0; // Length of a pattern substring that is already matched.
     let wholeText = '';
-    const toHighlight: any[] = [];
     for (let i = 0; i < textNodes.length; i++) {
       const n = textNodes[i];
       if (!n.nodeValue) continue;
@@ -407,21 +294,9 @@ function DocPage({
           nodeEndIdx = nodeStartIdx + (pattern.length - matchedLength - 1);
         }
         matchedLength += nodeEndIdx - nodeStartIdx + 1;
-        /*
-        toHighlight.push({
-          node: n,
-          start: nodeStartIdx,
-          end: nodeEndIdx
-        });
-        */
         highlightNode(n, nodeStartIdx, nodeEndIdx);
       }
     }
-    /*
-    toHighlight.forEach((obj: any) => {
-      highlightNode(obj.node, obj.start, obj.end);
-    });
-    */
   }
 
   useEffect(() => {
