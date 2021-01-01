@@ -180,6 +180,83 @@ function getTextNodeChildren(node: Node) {
   return nodes;
 }
 
+function removeHighlight(node: Node) {
+  if (!node.parentNode) throw new Error('Cannot remove highlight on a node without parent');
+  if (node.childNodes.length === 0) throw new Error('Cannot remove highlight on a node without children');
+  const textNode = node.childNodes[0];
+  if (textNode.nodeType !== Node.TEXT_NODE || !textNode.nodeValue)
+    throw new Error('Cannot remove highlight on a node that does not have a text node.');
+
+  node.parentNode.insertBefore(document.createTextNode(textNode.nodeValue), node.nextSibling);
+  node.parentNode.removeChild(node);
+}
+
+function highlightNode(textNode: Node, startIdx: number, endIdx: number) {
+  if (textNode.nodeType !== Node.TEXT_NODE) throw new Error('Cannot highlight a node that is not of type TEXT_NODE');
+  if (!textNode.nodeValue) return;
+
+  const nodes: Node[] = [];
+  const before = textNode.nodeValue.slice(0, startIdx);
+  if (before) {
+    nodes.push(document.createTextNode(before));
+  }
+
+  const highlight = textNode.nodeValue.slice(startIdx, endIdx+1);
+  const highlightEl = document.createElement('mark');
+  highlightEl.classList.add('devbook-highlight');
+  highlightEl.innerText = highlight;
+  nodes.push(highlightEl as Node);
+
+  const after = textNode.nodeValue.slice(endIdx+1);
+  if (after) {
+    nodes.push(document.createTextNode(after));
+  }
+
+  if (textNode.parentNode) {
+    nodes.forEach(newN => {
+      textNode.parentNode!.insertBefore(newN, textNode);
+    });
+    if (nodes.length > 0) {
+      textNode.parentNode.removeChild(textNode);
+    }
+    return highlightEl as Node;
+  }
+}
+
+function highlightPattern(textNodes: Node[], startIdx: number, pattern: string) {
+  let matchedLength = 0; // Length of a pattern substring that is already matched.
+  let wholeText = '';
+  const nodes: Node[] = [];
+  for (let i = 0; i < textNodes.length; i++) {
+    const n = textNodes[i];
+    if (!n.nodeValue) continue;
+    wholeText += n.nodeValue;
+
+    // This node contains the starting index of the matched pattern.
+    if (wholeText.length > startIdx && matchedLength < pattern.length) {
+      // Convert startIdx to an index relative to the current node.
+      // We must take the already matched pattern substring into an
+      // account.
+      const nodeStartIdx = (startIdx + matchedLength) - (wholeText.length - n.nodeValue.length);
+
+      let nodeEndIdx = 0;
+      if (pattern.length - matchedLength > n.nodeValue.length) {
+        // The pattern is longer than this node. We want to highlight the whole node.
+        nodeEndIdx = n.nodeValue.length - 1;
+      } else {
+        // The pattern is shorter and the same length is the current node
+        // and starts anywhere in the middle of the node.
+        nodeEndIdx = nodeStartIdx + (pattern.length - matchedLength - 1);
+      }
+      matchedLength += nodeEndIdx - nodeStartIdx + 1;
+      const highlightedNode = highlightNode(n, nodeStartIdx, nodeEndIdx);
+      if (highlightedNode) {
+        nodes.push(highlightedNode);
+      }
+    }
+  }
+  return nodes;
+}
 function DocPage({
   isSearchingInDocPage,
   html,
@@ -226,78 +303,6 @@ function DocPage({
     return el.outerHTML || '<html></html>';
   }
 
-  function removeHighlight(node: Node) {
-    if (!node.parentNode) throw new Error('Cannot remove highlight on a node without parent');
-    if (node.childNodes.length === 0) throw new Error('Cannot remove highlight on a node without children');
-    const textNode = node.childNodes[0];
-    if (textNode.nodeType !== Node.TEXT_NODE || !textNode.nodeValue)
-      throw new Error('Cannot remove highlight on a node that does not have a text node.');
-
-    node.parentNode.insertBefore(document.createTextNode(textNode.nodeValue), node.nextSibling);
-    node.parentNode.removeChild(node);
-  }
-
-  function highlightNode(textNode: Node, startIdx: number, endIdx: number) {
-    if (textNode.nodeType !== Node.TEXT_NODE) throw new Error('Cannot highlight a node that is not of type TEXT_NODE');
-    if (!textNode.nodeValue) return;
-
-    const nodes: Node[] = [];
-    const before = textNode.nodeValue.slice(0, startIdx);
-    if (before) {
-      nodes.push(document.createTextNode(before));
-    }
-
-    const highlight = textNode.nodeValue.slice(startIdx, endIdx+1);
-    const highlightEl = document.createElement('mark');
-    highlightEl.classList.add('devbook-highlight');
-    highlightEl.innerText = highlight;
-    nodes.push(highlightEl as Node);
-
-    const after = textNode.nodeValue.slice(endIdx+1);
-    if (after) {
-      nodes.push(document.createTextNode(after));
-    }
-
-    if (textNode.parentNode) {
-      nodes.forEach(newN => {
-        textNode.parentNode!.insertBefore(newN, textNode);
-      });
-      setHighlightedNodes(c => c.concat([highlightEl as Node]));
-      if (nodes.length > 0) {
-        textNode.parentNode.removeChild(textNode);
-      }
-    }
-  }
-
-  function highlightPattern(textNodes: Node[], startIdx: number, pattern: string) {
-    let matchedLength = 0; // Length of a pattern substring that is already matched.
-    let wholeText = '';
-    for (let i = 0; i < textNodes.length; i++) {
-      const n = textNodes[i];
-      if (!n.nodeValue) continue;
-      wholeText += n.nodeValue;
-
-      // This node contains the starting index of the matched pattern.
-      if (wholeText.length > startIdx && matchedLength < pattern.length) {
-        // Convert startIdx to an index relative to the current node.
-        // We must take the already matched pattern substring into an
-        // account.
-        const nodeStartIdx = (startIdx + matchedLength) - (wholeText.length - n.nodeValue.length);
-
-        let nodeEndIdx = 0;
-        if (pattern.length - matchedLength > n.nodeValue.length) {
-          // The pattern is longer than this node. We want to highlight the whole node.
-          nodeEndIdx = n.nodeValue.length - 1;
-        } else {
-          // The pattern is shorter and the same length is the current node
-          // and starts anywhere in the middle of the node.
-          nodeEndIdx = nodeStartIdx + (pattern.length - matchedLength - 1);
-        }
-        matchedLength += nodeEndIdx - nodeStartIdx + 1;
-        highlightNode(n, nodeStartIdx, nodeEndIdx);
-      }
-    }
-  }
 
   useEffect(() => {
     containerRef?.current?.focus();
@@ -322,9 +327,10 @@ function DocPage({
     const re = new RegExp(escaped, 'g');
     let match: RegExpExecArray | null;
     while ((match = re.exec(wholeText.toLowerCase())) !== null) {
-      highlightPattern([...textNodes], match.index, debouncedSearchQuery);
+      const nodes = highlightPattern([...textNodes], match.index, debouncedSearchQuery);
+      setHighlightedNodes(c => c.concat(nodes));
     }
-  }, [debouncedSearchQuery]);
+  }, [setHighlightedNodes, debouncedSearchQuery]);
 
   return (
     <>
