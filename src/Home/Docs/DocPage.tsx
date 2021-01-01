@@ -299,6 +299,7 @@ function selectHighlight(highlight: Highlight) {
   highlight.nodes.forEach(n => {
     (n as HTMLElement).classList.add('selected');
   });
+  (highlight.nodes[0] as HTMLElement).scrollIntoView({ block: 'center' });
 }
 
 function deselectHighlight(highlight: Highlight) {
@@ -418,14 +419,15 @@ function DocPage({
     let match: RegExpExecArray | null;
     let highlightIndex = 0;
     while ((match = re.exec(wholeText.toLowerCase())) !== null) {
+      // TODO: highlightPattern sometimes returns an empty array
       const nodes = highlightPattern([...textNodes], match.index, debouncedSearchQuery);
+      if (nodes.length > 0) {
+        const highlight: Highlight = { index: highlightIndex++, nodes };
+        setHighlights(c => c.concat(highlight));
 
-      const highlight: Highlight = { index: highlightIndex++, nodes };
-      setHighlights(c => c.concat(highlight));
-
-      // Select the first highlight
-      if (highlight.index === 0) selectHighlight(highlight);
-      //highlightIndex += 1;
+        // Select the first highlight
+        if (highlight.index === 0) selectHighlight(highlight);
+      }
     }
   }, [setHighlights, debouncedSearchQuery]);
 
