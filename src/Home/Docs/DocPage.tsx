@@ -166,10 +166,6 @@ const SearchDelimiter = styled.div`
 const SearchControls = styled.div`
 `;
 
-interface DocPageProps {
-  isSearchingInDocPage?: boolean;
-  html: string;
-}
 
 function getTextNodeChildren(node: Node) {
   let nodes: Node[] = [];
@@ -257,9 +253,17 @@ function highlightPattern(textNodes: Node[], startIdx: number, pattern: string) 
   }
   return nodes;
 }
+
+interface DocPageProps {
+  isSearchingInDocPage?: boolean;
+  html: string;
+  searchInputRef: any;
+}
+
 function DocPage({
   isSearchingInDocPage,
   html,
+  searchInputRef,
 }: DocPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -337,6 +341,7 @@ function DocPage({
       {isSearchingInDocPage &&
         <SearchInputWrapper>
           <SearchInput
+            ref={searchInputRef}
             autoFocus
             placeholder="Search in page"
             value={searchQuery}

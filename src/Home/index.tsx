@@ -1,4 +1,5 @@
 import React, {
+  useRef,
   useEffect,
   useCallback,
   useReducer,
@@ -626,6 +627,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
 }
 
 function Home() {
+  const docPageSearchInputRef = useRef<HTMLInputElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
   const debouncedQuery = useDebounce(state.search.query.trim(), 400);
@@ -1051,6 +1053,7 @@ function Home() {
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+f' : 'alt+f', () => {
     if (activeFilter !== ResultsFilter.Docs) return;
     searchInDocPage();
+    docPageSearchInputRef?.current?.focus();
     trackShortcut({ action: 'Search in doc page' });
   }, [activeFilter, searchInDocPage]);
   /* //////////////////// */
@@ -1229,6 +1232,7 @@ function Home() {
                 <DocPage
                   isSearchingInDocPage={state.isSearchingInDocPage}
                   html={(activeFocusedItem as DocResult).page.html}
+                  searchInputRef={docPageSearchInputRef}
                 />
               </DocsWrapper>
             }
