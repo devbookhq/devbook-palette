@@ -367,18 +367,24 @@ function DocPage({
   }
 
   function selectNextHighlight() {
+    deselectHighlight(highlights[selectedIdx]);
     if (selectedIdx < highlights.length - 1) {
-      deselectHighlight(highlights[selectedIdx]);
       selectHighlight(highlights[selectedIdx+1]);
       setSelectedIdx(c => c += 1);
+    } else {
+      selectHighlight(highlights[0]);
+      setSelectedIdx(0);
     }
   }
 
   function selectPreviousHighlight() {
-    if (selectedIdx > 0) {
       deselectHighlight(highlights[selectedIdx]);
+    if (selectedIdx > 0) {
       selectHighlight(highlights[selectedIdx-1]);
       setSelectedIdx(c => c -= 1);
+    } else {
+      selectHighlight(highlights[highlights.length-1]);
+      setSelectedIdx(highlights.length - 1);
     }
   }
 
