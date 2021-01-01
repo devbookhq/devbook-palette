@@ -45,11 +45,11 @@ export function hideMainWindow() {
 }
 
 export function saveSearchQuery(query: string) {
-  electron.ipcRenderer.send('save-search-query', query)
+  electron.ipcRenderer.send('save-search-query', { query });
 }
 
 export function saveSearchFilter(filter: ResultsFilter) {
-  electron.ipcRenderer.send('save-search-filter', filter.toString());
+  electron.ipcRenderer.send('save-search-filter', { filter: filter.toString() });
 }
 
 export function trackSearch(searchInfo: {
@@ -98,7 +98,7 @@ export function createTmpFile(options: { fileContent: string, filePath: string }
 }
 
 export function saveDocSearchResultsDefaultWidth(width: number) {
-  electron.ipcRenderer.send('save-doc-search-results-default-width', width);
+  electron.ipcRenderer.send('save-doc-search-results-default-width', { width });
 }
 
 export function getDocSearchResultsDefaultWidth(): Promise<number> {

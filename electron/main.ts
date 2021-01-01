@@ -74,7 +74,7 @@ if (!isDev) {
   autoUpdater.requestHeaders = null;
 
   app.on('ready', () => {
-    // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron
+    // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron.
     setInterval(() => {
       autoUpdater.checkForUpdates();
     }, 10 * 60 * 1000);
@@ -318,15 +318,15 @@ ipcMain.on('restart-and-update', () => {
   restartAndUpdate();
 });
 
-ipcMain.on('track-search', (event, searchInfo: any) => trackSearchDebounced(searchInfo));
+ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo));
 
-ipcMain.on('track-modal-opened', (event, modalInfo: any) => trackModalOpened(modalInfo));
+ipcMain.on('track-modal-opened', (_, modalInfo: any) => trackModalOpened(modalInfo));
 
-ipcMain.on('save-search-query', (event, query: string) => {
+ipcMain.on('save-search-query', (_, { query }: { query: string }) => {
   store.set('lastQuery', query);
 });
 
-ipcMain.on('save-search-filter', (event, filter: string) => {
+ipcMain.on('save-search-filter', (_, { filter }: { filter: string }) => {
   store.set('searchFilter', filter);
 });
 
@@ -393,7 +393,7 @@ ipcMain.handle('update-status', () => {
   return isUpdateAvailable;
 });
 
-ipcMain.on('save-doc-search-results-default-width', (_, width: number) => {
+ipcMain.on('save-doc-search-results-default-width', (_, { width }: { width: number }) => {
   store.set('docSearchResultsDefaultWidth', width);
 });
 

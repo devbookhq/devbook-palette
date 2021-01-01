@@ -229,7 +229,7 @@ function SearchInput({
     if (!isModalOpened) inputRef?.current?.focus();
   });
 
-  useIPCRenderer('update-available', (event, { isReminder }: { isReminder?: boolean }) => {
+  useIPCRenderer('update-available', (_, { isReminder }: { isReminder?: boolean }) => {
     setIsUpdateAvailable(true);
     if (isReminder) {
       setIsUpdatePanelOpened(true);

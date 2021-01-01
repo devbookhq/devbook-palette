@@ -11,9 +11,7 @@ import { Resizable } from 're-resizable';
 import electron, {
   isDev,
   hideMainWindow,
-  connectGitHub,
-  openLink,
-  createTmpFile,
+  connectGitHub, openLink, createTmpFile,
   trackModalOpened,
   trackSearch,
   trackShortcut,
@@ -740,6 +738,8 @@ function Home() {
     // focused item for the given filter.
     const idx = state.results[filter].focusedIdx.idx;
     focusResultItem(filter, idx, FocusState.WithScroll);
+
+    cancelSearchInDocPage();
   }, [state.results, focusResultItem]);
 
   const openModal = useCallback((item: SearchResultItem) => {

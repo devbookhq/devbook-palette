@@ -22,6 +22,7 @@ export async function search(query: string): Promise<DocResult[]> {
   if (isDev) url = 'https://dev.usedevbook.com/search/docs';
 
   const result = await axios.post(url, { query });
+  console.log('docs', result.data.results);
   return result.data.results;
 }
 
