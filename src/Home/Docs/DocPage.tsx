@@ -345,7 +345,6 @@ function DocPage({
   }
 
   function highlightNode(textNode: Node, startIdx: number, endIdx: number) {
-    console.log('---------!!! HIGHLIGHT NODE', textNode, startIdx, endIdx);
     if (textNode.nodeType !== Node.TEXT_NODE) throw new Error('Cannot highlight a node that is not of type TEXT_NODE');
     if (!textNode.nodeValue) return;
 
@@ -375,17 +374,14 @@ function DocPage({
         textNode.parentNode!.insertBefore(newN, textNode);
       });
       setHighlightedNodes(c => c.concat([highlightEl as Node]));
-      console.log('child nodes [BEFORE]:', [...textNode.parentNode.childNodes]);
       if (nodes.length > 0) {
         const p = textNode.parentNode;
         textNode.parentNode.removeChild(textNode);
-        console.log('child nodes [AFTER]:', [...p.childNodes]);
       }
     }
   }
 
   function highlightPattern(textNodes: Node[], startIdx: number, pattern: string) {
-    console.log('startIdx:', startIdx);
     let matchedLength = 0; // Length of a pattern substring that is already matched.
     let wholeText = '';
     const toHighlight: any[] = [];
@@ -393,9 +389,6 @@ function DocPage({
       const n = textNodes[i];
       if (!n.nodeValue) continue;
       wholeText += n.nodeValue;
-      console.log('<<TEXT NODE:', n.nodeValue);
-      console.log('wholeText:', wholeText.length, wholeText);
-      console.log('matchedLength:', matchedLength);
 
       // This node contains the starting index of the matched pattern.
       if (wholeText.length > startIdx && matchedLength < pattern.length) {
@@ -414,21 +407,21 @@ function DocPage({
           nodeEndIdx = nodeStartIdx + (pattern.length - matchedLength - 1);
         }
         matchedLength += nodeEndIdx - nodeStartIdx + 1;
-        console.log('nodeStartIdx', nodeStartIdx);
-        console.log('nodeEndIdx', nodeEndIdx);
+        /*
         toHighlight.push({
           node: n,
           start: nodeStartIdx,
           end: nodeEndIdx
         });
-        //highlightNode(n, nodeStartIdx, nodeEndIdx);
-      } else {
-        console.log('---> Skipping node, before start or after end');
+        */
+        highlightNode(n, nodeStartIdx, nodeEndIdx);
       }
     }
+    /*
     toHighlight.forEach((obj: any) => {
       highlightNode(obj.node, obj.start, obj.end);
     });
+    */
   }
 
   useEffect(() => {
@@ -440,47 +433,19 @@ function DocPage({
       removeHighlight(n);
     });
     setHighlightedNodes([]);
-    if (!debouncedSearchQuery) return;
+    if (!debouncedSearchQuery || !containerRef?.current) return;
 
-    // xpath problem with apostrophe - https://stackoverflow.com/questions/44032984/xpath-expression-error-due-to-apostrophe-in-a-string-in-robot-framework
-    /*
-    const els = document.evaluate(
-      `//div[@id='doc-page']//*[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '${debouncedSearchQuery.toLowerCase()}')]`,
-      document,
-      null,
-      XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-      null,
-    );
-
-    for (let i = 0; i < els.snapshotLength; i++) {
-      const parentNode = els.snapshotItem(i);
-      if (!parentNode || !(parentNode as HTMLElement).innerText) continue;
-      console.log('===== xpath node', (parentNode as HTMLElement).innerText);
-      const textNodes = getTextNodeChildren(parentNode as Node);
-
-      const escaped = debouncedSearchQuery
-        .toLowerCase()
-        .replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string.
-      const re = new RegExp(escaped, 'g');
-      let match: RegExpExecArray | null;
-      while ((match = re.exec((parentNode as HTMLElement).innerText.toLowerCase())) !== null) {
-        highlightPattern([...textNodes], match.index, debouncedSearchQuery);
-      }
-    }
-    */
-
-    const textNodes = getTextNodeChildren(containerRef!.current! as Node);
+    const textNodes = getTextNodeChildren(containerRef.current as Node);
+    let wholeText = '';
+    textNodes.map(n => {
+      wholeText += n.nodeValue || '';
+    });
 
     const escaped = debouncedSearchQuery
       .toLowerCase()
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string.
     const re = new RegExp(escaped, 'g');
     let match: RegExpExecArray | null;
-    //while ((match = re.exec((containerRef!.current! as HTMLElement).innerText.toLowerCase())) !== null) {
-    let wholeText = '';
-    textNodes.map(n => {
-      wholeText += n.nodeValue || '';
-    });
     while ((match = re.exec(wholeText.toLowerCase())) !== null) {
       highlightPattern([...textNodes], match.index, debouncedSearchQuery);
     }
