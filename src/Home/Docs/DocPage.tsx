@@ -7,10 +7,7 @@ import styled from 'styled-components';
 import Prism from 'prismjs';
 
 import useDebounce from 'hooks/useDebounce';
-import Mark from 'mark.js';
-import { boyerMooreSearch } from './BoyerMoore';
-
-const markInstance = new Mark('#doc-page');
+import { ReactComponent as chevronImg } from 'img/chevron.svg';
 
 const Container = styled.div`
   flex: 1;
@@ -134,9 +131,11 @@ const SearchInputWrapper = styled.div`
   position: absolute;
   top: 115px;
   right: 20px;
+  min-height: 50px;
 
-  padding: 10px;
+  padding: 5px 10px;
   display: flex;
+  align-items: center;
   background: #111013;
   border: 1px solid #434252;
   border-radius: 5px;
@@ -160,12 +159,49 @@ const SearchInput = styled.input`
 
 const SearchDelimiter = styled.div`
   width: 1px;
+  height: 25px;
+  margin: 0 10px;
   background: #434252;
 `;
 
 const SearchControls = styled.div`
+  padding: 0 5px;
+  display: flex;
+  justify-content: space-between;
 `;
 
+const HitCount = styled.span`
+  min-width: 70px;
+  text-align: right;
+  font-size: 14px;
+  color: #5A5A6F;
+`;
+
+const ChevronButton = styled.button`
+  padding: 5px 0;
+
+  border: none;
+  background: none;
+  outline: none;
+
+  :hover {
+    cursor: pointer;
+    path {
+      stroke: #fff;
+    }
+  }
+
+  :first-child {
+    margin-right: 10px;
+  }
+`;
+
+const ChevronUp = styled(chevronImg)`
+  transform: rotate(180deg);
+`;
+
+const ChevronDown = styled(chevronImg)`
+`;
 
 function getTextNodeChildren(node: Node) {
   let nodes: Node[] = [];
@@ -270,7 +306,8 @@ function DocPage({
   const debouncedSearchQuery = useDebounce(searchQuery, 0);
 
   const [highlightedNodes, setHighlightedNodes] = useState<Node[]>([]);
-
+  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [hitCount, setHitCount] = useState(0);
 
   function highlightCode(html: string) {
     const el = document.createElement('html');
@@ -317,6 +354,7 @@ function DocPage({
       removeHighlight(n);
     });
     setHighlightedNodes([]);
+    setHitCount(0);
     if (!debouncedSearchQuery || !containerRef?.current) return;
 
     const textNodes = getTextNodeChildren(containerRef.current as Node);
@@ -333,6 +371,7 @@ function DocPage({
     while ((match = re.exec(wholeText.toLowerCase())) !== null) {
       const nodes = highlightPattern([...textNodes], match.index, debouncedSearchQuery);
       setHighlightedNodes(c => c.concat(nodes));
+      setHitCount(c => c+=1);
     }
   }, [setHighlightedNodes, debouncedSearchQuery]);
 
@@ -347,11 +386,21 @@ function DocPage({
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
+          <HitCount>
+            <>
+            {searchQuery &&
+              <span>0/{hitCount}</span>
+            }
+            </>
+          </HitCount>
           <SearchDelimiter/>
           <SearchControls>
-            <span>Next</span>
-            <span>Back</span>
-            <span>Cancel</span>
+            <ChevronButton>
+              <ChevronDown/>
+            </ChevronButton>
+            <ChevronButton>
+              <ChevronUp/>
+            </ChevronButton>
           </SearchControls>
         </SearchInputWrapper>
       }
