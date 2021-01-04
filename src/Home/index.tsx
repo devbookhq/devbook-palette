@@ -55,7 +55,11 @@ import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
 import CodeItem from './GitHub/CodeItem';
 import CodeModal from './GitHub/CodeModal';
-import { DocSearchResultItem, DocPage } from './Docs';
+import {
+  DocSearchResultItem,
+  DocPage,
+  DocsFilterModal,
+} from './Docs';
 
 const Container = styled.div`
   height: 100%;
@@ -154,6 +158,7 @@ enum ReducerActionType {
 
   FocusResultItem,
 
+  // StackOverflow + GitHubCode modal.
   OpenModal,
   CloseModal,
 
@@ -167,6 +172,9 @@ enum ReducerActionType {
 
   SearchInDocPage,
   CancelSearchInDocPage,
+
+  OpenDocsFilterModal,
+  CloseDocsFilterModal,
 }
 
 interface SetSearchQuery {
@@ -293,6 +301,14 @@ interface CancelSearchInDocPage {
   type: ReducerActionType.CancelSearchInDocPage;
 }
 
+interface OpenDocsFilterModal {
+  type: ReducerActionType.OpenDocsFilterModal;
+}
+
+interface CloseDocsFilterModal {
+  type: ReducerActionType.CloseDocsFilterModal;
+}
+
 type ReducerAction = SetSearchQuery
   | SetSearchFilter
   | CacheScrollTopPosition
@@ -312,7 +328,9 @@ type ReducerAction = SetSearchQuery
   | SetDocSearchResultsDefaultWidth
   | CacheDocSearchResultsWidth
   | SearchInDocPage
-  | CancelSearchInDocPage;
+  | CancelSearchInDocPage
+  | OpenDocsFilterModal
+  | CloseDocsFilterModal;
 
 interface State {
   search: {
@@ -331,6 +349,7 @@ interface State {
     docSearchResultsDefaultWidth: number;
   }
   isSearchingInDocPage: boolean;
+  isDocsFilterModalOpened: boolean;
 }
 
 const initialState: State = {
@@ -380,6 +399,7 @@ const initialState: State = {
     docSearchResultsDefaultWidth: 200,
   },
   isSearchingInDocPage: false,
+  isDocsFilterModalOpened: false,
 }
 
 function stateReducer(state: State, reducerAction: ReducerAction): State {
@@ -621,6 +641,18 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         isSearchingInDocPage: false,
       };
     }
+    case ReducerActionType.OpenDocsFilterModal: {
+      return {
+        ...state,
+        isDocsFilterModalOpened: true,
+      };
+    }
+    case ReducerActionType.CloseDocsFilterModal: {
+      return {
+        ...state,
+        isDocsFilterModalOpened: false,
+      };
+    }
     default:
       return state;
   }
@@ -820,7 +852,19 @@ function Home() {
     dispatch({
       type: ReducerActionType.CancelSearchInDocPage,
     });
-  }, [])
+  }, []);
+
+  const openDocsFilterModal = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.OpenDocsFilterModal,
+    });
+  }, []);
+
+  const closeDocsFilterModal = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.CloseDocsFilterModal,
+    });
+  }, []);
   /////////
 
   const openFocusedSOItemInBrowser = useCallback(() => {
@@ -1057,6 +1101,14 @@ function Home() {
     docPageSearchInputRef?.current?.focus();
     trackShortcut({ action: 'Search in doc page' });
   }, [activeFilter, searchInDocPage]);
+
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+shift+f' : 'alt+shift+f', () => {
+    if (activeFilter !== ResultsFilter.Docs) return;
+
+    if (state.isDocsFilterModalOpened) closeDocsFilterModal();
+    else openDocsFilterModal();
+    trackShortcut({ action: 'Filter docs' });
+  }, [activeFilter, state.isDocsFilterModalOpened]);
   /* //////////////////// */
 
   useIPCRenderer('github-access-token', async (_, { accessToken }: { accessToken: string | null }) => {
@@ -1126,7 +1178,7 @@ function Home() {
   return (
     <>
       {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
-        <StackOverflowModal
+          <StackOverflowModal
           soResult={state.modalItem as StackOverflowResult}
           onCloseRequest={closeModal}
         />
@@ -1137,6 +1189,10 @@ function Home() {
           codeResult={state.modalItem as CodeResult}
           onCloseRequest={closeModal}
         />
+      }
+
+      {state.isDocsFilterModalOpened && activeFilter === ResultsFilter.Docs &&
+        <DocsFilterModal/>
       }
 
       <Container>
@@ -1274,8 +1330,10 @@ function Home() {
             {/* Docs search results */}
             {!state.modalItem && activeFilter === ResultsFilter.Docs &&
               <DocsSearchHotkeysPanel
+                isDocsFilterModalOpened={state.isDocsFilterModalOpened}
                 isSearchingInDocPage={state.isSearchingInDocPage}
-                onFilterDocsClick={() => {}}
+                onOpenFilterDocsClick={openDocsFilterModal}
+                onCloseFilterDocsClick={closeDocsFilterModal}
                 onSearchInDocPageClick={searchInDocPage}
                 onCancelSearchInDocPageClick={cancelSearchInDocPage}
               />

@@ -7,15 +7,19 @@ import Panel from '../Panel';
 const cmdModifier = electron.remote.process.platform === 'darwin' ? Key.Command : Key.Alt;
 
 interface SearchHotkeysPanelProps {
-  isSearchingInDocPage?: boolean;
-  onFilterDocsClick: (e: any) => void;
+  isDocsFilterModalOpened: boolean;
+  isSearchingInDocPage: boolean;
+  onOpenFilterDocsClick: (e: any) => void;
+  onCloseFilterDocsClick: (e: any) => void;
   onSearchInDocPageClick: (e:  any) => void;
   onCancelSearchInDocPageClick: (e: any) => void;
 }
 
 function SearchHotkeysPanel({
+  isDocsFilterModalOpened,
   isSearchingInDocPage,
-  onFilterDocsClick,
+  onOpenFilterDocsClick,
+  onCloseFilterDocsClick,
   onSearchInDocPageClick,
   onCancelSearchInDocPageClick,
 }: SearchHotkeysPanelProps) {
@@ -28,9 +32,9 @@ function SearchHotkeysPanel({
           isSeparated: true
         },
         {
-          text: 'Filter docs',
+          text: isDocsFilterModalOpened ? 'Close' : 'Filter docs',
           hotkey: [cmdModifier, Key.Shift, 'F'],
-          onClick: onFilterDocsClick,
+          onClick: isDocsFilterModalOpened ? onCloseFilterDocsClick : onOpenFilterDocsClick,
         },
       ]}
       hotkeysRight={[
