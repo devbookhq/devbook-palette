@@ -25,19 +25,37 @@ function SearchHotkeysPanel({
 }: SearchHotkeysPanelProps) {
   return (
     <Panel
-      hotkeysLeft={[
+      hotkeysLeft={isDocsFilterModalOpened ? [
+        {
+          text: 'Select documentation',
+          hotkey: [Key.ArrowUp, Key.ArrowDown],
+          isSeparated: true
+        },
+        // TODO: Change functionality based on whether the currently select
+        // documentation is included or removed from the search.
+        {
+          text: 'Include in search',
+          hotkey: [Key.Enter],
+        },
+      ] : [
         {
           text: 'Navigate results',
           hotkey: [Key.Shift, VisualConcat.Plus, Key.ArrowUp, Key.ArrowDown],
           isSeparated: true
         },
         {
-          text: isDocsFilterModalOpened ? 'Close' : 'Filter docs',
+          text: 'Filter docs',
           hotkey: [cmdModifier, Key.Shift, 'F'],
-          onClick: isDocsFilterModalOpened ? onCloseFilterDocsClick : onOpenFilterDocsClick,
+          onClick: onOpenFilterDocsClick,
         },
       ]}
-      hotkeysRight={[
+      hotkeysRight={isDocsFilterModalOpened ? [
+        {
+          text: 'Close',
+          hotkey: ['ESC'],
+          onClick: onCloseFilterDocsClick,
+        }
+      ] : [
         {
           text: 'Scroll page',
           hotkey: [Key.ArrowUp, Key.ArrowDown],

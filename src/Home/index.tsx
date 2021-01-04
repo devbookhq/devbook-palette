@@ -37,7 +37,9 @@ import {
 } from 'search/gitHub';
 import {
   search as searchDocumentations,
+  listDocSources,
   DocResult,
+  DocSource,
 } from 'search/docs';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
@@ -175,6 +177,12 @@ enum ReducerActionType {
 
   OpenDocsFilterModal,
   CloseDocsFilterModal,
+
+  FetchDocSourcesSuccess,
+  FetchDocSourcesFail,
+
+  IncludeDocSourceInSearch,
+  RemoveDocSourceFromSearch,
 }
 
 interface SetSearchQuery {
@@ -309,6 +317,26 @@ interface CloseDocsFilterModal {
   type: ReducerActionType.CloseDocsFilterModal;
 }
 
+interface FetchDocSourcesSuccess {
+  type: ReducerActionType.FetchDocSourcesSuccess;
+  payload: { docSources: DocSource[] };
+}
+
+interface FetchDocSourcesFail {
+  type: ReducerActionType.FetchDocSourcesFail;
+  payload: { errorMessage: string };
+}
+
+interface IncludeDocSourceInSearch {
+  type: ReducerActionType.IncludeDocSourceInSearch;
+  payload: { docSource: DocSource };
+}
+
+interface RemoveDocSourceFromSearch {
+  type: ReducerActionType.RemoveDocSourceFromSearch;
+  payload: { docSource: DocSource };
+}
+
 type ReducerAction = SetSearchQuery
   | SetSearchFilter
   | CacheScrollTopPosition
@@ -330,7 +358,11 @@ type ReducerAction = SetSearchQuery
   | SearchInDocPage
   | CancelSearchInDocPage
   | OpenDocsFilterModal
-  | CloseDocsFilterModal;
+  | CloseDocsFilterModal
+  | FetchDocSourcesSuccess
+  | FetchDocSourcesFail
+  | IncludeDocSourceInSearch
+  | RemoveDocSourceFromSearch;
 
 interface State {
   search: {
@@ -350,6 +382,7 @@ interface State {
   }
   isSearchingInDocPage: boolean;
   isDocsFilterModalOpened: boolean;
+  docSources: DocSource[];
 }
 
 const initialState: State = {
@@ -400,6 +433,7 @@ const initialState: State = {
   },
   isSearchingInDocPage: false,
   isDocsFilterModalOpened: false,
+  docSources: [],
 }
 
 function stateReducer(state: State, reducerAction: ReducerAction): State {
@@ -653,6 +687,34 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         isDocsFilterModalOpened: false,
       };
     }
+    case ReducerActionType.FetchDocSourcesSuccess: {
+      const { docSources } = reducerAction.payload;
+      return {
+        ...state,
+        docSources,
+      };
+    }
+    case ReducerActionType.FetchDocSourcesFail: {
+      const { errorMessage } = reducerAction.payload;
+      return {
+        ...state,
+        errorMessage,
+      };
+    }
+    case ReducerActionType.IncludeDocSourceInSearch: {
+      const { docSource } = reducerAction.payload;
+      return {
+        ...state,
+        docSources: state.docSources.map(ds => ds.slug === docSource.slug ? { ...ds, isIncludedInSearch: true } : ds),
+      };
+    }
+    case ReducerActionType.RemoveDocSourceFromSearch: {
+      const { docSource } = reducerAction.payload;
+      return {
+        ...state,
+        docSources: state.docSources.map(ds => ds.slug === docSource.slug ? { ...ds, isIncludedInSearch: false } : ds),
+      };
+    }
     default:
       return state;
   }
@@ -865,6 +927,34 @@ function Home() {
       type: ReducerActionType.CloseDocsFilterModal,
     });
   }, []);
+
+  const fetchDocSourcesSuccess = useCallback((docSources: DocSource[]) => {
+    dispatch({
+      type: ReducerActionType.FetchDocSourcesSuccess,
+      payload: { docSources },
+    });
+  }, []);
+
+  const fetchDocSourcesFail = useCallback((errorMessage: string) => {
+    dispatch({
+      type: ReducerActionType.FetchDocSourcesFail,
+      payload: { errorMessage },
+    });
+  }, []);
+
+  const includeDocSourceInSearch = useCallback((docSource: DocSource) => {
+    dispatch({
+      type: ReducerActionType.IncludeDocSourceInSearch,
+      payload: { docSource },
+    });
+  }, []);
+
+  const removeDocSourceFromSearch = useCallback((docSource: DocSource) => {
+    dispatch({
+      type: ReducerActionType.RemoveDocSourceFromSearch,
+      payload: { docSource },
+    });
+  }, []);
   /////////
 
   const openFocusedSOItemInBrowser = useCallback(() => {
@@ -924,21 +1014,21 @@ function Home() {
     }
   }
 
-  async function searchDocs(query: string) {
+  async function searchDocs(query: string, docSources: DocSource[]) {
     try {
       startSearching(ResultsFilter.Docs);
-      const results = await searchDocumentations(query);
+      const results = await searchDocumentations(query, docSources.filter(ds => ds.isIncludedInSearch));
       searchingSuccess(ResultsFilter.Docs, results);
     } catch (error) {
       searchingFail(ResultsFilter.Docs, error.message);
     }
   }
 
-  async function searchAll(query: string, filter: ResultsFilter, isGitHubConnected: boolean) {
+  async function searchAll(query: string, filter: ResultsFilter, isGitHubConnected: boolean, docSources: DocSource[]) {
     switch (filter) {
       case ResultsFilter.StackOverflow:
         await searchSO(query);
-        await searchDocs(query);
+        await searchDocs(query, docSources);
         if (isGitHubConnected) {
           await searchGHCode(query);
         }
@@ -949,11 +1039,11 @@ function Home() {
           await searchGHCode(query);
         }
         await searchSO(query);
-        await searchDocs(query);
+        await searchDocs(query, docSources);
       break;
 
       case ResultsFilter.Docs:
-        await searchDocs(query);
+        await searchDocs(query, docSources);
         await searchSO(query);
         if (isGitHubConnected) {
           await searchGHCode(query);
@@ -983,6 +1073,11 @@ function Home() {
 
   function handleDocSearchResultsResizeStop(e: any, dir: any, elRef: HTMLElement) {
     cacheDocSearchResultsWidth(elRef.clientWidth);
+  }
+
+  function handleDocSourceClick(docSource: DocSource) {
+    if (docSource.isIncludedInSearch) removeDocSourceFromSearch(docSource);
+    else includeDocSourceInSearch(docSource);
   }
 
   /* HOTKEYS */
@@ -1068,9 +1163,15 @@ function Home() {
       return;
     }
 
+    if (state.isDocsFilterModalOpened) {
+      closeDocsFilterModal();
+      trackShortcut({ action: 'Close docs filter modal' });
+      return;
+    }
+
     hideMainWindow();
     trackShortcut({ action: 'Hide main window' });
-  }, [state.modalItem, state.isSearchingInDocPage]);
+  }, [state.modalItem, state.isSearchingInDocPage, state.isDocsFilterModalOpened]);
 
   // 'cmd+o' hotkey - open the focused result in a browser.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+o' : 'alt+o', () => {
@@ -1138,6 +1239,7 @@ function Home() {
     }
     loadCachedData();
     tryToLoadGitHubAccount();
+    listDocSources().then(fetchDocSourcesSuccess).catch(fetchDocSourcesFail);
   // We want to run this only during the first render.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1152,7 +1254,12 @@ function Home() {
   useEffect(() => {
     if (!debouncedQuery || debouncedQuery === debouncedLastSearchedQuery) return;
 
-    searchAll(debouncedQuery, activeFilter, state.gitHubAccount.isConnected);
+    searchAll(
+      debouncedQuery,
+      activeFilter,
+      state.gitHubAccount.isConnected,
+      state.docSources,
+    );
     trackSearch({
       activeFilter: activeFilter.toString(),
     });
@@ -1161,6 +1268,7 @@ function Home() {
     debouncedLastSearchedQuery,
     activeFilter,
     state.gitHubAccount.isConnected,
+    state.docSources,
   ]);
 
   // Cache the debounced query.
@@ -1192,7 +1300,10 @@ function Home() {
       }
 
       {state.isDocsFilterModalOpened && activeFilter === ResultsFilter.Docs &&
-        <DocsFilterModal/>
+        <DocsFilterModal
+          docSources={state.docSources}
+          onDocSourceClick={handleDocSourceClick}
+        />
       }
 
       <Container>

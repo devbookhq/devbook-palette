@@ -390,7 +390,7 @@ function DocPage({
 
   function handleSearchInputKeyDown(e: any) {
     // Enter pressed.
-    if (e.keyCode === 13) {
+    if (searchQuery && e.keyCode === 13) {
       if (e.shiftKey) {
         selectPreviousHighlight();
       } else {

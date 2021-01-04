@@ -5,25 +5,20 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
+import { DocSource } from 'search/docs';
 import Modal from 'components/Modal';
 import { ReactComponent as searchImg } from 'img/search.svg';
 
-const marginTop = 110;
 
 const StyledModal = styled(Modal)`
-  /*
-  position: relative;
-  bottom: 50px;
-  width: 100%;
-  height: calc(100vh - ${marginTop}px);
-  margin-top: ${marginTop}px;
-  */
+  height: 100%;
+  margin: 60px 0 69px;
   min-width: 550px;
 
   display: flex;
   flex-direction: column;
 
-  overflow-y: auto;
+  overflow: hidden;
   background: #1C1B26;
   border-radius: 5px;
   border: 1px solid #3B3A4A;
@@ -67,8 +62,9 @@ const SearchInput = styled.input`
 `;
 
 const Content = styled.div`
-  padding: 5px 15px;
+  padding: 10px 0 50px;
 
+  height: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -76,6 +72,7 @@ const Content = styled.div`
 
 const DocsListHeader = styled.div`
   width: 100%;
+  padding: 0 10px;
   margin-bottom: 10px;
 
   display: flex;
@@ -90,21 +87,29 @@ const HeaderText = styled.span`
 `;
 
 const DocsList = styled.div`
+  height: 100%;
   width: 100%;
+
   display: flex;
   flex-direction: column;
+
+  overflow: overlay;
 `;
 
 const DocRow = styled.div`
   width: 100%;
-  margin-bottom: 10px;
-  padding-bottom: 5px;
+  padding: 5px 10px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
   border-bottom: 1px solid #262736;
+
+  :hover {
+    background: #2C2F5A;
+    cursor: pointer;
+  }
 `;
 
 const DocName = styled.span`
@@ -113,18 +118,32 @@ const DocName = styled.span`
   font-weight: 500;
 `;
 
-function DocsFilterModal() {
-  const inputRef = useRef<HTMLInputElement>(null);
+const DocToggle = styled.input`
+`;
+
+
+interface DocsFilterModalProps {
+  docSources: DocSource[];
+  onDocSourceClick: (ds: DocSource) => void;
+}
+
+function DocsFilterModal({
+  docSources,
+  onDocSourceClick,
+}: DocsFilterModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
+
+  function escapeRegex(s: string) {
+    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  }
 
   return (
     <StyledModal>
       <SearchWrapper>
         <SearchImg/>
         <SearchInput
-          ref={inputRef}
           autoFocus
-          placeholder="Search in available documentations"
+          placeholder="Python, JavaScript, Docker, etc"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
         />
@@ -140,15 +159,24 @@ function DocsFilterModal() {
         </DocsListHeader>
 
         <DocsList>
-          <DocRow>
-            <DocName>JavaScript</DocName>
-          </DocRow>
-          <DocRow>
-            <DocName>JavaScript</DocName>
-          </DocRow>
-          <DocRow>
-            <DocName>JavaScript</DocName>
-          </DocRow>
+          {docSources
+           // Show the selected docs first.
+           .sort((a,b) => (a === b) ? 0 : a ? -1 : 1)
+           .filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))))
+           .map((ds, idx) => (
+            <DocRow
+              key={idx}
+              onClick={() => onDocSourceClick(ds)}
+            >
+              <DocName>{ds.name}</DocName>
+              <DocToggle
+                type="radio"
+                checked={ds.isIncludedInSearch}
+                value={ds.slug}
+                onChange={() => onDocSourceClick(ds)}
+              />
+            </DocRow>
+          ))}
         </DocsList>
       </Content>
     </StyledModal>
