@@ -152,8 +152,6 @@ enum ReducerActionType {
   SetSearchFilter,
 
   CacheScrollTopPosition,
-  CacheSearchQuery,
-  CacheSearchFilter,
   ClearResults,
 
   StartSearching,
@@ -206,20 +204,6 @@ interface CacheScrollTopPosition {
   payload: {
     filter: ResultsFilter;
     scrollTopPosition: number;
-  };
-}
-
-interface CacheSearchQuery {
-  type: ReducerActionType.CacheSearchQuery;
-  payload: {
-    query: string;
-  };
-}
-
-interface CacheSearchFilter {
-  type: ReducerActionType.CacheSearchFilter,
-  payload: {
-    filter: ResultsFilter;
   };
 }
 
@@ -342,8 +326,6 @@ interface RemoveDocSourceFromSearch {
 type ReducerAction = SetSearchQuery
   | SetSearchFilter
   | CacheScrollTopPosition
-  | CacheSearchQuery
-  | CacheSearchFilter
   | ClearResults
   | StartSearching
   | SearchingSuccess
@@ -479,22 +461,6 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
           },
         },
       };
-    }
-    case ReducerActionType.CacheSearchQuery: {
-      // TODO: Should this be a reducer action?
-      // It feels wrong to not do anything with the state
-      // and just return it as it is.
-      const { query } = reducerAction.payload;
-      saveSearchQuery(query);
-      return { ...state };
-    }
-    case ReducerActionType.CacheSearchFilter: {
-      // TODO: Should this be a reducer action?
-      // It feels wrong to not do anything with the state
-      // and just return it as it is.
-      const { filter } = reducerAction.payload;
-      saveSearchFilter(filter)
-      return { ...state };
     }
     case ReducerActionType.SetSearchFilter: {
       const { filter } = reducerAction.payload;
@@ -759,20 +725,6 @@ function Home() {
     dispatch({
       type: ReducerActionType.CacheScrollTopPosition,
       payload: { filter, scrollTopPosition },
-    });
-  }, []);
-
-  const cacheSearchQuery = useCallback((query: string) => {
-    dispatch({
-      type: ReducerActionType.CacheSearchQuery,
-      payload: { query },
-    });
-  }, []);
-
-  const cacheSearchFilter = useCallback((filter: ResultsFilter) => {
-    dispatch({
-      type: ReducerActionType.CacheSearchFilter,
-      payload: { filter },
     });
   }, []);
 
@@ -1292,13 +1244,13 @@ function Home() {
   // Cache the debounced query.
   useEffect(() => {
     if (debouncedQuery !== debouncedLastSearchedQuery) {
-      cacheSearchQuery(debouncedQuery);
+      saveSearchQuery(debouncedQuery);
     }
   }, [debouncedQuery, debouncedLastSearchedQuery]);
 
   // Cache the currently active filter.
   useEffect(() => {
-    cacheSearchFilter(activeFilter);
+    saveSearchFilter(activeFilter);
   }, [activeFilter]);
 
   // Cache the doc sources.

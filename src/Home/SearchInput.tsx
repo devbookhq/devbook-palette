@@ -225,6 +225,13 @@ function SearchInput({
     postponeUpdate();
   }
 
+  function getResultsFilterDisplayName(f: ResultsFilter) {
+    if (f === ResultsFilter.GitHubCode) {
+      return 'GitHub';
+    }
+    return f;
+  }
+
   useIPCRenderer('did-show-main-window', () => {
     if (!isModalOpened) inputRef?.current?.focus();
   });
@@ -278,14 +285,18 @@ function SearchInput({
               <FilterButton
                 selected={activeFilter === f}
                 onClick={() => onFilterSelect(f)}
-              >{f}
+              >{getResultsFilterDisplayName(f)}
               </FilterButton>
-              {electron.remote.process.platform === 'darwin' && <Hotkey
-                hotkey={[Key.Command, `${idx + 1}`]}
-              />}
-              {electron.remote.process.platform === 'linux' && <Hotkey
-                hotkey={['Alt + ', `${idx + 1}`]}
-              />}
+              {electron.remote.process.platform === 'darwin' &&
+                <Hotkey
+                  hotkey={[Key.Command, `${idx + 1}`]}
+                />
+              }
+              {electron.remote.process.platform === 'linux' &&
+                <Hotkey
+                  hotkey={['Alt + ', `${idx + 1}`]}
+                />
+              }
             </Filter>
           ))}
         </FiltersWrapper>
