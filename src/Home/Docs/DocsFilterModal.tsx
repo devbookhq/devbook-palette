@@ -9,7 +9,6 @@ import { DocSource } from 'search/docs';
 import Modal from 'components/Modal';
 import { ReactComponent as searchImg } from 'img/search.svg';
 
-
 const StyledModal = styled(Modal)`
   height: 100%;
   margin: 60px 0 69px;
@@ -170,9 +169,8 @@ function DocsFilterModal({
             >
               <DocName>{ds.name}</DocName>
               <DocToggle
-                type="radio"
+                type="checkbox"
                 checked={ds.isIncludedInSearch}
-                value={ds.slug}
                 onChange={() => onDocSourceClick(ds)}
               />
             </DocRow>

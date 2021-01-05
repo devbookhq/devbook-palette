@@ -22,6 +22,8 @@ import electron, {
   getSavedSearchFilter,
   saveDocSearchResultsDefaultWidth,
   getDocSearchResultsDefaultWidth,
+  saveDocSources,
+  getCachedDocSources,
 } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -37,7 +39,7 @@ import {
 } from 'search/gitHub';
 import {
   search as searchDocumentations,
-  listDocSources,
+  fetchDocSources,
   DocResult,
   DocSource,
 } from 'search/docs';
@@ -1236,10 +1238,26 @@ function Home() {
 
       const width = await getDocSearchResultsDefaultWidth();
       setDocSearchResultsDefaultWidth(width);
+
+      try {
+        // We merge the cached doc sources and the fetched ones
+        // so we always have the most up to date doc sources
+        // and at the same time we respect user's selection.
+        const cachedDocSources = await getCachedDocSources();
+        const allDocSources = await fetchDocSources();
+        const mergedDocSources = allDocSources.map(ds => {
+          const cached = cachedDocSources.find(cds => cds.slug === ds.slug);
+          if (cached) return {...ds, isIncludedInSearch: cached.isIncludedInSearch};
+          return ds;
+        });
+        fetchDocSourcesSuccess(mergedDocSources);
+      } catch(err) {
+        fetchDocSourcesFail(err);
+      }
     }
     loadCachedData();
     tryToLoadGitHubAccount();
-    listDocSources().then(fetchDocSourcesSuccess).catch(fetchDocSourcesFail);
+
   // We want to run this only during the first render.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1282,6 +1300,12 @@ function Home() {
   useEffect(() => {
     cacheSearchFilter(activeFilter);
   }, [activeFilter]);
+
+  // Cache the doc sources.
+  useEffect(() => {
+    if (state.docSources.length === 0) return;
+    saveDocSources(state.docSources);
+  }, [state.docSources]);
 
   return (
     <>

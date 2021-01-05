@@ -31,7 +31,7 @@ export async function search(query: string, docSources: DocSource[]): Promise<Do
   return result.data.results;
 }
 
-export async function listDocSources(): Promise<DocSource[]> {
+export async function fetchDocSources(): Promise<DocSource[]> {
   let url = 'https://api.usedevbook.com/search/docs';
   if (isDev) url = 'https://dev.usedevbook.com/search/docs';
 

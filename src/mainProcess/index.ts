@@ -1,6 +1,18 @@
 import { ResultsFilter } from 'Home/SearchInput';
+import { DocSource } from 'search/docs';
+
+enum IPCMessage {
+  GetCachedDocSources = 'GetCachedDocSources',
+  SaveDocSources = 'SaveDocSources',
+}
 
 const electron = window.require('electron') as typeof import('electron');
+
+// So we see logs from the main process in the Chrome debug tools.
+electron.ipcRenderer.on('console', (_, args) => {
+  const [type, ...consoleArgs] = args;
+  console[type as 'log' | 'error']?.('[main]:', ...consoleArgs);
+});
 
 const app = electron.app || electron.remote.app;
 const isEnvSet = 'ELECTRON_IS_DEV' in electron.remote.process.env;
@@ -105,11 +117,13 @@ export function getDocSearchResultsDefaultWidth(): Promise<number> {
   return electron.ipcRenderer.invoke('get-doc-search-results-default-width');
 }
 
-// So we see logs from the main process in the Chrome debug tools.
-electron.ipcRenderer.on('console', (_, args) => {
-  const [type, ...consoleArgs] = args;
-  console[type as 'log' | 'error']?.('[main]:', ...consoleArgs);
-});
+export function getCachedDocSources(): Promise<DocSource[]> {
+  return electron.ipcRenderer.invoke(IPCMessage.GetCachedDocSources);
+}
+
+export function saveDocSources(docSources: DocSource[]) {
+  return electron.ipcRenderer.send(IPCMessage.SaveDocSources, { docSources });
+}
 
 export default electron;
 

@@ -26,6 +26,15 @@ import PreferencesWindow from './PreferencesWindow';
 import OAuth from './OAuth';
 import MainWindow from './MainWindow';
 
+enum IPCMessage {
+  GetCachedDocSources = 'GetCachedDocSources',
+  SaveDocSources = 'SaveDocSources',
+}
+
+enum StoreKey {
+  DocSources = 'docSources',
+}
+
 const PORT = 3000;
 
 // Set up logs so logging from the main process can be seen in the browser.
@@ -400,3 +409,13 @@ ipcMain.on('save-doc-search-results-default-width', (_, { width }: { width: numb
 ipcMain.handle('get-doc-search-results-default-width', () => {
   return store.get('docSearchResultsDefaultWidth', 200);
 });
+
+ipcMain.handle(IPCMessage.GetCachedDocSources, async () => {
+  return store.get(StoreKey.DocSources, []);
+});
+
+ipcMain.on(IPCMessage.SaveDocSources, (_, { docSources }) => {
+  store.set(StoreKey.DocSources, docSources);
+});
+
+
