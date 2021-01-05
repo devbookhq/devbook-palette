@@ -1,6 +1,4 @@
 import React, {
-  useRef,
-  useEffect,
   useState,
 } from 'react';
 import styled from 'styled-components';
@@ -124,11 +122,13 @@ const DocToggle = styled.input`
 interface DocsFilterModalProps {
   docSources: DocSource[];
   onDocSourceClick: (ds: DocSource) => void;
+  onCloseRequest?: () => void;
 }
 
 function DocsFilterModal({
   docSources,
   onDocSourceClick,
+  onCloseRequest,
 }: DocsFilterModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -137,7 +137,9 @@ function DocsFilterModal({
   }
 
   return (
-    <StyledModal>
+    <StyledModal
+      onCloseRequest={onCloseRequest}
+    >
       <SearchWrapper>
         <SearchImg/>
         <SearchInput

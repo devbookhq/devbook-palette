@@ -1257,6 +1257,15 @@ function Home() {
   useEffect(() => {
     if (state.docSources.length === 0) return;
     saveDocSources(state.docSources);
+
+    if (debouncedQuery) {
+      searchDocs(debouncedQuery, state.docSources);
+    }
+  // NOTE: We don't want to run this useEffect every time
+  // the search query changes. We just want to refresh
+  // the docs results when user changes what doc sources
+  // they want to have active.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.docSources]);
 
   return (
@@ -1279,6 +1288,7 @@ function Home() {
         <DocsFilterModal
           docSources={state.docSources}
           onDocSourceClick={handleDocSourceClick}
+          onCloseRequest={closeDocsFilterModal}
         />
       }
 
