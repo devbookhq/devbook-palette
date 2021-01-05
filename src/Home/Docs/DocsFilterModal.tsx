@@ -1,5 +1,6 @@
 import React, {
   useState,
+  useEffect,
 } from 'react';
 import styled from 'styled-components';
 
@@ -83,7 +84,7 @@ const HeaderText = styled.span`
   font-weight: 500;
 `;
 
-const DocsList = styled.div`
+const DocsListsWrapper = styled.div`
   height: 100%;
   width: 100%;
 
@@ -91,6 +92,21 @@ const DocsList = styled.div`
   flex-direction: column;
 
   overflow: overlay;
+`;
+
+const DocsListIncluded = styled.div`
+  width: 100%;
+  margin-bottom: 20px;
+
+  display: flex;
+  flex-direction: column;
+`;
+
+const DocsListNotIncluded = styled.div`
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
 `;
 
 const DocRow = styled.div`
@@ -131,9 +147,45 @@ function DocsFilterModal({
   onCloseRequest,
 }: DocsFilterModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  // const [sortedSources, setSortedSources] = useState<DocSource[]>([]);
+  const [includedSources, setIncludedSources] = useState<DocSource[]>([]);
+  const [notIncludedSources, setNotIncludedSources] = useState<DocSource[]>([]);
 
   function escapeRegex(s: string) {
     return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  }
+
+  useEffect(() => {
+    // Split doc sources into two arrays - included doc sources and not included ones.
+    const sorted = docSources
+      .sort((a, b) => (a.isIncludedInSearch === b.isIncludedInSearch) ? 0 : a.isIncludedInSearch ? -1 : 1);
+    const firstNotIncluded = sorted.findIndex(ds => !ds.isIncludedInSearch);
+    if (firstNotIncluded === -1) {
+      setNotIncludedSources(sorted.sort((a, b) => a.name.localeCompare(b.name)));
+    } else {
+      let includedSlice = sorted.slice(0, firstNotIncluded);
+      includedSlice = includedSlice
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setIncludedSources(includedSlice);
+
+      let notIncludedSlice = sorted.slice(firstNotIncluded);
+      notIncludedSlice = notIncludedSlice
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setNotIncludedSources(notIncludedSlice);
+    }
+  }, []);
+
+  function handleDocRowClick(docSource: DocSource, includedSlice: boolean) {
+    if (includedSlice) {
+      setIncludedSources(c =>
+        c.map(ds => ds.slug === docSource.slug ? {...ds, isIncludedInSearch: !ds.isIncludedInSearch} : ds)
+      );
+    } else {
+      setNotIncludedSources(c =>
+        c.map(ds => ds.slug === docSource.slug ? {...ds, isIncludedInSearch: !ds.isIncludedInSearch} : ds)
+      );
+    }
+    onDocSourceClick(docSource);
   }
 
   return (
@@ -159,25 +211,47 @@ function DocsFilterModal({
           </HeaderText>
         </DocsListHeader>
 
-        <DocsList>
-          {docSources
-           // Show the selected docs first.
-           .sort((a,b) => (a === b) ? 0 : a ? -1 : 1)
-           .filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))))
-           .map((ds, idx) => (
-            <DocRow
-              key={idx}
-              onClick={() => onDocSourceClick(ds)}
-            >
-              <DocName>{ds.name}</DocName>
-              <DocToggle
-                type="checkbox"
-                checked={ds.isIncludedInSearch}
-                onChange={() => onDocSourceClick(ds)}
-              />
-            </DocRow>
-          ))}
-        </DocsList>
+        <DocsListsWrapper>
+          {includedSources.length > 0 &&
+            <DocsListIncluded>
+              {includedSources
+               .filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))))
+               .map((ds, idx) => (
+                <DocRow
+                  key={idx}
+                  onClick={() => handleDocRowClick(ds, true)}
+                >
+                  <DocName>{ds.name}</DocName>
+                  <DocToggle
+                    type="checkbox"
+                    checked={ds.isIncludedInSearch}
+                    onChange={() => {}}
+                  />
+                </DocRow>
+              ))}
+            </DocsListIncluded>
+          }
+
+          {notIncludedSources.length > 0 &&
+            <DocsListNotIncluded>
+              {notIncludedSources
+               .filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))))
+               .map((ds, idx) => (
+                <DocRow
+                  key={idx}
+                  onClick={() => handleDocRowClick(ds, false)}
+                >
+                  <DocName>{ds.name}</DocName>
+                  <DocToggle
+                    type="checkbox"
+                    checked={ds.isIncludedInSearch}
+                    onChange={() => {}}
+                  />
+                </DocRow>
+              ))}
+            </DocsListNotIncluded>
+          }
+        </DocsListsWrapper>
       </Content>
     </StyledModal>
   );
