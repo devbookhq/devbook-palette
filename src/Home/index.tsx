@@ -1074,7 +1074,7 @@ function Home() {
 
   // 'up arrow' hotkey - navigation.
   useHotkeys('up', () => {
-    if (state.modalItem) return;
+    if (state.modalItem || state.isDocsFilterModalOpened) return;
     // The docs search filter uses 'cmd + arrow' for the search navigation.
     if (activeFilter === ResultsFilter.Docs) return;
 
@@ -1086,7 +1086,7 @@ function Home() {
 
   // 'down arrow' hotkey - navigation.
   useHotkeys('down', () => {
-    if (state.modalItem) return;
+    if (state.modalItem || state.isDocsFilterModalOpened) return;
     // The docs search filter uses 'cmd + arrow' for the search navigation.
     if (activeFilter === ResultsFilter.Docs) return;
 

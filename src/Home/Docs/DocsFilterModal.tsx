@@ -1,8 +1,10 @@
 import React, {
   useState,
   useEffect,
+  useCallback,
 } from 'react';
 import styled from 'styled-components';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { DocSource } from 'search/docs';
 import Modal from 'components/Modal';
@@ -109,7 +111,7 @@ const DocsListNotIncluded = styled.div`
   flex-direction: column;
 `;
 
-const DocRow = styled.div`
+const DocRow = styled.div<{ isFocused?: boolean, lastUsedNavigation: Navigation }>`
   width: 100%;
   padding: 5px 10px;
 
@@ -118,9 +120,10 @@ const DocRow = styled.div`
   justify-content: space-between;
 
   border-bottom: 1px solid #262736;
+  background: ${props => props.isFocused && props.lastUsedNavigation === Navigation.Keys ? '#2C2F5A' : 'transparent'};
 
   :hover {
-    background: #2C2F5A;
+    ${props => props.lastUsedNavigation === Navigation.Mouse ? 'background: #2C2F5A' : ''};
     cursor: pointer;
   }
 `;
@@ -141,19 +144,88 @@ interface DocsFilterModalProps {
   onCloseRequest?: () => void;
 }
 
+enum Navigation {
+  Mouse,
+  Keys,
+}
+
 function DocsFilterModal({
   docSources,
   onDocSourceClick,
   onCloseRequest,
 }: DocsFilterModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  // const [sortedSources, setSortedSources] = useState<DocSource[]>([]);
+
+  const [selectedIdx, setSelectedIdx] = useState(0);
+
   const [includedSources, setIncludedSources] = useState<DocSource[]>([]);
   const [notIncludedSources, setNotIncludedSources] = useState<DocSource[]>([]);
+
+  const [lastUsedNavigation, setLastUseNavigation] = useState<Navigation>(Navigation.Keys);
+
+  const includedVisibleSources = useCallback(() => {
+    return includedSources.filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))));
+  }, [includedSources, searchQuery]);
+  const notIncludedVisibleSources = useCallback(() => {
+    return notIncludedSources.filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))));
+  }, [notIncludedSources, searchQuery]);
 
   function escapeRegex(s: string) {
     return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
   }
+
+  function toggleDocSource(docSource: DocSource, includedSlice: boolean) {
+    if (includedSlice) {
+      setIncludedSources(c =>
+        c.map(ds => ds.slug === docSource.slug ? {...ds, isIncludedInSearch: !ds.isIncludedInSearch} : ds)
+      );
+    } else {
+      setNotIncludedSources(c =>
+        c.map(ds => ds.slug === docSource.slug ? {...ds, isIncludedInSearch: !ds.isIncludedInSearch} : ds)
+      );
+    }
+    onDocSourceClick(docSource);
+  }
+
+  function handleDocRowMouseOver(idx: number, isInIncludedSlice: boolean) {
+    if (isInIncludedSlice) {
+      setSelectedIdx(idx);
+    } else {
+      setSelectedIdx(idx + includedVisibleSources().length);
+    }
+    setLastUseNavigation(Navigation.Mouse);
+  }
+
+  function handleInputKeyDown(e: any) {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+  }
+
+  useHotkeys('up', () => {
+    if (selectedIdx > 0) {
+      setSelectedIdx(c => c -= 1);
+    }
+    setLastUseNavigation(Navigation.Keys);
+  }, { filter: () => true }, [selectedIdx]);
+
+  useHotkeys('down', () => {
+    if (selectedIdx < includedVisibleSources().length + notIncludedVisibleSources().length - 1) {
+      setSelectedIdx(c => c += 1);
+    }
+    setLastUseNavigation(Navigation.Keys);
+  }, { filter: () => true }, [selectedIdx, notIncludedVisibleSources, includedVisibleSources]);
+
+  useHotkeys('enter', () => {
+    if (selectedIdx >= includedVisibleSources().length) {
+      const idx = selectedIdx - includedVisibleSources().length;
+      toggleDocSource(notIncludedVisibleSources()[idx], false);
+    } else {
+      toggleDocSource(includedVisibleSources()[selectedIdx], true);
+    }
+  }, { filter: () => true }, [selectedIdx, notIncludedVisibleSources, includedVisibleSources]);
+
+  useEffect(() => {
+    setSelectedIdx(0);
+  }, [searchQuery]);
 
   useEffect(() => {
     // Split doc sources into two arrays - included doc sources and not included ones.
@@ -175,19 +247,6 @@ function DocsFilterModal({
     }
   }, []);
 
-  function handleDocRowClick(docSource: DocSource, includedSlice: boolean) {
-    if (includedSlice) {
-      setIncludedSources(c =>
-        c.map(ds => ds.slug === docSource.slug ? {...ds, isIncludedInSearch: !ds.isIncludedInSearch} : ds)
-      );
-    } else {
-      setNotIncludedSources(c =>
-        c.map(ds => ds.slug === docSource.slug ? {...ds, isIncludedInSearch: !ds.isIncludedInSearch} : ds)
-      );
-    }
-    onDocSourceClick(docSource);
-  }
-
   return (
     <StyledModal
       onCloseRequest={onCloseRequest}
@@ -196,6 +255,7 @@ function DocsFilterModal({
         <SearchImg/>
         <SearchInput
           autoFocus
+          onKeyDown={handleInputKeyDown}
           placeholder="Python, JavaScript, Docker, etc"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
@@ -212,14 +272,15 @@ function DocsFilterModal({
         </DocsListHeader>
 
         <DocsListsWrapper>
-          {includedSources.length > 0 &&
+          {includedVisibleSources().length > 0 &&
             <DocsListIncluded>
-              {includedSources
-               .filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))))
-               .map((ds, idx) => (
+              {includedVisibleSources().map((ds, idx) => (
                 <DocRow
                   key={idx}
-                  onClick={() => handleDocRowClick(ds, true)}
+                  onMouseOver={() => handleDocRowMouseOver(idx, true)}
+                  onClick={() => toggleDocSource(ds, true)}
+                  isFocused={idx === selectedIdx}
+                  lastUsedNavigation={lastUsedNavigation}
                 >
                   <DocName>{ds.name}</DocName>
                   <DocToggle
@@ -232,14 +293,15 @@ function DocsFilterModal({
             </DocsListIncluded>
           }
 
-          {notIncludedSources.length > 0 &&
+          {notIncludedVisibleSources().length > 0 &&
             <DocsListNotIncluded>
-              {notIncludedSources
-               .filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))))
-               .map((ds, idx) => (
+              {notIncludedVisibleSources().map((ds, idx) => (
                 <DocRow
                   key={idx}
-                  onClick={() => handleDocRowClick(ds, false)}
+                  onMouseOver={() => handleDocRowMouseOver(idx, false)}
+                  onClick={() => toggleDocSource(ds, false)}
+                  isFocused={idx === selectedIdx - includedVisibleSources().length}
+                  lastUsedNavigation={lastUsedNavigation}
                 >
                   <DocName>{ds.name}</DocName>
                   <DocToggle
