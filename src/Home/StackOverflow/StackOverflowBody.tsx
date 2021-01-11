@@ -63,6 +63,7 @@ const Body = styled.div`
 
     background: #23222D;
     border-radius: 3px;
+    font-family: 'Roboto Mono';
 
     code {
       padding: 0;
@@ -138,8 +139,7 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
 
     const codes = el.getElementsByTagName('code');
     for (const code of codes) {
-      if (code.childNodes.length === 0) continue;
-      const codeText = code.childNodes[0].nodeValue;
+      const codeText = (code as HTMLElement).innerText;
       if (codeText) {
         const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
         code.innerHTML = codeHTML;

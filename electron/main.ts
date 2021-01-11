@@ -394,7 +394,7 @@ ipcMain.handle('get-saved-search-query', () => {
   return store.get('lastQuery', '');
 });
 
-ipcMain.handle('get-saved-search-filter', () => {
+ipcMain.handle('get-saved-search-filter', async () => {
   return store.get('searchFilter', '');
 });
 

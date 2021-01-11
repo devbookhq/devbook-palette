@@ -69,11 +69,12 @@ const Container = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
 `;
 
 const SearchResultsWrapper = styled.div`
-  flex: 1;
   padding: 10px 15px;
+  width: 100%;
 
   overflow: hidden;
   overflow-y: overlay;
@@ -106,6 +107,16 @@ const ConnectGitHubButton = styled(Button)`
 
 const GitHubConnectTitle = styled(InfoMessage)`
   margin: 0 0 30px;
+`;
+
+const EnableDocSourcesButton = styled(Button)`
+  margin: 15px 0;
+  padding: 10px 20px;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  border-radius: 5px;
 `;
 
 const DocsWrapper = styled.div`
@@ -183,6 +194,8 @@ enum ReducerActionType {
 
   IncludeDocSourceInSearch,
   RemoveDocSourceFromSearch,
+
+  SetIsLoadingCachedData,
 }
 
 interface SetSearchQuery {
@@ -323,6 +336,11 @@ interface RemoveDocSourceFromSearch {
   payload: { docSource: DocSource };
 }
 
+interface SetIsLoadingCachedData {
+  type: ReducerActionType.SetIsLoadingCachedData;
+  payload: { isLoadingCachedData: boolean };
+}
+
 type ReducerAction = SetSearchQuery
   | SetSearchFilter
   | CacheScrollTopPosition
@@ -346,7 +364,8 @@ type ReducerAction = SetSearchQuery
   | FetchDocSourcesSuccess
   | FetchDocSourcesFail
   | IncludeDocSourceInSearch
-  | RemoveDocSourceFromSearch;
+  | RemoveDocSourceFromSearch
+  | SetIsLoadingCachedData;
 
 interface State {
   search: {
@@ -367,6 +386,7 @@ interface State {
   isSearchingInDocPage: boolean;
   isDocsFilterModalOpened: boolean;
   docSources: DocSource[];
+  isLoadingCachedData: boolean;
 }
 
 const initialState: State = {
@@ -380,7 +400,7 @@ const initialState: State = {
   results: {
     [ResultsFilter.StackOverflow]: {
       items: [],
-      isLoading: false,
+      isLoading: true,
       scrollTopPosition: 0,
       focusedIdx: {
         idx: 0,
@@ -389,7 +409,7 @@ const initialState: State = {
     },
     [ResultsFilter.GitHubCode]: {
       items: [],
-      isLoading: false,
+      isLoading: true,
       scrollTopPosition: 0,
       focusedIdx: {
         idx: 0,
@@ -398,7 +418,7 @@ const initialState: State = {
     },
     [ResultsFilter.Docs]: {
       items: [],
-      isLoading: false,
+      isLoading: true,
       scrollTopPosition: 0,
       focusedIdx: {
         idx: 0,
@@ -418,6 +438,7 @@ const initialState: State = {
   isSearchingInDocPage: false,
   isDocsFilterModalOpened: false,
   docSources: [],
+  isLoadingCachedData: true,
 }
 
 function stateReducer(state: State, reducerAction: ReducerAction): State {
@@ -437,6 +458,13 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
       };
     }
     case ReducerActionType.ClearResults: {
+      const emptyResults = initialState.results;
+      // Initial state has the 'isLoading' field set to 'true'
+      // for each result filter. We want to set it to 'false'.
+      Object.keys(emptyResults).forEach(k => {
+        (emptyResults[k as ResultsFilter] as any).isLoading = false;
+      });
+
       return {
         ...state,
         search: {
@@ -445,7 +473,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
           lastSearchedQuery: '',
         },
         results: {
-          ...initialState.results,
+          ...emptyResults,
         },
       };
     }
@@ -683,6 +711,13 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         docSources: state.docSources.map(ds => ds.slug === docSource.slug ? { ...ds, isIncludedInSearch: false } : ds),
       };
     }
+    case ReducerActionType.SetIsLoadingCachedData: {
+      const { isLoadingCachedData } = reducerAction.payload;
+      return {
+        ...state,
+        isLoadingCachedData,
+      };
+    }
     default:
       return state;
   }
@@ -712,6 +747,10 @@ function Home() {
   const isActiveFilterLoading = useMemo(() => {
     return state.results[activeFilter].isLoading;
   }, [state.results, activeFilter]);
+
+  const isAnyDocSourceIncluded = useMemo(() => {
+    return state.docSources.findIndex(ds => ds.isIncludedInSearch) !== -1;
+  }, [state.docSources]);
 
   // Dispatch helpers
   const setSearchQuery = useCallback((query: string) => {
@@ -909,6 +948,13 @@ function Home() {
       payload: { docSource },
     });
   }, []);
+
+  const setIsLoadingCachedData = useCallback((isLoadingCachedData: boolean) => {
+    dispatch({
+      type: ReducerActionType.SetIsLoadingCachedData,
+      payload: { isLoadingCachedData },
+    });
+  }, []);
   /////////
 
   const openFocusedSOItemInBrowser = useCallback(() => {
@@ -969,6 +1015,12 @@ function Home() {
   }
 
   async function searchDocs(query: string, docSources: DocSource[]) {
+    // User has all doc sources unincluded.
+    if (docSources.findIndex(ds => ds.isIncludedInSearch) === -1) {
+      searchingSuccess(ResultsFilter.Docs, []);
+      return;
+    }
+
     try {
       startSearching(ResultsFilter.Docs);
       const results = await searchDocumentations(query, docSources.filter(ds => ds.isIncludedInSearch));
@@ -1182,14 +1234,14 @@ function Home() {
   // GitHub in the past.
   useEffect(() => {
     async function loadCachedData() {
+      const width = await getDocSearchResultsDefaultWidth();
+      setDocSearchResultsDefaultWidth(width);
+
       const filter = await getSavedSearchFilter();
       setSearchFilter(filter);
 
       const lastQuery = await getSavedSearchQuery();
       setSearchQuery(lastQuery);
-
-      const width = await getDocSearchResultsDefaultWidth();
-      setDocSearchResultsDefaultWidth(width);
 
       try {
         // We merge the cached doc sources and the fetched ones
@@ -1206,10 +1258,11 @@ function Home() {
       } catch(err) {
         fetchDocSourcesFail(err);
       }
+
+      setIsLoadingCachedData(false);
     }
     loadCachedData();
     tryToLoadGitHubAccount();
-
   // We want to run this only during the first render.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1250,8 +1303,9 @@ function Home() {
 
   // Cache the currently active filter.
   useEffect(() => {
+    if (state.isLoadingCachedData) return;
     saveSearchFilter(activeFilter);
-  }, [activeFilter]);
+  }, [activeFilter, state.isLoadingCachedData]);
 
   // Cache the doc sources.
   useEffect(() => {
@@ -1304,26 +1358,50 @@ function Home() {
         />
 
         {!state.search.query
-         && (state.gitHubAccount.isConnected || activeFilter === ResultsFilter.StackOverflow)
+         // We don't want to show this if users selected GitHubCode filter
+         // and haven't connected their GitHub account yet.
+         && (state.gitHubAccount.isConnected || activeFilter !== ResultsFilter.GitHubCode)
          && !isActiveFilterLoading
          &&
           <InfoMessage>Type your search query</InfoMessage>
         }
 
         {state.search.query
-         && (state.gitHubAccount.isConnected || activeFilter === ResultsFilter.StackOverflow)
+         // We don't want to show this if users selected GitHubCode filter
+         // and haven't connected their GitHub account yet.
+         && (state.gitHubAccount.isConnected || activeFilter !== ResultsFilter.GitHubCode)
          && hasActiveFilterEmptyResults
          && !isActiveFilterLoading
+         // Don't show "Nothing found" when user is searching docs but disabled
+         // all doc sources.
+         && !(activeFilter === ResultsFilter.Docs && !isAnyDocSourceIncluded)
          &&
           <InfoMessage>Nothing found</InfoMessage>
         }
 
-        {activeFilter === ResultsFilter.GitHubCode && !state.gitHubAccount.isConnected &&
+        {state.search.query
+         && activeFilter === ResultsFilter.Docs
+         && !isAnyDocSourceIncluded
+         && !isActiveFilterLoading
+         &&
+          <>
+            <InfoMessage>No documentation is enabled</InfoMessage>
+            <EnableDocSourcesButton
+              onClick={openDocsFilterModal}
+            >
+              Enable documentations
+            </EnableDocSourcesButton>
+          </>
+        }
+
+        {activeFilter === ResultsFilter.GitHubCode
+         && !state.gitHubAccount.isConnected
+         &&
           <GitHubConnect>
             <GitHubConnectTitle>
               Connect your GitHub account to search on GitHub
             </GitHubConnectTitle>
-            <ConnectGitHubButton onClick={() => connectGitHub()}>
+            <ConnectGitHubButton onClick={connectGitHub()}>
               Connect my GitHub account
             </ConnectGitHubButton>
             {/* <GitHubPrivacyLink onClick={openPrivacyTerms}>
@@ -1332,7 +1410,10 @@ function Home() {
           </GitHubConnect>
         }
 
-        {!hasActiveFilterEmptyResults && !isActiveFilterLoading &&
+        {state.search.query
+         && !hasActiveFilterEmptyResults
+         && !isActiveFilterLoading
+         &&
           <>
             {(activeFilter === ResultsFilter.StackOverflow || activeFilter === ResultsFilter.GitHubCode) &&
               <SearchResultsWrapper>
@@ -1360,7 +1441,9 @@ function Home() {
                 ))}
               </SearchResultsWrapper>
             }
-            {activeFilter === ResultsFilter.Docs &&
+            {activeFilter === ResultsFilter.Docs
+             && isAnyDocSourceIncluded
+             &&
               <DocsWrapper>
                 <Resizable
                   defaultSize={{
@@ -1384,6 +1467,7 @@ function Home() {
                   </DocSearchResults>
                 </Resizable>
                 <DocPage
+                  isDocsFilterModalOpened={state.isDocsFilterModalOpened}
                   isSearchingInDocPage={state.isSearchingInDocPage}
                   html={(activeFocusedItem as DocResult).page.html}
                   searchInputRef={docPageSearchInputRef}
@@ -1425,7 +1509,10 @@ function Home() {
             {/*-------------------------------------------------------------*/}
 
             {/* Docs search results */}
-            {!state.modalItem && activeFilter === ResultsFilter.Docs &&
+            {!state.modalItem
+             && activeFilter === ResultsFilter.Docs
+             && isAnyDocSourceIncluded
+             &&
               <DocsSearchHotkeysPanel
                 isDocsFilterModalOpened={state.isDocsFilterModalOpened}
                 isSearchingInDocPage={state.isSearchingInDocPage}

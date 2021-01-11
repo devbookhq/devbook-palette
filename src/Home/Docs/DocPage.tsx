@@ -5,6 +5,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import Prism from 'prismjs';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import useDebounce from 'hooks/useDebounce';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
@@ -15,14 +16,44 @@ const Container = styled.div`
   height: 100%;
   width: 100%;
   min-width: 1px;
+  // background: #1b1b1b;
+  background: #1f1e1e;
+
+  //color: #E3E3E3;
+  color: #c1c9d2;
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Ubuntu,sans-serif;
 
   overflow: hidden;
   overflow-y: overlay;
 
-  * {
-    font-size: 14px;
-    font-weight: 400;
-    color: #e2e2e2;
+  h1 {
+    margin: 0;
+    padding: 15px 0;
+    color: #dcdcdc;
+    font-weight: 600;
+    font-size: 24px;
+    border-bottom: 1px solid #3B3A4A;
+  }
+
+  h2 {
+    margin: 0;
+    padding: 15px 0;
+    color: #dcdcdc;
+    font-weight: 600;
+    font-size: 20px;
+  }
+
+  h3 {
+    margin: 0;
+    padding: 15px 0;
+    color: #dcdcdc;
+    font-weight: 500;
+    font-size: 18px;
+  }
+
+  p {
+    line-height: 1.4em;
+    font-size: 16px;
   }
 
   strong {
@@ -45,7 +76,7 @@ const Container = styled.div`
     font-size: 14px;
     font-weight: 400;
 
-    background: #23222D;
+    background: #2a2933;
     border-radius: 3px;
   }
 
@@ -73,31 +104,17 @@ const Container = styled.div`
     padding: 10px;
     overflow-y: auto;
 
-    background: #23222D;
+    font-size: 14px;
+    font-family: 'Roboto Mono';
+    background: #373648;
+    border-left: 4px solid #5861d6;
     border-radius: 3px;
 
     code {
       padding: 0;
       background: transparent;
-      line-height: 18px;
+      line-height: 1.4em;
     }
-  }
-
-  h1 {
-    margin: 0 0 15px;
-    padding: 0 0 15px;
-    font-size: 21px;
-    font-weight: 600;
-    border-bottom: 2px solid #5A5A6F;
-  }
-
-  h2 {
-    font-size: 14px;
-    font-weight: 600;
-  }
-
-  h3 {
-    font-size: 14px;
   }
 
   a {
@@ -129,6 +146,43 @@ const Container = styled.div`
 
   .devbook-highlight.selected {
     background: #e46804;
+  }
+
+  /* MDN Specific (JS) */
+  .badge {
+    font-family: 'Roboto Mono';
+    font-weight: 600;
+    text-transform: lowercase;
+    font-size: 13px;
+    color: #87929c;
+  }
+
+  // <h3> title for parameters and return value.
+  #parameters, #return_value {
+    border-bottom: 1px solid #3B3A4A;
+  }
+
+  dl {
+    margin: 10px 0 0;
+    dt {
+      code {
+        font-weight: 500;
+        background: transparent;
+      }
+    }
+
+    dd {
+      margin: 5px 0 0 15px;
+
+      // Nested <dl> should have spacing.
+      dl {
+        margin-top: 10px;
+      }
+    }
+  }
+
+  .notecard.note {
+    background: #
   }
 `;
 
@@ -233,9 +287,9 @@ function highlightNode(textNode: Node, startIdx: number, endIdx: number) {
   if (!textNode.nodeValue) return;
 
   const nodes: Node[] = [];
-  const before = textNode.nodeValue.slice(0, startIdx);
-  if (before) {
-    nodes.push(document.createTextNode(before));
+  const infront = textNode.nodeValue.slice(0, startIdx);
+  if (infront) {
+    nodes.push(document.createTextNode(infront));
   }
 
   const highlight = textNode.nodeValue.slice(startIdx, endIdx+1);
@@ -314,12 +368,14 @@ interface Highlight {
 }
 
 interface DocPageProps {
-  isSearchingInDocPage?: boolean;
+  isDocsFilterModalOpened: boolean;
+  isSearchingInDocPage: boolean;
   html: string;
   searchInputRef: any;
 }
 
 function DocPage({
+  isDocsFilterModalOpened,
   isSearchingInDocPage,
   html,
   searchInputRef,
@@ -335,16 +391,9 @@ function DocPage({
     const el = document.createElement('html');
     el.innerHTML = html;
 
-    /*
-    if (el.getElementsByTagName('body').length > 0) {
-      console.log('el.innerText', el.getElementsByTagName('body')[0].innerText);
-    }
-    */
-
     const codes = el.getElementsByTagName('code');
     for (const code of codes) {
-      if (code.childNodes.length === 0) continue;
-      const codeText = code.childNodes[0].nodeValue;
+      const codeText = (code as HTMLElement).innerText;
       if (codeText) {
         // TODO: We could use the correct langague highlight based on the documentation.
         const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
@@ -354,11 +403,10 @@ function DocPage({
 
     const pres = el.getElementsByTagName('pre');
     for (const pre of pres) {
-      if (pre.childNodes.length === 0) return;
-      const text = pre.childNodes[0].nodeValue;
-      if (text) {
+      const codeText = (pre as HTMLElement).innerText;
+      if (codeText) {
         // TODO: We could use the correct langague highlight based on the documentation.
-        const codeHTML = Prism.highlight(text, Prism.languages.clike, 'clike');
+        const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
         pre.innerHTML = codeHTML;
       }
     }
@@ -399,9 +447,21 @@ function DocPage({
     }
   }
 
-  useEffect(() => {
-    containerRef?.current?.focus();
-  }, [html]);
+  useHotkeys('up', () => {
+    if (isSearchingInDocPage || isDocsFilterModalOpened) return;
+
+    if (containerRef?.current) {
+      containerRef.current.scrollBy(0, -15);
+    }
+  }, { filter: () => true }, [isSearchingInDocPage, isDocsFilterModalOpened]);
+
+  useHotkeys('down', () => {
+    if (isSearchingInDocPage || isDocsFilterModalOpened) return;
+
+    if (containerRef?.current) {
+      containerRef.current.scrollBy(0, 15);
+    }
+  }, { filter: () => true }, [isSearchingInDocPage, isDocsFilterModalOpened]);
 
   useEffect(() => {
     highlights.forEach(h => {
@@ -482,7 +542,6 @@ function DocPage({
       <Container
         id="doc-page"
         ref={containerRef}
-        tabIndex={0}
         dangerouslySetInnerHTML={{__html: highlightCode(html) as string}}
       />
     </>
