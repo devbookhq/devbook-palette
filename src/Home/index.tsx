@@ -1469,6 +1469,7 @@ function Home() {
                 <DocPage
                   isDocsFilterModalOpened={state.isDocsFilterModalOpened}
                   isSearchingInDocPage={state.isSearchingInDocPage}
+                  pageURL={(activeFocusedItem as DocResult).page.pageURL}
                   html={(activeFocusedItem as DocResult).page.html}
                   searchInputRef={docPageSearchInputRef}
                 />

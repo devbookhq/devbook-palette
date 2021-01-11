@@ -8,12 +8,13 @@ interface Page {
   documentation: string;
   name: string;
   summary: string;
+  hasHTMLExtension: boolean;
+  pageURL: string;
 }
 
 export interface DocResult {
   score: number;
   id: string;
-  highlights: string[];
   page: Page;
 }
 
@@ -28,6 +29,7 @@ export async function search(query: string, docSources: DocSource[]): Promise<Do
   if (isDev) url = 'https://dev.usedevbook.com/search/docs';
 
   const result = await axios.post(url, { query, filter: docSources.length > 0 ? docSources.map(ds => ds.slug) : undefined });
+  console.log('docs', result.data.results);
   return result.data.results;
 }
 
