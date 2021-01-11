@@ -43,7 +43,7 @@ class MainWindow {
     });
 
     this.window.setSkipTaskbar(true);
-    this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true }); 
+    this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
     this.window.on('restore', () => {
       console.log('Window restored');
