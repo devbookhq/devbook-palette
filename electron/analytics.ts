@@ -8,7 +8,7 @@ import debounce from './utils/debounce';
 const client = new Analytics('BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf', { flushAt: 5 });
 const store = new ElectronStore();
 
-const userID = store.get('userID', uuidv4());
+let userID = store.get('userID', uuidv4());
 store.set('userID', userID);
 
 const appVersion = app.getVersion();
@@ -19,9 +19,20 @@ client.identify({
   traits: {
     platform,
     appVersion,
-    name: userID,
   },
 });
+
+export function aliasAnalyticsUser(newUserID: string) {
+  const deviceUserID = store.get('userID', uuidv4());
+  store.set('userID', userID);
+
+  client.alias({
+    previousId: deviceUserID,
+    userId: newUserID,
+  });
+
+  userID = newUserID;
+}
 
 export function trackShowApp() {
   client.track({
