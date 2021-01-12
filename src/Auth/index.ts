@@ -15,7 +15,7 @@ export const authState = new EventEmitter();
 type UserState = { isUserLoading?: boolean, isUserSignedIn?: boolean };
 type UserInfo = (MagicUserMetadata & UserState) | (Partial<MagicUserMetadata> & UserState);
 
-export let user: UserState = { isUserLoading: true, isUserSignedIn: false };
+export let user: UserInfo = { isUserLoading: true, isUserSignedIn: false };
 
 authState.emit('changed', user);
 
