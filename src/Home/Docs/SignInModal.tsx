@@ -1,10 +1,17 @@
 import React from 'react';
 import styled from 'styled-components';
 
+const Content = styled.div`
+  
+`;
 
+function SignInForm() {
 
-function SignInModal() {
+  return (
+    <Content>
 
+    </Content>
+  );
 }
 
-export default SignInModal;
+export default SignInForm;

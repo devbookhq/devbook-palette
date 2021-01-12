@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Resizable } from 're-resizable';
 
+import { user, signIn } from 'Auth';
 import electron, {
   isDev,
   hideMainWindow,
@@ -107,6 +108,16 @@ const ConnectGitHubButton = styled(Button)`
 
 const GitHubConnectTitle = styled(InfoMessage)`
   margin: 0 0 30px;
+`;
+
+const SignInButton = styled(Button)`
+  margin-bottom: 15px;
+  padding: 10px 20px;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  border-radius: 5px;
 `;
 
 const EnableDocSourcesButton = styled(Button)`
@@ -727,6 +738,8 @@ function Home() {
   const docPageSearchInputRef = useRef<HTMLInputElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
+  const { isUserSignedIn } = user;
+
   const debouncedQuery = useDebounce(state.search.query.trim(), 400);
   const debouncedLastSearchedQuery = useDebounce(state.search.lastSearchedQuery.trim(), 400);
 
@@ -781,24 +794,24 @@ function Home() {
   }, []);
 
   const searchingSuccess = useCallback((filter: ResultsFilter, items: SearchResultItems) => {
-   dispatch({
-     type: ReducerActionType.SearchingSuccess,
-     payload: { filter, items },
-   });
+    dispatch({
+      type: ReducerActionType.SearchingSuccess,
+      payload: { filter, items },
+    });
   }, []);
 
   const searchingFail = useCallback((filter: ResultsFilter, errorMessage: string) => {
-   dispatch({
-     type: ReducerActionType.SearchingFail,
-     payload: { filter, errorMessage },
-   });
+    dispatch({
+      type: ReducerActionType.SearchingFail,
+      payload: { filter, errorMessage },
+    });
   }, []);
 
   const focusResultItem = useCallback((filter: ResultsFilter, idx: number, focusState: FocusState) => {
-   dispatch({
-     type: ReducerActionType.FocusResultItem,
-     payload: { filter, idx, focusState },
-   });
+    dispatch({
+      type: ReducerActionType.FocusResultItem,
+      payload: { filter, idx, focusState },
+    });
   }, []);
 
   const setSearchFilter = useCallback((filter: ResultsFilter) => {
@@ -1038,7 +1051,7 @@ function Home() {
         if (isGitHubConnected) {
           await searchGHCode(query);
         }
-      break;
+        break;
 
       case ResultsFilter.GitHubCode:
         if (isGitHubConnected) {
@@ -1046,7 +1059,7 @@ function Home() {
         }
         await searchSO(query);
         await searchDocs(query, docSources);
-      break;
+        break;
 
       case ResultsFilter.Docs:
         await searchDocs(query, docSources);
@@ -1054,7 +1067,7 @@ function Home() {
         if (isGitHubConnected) {
           await searchGHCode(query);
         }
-      break;
+        break;
     }
   }
 
@@ -1251,11 +1264,11 @@ function Home() {
         const allDocSources = await fetchDocSources();
         const mergedDocSources = allDocSources.map(ds => {
           const cached = cachedDocSources.find(cds => cds.slug === ds.slug);
-          if (cached) return {...ds, isIncludedInSearch: cached.isIncludedInSearch};
+          if (cached) return { ...ds, isIncludedInSearch: cached.isIncludedInSearch };
           return ds;
         });
         fetchDocSourcesSuccess(mergedDocSources);
-      } catch(err) {
+      } catch (err) {
         fetchDocSourcesFail(err);
       }
 
@@ -1263,8 +1276,8 @@ function Home() {
     }
     loadCachedData();
     tryToLoadGitHubAccount();
-  // We want to run this only during the first render.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // We want to run this only during the first render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Log error messages.
@@ -1315,17 +1328,17 @@ function Home() {
     if (debouncedQuery) {
       searchDocs(debouncedQuery, state.docSources);
     }
-  // NOTE: We don't want to run this useEffect every time
-  // the search query changes. We just want to refresh
-  // the docs results when user changes what doc sources
-  // they want to have active.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // NOTE: We don't want to run this useEffect every time
+    // the search query changes. We just want to refresh
+    // the docs results when user changes what doc sources
+    // they want to have active.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.docSources]);
 
   return (
     <>
       {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
-          <StackOverflowModal
+        <StackOverflowModal
           soResult={state.modalItem as StackOverflowResult}
           onCloseRequest={closeModal}
         />
@@ -1358,32 +1371,33 @@ function Home() {
         />
 
         {!state.search.query
-         // We don't want to show this if users selected GitHubCode filter
-         // and haven't connected their GitHub account yet.
-         && (state.gitHubAccount.isConnected || activeFilter !== ResultsFilter.GitHubCode)
-         && !isActiveFilterLoading
-         &&
+          // We don't want to show this if users selected GitHubCode filter
+          // and haven't connected their GitHub account yet.
+          && (state.gitHubAccount.isConnected || activeFilter !== ResultsFilter.GitHubCode)
+          && !isActiveFilterLoading
+          &&
           <InfoMessage>Type your search query</InfoMessage>
         }
 
         {state.search.query
-         // We don't want to show this if users selected GitHubCode filter
-         // and haven't connected their GitHub account yet.
-         && (state.gitHubAccount.isConnected || activeFilter !== ResultsFilter.GitHubCode)
-         && hasActiveFilterEmptyResults
-         && !isActiveFilterLoading
-         // Don't show "Nothing found" when user is searching docs but disabled
-         // all doc sources.
-         && !(activeFilter === ResultsFilter.Docs && !isAnyDocSourceIncluded)
-         &&
+          // We don't want to show this if users selected GitHubCode filter
+          // and haven't connected their GitHub account yet.
+          && (state.gitHubAccount.isConnected || activeFilter !== ResultsFilter.GitHubCode)
+          && hasActiveFilterEmptyResults
+          && !isActiveFilterLoading
+          // Don't show "Nothing found" when user is searching docs but disabled
+          // all doc sources.
+          && !(activeFilter === ResultsFilter.Docs && !isAnyDocSourceIncluded)
+          &&
           <InfoMessage>Nothing found</InfoMessage>
         }
 
         {state.search.query
-         && activeFilter === ResultsFilter.Docs
-         && !isAnyDocSourceIncluded
-         && !isActiveFilterLoading
-         &&
+          && activeFilter === ResultsFilter.Docs
+          && isUserSignedIn
+          && !isAnyDocSourceIncluded
+          && !isActiveFilterLoading
+          &&
           <>
             <InfoMessage>No documentation is enabled</InfoMessage>
             <EnableDocSourcesButton
@@ -1394,9 +1408,22 @@ function Home() {
           </>
         }
 
+        {activeFilter === ResultsFilter.Docs
+          && !isUserSignedIn
+          &&
+          <>
+            <InfoMessage>You need to Sign In to search in the documentation</InfoMessage>
+            <SignInButton
+              onClick={() => signIn()}
+            >
+              Sign In
+            </SignInButton>
+          </>
+        }
+
         {activeFilter === ResultsFilter.GitHubCode
-         && !state.gitHubAccount.isConnected
-         &&
+          && !state.gitHubAccount.isConnected
+          &&
           <GitHubConnect>
             <GitHubConnectTitle>
               Connect your GitHub account to search on GitHub
@@ -1411,39 +1438,41 @@ function Home() {
         }
 
         {state.search.query
-         && !hasActiveFilterEmptyResults
-         && !isActiveFilterLoading
-         &&
+          && !hasActiveFilterEmptyResults
+          && !isActiveFilterLoading
+          &&
           <>
             {(activeFilter === ResultsFilter.StackOverflow || activeFilter === ResultsFilter.GitHubCode) &&
               <SearchResultsWrapper>
                 {activeFilter === ResultsFilter.StackOverflow
-                 && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
-                  <StackOverflowItem
-                    key={idx}
-                    soResult={sor}
-                    focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
-                    onHeaderClick={() => focusResultItem(ResultsFilter.StackOverflow, idx, FocusState.NoScroll)}
-                    onTitleClick={() => openModal(sor)}
-                  />
-                ))}
+                  && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
+                    <StackOverflowItem
+                      key={idx}
+                      soResult={sor}
+                      focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+                      onHeaderClick={() => focusResultItem(ResultsFilter.StackOverflow, idx, FocusState.NoScroll)}
+                      onTitleClick={() => openModal(sor)}
+                    />
+                  ))}
 
                 {activeFilter === ResultsFilter.GitHubCode
-                 && state.gitHubAccount.isConnected
-                 && (state.results[ResultsFilter.GitHubCode].items as CodeResult[]).map((cr, idx) => (
-                  <CodeItem
-                    key={idx}
-                    codeResult={cr}
-                    focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
-                    onHeaderClick={() => focusResultItem(ResultsFilter.GitHubCode, idx, FocusState.NoScroll)}
-                    onFilePathClick={() => openModal(cr)}
-                  />
-                ))}
+                  && state.gitHubAccount.isConnected
+                  && (state.results[ResultsFilter.GitHubCode].items as CodeResult[]).map((cr, idx) => (
+                    <CodeItem
+                      key={idx}
+                      codeResult={cr}
+                      focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+                      onHeaderClick={() => focusResultItem(ResultsFilter.GitHubCode, idx, FocusState.NoScroll)}
+                      onFilePathClick={() => openModal(cr)}
+                    />
+                  ))}
               </SearchResultsWrapper>
             }
+
             {activeFilter === ResultsFilter.Docs
-             && isAnyDocSourceIncluded
-             &&
+              && isAnyDocSourceIncluded
+              && isUserSignedIn
+              &&
               <DocsWrapper>
                 <Resizable
                   defaultSize={{
@@ -1452,18 +1481,18 @@ function Home() {
                   }}
                   maxWidth="50%"
                   minWidth="200"
-                  enable={{right: true}}
+                  enable={{ right: true }}
                   onResizeStop={(e, dir, ref) => handleDocSearchResultsResizeStop(e, dir, ref)}
                 >
                   <DocSearchResults>
-                  {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
-                    <DocSearchResultItem
-                      key={idx}
-                      docResult={d}
-                      focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
-                      onClick={() => focusResultItem(ResultsFilter.Docs, idx, FocusState.NoScroll)}
-                    />
-                  ))}
+                    {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
+                      <DocSearchResultItem
+                        key={idx}
+                        docResult={d}
+                        focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+                        onClick={() => focusResultItem(ResultsFilter.Docs, idx, FocusState.NoScroll)}
+                      />
+                    ))}
                   </DocSearchResults>
                 </Resizable>
                 <DocPage
@@ -1511,9 +1540,10 @@ function Home() {
 
             {/* Docs search results */}
             {!state.modalItem
-             && activeFilter === ResultsFilter.Docs
-             && isAnyDocSourceIncluded
-             &&
+              && activeFilter === ResultsFilter.Docs
+              && isUserSignedIn
+              && isAnyDocSourceIncluded
+              &&
               <DocsSearchHotkeysPanel
                 isDocsFilterModalOpened={state.isDocsFilterModalOpened}
                 isSearchingInDocPage={state.isSearchingInDocPage}
@@ -1532,4 +1562,3 @@ function Home() {
 }
 
 export default Home;
-

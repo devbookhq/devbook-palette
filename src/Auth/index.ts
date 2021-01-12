@@ -1,12 +1,23 @@
+import { Magic, MagicUserMetadata } from 'magic-sdk';
+import axios from 'axios';
+import { EventEmitter } from 'events';
+
 import {
   crypto,
   querystring,
-} from '../mainProcess/electron';
+} from 'mainProcess/electron';
 import {
   openLink,
-} from '../mainProcess';
-import { Magic } from 'magic-sdk';
-import axios from 'axios';
+} from 'mainProcess';
+
+export const authState = new EventEmitter();
+
+type UserState = { isUserLoading?: boolean, isUserSignedIn?: boolean };
+type UserInfo = (MagicUserMetadata & UserState) | (Partial<MagicUserMetadata> & UserState);
+
+export let user: UserState = { isUserLoading: true, isUserSignedIn: false };
+
+authState.emit('changed', user);
 
 function generateSessionID() {
   return encodeURIComponent(crypto.randomBytes(64).toString('base64'));
@@ -29,12 +40,13 @@ export async function cancelSignIn() {
 
 export async function signOut() {
   await magic.user.logout();
+  await checkUser();
 }
 
 export async function signIn(email: string = 'tomas@usedevbook.com') {
   signInCanceled = false;
-  // const url = 'https://dev.usedevbook.com/auth';
-  const url = 'http://localhost:3002/auth';
+  const url = 'https://dev.usedevbook.com/auth';
+  // const url = 'http://localhost:3002/auth';
 
   const sessionID = generateSessionID();
 
@@ -81,8 +93,19 @@ export async function signIn(email: string = 'tomas@usedevbook.com') {
     });
 
     // await aliasAnalyticsUser(userMetadata.publicAddress);
+    await checkUser();
   } catch (error) {
     console.error(error);
   }
-
 }
+
+async function checkUser() {
+  const isUserSignedIn = await magic.user.isLoggedIn();
+  user = {
+    isUserSignedIn,
+    ...isUserSignedIn && await magic.user.getMetadata(),
+  };
+  authState.emit('changed', user);
+}
+
+checkUser();

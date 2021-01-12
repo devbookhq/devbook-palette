@@ -15,17 +15,10 @@ import electron, {
   restartAndUpdate,
   postponeUpdate,
 } from 'mainProcess';
-import { signIn } from '../Auth';
 
 import { ReactComponent as userProfileIcon } from 'img/user-profile.svg';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
-
-const SignButton = styled.div`
-  :hover {
-    cursor: pointer;
-  }
-`;
 
 const Container = styled.div`
   width: 100%;
@@ -344,9 +337,6 @@ function SearchInput({
           </CancelButton>
         </UpdatePanel>
       }
-      <SignButton onClick={() => signIn()}>
-        Sign In
-    </SignButton>
     </Container >
   );
 }
