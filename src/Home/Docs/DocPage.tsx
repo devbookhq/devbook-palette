@@ -32,7 +32,7 @@ const DocPageContainer = styled.div`
   overflow-y: overlay;
 
   h1 {
-    margin: 0;
+    margin: 0 0 10px;
     padding: 15px 0 10px;
     color: #dcdcdc;
     font-weight: 600;
@@ -41,7 +41,7 @@ const DocPageContainer = styled.div`
   }
 
   h2 {
-    margin: 0;
+    margin: 0 0 10px;
     padding: 15px 0 10px;
     color: #dcdcdc;
     font-weight: 600;
@@ -49,7 +49,7 @@ const DocPageContainer = styled.div`
   }
 
   h3 {
-    margin: 0;
+    margin: 0 0 10px;
     padding: 15px 0 10px;
     color: #dcdcdc;
     font-weight: 500;
@@ -57,7 +57,7 @@ const DocPageContainer = styled.div`
   }
 
   h4 {
-    margin: 0;
+    margin: 0 0 10px;
     padding: 15px 0 10px;
     color: #dcdcdc;
     font-weight: 500;
@@ -65,7 +65,7 @@ const DocPageContainer = styled.div`
   }
 
   p {
-    margin: 10px 0;
+    margin: 15px 0;
   }
 
   ul {
@@ -161,7 +161,6 @@ const DocPageContainer = styled.div`
     background: #e46804;
   }
 
-  /* MDN Specific (JS) */
   .badge {
     font-family: 'Roboto Mono';
     font-weight: 600;
@@ -171,13 +170,27 @@ const DocPageContainer = styled.div`
   }
 
   // Section titles.
+  /*
+  // JS
   #description,
   #parameters,
   #return_value,
   #constructor,
   #static_methods,
   #instance_methods,
-  #examples {
+  #examples,
+  #syntax,
+  // CSS
+  #Examples,
+  #Syntax,
+  #Values,
+  #Formal_definition,
+  #Formal_syntax {
+    border-bottom: 1px solid #3B3A4A;
+  }
+  */
+
+  h1, h2 {
     border-bottom: 1px solid #3B3A4A;
   }
 
@@ -185,6 +198,7 @@ const DocPageContainer = styled.div`
     margin: 10px 0 0;
     dt {
       margin-top: 10px;
+      font-weight: 600;
       code {
         font-weight: 500;
         background: transparent;
@@ -198,17 +212,214 @@ const DocPageContainer = styled.div`
         margin-top: 10px;
       }
 
-      p:first-child {
-        margin-top: 0;
+      p {
+        :first-child {
+          margin-top: 5px;
+        }
+        :last-child {
+          margin-bottom: 5px;
+        }
       }
     }
   }
 
-  .notecard.note {
-    margin: 5px 0;
-    padding: 1px 15px;
+  table {
+    margin: 15px 0;
+    width: 100%;
+    border-collapse: collapse;
+    border-left: 4px solid #3B3A4A;
+    th {
+      padding: 8px;
+      text-align: left;
+    }
+    thead {
+      tr {
+        border-bottom: 2px solid #3B3A4A;
+        td {
+          font-weight: 600;
+        }
+      }
+    }
+
+    tr {
+      :not(:last-child) {
+        border-bottom: 1px solid #3B3A4A;
+      }
+      td {
+        padding: 8px;
+        text-align: left;
+      }
+    }
+  }
+
+  // JS
+  .notecard.note,
+  // HTML
+  .note {
+    margin: 10px 0;
+    padding: 15px;
     background: #1C2443;
     border-left: 4px solid #1F4AE5;
+    border-radius: 3px;
+
+    blockquote {
+      padding: 0 0 0 15px;
+      margin: 0;
+      font-style: italic;
+      :before {
+        display: none;
+      }
+    }
+
+    h1, h2, h3, h4 {
+      :first-child {
+        padding-top: 0;
+        margin-top: 0;
+      }
+    }
+
+    p {
+      :first-child {
+        margin-top: 0;
+      }
+      :last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  // JS
+  .notecard.warning {
+    margin: 10px 0;
+    padding: 15px;
+    background: #464523;
+    border-left: 4px solid #F4ED44;
+    border-radius: 3px;
+
+    blockquote {
+      padding: 0 0 0 15px;
+      margin: 0;
+      font-style: italic;
+      :before {
+        display: none;
+      }
+    }
+
+    h1, h2, h3, h4 {
+      :first-child {
+        padding-top: 0;
+        margin-top: 0;
+      }
+    }
+
+    p {
+      :first-child {
+        margin-top: 0;
+      }
+      :last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  // JS
+  .notecard.deprecated,
+  // HTML
+  .blockIndicator.deprecated,
+  .blockIndicator.obsolete,
+  // Rust
+  .stab.deprecated {
+    margin: 10px 0;
+    padding: 15px;
+    background: #462323;
+    border-left: 4px solid #F44444;
+    border-radius: 3px;
+
+    // Note title.
+    #Deprecated {
+      color: #F44444;
+    }
+
+    blockquote {
+      padding: 0 0 0 15px;
+      margin: 0;
+      font-style: italic;
+      :before {
+        display: none;
+      }
+    }
+
+    h1, h2, h3, h4 {
+      :first-child {
+        padding-top: 0;
+        margin-top: 0;
+      }
+    }
+
+    p {
+      :first-child {
+        margin-top: 0;
+      }
+      :last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  // Rust
+  .stability {
+    margin: 15px 0;
+  }
+
+  // Rust
+  span.caption,
+  span.filename {
+    font-style: italic;
+  }
+
+  // Node
+  h3 {
+    code {
+      padding: 15px 0 10px;
+      font-weight: 500;
+      font-size: 18px;
+      background: transparent;
+      border-bottom: 1px solid #3B3A4A;
+    }
+  }
+
+  // Node
+  .api_metadata {
+    font-weight: 600;
+  }
+
+  // Node
+  // This is deprecated API.
+  .api_stability_0 {
+    margin: 10px 0;
+    padding: 15px;
+    background: #462323;
+    border-left: 4px solid #F44444;
+    border-radius: 3px;
+  }
+
+  // Node
+  // This is experimental API.
+  .api_stability_1 {
+    margin: 10px 0;
+    padding: 15px;
+    background: #464523;
+    border-left: 4px solid #F4ED44;
+    border-radius: 3px;
+  }
+
+  // Node
+  // This is stable API.
+  .api_stability_2 {
+    margin: 10px 0;
+    padding: 15px;
+    background: #234629;
+    border-left: 4px solid #44F460;
     border-radius: 3px;
   }
 `;
@@ -495,8 +706,6 @@ function DocPage({
   // Open all links in the browser.
   function handleDocPageClick(e: any) {
     const target = e.target || e.srcElement;
-    console.log('EVENT', e);
-    console.log('TARGET', target);
     // The 'target.parentNode' handles a case when <a> element contains a <code> element.
     // If <code> element is inside the <a> element the event's target is actually the
     // <code> element and not the <a> element. So we have to check if its parent is <a>.
@@ -579,6 +788,10 @@ function DocPage({
       }
     }
   }, [setHighlights, debouncedSearchQuery]);
+
+  useEffect(() => {
+    containerRef?.current?.scrollTo(0, 0);
+  }, [html]);
 
   return (
     <>
