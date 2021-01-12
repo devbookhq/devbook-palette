@@ -324,7 +324,7 @@ function SearchInput({
           </CancelButton>
         </UpdatePanel>
       }
-      <SignButton onClick={signIn}>
+      <SignButton onClick={() => signIn()}>
         Sign In
     </SignButton>
     </Container >

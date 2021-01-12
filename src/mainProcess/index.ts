@@ -1,3 +1,4 @@
+import electron from './electron';
 import { ResultsFilter } from 'Home/SearchInput';
 import { DocSource } from 'search/docs';
 
@@ -5,8 +6,6 @@ enum IPCMessage {
   GetCachedDocSources = 'GetCachedDocSources',
   SaveDocSources = 'SaveDocSources',
 }
-
-const electron = window.require('electron') as typeof import('electron');
 
 // So we see logs from the main process in the Chrome debug tools.
 electron.ipcRenderer.on('console', (_, args) => {

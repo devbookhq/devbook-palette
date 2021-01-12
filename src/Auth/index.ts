@@ -1,41 +1,88 @@
+import {
+  crypto,
+  querystring,
+} from '../mainProcess/electron';
+import {
+  openLink,
+} from '../mainProcess';
 import { Magic } from 'magic-sdk';
-import electron, { aliasAnalyticsUser, openLink } from '../mainProcess';
 import axios from 'axios';
-import { v4 as uuidv4 } from 'uuid';
 
-const querystring = electron.remote.require('querystring') as typeof import('querystring');
+function generateSessionID() {
+  return encodeURIComponent(crypto.randomBytes(64).toString('base64'));
+};
+
+function timeout(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 const magic = new Magic('pk_test_2AE829E9A03C1FA0');
 
+const cancelSignInToken = axios.CancelToken.source();
+
+let signInCanceled = false;
+
+export async function cancelSignIn() {
+  signInCanceled = true;
+  cancelSignInToken.cancel();
+}
+
+export async function signOut() {
+  await magic.user.logout();
+}
+
 export async function signIn(email: string = 'tomas@usedevbook.com') {
-  if (await magic.user.isLoggedIn()) {
-    await magic.user.logout();
-  }
+  signInCanceled = false;
+  // const url = 'https://dev.usedevbook.com/auth';
+  const url = 'http://localhost:3002/auth';
 
-  // const url = 'https://api.usedevbook.com/user/signin';
-  const url = 'http://localhost:3002/';
-
-  const sessionID = uuidv4();
+  const sessionID = generateSessionID();
 
   const params = querystring.encode({
     email,
   });
 
-  openLink(`${url}/auth/signin/${sessionID}?${params}`);
+  openLink(`${url}/signin/${sessionID}?${params}`);
 
-  const result = await axios.get(`${url}/auth/credentials/${sessionID}`, {
-    params: {
-      email,
-    },
-  });
+  let credential: string | undefined = undefined;
 
-  const { credentials } = result.data;
+  while (!signInCanceled && !credential) {
+    try {
+      const result = await axios.get(`${url}/credential/${sessionID}`, {
+        params: {
+          email,
+        },
+        cancelToken: cancelSignInToken.token,
+      });
 
-  await magic.auth.loginWithCredential(credentials);
+      credential = result.data.credential;
+      break;
+    } catch (error) {
+      if (error.response?.status !== 404) {
+        signInCanceled = true;
+        console.error(error);
+        break;
+      }
+    }
+    await timeout(1200);
+  }
 
-  const userMetadata = await magic.user.getMetadata();
+  if (!credential) {
+    return;
+  }
 
-  console.log('public address', userMetadata.publicAddress);
+  try {
+    const didToken = await magic.auth.loginWithCredential(credential);
+    const userMetadata = await magic.user.getMetadata()
+    console.log('public address', userMetadata.publicAddress);
 
-  // await aliasAnalyticsUser(userMetadata.publicAddress);
+    await axios.post(`${url}/signin`, {
+      didToken,
+    });
+
+    // await aliasAnalyticsUser(userMetadata.publicAddress);
+  } catch (error) {
+    console.error(error);
+  }
+
 }
