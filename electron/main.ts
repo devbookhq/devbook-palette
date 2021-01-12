@@ -19,11 +19,12 @@ import {
   trackConnectGitHubStarted,
   trackModalOpened,
   trackShortcut,
+  aliasAnalyticsUser,
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow from './PreferencesWindow';
-import OAuth from './OAuth';
+import Auth from './Auth';
 import MainWindow from './MainWindow';
 
 enum IPCMessage {
@@ -148,19 +149,19 @@ let preferencesWindow: PreferencesWindow | undefined = undefined;
 
 const store = new Store();
 
-const oauth = new OAuth(
+const auth = new Auth(
   () => mainWindow?.show(),
   () => hideMainWindow(),
 );
 
-oauth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
+auth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
   mainWindow?.webContents?.send('github-access-token', { accessToken });
   preferencesWindow?.webContents?.send('github-access-token', { accessToken });
   store.set('github', accessToken);
   trackConnectGitHubFinished();
 });
 
-oauth.emitter.on('error', ({ message }: { message: string }) => {
+auth.emitter.on('error', ({ message }: { message: string }) => {
   mainWindow?.webContents?.send('github-error', { message });
   preferencesWindow?.webContents?.send('github-error', { message });
 });
@@ -317,8 +318,12 @@ ipcMain.handle('get-global-shortcut', () => {
 });
 
 ipcMain.on('connect-github', () => {
-  oauth.requestOAuth();
+  auth.requestOAuth();
   trackConnectGitHubStarted();
+});
+
+ipcMain.handle('alias-analytics-user', async (_, { userID }: { userID: string }) => {
+  aliasAnalyticsUser(userID);
 });
 
 ipcMain.on('open-preferences', () => openPreferences());
