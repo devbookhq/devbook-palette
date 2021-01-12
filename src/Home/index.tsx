@@ -112,7 +112,7 @@ const GitHubConnectTitle = styled(InfoMessage)`
 `;
 
 const SignInButton = styled(Button)`
-  margin-bottom: 15px;
+  margin-top: 15px;
   padding: 10px 20px;
 
   font-size: 15px;
@@ -1459,7 +1459,7 @@ function Home() {
           && !isUserSignedIn
           &&
           <>
-            <InfoMessage>You need to Sign In to search in the documentation</InfoMessage>
+            <InfoMessage>You need to sign in to search documentations</InfoMessage>
             <SignInButton
               onClick={openSignInModal}
             >

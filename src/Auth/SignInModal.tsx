@@ -1,27 +1,39 @@
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-} from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 
 import Modal from 'components/Modal';
 import Button from 'components/Button';
 import { signIn, cancelSignIn } from 'Auth';
 
-
 const StyledModal = styled(Modal)`
+  padding: 15px;
   height: 100%;
   margin: 60px 0 69px;
   min-width: 550px;
 
   display: flex;
   flex-direction: column;
+  align-items: center;
 
-  overflow: hidden;
   background: #1C1B26;
   border-radius: 5px;
   border: 1px solid #3B3A4A;
+`;
+
+const Title = styled.h1`
+  margin: 0 0 10px;
+
+  color: #fff;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+`;
+
+const Description = styled.div`
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #C1C9D2;
 `;
 
 const SignInButton = styled(Button)`
@@ -34,21 +46,42 @@ const SignInButton = styled(Button)`
   border-radius: 5px;
 `;
 
-const CancelSignInButton = styled.div`
-  margin: 6px 0;
+const InputWrapper = styled.div`
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 350px;
 
-  color: #FF5865;
-  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const InputTitle = styled.span`
+  margin-bottom: 3px;
   font-size: 14px;
-  user-select: none;
+  color: #5A5A6F;
+`;
 
-  :hover {
-    cursor: pointer;
-    color: white;
-  }
+const Error = styled.div`
+  margin: 15px 0 10px;
+  padding: 5px 10px;
+  color: #F44444;
+  background: #462323;
+  border-radius: 5px;
 `;
 
 const EmailInput = styled.input`
+  padding: 8px 10px;
+  width: 100%;
+
+  color: #fff;
+  font-size: 14px;
+  font-family: 'Poppins';
+  font-weight: 500;
+
+  border: 1px solid #535BD7;
+  border-radius: 5px;
+  background: #23222D;
 `;
 
 interface SignInModalProps {
@@ -70,12 +103,15 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
   }
 
   async function handleSignIn() {
-    if (email && email !== '') {
-      setError('Email must not be empty')
-    }
-
+    if (isLoading) return;
     setIsLoading(true);
     setError('');
+
+    if (!email) {
+      setError('Email is empty')
+      return;
+    }
+
     try {
       await signIn(email);
     } catch (error) {
@@ -90,30 +126,36 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
     <StyledModal
       onCloseRequest={handleCloseRequest}
     >
-      <EmailInput disabled={isLoading} value={email} onChange={handleEmailInputChange} />
+      <Title>
+        Sign in with your email
+      </Title>
 
-      {
-        isLoading
-        &&
-        <CancelSignInButton
-          onClick={cancelSignIn}
-        >
-          Cancel
-       </CancelSignInButton>
-      }
+      <Description>
+        Click on the sign-in button and you'll receive an email with a sign-in link.
+      </Description>
 
-      {
-        !isLoading
-        &&
-        <SignInButton
-          disabled={email.length < 1}
-          onClick={handleSignIn}
-        >
-          Sign In
-       </SignInButton>
+      <InputWrapper>
+        <InputTitle>EMAIL</InputTitle>
+        <EmailInput
+          placeholder="your@email.com"
+          value={email}
+          onChange={handleEmailInputChange}
+        />
+     </InputWrapper>
+
+      {error &&
+        <Error>
+          {error}
+        </Error>
       }
-    </StyledModal >
+      <SignInButton
+        onClick={handleSignIn}
+      >
+        Sign in to Devbook
+     </SignInButton>
+    </StyledModal>
   );
 }
 
 export default SignInModal;
+
