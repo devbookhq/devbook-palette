@@ -46,7 +46,7 @@ export async function signOut() {
   }
 }
 
-export async function signIn(email: string = 'tomas@usedevbook.com') {
+export async function signIn(email: string) {
   signInCanceled = false;
   const url = 'https://dev.usedevbook.com/auth';
   // const url = 'http://localhost:3002/auth';
