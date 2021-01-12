@@ -46,6 +46,7 @@ import {
 } from 'search/docs';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
+import SignInModal from 'Auth/SignInModal';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
 import {
@@ -200,6 +201,9 @@ enum ReducerActionType {
   OpenDocsFilterModal,
   CloseDocsFilterModal,
 
+  OpenSignInModal,
+  CloseSignInModal,
+
   FetchDocSourcesSuccess,
   FetchDocSourcesFail,
 
@@ -327,6 +331,14 @@ interface CloseDocsFilterModal {
   type: ReducerActionType.CloseDocsFilterModal;
 }
 
+interface OpenSignInModal {
+  type: ReducerActionType.OpenSignInModal;
+}
+
+interface CloseSignInModal {
+  type: ReducerActionType.CloseSignInModal;
+}
+
 interface FetchDocSourcesSuccess {
   type: ReducerActionType.FetchDocSourcesSuccess;
   payload: { docSources: DocSource[] };
@@ -372,6 +384,8 @@ type ReducerAction = SetSearchQuery
   | CancelSearchInDocPage
   | OpenDocsFilterModal
   | CloseDocsFilterModal
+  | OpenSignInModal
+  | CloseSignInModal
   | FetchDocSourcesSuccess
   | FetchDocSourcesFail
   | IncludeDocSourceInSearch
@@ -398,6 +412,7 @@ interface State {
   isDocsFilterModalOpened: boolean;
   docSources: DocSource[];
   isLoadingCachedData: boolean;
+  isSignInModalOpened: boolean;
 }
 
 const initialState: State = {
@@ -450,6 +465,7 @@ const initialState: State = {
   isDocsFilterModalOpened: false,
   docSources: [],
   isLoadingCachedData: true,
+  isSignInModalOpened: false,
 }
 
 function stateReducer(state: State, reducerAction: ReducerAction): State {
@@ -694,6 +710,18 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         isDocsFilterModalOpened: false,
       };
     }
+    case ReducerActionType.OpenSignInModal: {
+      return {
+        ...state,
+        isSignInModalOpened: true,
+      };
+    }
+    case ReducerActionType.CloseSignInModal: {
+      return {
+        ...state,
+        isSignInModalOpened: false,
+      };
+    }
     case ReducerActionType.FetchDocSourcesSuccess: {
       const { docSources } = reducerAction.payload;
       return {
@@ -931,6 +959,18 @@ function Home() {
   const closeDocsFilterModal = useCallback(() => {
     dispatch({
       type: ReducerActionType.CloseDocsFilterModal,
+    });
+  }, []);
+
+  const openSignInModal = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.OpenSignInModal,
+    });
+  }, []);
+
+  const closeSignInModal = useCallback(() => {
+    dispatch({
+      type: ReducerActionType.CloseSignInModal,
     });
   }, []);
 
@@ -1359,6 +1399,13 @@ function Home() {
         />
       }
 
+      {
+        state.isSignInModalOpened &&
+        <SignInModal
+          onCloseRequest={closeSignInModal}
+        />
+      }
+
       <Container>
         <SearchInput
           placeholder="Search StackOverflow, code on GitHub, and docs"
@@ -1414,7 +1461,7 @@ function Home() {
           <>
             <InfoMessage>You need to Sign In to search in the documentation</InfoMessage>
             <SignInButton
-              onClick={() => signIn()}
+              onClick={openSignInModal}
             >
               Sign In
             </SignInButton>

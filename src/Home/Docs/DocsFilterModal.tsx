@@ -137,7 +137,6 @@ const DocName = styled.span`
 const DocToggle = styled.input`
 `;
 
-
 interface DocsFilterModalProps {
   docSources: DocSource[];
   onDocSourceClick: (ds: DocSource) => void;
@@ -320,4 +319,3 @@ function DocsFilterModal({
 }
 
 export default DocsFilterModal;
-

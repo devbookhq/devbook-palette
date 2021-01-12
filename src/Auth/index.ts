@@ -32,14 +32,18 @@ const cancelSignInToken = axios.CancelToken.source();
 
 let signInCanceled = false;
 
-export async function cancelSignIn() {
+export function cancelSignIn() {
   signInCanceled = true;
   cancelSignInToken.cancel();
 }
 
 export async function signOut() {
-  await magic.user.logout();
-  await checkUser();
+  try {
+    await magic.user.logout();
+    await checkUser();
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 export async function signIn(email: string = 'tomas@usedevbook.com') {
