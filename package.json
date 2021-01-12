@@ -75,11 +75,12 @@
     "release:linux": "rm -rf dist && npm run electron:build-linux && npm run upload:linux"
   },
   "dependencies": {
-    "analytics-node": "^3.4.0-beta.3",
-    "axios": "^0.21.0",
+    "analytics-node": "^3.5.0",
+    "axios": "^0.21.1",
     "electron-store": "^5.2.0",
     "electron-updater": "^4.3.5",
     "express": "^4.17.1",
+    "magic-sdk": "^4.0.2",
     "prism-react-renderer": "^1.1.1",
     "prismjs": "^1.22.0",
     "re-resizable": "^6.9.0",
@@ -111,6 +112,6 @@
     "electron-reload": "^1.5.0",
     "react-scripts": "^4.0.1",
     "typescript": "^4.0.2",
-    "wait-on": "^5.0.0"
+    "wait-on": "^5.2.1"
   }
 }

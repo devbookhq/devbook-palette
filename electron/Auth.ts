@@ -61,7 +61,7 @@ class OAuth {
   }
 
   private static async getAccessToken(code: string) {
-    const result = await axios.post('https://api.getsidekick.app/getOAuthAccessToken', {
+    const result = await axios.post('https://api.usedevbook.app/getOAuthAccessToken', {
       code,
     });
     return result.data.accessToken;

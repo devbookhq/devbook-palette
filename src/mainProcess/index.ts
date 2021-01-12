@@ -31,6 +31,10 @@ export function connectGitHub() {
   electron.ipcRenderer.send('connect-github');
 }
 
+export function aliasAnalyticsUser(userID: string) {
+  return electron.ipcRenderer.invoke('alias-analytics-user', { userID });
+}
+
 export function removeGitHub() {
   return electron.ipcRenderer.invoke('remove-github');
 }
@@ -126,4 +130,3 @@ export function saveDocSources(docSources: DocSource[]) {
 }
 
 export default electron;
-
