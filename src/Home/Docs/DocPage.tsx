@@ -5,12 +5,16 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import Prism from 'prismjs';
+
 import { useHotkeys } from 'react-hotkeys-hook';
 
+import { openLink } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
 
-const Container = styled.div`
+
+
+const DocPageContainer = styled.div`
   flex: 1;
   padding: 10px 15px 20px;
   height: 100%;
@@ -21,6 +25,9 @@ const Container = styled.div`
 
   //color: #E3E3E3;
   color: #c1c9d2;
+  //color: #ced3d8;
+  font-size: 14px;
+  line-height: 1.65em;
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Ubuntu,sans-serif;
 
   overflow: hidden;
@@ -51,21 +58,13 @@ const Container = styled.div`
     font-size: 18px;
   }
 
-  p {
-    line-height: 1.4em;
-    font-size: 16px;
-  }
-
-  strong {
-    font-weight: 600;
-    font-size: 14px;
-  }
-
-  hr {
-    border: none;
-    height: 1px;
-    background-color: #535557;
-    height: 0;
+  ul {
+    padding-left: 40px;
+    li {
+      :not(:last-child) {
+        margin-bottom: 10px;
+      }
+    }
   }
 
   code {
@@ -73,7 +72,7 @@ const Container = styled.div`
 
     color: #D9D9DA;
     font-family: 'Roboto Mono';
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 400;
 
     background: #2a2933;
@@ -104,7 +103,7 @@ const Container = styled.div`
     padding: 10px;
     overflow-y: auto;
 
-    font-size: 14px;
+    font-size: 13px;
     font-family: 'Roboto Mono';
     background: #373648;
     border-left: 4px solid #5861d6;
@@ -182,7 +181,10 @@ const Container = styled.div`
   }
 
   .notecard.note {
-    background: #
+    padding: 1px 15px;
+    background: #1C2443;
+    border-left: 4px solid #1F4AE5;
+    border-radius: 3px;
   }
 `;
 
@@ -370,6 +372,7 @@ interface Highlight {
 interface DocPageProps {
   isDocsFilterModalOpened: boolean;
   isSearchingInDocPage: boolean;
+  pageURL: string;
   html: string;
   searchInputRef: any;
 }
@@ -377,6 +380,7 @@ interface DocPageProps {
 function DocPage({
   isDocsFilterModalOpened,
   isSearchingInDocPage,
+  pageURL,
   html,
   searchInputRef,
 }: DocPageProps) {
@@ -408,6 +412,20 @@ function DocPage({
         // TODO: We could use the correct langague highlight based on the documentation.
         const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
         pre.innerHTML = codeHTML;
+      }
+    }
+
+    // TODO: Load TEX language.
+    const maths = el.getElementsByTagName('math');
+    for (const math of maths) {
+      //console.log('math', math);
+      const mathText = (math as HTMLElement).innerText;
+      //console.log('mathText', mathText);
+      //console.log('Prism', Prism.languages)
+      if (mathText) {
+        // TODO: We could use the correct langague highlight based on the documentation.
+        const mathHTML = Prism.highlight(mathText, Prism.languages.tex, 'tex');
+        math.innerHTML = mathHTML;
       }
     }
 
@@ -444,6 +462,42 @@ function DocPage({
       } else {
         selectNextHighlight();
       }
+    }
+  }
+
+  // Open all links in the browser.
+  function handleDocPageClick(e: any) {
+    const target = e.target || e.srcElement;
+    console.log('TARGET', target);
+    // The 'target.parentNode' handles a case when <a> element contains a <code> element.
+    // If <code> element is inside the <a> element the event's target is actually the
+    // <code> element and not the <a> element. So we have to check if its parent is <a>.
+    if (target.tagName === 'A' || target.parentNode.tagName === 'A') {
+      let url = target.getAttribute('href') || target.parentNode.getAttribute('href');
+      if (
+        url.startsWith('.')
+        || url.startsWith('#')
+        || !url.startsWith('http://')
+        || !url.startsWith('https://')
+       ) {
+        url = new URL(url, pageURL).href;
+      }
+      openLink(url);
+      e.preventDefault();
+    }
+
+    if (target.tagName === 'IMG') {
+      let url = target.getAttribute('src');
+      if (
+        url.startsWith('.')
+        || url.startsWith('#')
+        || !url.startsWith('http://')
+        || !url.startsWith('https://')
+       ) {
+        url = new URL(url, pageURL).href;
+      }
+      openLink(url);
+      e.preventDefault();
     }
   }
 
@@ -539,8 +593,9 @@ function DocPage({
           </SearchControls>
         </SearchInputWrapper>
       }
-      <Container
+      <DocPageContainer
         id="doc-page"
+        onClick={handleDocPageClick}
         ref={containerRef}
         dangerouslySetInnerHTML={{__html: highlightCode(html) as string}}
       />
