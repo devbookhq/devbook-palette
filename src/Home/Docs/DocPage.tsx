@@ -12,8 +12,6 @@ import { openLink } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
 
-
-
 const DocPageContainer = styled.div`
   flex: 1;
   padding: 10px 15px 20px;
@@ -35,7 +33,7 @@ const DocPageContainer = styled.div`
 
   h1 {
     margin: 0;
-    padding: 15px 0;
+    padding: 15px 0 10px;
     color: #dcdcdc;
     font-weight: 600;
     font-size: 24px;
@@ -44,7 +42,7 @@ const DocPageContainer = styled.div`
 
   h2 {
     margin: 0;
-    padding: 15px 0;
+    padding: 15px 0 10px;
     color: #dcdcdc;
     font-weight: 600;
     font-size: 20px;
@@ -52,10 +50,22 @@ const DocPageContainer = styled.div`
 
   h3 {
     margin: 0;
-    padding: 15px 0;
+    padding: 15px 0 10px;
     color: #dcdcdc;
     font-weight: 500;
     font-size: 18px;
+  }
+
+  h4 {
+    margin: 0;
+    padding: 15px 0 10px;
+    color: #dcdcdc;
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  p {
+    margin: 10px 0;
   }
 
   ul {
@@ -104,6 +114,7 @@ const DocPageContainer = styled.div`
     overflow-y: auto;
 
     font-size: 13px;
+    font-weight: 500;
     font-family: 'Roboto Mono';
     background: #373648;
     border-left: 4px solid #5861d6;
@@ -119,6 +130,9 @@ const DocPageContainer = styled.div`
   a {
     color: #4CACD6;
     text-decoration: underline;
+    code {
+      text-decoration: none;
+    }
   }
 
   img {
@@ -156,14 +170,21 @@ const DocPageContainer = styled.div`
     color: #87929c;
   }
 
-  // <h3> title for parameters and return value.
-  #parameters, #return_value {
+  // Section titles.
+  #description,
+  #parameters,
+  #return_value,
+  #constructor,
+  #static_methods,
+  #instance_methods,
+  #examples {
     border-bottom: 1px solid #3B3A4A;
   }
 
   dl {
     margin: 10px 0 0;
     dt {
+      margin-top: 10px;
       code {
         font-weight: 500;
         background: transparent;
@@ -172,15 +193,19 @@ const DocPageContainer = styled.div`
 
     dd {
       margin: 5px 0 0 15px;
-
       // Nested <dl> should have spacing.
       dl {
         margin-top: 10px;
+      }
+
+      p:first-child {
+        margin-top: 0;
       }
     }
   }
 
   .notecard.note {
+    margin: 5px 0;
     padding: 1px 15px;
     background: #1C2443;
     border-left: 4px solid #1F4AE5;
@@ -395,6 +420,7 @@ function DocPage({
     const el = document.createElement('html');
     el.innerHTML = html;
 
+    /*
     const codes = el.getElementsByTagName('code');
     for (const code of codes) {
       const codeText = (code as HTMLElement).innerText;
@@ -404,6 +430,7 @@ function DocPage({
         code.innerHTML = codeHTML;
       }
     }
+    */
 
     const pres = el.getElementsByTagName('pre');
     for (const pre of pres) {
@@ -468,6 +495,7 @@ function DocPage({
   // Open all links in the browser.
   function handleDocPageClick(e: any) {
     const target = e.target || e.srcElement;
+    console.log('EVENT', e);
     console.log('TARGET', target);
     // The 'target.parentNode' handles a case when <a> element contains a <code> element.
     // If <code> element is inside the <a> element the event's target is actually the
@@ -499,6 +527,7 @@ function DocPage({
       openLink(url);
       e.preventDefault();
     }
+    e.preventDefault();
   }
 
   useHotkeys('up', () => {
