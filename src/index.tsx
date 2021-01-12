@@ -8,7 +8,15 @@ import * as serviceWorker from './serviceWorker';
 import App from './App';
 import { authState } from 'Auth';
 
-authState.on('changed', (user) => {
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+  ,
+  document.getElementById('root'),
+);
+
+authState.on('changed', () => {
   ReactDOM.render(
     <React.StrictMode>
       <App />

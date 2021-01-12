@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Resizable } from 're-resizable';
 
-import { user, signIn } from 'Auth';
+import { authInfo, signIn } from 'Auth';
 import electron, {
   isDev,
   hideMainWindow,
@@ -738,7 +738,7 @@ function Home() {
   const docPageSearchInputRef = useRef<HTMLInputElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
-  const { isUserSignedIn } = user;
+  const isUserSignedIn = !!authInfo.user;
 
   const debouncedQuery = useDebounce(state.search.query.trim(), 400);
   const debouncedLastSearchedQuery = useDebounce(state.search.lastSearchedQuery.trim(), 400);

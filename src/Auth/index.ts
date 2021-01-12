@@ -12,12 +12,11 @@ import {
 
 export const authState = new EventEmitter();
 
-type UserState = { isUserLoading?: boolean, isUserSignedIn?: boolean };
-type UserInfo = (MagicUserMetadata & UserState) | (Partial<MagicUserMetadata> & UserState);
+export type AuthInfo = { user?: MagicUserMetadata, isLoading?: boolean };
 
-export let user: UserInfo = { isUserLoading: true, isUserSignedIn: false };
+export type { MagicUserMetadata };
 
-authState.emit('changed', user);
+export let authInfo: AuthInfo = { isLoading: true };
 
 function generateSessionID() {
   return encodeURIComponent(crypto.randomBytes(64).toString('base64'));
@@ -101,11 +100,12 @@ export async function signIn(email: string = 'tomas@usedevbook.com') {
 
 async function checkUser() {
   const isUserSignedIn = await magic.user.isLoggedIn();
-  user = {
-    isUserSignedIn,
-    ...isUserSignedIn && await magic.user.getMetadata(),
-  };
-  authState.emit('changed', user);
+  if (isUserSignedIn) {
+    authInfo = { user: await magic.user.getMetadata(), isLoading: false };
+  } else {
+    authInfo = { isLoading: false };
+  }
+  authState.emit('changed', authInfo);
 }
 
 checkUser();

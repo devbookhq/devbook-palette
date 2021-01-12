@@ -1,10 +1,8 @@
-import React, {
-  useEffect,
-  useState,
-} from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import Base from './Base';
 import Button from 'components/Button';
+import { MagicUserMetadata, signOut } from 'Auth';
 
 const Container = styled.div`
   width: 100%;
@@ -45,7 +43,7 @@ const SignInText = styled.div`
 const SignInButton = styled(Button)``;
 
 interface AccountProps {
-  user?: any; // TODO: Add a proper type.
+  user?: MagicUserMetadata;
 }
 
 function Account({ user }: AccountProps) {
@@ -57,8 +55,7 @@ function Account({ user }: AccountProps) {
             <Email>
               {user.email}
             </Email>
-            {/* TODO: Implement onClick */}
-            <SignOutButton onClick={() => {}}>
+            <SignOutButton onClick={() => signOut()}>
               Sign Out
             </SignOutButton>
           </>
@@ -71,7 +68,7 @@ function Account({ user }: AccountProps) {
             </SignInText>
 
             {/* TODO: Implement onClick */}
-            <SignInButton onClick={() => {}}>
+            <SignInButton onClick={() => { }}>
               Sign in to Devbook
             </SignInButton>
           </SignInWrapper>
@@ -82,4 +79,3 @@ function Account({ user }: AccountProps) {
 }
 
 export default Account;
-

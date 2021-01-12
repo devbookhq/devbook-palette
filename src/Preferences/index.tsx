@@ -19,7 +19,7 @@ import GeneralPreferences from './Pages/GeneralPreferences';
 import Integrations from './Pages/Integrations';
 import Account from './Pages/Account';
 import useIPCRenderer from 'hooks/useIPCRenderer';
-
+import { authInfo } from 'Auth';
 
 const Container = styled.div`
   width: 100%;
@@ -199,12 +199,14 @@ function Preferences() {
         <Route
           path="/preferences/account"
           exact
-          component={Account}
-        />
+        >
+          <Account
+            user={authInfo.user}
+          />
+        </Route>
       </Switch>
     </Container>
   );
 }
 
 export default Preferences;
-
