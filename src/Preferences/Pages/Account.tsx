@@ -45,7 +45,7 @@ const SignInText = styled.div`
 const SignInButton = styled(Button)``;
 
 interface AccountProps {
-  user?: any; // TODO: Add a proper type.
+  user?: any; // TODO: Add a proper type and remove "?".
 }
 
 function Account({ user }: AccountProps) {
