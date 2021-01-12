@@ -16,8 +16,9 @@ import electron, {
   postponeUpdate,
 } from 'mainProcess';
 
-import { ReactComponent as PreferencesIcon } from 'img/preferences.svg';
-import { ReactComponent as closeImg } from 'img/close.svg';
+import { ReactComponent as userProfileIcon } from 'img/user-profile.svg';
+import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
+import { ReactComponent as closeIcon } from 'img/close.svg';
 
 const Container = styled.div`
   width: 100%;
@@ -101,7 +102,25 @@ const FilterButton = styled.button<{ selected?: boolean }>`
   }
 `;
 
-const StyledPreferencesIcon = styled(PreferencesIcon)`
+const UserProfileIcon = styled(userProfileIcon)`
+  height: auto;
+  width: 20px;
+`;
+
+const UserProfileButton = styled.div`
+  margin: 0 15px 0 0;
+
+  display: flex;
+
+  :hover {
+    path {
+      stroke: white;
+    }
+    cursor: pointer;
+  }
+`;
+
+const PreferencesIcon = styled(preferencesIcon)`
   height: auto;
   width: 20px;
 `;
@@ -157,12 +176,10 @@ const CancelButton = styled.div`
   }
 `;
 
-const CloseImg = styled(closeImg)`
+const CloseIcon = styled(closeIcon)`
   width: auto;
   height: 18px;
-
   display: block;
-
   path {
     stroke: #FFFFFF;
   }
@@ -301,8 +318,11 @@ function SearchInput({
           ))}
         </FiltersWrapper>
         {isDev && <Dev>[dev build]</Dev>}
+        <UserProfileButton onClick={openPreferences}>
+          <UserProfileIcon />
+        </UserProfileButton>
         <PreferencesButton onClick={openPreferences}>
-          <StyledPreferencesIcon />
+          <PreferencesIcon />
         </PreferencesButton>
       </Menu>
       {isUpdateAvailable && isUpdatePanelOpened &&
@@ -313,7 +333,7 @@ function SearchInput({
           <CancelButton
             onClick={handleCloseUpdatePanel}
           >
-            <CloseImg />
+            <CloseIcon />
           </CancelButton>
         </UpdatePanel>
       }

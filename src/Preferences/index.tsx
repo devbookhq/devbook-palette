@@ -17,6 +17,7 @@ import Button from 'components/Button';
 
 import GeneralPreferences from './Pages/GeneralPreferences';
 import Integrations from './Pages/Integrations';
+import Account from './Pages/Account';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 
 
@@ -154,6 +155,16 @@ function Preferences() {
           >
             Integrations
           </LinkButton>
+
+          <LinkButton
+            replace
+            to="/preferences/account"
+            activeStyle={{
+              background: '#3B3A4A',
+            }}
+          >
+            Account
+          </LinkButton>
         </SidebarContent>
         <UpdateWrapper>
           {isUpdateAvailable &&
@@ -183,6 +194,12 @@ function Preferences() {
           path="/preferences/integrations"
           exact
           component={Integrations}
+        />
+
+        <Route
+          path="/preferences/account"
+          exact
+          component={Account}
         />
       </Switch>
     </Container>
