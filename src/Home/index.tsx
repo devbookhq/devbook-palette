@@ -1597,6 +1597,7 @@ function Home() {
                   isSearchingInDocPage={state.isSearchingInDocPage}
                   pageURL={(activeFocusedItem as DocResult).page.pageURL}
                   html={(activeFocusedItem as DocResult).page.html}
+                  hasHTMLExtension={(activeFocusedItem as DocResult).page.hasHTMLExtension}
                   searchInputRef={docPageSearchInputRef}
                 />
               </DocsWrapper>

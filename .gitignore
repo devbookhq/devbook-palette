@@ -2,7 +2,6 @@
 .eslintcache
 .eslintcache~*
 
-
 # dependencies
 /node_modules
 /.pnp
@@ -30,5 +29,3 @@ yarn-debug.log*
 yarn-error.log*
 
 keys_firebase.json
-
-/www

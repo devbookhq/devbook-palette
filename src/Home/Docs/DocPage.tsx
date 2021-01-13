@@ -527,13 +527,13 @@ function highlightNode(textNode: Node, startIdx: number, endIdx: number) {
     nodes.push(document.createTextNode(infront));
   }
 
-  const highlight = textNode.nodeValue.slice(startIdx, endIdx+1);
+  const highlight = textNode.nodeValue.slice(startIdx, endIdx + 1);
   const highlightEl = document.createElement('mark');
   highlightEl.classList.add('devbook-highlight');
   highlightEl.innerText = highlight;
   nodes.push(highlightEl as Node);
 
-  const after = textNode.nodeValue.slice(endIdx+1);
+  const after = textNode.nodeValue.slice(endIdx + 1);
   if (after) {
     nodes.push(document.createTextNode(after));
   }
@@ -605,6 +605,7 @@ interface Highlight {
 interface DocPageProps {
   isDocsFilterModalOpened: boolean;
   isSearchingInDocPage: boolean;
+  hasHTMLExtension: boolean;
   pageURL: string;
   html: string;
   searchInputRef: any;
@@ -614,6 +615,7 @@ function DocPage({
   isDocsFilterModalOpened,
   isSearchingInDocPage,
   pageURL,
+  hasHTMLExtension,
   html,
   searchInputRef,
 }: DocPageProps) {
@@ -660,7 +662,7 @@ function DocPage({
   function selectNextHighlight() {
     deselectHighlight(highlights[selectedIdx]);
     if (selectedIdx < highlights.length - 1) {
-      selectHighlight(highlights[selectedIdx+1]);
+      selectHighlight(highlights[selectedIdx + 1]);
       setSelectedIdx(c => c += 1);
     } else {
       selectHighlight(highlights[0]);
@@ -669,12 +671,12 @@ function DocPage({
   }
 
   function selectPreviousHighlight() {
-      deselectHighlight(highlights[selectedIdx]);
+    deselectHighlight(highlights[selectedIdx]);
     if (selectedIdx > 0) {
-      selectHighlight(highlights[selectedIdx-1]);
+      selectHighlight(highlights[selectedIdx - 1]);
       setSelectedIdx(c => c -= 1);
     } else {
-      selectHighlight(highlights[highlights.length-1]);
+      selectHighlight(highlights[highlights.length - 1]);
       setSelectedIdx(highlights.length - 1);
     }
   }
@@ -697,30 +699,28 @@ function DocPage({
     // If <code> element is inside the <a> element the event's target is actually the
     // <code> element and not the <a> element. So we have to check if its parent is <a>.
     if (target.tagName === 'A' || target.parentNode.tagName === 'A') {
-      let url = target.getAttribute('href') || target.parentNode.getAttribute('href');
-      if (
-        url.startsWith('.')
-        || url.startsWith('#')
-        || !url.startsWith('http://')
-        || !url.startsWith('https://')
-       ) {
-        url = new URL(url, pageURL).href;
+      let link = target.getAttribute('href') || target.parentNode.getAttribute('href');
+      if (!link.startsWith('http://') && !link.startsWith('https://')) {
+        const urlWithoutExtension = new URL(link, pageURL);
+        const hash = urlWithoutExtension.hash;
+        const urlWithoutExtensionAndHash = new URL('', pageURL);
+
+        link = urlWithoutExtensionAndHash.href + (hasHTMLExtension ? '.html' : '') + hash;
       }
-      openLink(url);
+      openLink(link);
       e.preventDefault();
     }
 
     if (target.tagName === 'IMG') {
-      let url = target.getAttribute('src');
-      if (
-        url.startsWith('.')
-        || url.startsWith('#')
-        || !url.startsWith('http://')
-        || !url.startsWith('https://')
-       ) {
-        url = new URL(url, pageURL).href;
+      let link = target.getAttribute('src');
+      if (!link.startsWith('http://') && !link.startsWith('https://')) {
+        const urlWithoutExtension = new URL(link, pageURL);
+        const hash = urlWithoutExtension.hash;
+        const urlWithoutExtensionAndHash = new URL('', pageURL);
+
+        link = urlWithoutExtensionAndHash.href + (hasHTMLExtension ? '.html' : '') + hash;
       }
-      openLink(url);
+      openLink(link);
       e.preventDefault();
     }
   }
@@ -773,10 +773,10 @@ function DocPage({
         if (highlight.index === 0) selectHighlight(highlight);
       }
     }
-  // Note - we don't want to include 'highlights' in the deps array
-  // because we would end up in an infinite cycle.
-  // We just want to remove highlights every time user changes the
-  // query. Not when highlights change.
+    // Note - we don't want to include 'highlights' in the deps array
+    // because we would end up in an infinite cycle.
+    // We just want to remove highlights every time user changes the
+    // query. Not when highlights change.
   }, [setHighlights, debouncedSearchQuery]);
 
   useEffect(() => {
@@ -797,30 +797,30 @@ function DocPage({
           />
           <HitCount>
             <>
-            {searchQuery &&
-              <>
-                {highlights.length > 0 &&
-                  <span>{selectedIdx+1}/{highlights.length}</span>
-                }
-                {highlights.length === 0 &&
-                  <span>0/0</span>
-                }
-              </>
-            }
+              {searchQuery &&
+                <>
+                  {highlights.length > 0 &&
+                    <span>{selectedIdx + 1}/{highlights.length}</span>
+                  }
+                  {highlights.length === 0 &&
+                    <span>0/0</span>
+                  }
+                </>
+              }
             </>
           </HitCount>
-          <SearchDelimiter/>
+          <SearchDelimiter />
           <SearchControls>
             <ChevronButton
               onClick={selectNextHighlight}
             >
-              <ChevronDown/>
+              <ChevronDown />
             </ChevronButton>
 
             <ChevronButton
               onClick={selectPreviousHighlight}
             >
-              <ChevronUp/>
+              <ChevronUp />
             </ChevronButton>
           </SearchControls>
         </SearchInputWrapper>
@@ -829,11 +829,10 @@ function DocPage({
         id="doc-page"
         onClick={handleDocPageClick}
         ref={containerRef}
-        dangerouslySetInnerHTML={{__html: highlightCode(html) as string}}
+        dangerouslySetInnerHTML={{ __html: highlightCode(html) as string }}
       />
     </>
   );
 }
 
 export default DocPage;
-
