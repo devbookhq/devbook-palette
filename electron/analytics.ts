@@ -130,3 +130,29 @@ export function trackModalOpened(modalInfo: any) {
     },
   });
 }
+
+export function trackSignInModalOpened() {
+
+}
+
+export function trackSignInModalClosed() {
+
+}
+
+export function trackSignInButtonClicked() {
+
+}
+
+export function trackSignInAgainButtonClicked() {
+
+}
+
+export function trackSignInFinished() {
+
+}
+
+export function trackSignOutButtonClicked() {
+
+}
+
+

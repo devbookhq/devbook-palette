@@ -2,10 +2,12 @@ import electron, { isDev } from './electron';
 import { ResultsFilter } from 'Home/SearchInput';
 import { DocSource } from 'search/docs';
 import { refreshAuth } from 'Auth';
+import { PreferencesPage } from 'Preferences';
 
-enum IPCMessage {
+export enum IPCMessage {
   GetCachedDocSources = 'GetCachedDocSources',
   SaveDocSources = 'SaveDocSources',
+  GoToPreferencesPage = 'GoToPreferencesPage',
 }
 
 // So we see logs from the main process in the Chrome debug tools.
@@ -88,8 +90,8 @@ export function refreshAuthInOtherWindows() {
   electron.ipcRenderer.send('refresh-auth');
 }
 
-export function openPreferences() {
-  electron.ipcRenderer.send('open-preferences');
+export function openPreferences(page?: PreferencesPage) {
+  electron.ipcRenderer.send('open-preferences', { page });
 }
 
 export function openSignInModal() {

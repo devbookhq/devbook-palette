@@ -7,19 +7,24 @@ import {
   Route,
   Redirect,
   Switch,
+  useHistory,
 } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 
-import electron, { getUpdateStatus, restartAndUpdate } from 'mainProcess';
-import logo from 'img/logo.png';
-
+import electron, {
+  IPCMessage,
+  getUpdateStatus,
+  restartAndUpdate,
+} from 'mainProcess';
+import { authInfo } from 'Auth';
 import Button from 'components/Button';
+import useIPCRenderer from 'hooks/useIPCRenderer';
+
+import logo from 'img/logo.png';
 
 import GeneralPreferences from './Pages/GeneralPreferences';
 import Integrations from './Pages/Integrations';
 import Account from './Pages/Account';
-import useIPCRenderer from 'hooks/useIPCRenderer';
-import { authInfo } from 'Auth';
 
 const Container = styled.div`
   width: 100%;
@@ -104,7 +109,14 @@ const UpdateButton = styled(Button)`
   margin: 0px 15px 10px;
 `;
 
+export enum PreferencesPage {
+  General = 'general',
+  Integrations = 'integrations',
+  Account = 'account',
+}
+
 function Preferences() {
+  const history = useHistory();
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
 
   useEffect(() => {
@@ -119,6 +131,10 @@ function Preferences() {
 
   useIPCRenderer('update-available', () => {
     setIsUpdateAvailable(true);
+  });
+
+  useIPCRenderer(IPCMessage.GoToPreferencesPage, (_, { page }: { page: PreferencesPage }) => {
+    history.push('/preferences' + `/${page}`);
   });
 
   function handleUpdate() {
