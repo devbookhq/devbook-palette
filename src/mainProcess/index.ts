@@ -3,9 +3,12 @@ import { ResultsFilter } from 'Home/SearchInput';
 import { DocSource } from 'search/docs';
 import { refreshAuth } from 'Auth';
 
-enum IPCMessage {
+export enum IPCMessage {
   GetCachedDocSources = 'GetCachedDocSources',
   SaveDocSources = 'SaveDocSources',
+  RefreshAuth = 'RefreshAuth',
+  OpenSignInModal = 'OpenSignInModal',
+  ChangeUserInMain = 'ChangeUserInMain',
 }
 
 // So we see logs from the main process in the Chrome debug tools.
@@ -14,7 +17,7 @@ electron.ipcRenderer.on('console', (_, args) => {
   console[type as 'log' | 'error']?.('[main]:', ...consoleArgs);
 });
 
-electron.ipcRenderer.on('refresh-auth', () => {
+electron.ipcRenderer.on(IPCMessage.RefreshAuth, () => {
   refreshAuth();
 });
 
@@ -31,7 +34,7 @@ export function connectGitHub() {
 }
 
 export function changeUserInMain(user?: { userID: string, email: string }) {
-  electron.ipcRenderer.send('change-user-in-main', user);
+  electron.ipcRenderer.send(IPCMessage.ChangeUserInMain, user);
 }
 
 export function removeGitHub() {
@@ -81,11 +84,11 @@ export function trackModalOpened(modalInfo: {
 }
 
 export function userDidChangeShortcut(shortcut: string) {
-  electron.ipcRenderer.send('user-did-change-shortcut', { shortcut });
+  electron.ipcRenderer.send('user-did-change-hortcut', { shortcut });
 }
 
 export function refreshAuthInOtherWindows() {
-  electron.ipcRenderer.send('refresh-auth');
+  electron.ipcRenderer.send(IPCMessage.RefreshAuth);
 }
 
 export function openPreferences() {
@@ -93,7 +96,7 @@ export function openPreferences() {
 }
 
 export function openSignInModal() {
-  electron.ipcRenderer.send('open-sign-in-modal');
+  electron.ipcRenderer.send(IPCMessage.OpenSignInModal);
 }
 
 export function postponeUpdate() {

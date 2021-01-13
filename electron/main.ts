@@ -30,10 +30,14 @@ import MainWindow from './MainWindow';
 enum IPCMessage {
   GetCachedDocSources = 'GetCachedDocSources',
   SaveDocSources = 'SaveDocSources',
+  RefreshAuth = 'RefreshAuth',
+  OpenSignInModal = 'OpenSignInModal',
+  ChangeUserInMain = 'ChangeUserInMain',
 }
 
 enum StoreKey {
   DocSources = 'docSources',
+  Email = 'email',
 }
 
 const PORT = 3000;
@@ -322,11 +326,11 @@ ipcMain.on('connect-github', () => {
   trackConnectGitHubStarted();
 });
 
-ipcMain.on('change-user-in-main', async (_, user: { userID: string, email: string } | undefined) => {
+ipcMain.on(IPCMessage.ChangeUserInMain, async (_, user: { userID: string, email: string } | undefined) => {
   if (user) {
     // TODO: Test segment usedID aliasing again, with the whole sign-in flow
-    // changeAnalyticsUser(user.userID);
-    store.set('email', user.email);
+    // changeAnalyticsUser(user.userID, user.email);
+    store.set(StoreKey.Email, user.email);
   } else {
     // changeAnalyticsUser();
   }
@@ -340,19 +344,19 @@ ipcMain.on('restart-and-update', () => {
 
 ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo));
 
-ipcMain.on('refresh-auth', (event) => {
+ipcMain.on(IPCMessage.RefreshAuth, (event) => {
   if (event.sender.id !== mainWindow?.window?.id) {
-    mainWindow?.webContents?.send('refresh-auth');
+    mainWindow?.webContents?.send(IPCMessage.RefreshAuth);
   }
 
   if (event.sender.id !== preferencesWindow?.window?.id) {
-    preferencesWindow?.webContents?.send('refresh-auth');
+    preferencesWindow?.webContents?.send(IPCMessage.RefreshAuth);
   }
 });
 
-ipcMain.on('open-sign-in-modal', () => {
+ipcMain.on(IPCMessage.OpenSignInModal, () => {
   mainWindow?.show();
-  mainWindow?.webContents?.send('open-sign-in-modal');
+  mainWindow?.webContents?.send(IPCMessage.OpenSignInModal);
 });
 
 ipcMain.on('track-modal-opened', (_, modalInfo: any) => trackModalOpened(modalInfo));
