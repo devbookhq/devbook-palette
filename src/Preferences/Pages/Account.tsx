@@ -1,9 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
-import Base from './Base';
-import Button from 'components/Button';
-import { MagicUserMetadata, signOut } from 'Auth';
+
+import { AuthInfo, signOut } from 'Auth';
 import { openSignInModal } from 'mainProcess';
+
+import Button from 'components/Button';
+import Loader from 'components/Loader';
+
+import Base from './Base';
 
 const Container = styled.div`
   width: 100%;
@@ -41,20 +45,28 @@ const SignInText = styled.div`
   margin-bottom: 15px;
 `;
 
+const StyledLoader = styled(Loader)`
+  margin: 0 auto;
+`;
+
 const SignInButton = styled(Button)``;
 
 interface AccountProps {
-  user?: MagicUserMetadata;
+  authInfo: AuthInfo;
 }
 
-function Account({ user }: AccountProps) {
+function Account({ authInfo }: AccountProps) {
   return (
     <Base title="Account">
       <Container>
-        {user &&
+        {authInfo.isLoading &&
+          <StyledLoader/>
+        }
+
+        {!authInfo.isLoading && authInfo.user &&
           <>
             <Email>
-              {user.email}
+              {authInfo.user.email}
             </Email>
             <SignOutButton onClick={() => signOut()}>
               Sign Out
@@ -62,7 +74,7 @@ function Account({ user }: AccountProps) {
           </>
         }
 
-        {!user &&
+        {!authInfo.isLoading && !authInfo.user &&
           <SignInWrapper>
             <SignInText>
               You are not signed in

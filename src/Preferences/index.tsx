@@ -201,7 +201,7 @@ function Preferences() {
           exact
         >
           <Account
-            user={authInfo.user}
+            authInfo={authInfo}
           />
         </Route>
       </Switch>
