@@ -71,17 +71,17 @@ export type AuthInfo = FailedSignOutAuthInfo
 
 export type { MagicUserMetadata };
 
-// export type AuthInfo = { metadata?: MagicUserMetadata, state: AuthState, error?: AuthError };
-// export type AuthInfo = { user?: MagicUserMetadata, isLoading?: boolean, isSignedIn?: boolean };
-
 export const authEmitter = new EventEmitter();
 export let authInfo: AuthInfo = { state: AuthState.LoadingUser };
 
 const url = isDev ? 'https://dev.usedevbook.com/auth' : 'https://api.usedevbook.com/auth';
+// const url = 'http://localhost:3002/auth';
 const magicAPIKey = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
 const magic = new Magic(magicAPIKey);
 
 let signInCancelHandle: (() => void) | undefined = undefined;
+
+refreshAuthInfo();
 
 function changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
   if (auth.state === AuthState.UserAndMetadataLoaded) {
@@ -92,8 +92,6 @@ function changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
     changeUserInMain();
   }
 }
-
-refreshAuthInfo();
 
 function generateSessionID() {
   return encodeURIComponent(crypto.randomBytes(64).toString('base64'));
@@ -201,11 +199,13 @@ export async function signIn(email: string) {
     }
 
     if (isCancelled) {
-
-      axios.delete
-
-
-      return reject({ message: 'Sign in was cancelled' });
+      try {
+        await axios.delete(`${url}/credential/${sessionID}`);
+        return reject({ message: 'Sign in was cancelled' });
+      } catch (error) {
+        console.error(error.message);
+        return reject({ message: 'Sign in could not be cancelled' });
+      }
     }
 
     if (!credential && !isCancelled) {

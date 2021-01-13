@@ -13,19 +13,17 @@ export enum PreferencesPage {
 
 class PreferencesWindow {
   public window: electron.BrowserWindow | undefined;
-  private port: number;
 
   public get webContents() {
     return this.window?.webContents;
   }
 
   public constructor(
-    port: number,
+    private port: number,
     isOnboardingVisible: () => boolean | undefined,
     taskBarIcon: electron.NativeImage,
     page?: PreferencesPage,
   ) {
-    this.port = port;
     this.window = new electron.BrowserWindow({
       width: 850,
       height: 600,
@@ -60,7 +58,7 @@ class PreferencesWindow {
     });
 
     if (isDev) {
-      const url = `http://localhost:${port}/index.html#/preferences` + (page ? `/${page}` : '');
+      const url = `http://localhost:${this.port}/index.html#/preferences` + (page ? `/${page}` : '');
       this.window.loadURL(url);
       // Hot Reloading
       require('electron-reload')(__dirname, {
@@ -96,4 +94,3 @@ class PreferencesWindow {
 }
 
 export default PreferencesWindow;
-
