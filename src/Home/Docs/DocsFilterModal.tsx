@@ -6,6 +6,7 @@ import React, {
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
+import { openLink } from 'mainProcess';
 import { DocSource } from 'search/docs';
 import Modal from 'components/Modal';
 import { ReactComponent as searchImg } from 'img/search.svg';
@@ -134,7 +135,22 @@ const DocName = styled.span`
   font-weight: 500;
 `;
 
-const DocToggle = styled.input`
+const DocToggle = styled.input``;
+
+const FeedbackButton = styled.button`
+  margin: 10px 0;
+  color: #4CACD6;
+  font-size: 14px;
+  font-weight: 600;
+  background: none;
+  outline: none;
+  border: none;
+  text-decoration: underline;
+
+  :hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
 `;
 
 interface DocsFilterModalProps {
@@ -199,6 +215,10 @@ function DocsFilterModal({
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
   }
 
+  function handleFeedbackButtonClick() {
+    openLink('https://docs.google.com/forms/d/e/1FAIpQLSddf3HliA9uU0SZS-EGofU_gvnDcQX_BykzCxri9nsdoQusBw/viewform?usp=sf_link');
+  }
+
   useHotkeys('up', () => {
     if (selectedIdx > 0) {
       setSelectedIdx(c => c -= 1);
@@ -246,6 +266,7 @@ function DocsFilterModal({
     }
   }, []);
 
+
   return (
     <StyledModal
       onCloseRequest={onCloseRequest}
@@ -261,6 +282,12 @@ function DocsFilterModal({
         />
       </SearchWrapper>
       <Content>
+        <FeedbackButton
+          onClick={handleFeedbackButtonClick}
+        >
+          Missing some docs?
+        </FeedbackButton>
+
         <DocsListHeader>
           <HeaderText>
             NAME
