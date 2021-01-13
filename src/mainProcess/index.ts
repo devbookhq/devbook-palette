@@ -1,4 +1,4 @@
-import electron from './electron';
+import electron, { isDev } from './electron';
 import { ResultsFilter } from 'Home/SearchInput';
 import { DocSource } from 'search/docs';
 import { refreshAuth } from 'Auth';
@@ -18,11 +18,6 @@ electron.ipcRenderer.on('refresh-auth', () => {
   refreshAuth();
 });
 
-const app = electron.app || electron.remote.app;
-const isEnvSet = 'ELECTRON_IS_DEV' in electron.remote.process.env;
-const getFromEnv = parseInt(electron.remote.process.env.ELECTRON_IS_DEV || '0', 10) === 1;
-export const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
-
 export function getGlobalShortcut() {
   return electron.ipcRenderer.invoke('get-global-shortcut') as Promise<string>;
 }
@@ -35,8 +30,8 @@ export function connectGitHub() {
   electron.ipcRenderer.send('connect-github');
 }
 
-export function aliasAnalyticsUser(userID: string) {
-  return electron.ipcRenderer.invoke('alias-analytics-user', { userID });
+export function changeAnalyticsUser(userID?: string) {
+  electron.ipcRenderer.send('change-analytics-user', { userID });
 }
 
 export function removeGitHub() {
@@ -140,5 +135,7 @@ export function getCachedDocSources(): Promise<DocSource[]> {
 export function saveDocSources(docSources: DocSource[]) {
   return electron.ipcRenderer.send(IPCMessage.SaveDocSources, { docSources });
 }
+
+export { isDev };
 
 export default electron;
