@@ -16,11 +16,11 @@ function openLink(url: string) {
   return shell.openExternal(url);
 }
 
-class OAuth {
+class GitHubOAuth {
   private static PORT = 8020;
   private static GITHUB_CONFIG = {
     client_id: 'edcfabd8a71a394620a0',
-    redirect_uri: `http://localhost:${OAuth.PORT}`,
+    redirect_uri: `http://localhost:${GitHubOAuth.PORT}`,
     login: '',
     scope: '',
     allow_signup: 'true',
@@ -33,7 +33,7 @@ class OAuth {
   public emitter = new EventEmitter();
 
   public constructor(private showApp: any, private hideApp: any) {
-    this.app.use('/redirect', express.static(OAuth.redirectHTMLPath));
+    this.app.use('/redirect', express.static(GitHubOAuth.redirectHTMLPath));
 
     this.app.all('/', async (req, res) => {
       const code = req.query['code'] as string;
@@ -44,7 +44,7 @@ class OAuth {
       }
 
       try {
-        const accessToken = await OAuth.getAccessToken(code);
+        const accessToken = await GitHubOAuth.getAccessToken(code);
         this.emitter.emit('access-token', { accessToken });
         res.redirect('/redirect');
       } catch (error) {
@@ -57,7 +57,7 @@ class OAuth {
       }
     });
 
-    this.app.listen(OAuth.PORT);
+    this.app.listen(GitHubOAuth.PORT);
   }
 
   private static async getAccessToken(code: string) {
@@ -72,7 +72,7 @@ class OAuth {
     this.stateTokens[state] = true;
 
     const queryParams = querystring.stringify({
-      ...OAuth.GITHUB_CONFIG,
+      ...GitHubOAuth.GITHUB_CONFIG,
       state,
     });
     const url = `https://github.com/login/oauth/authorize?${queryParams}`;
@@ -82,4 +82,4 @@ class OAuth {
   }
 }
 
-export default OAuth;
+export default GitHubOAuth;

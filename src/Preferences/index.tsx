@@ -16,7 +16,6 @@ import electron, {
   getUpdateStatus,
   restartAndUpdate,
 } from 'mainProcess';
-import { authInfo } from 'Auth';
 import Button from 'components/Button';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 
@@ -215,11 +214,8 @@ function Preferences() {
         <Route
           path="/preferences/account"
           exact
-        >
-          <Account
-            authInfo={authInfo}
-          />
-        </Route>
+          component={Account}
+        />
       </Switch>
     </Container>
   );

@@ -32,7 +32,7 @@ import {
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
-import Auth from './Auth';
+import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
 import { IPCMessage } from './ipc';
 
@@ -154,19 +154,19 @@ let preferencesWindow: PreferencesWindow | undefined = undefined;
 
 const store = new Store();
 
-const auth = new Auth(
+const gitHubOAuth = new GitHubOAuth(
   () => mainWindow?.show(),
   () => hideMainWindow(),
 );
 
-auth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
+gitHubOAuth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
   mainWindow?.webContents?.send('github-access-token', { accessToken });
   preferencesWindow?.webContents?.send('github-access-token', { accessToken });
   store.set('github', accessToken);
   trackConnectGitHubFinished();
 });
 
-auth.emitter.on('error', ({ message }: { message: string }) => {
+gitHubOAuth.emitter.on('error', ({ message }: { message: string }) => {
   mainWindow?.webContents?.send('github-error', { message });
   preferencesWindow?.webContents?.send('github-error', { message });
 });
@@ -323,7 +323,7 @@ ipcMain.handle('get-global-shortcut', () => {
 });
 
 ipcMain.on('connect-github', () => {
-  auth.requestOAuth();
+  gitHubOAuth.requestOAuth();
   trackConnectGitHubStarted();
 });
 

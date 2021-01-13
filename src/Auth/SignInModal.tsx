@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -13,7 +13,7 @@ import Button from 'components/Button';
 import Loader from 'components/Loader';
 import { ReactComponent as checkIcon } from 'img/check-circle.svg';
 
-import { signIn, cancelSignIn } from './index';
+import { signIn, cancelSignIn, AuthContext, AuthState } from './index';
 
 const StyledModal = styled(Modal)`
   padding: 15px;
@@ -134,9 +134,13 @@ interface SignInModalProps {
 
 function SignInModal({ onCloseRequest }: SignInModalProps) {
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  const auth = useContext(AuthContext);
+
+  const isLoading = auth.state === AuthState.LoadingUser;
+  const isSignedIn = auth.state === AuthState.LoadingUserMetadata
+    || auth.state === AuthState.UserAndMetadataLoaded;
 
   function handleEmailInputChange(e: any) {
     setEmail(e.target.value);
@@ -149,32 +153,32 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
   async function handleSignInButtonClick() {
     trackSignInButtonClicked();
     if (isLoading) return;
-    setIsLoading(true);
+    // setIsLoading(true);
     setError('');
 
     if (!email) {
       setError('Email is empty')
-      setIsLoading(false);
+      // setIsLoading(false);
       return;
     }
 
     try {
       await signIn(email);
-      setIsSignedIn(true);
+      // setIsSignedIn(true);
       trackSignInFinished();
     } catch (error) {
       console.error(error.message);
       setError(error.message);
       trackSignInFailed(error);
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   }
 
   function handleSignInAgainButtonClick() {
     trackSignInAgainButtonClicked();
-    cancelSignIn()
-    setIsLoading(false);
+    cancelSignIn();
+    // setIsLoading(false);
   }
 
   function handleEmailInputOnKeyDown(e: any) {
@@ -190,9 +194,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
     <StyledModal
       onCloseRequest={handleCloseRequest}
     >
-      {!isSignedIn
-        && !isLoading
-        &&
+      {!isSignedIn && !isLoading &&
         <>
           <Title>
             Sign in with your email
@@ -237,7 +239,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
 
           <Description>
             We just sent an email with the sign-in link to the following email address:
-            <br/>
+            <br />
             <strong>{email}</strong>
           </Description>
 
