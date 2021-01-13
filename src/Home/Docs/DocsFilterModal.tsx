@@ -11,6 +11,11 @@ import { DocSource } from 'search/docs';
 import Modal from 'components/Modal';
 import { ReactComponent as searchImg } from 'img/search.svg';
 
+enum Navigation {
+  Mouse,
+  Keys,
+}
+
 const StyledModal = styled(Modal)`
   height: 100%;
   margin: 60px 0 69px;
@@ -159,11 +164,6 @@ interface DocsFilterModalProps {
   onCloseRequest?: () => void;
 }
 
-enum Navigation {
-  Mouse,
-  Keys,
-}
-
 function DocsFilterModal({
   docSources,
   onDocSourceClick,
@@ -186,7 +186,7 @@ function DocsFilterModal({
   }, [notIncludedSources, searchQuery]);
 
   function escapeRegex(s: string) {
-    return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
   }
 
   function toggleDocSource(docSource: DocSource, includedSlice: boolean) {
@@ -264,8 +264,9 @@ function DocsFilterModal({
         .sort((a, b) => a.name.localeCompare(b.name));
       setNotIncludedSources(notIncludedSlice);
     }
+    // We want to run this only during the first render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   return (
     <StyledModal

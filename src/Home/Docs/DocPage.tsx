@@ -762,7 +762,7 @@ function DocPage({
 
     const textNodes = getTextNodeChildren(containerRef.current as Node);
     let wholeText = '';
-    textNodes.map(n => {
+    textNodes.forEach(n => {
       wholeText += n.nodeValue || '';
     });
 
@@ -783,6 +783,10 @@ function DocPage({
         if (highlight.index === 0) selectHighlight(highlight);
       }
     }
+  // Note - we don't want to include 'highlights' in the deps array
+  // because we would end up in an infinite cycle.
+  // We just want to remove highlights every time user changes the
+  // query. Not when highlights change.
   }, [setHighlights, debouncedSearchQuery]);
 
   useEffect(() => {

@@ -133,7 +133,7 @@ function Preferences() {
   });
 
   useIPCRenderer(IPCMessage.GoToPreferencesPage, (_, { page }: { page: PreferencesPage }) => {
-    history.push('/preferences' + `/${page}`);
+    history.push(`/preferences/${page}`);
   });
 
   function handleUpdate() {
