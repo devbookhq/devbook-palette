@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
+import {
+  trackSignInButtonClicked,
+  trackSignInAgainButtonClicked,
+  trackSignInFinished,
+  trackSignInFailed,
+  trackContinueIntoAppButtonClicked,
+} from 'mainProcess';
 import Modal from 'components/Modal';
 import Button from 'components/Button';
 import Loader from 'components/Loader';
@@ -49,7 +56,7 @@ const SignInButton = styled(Button)`
   border-radius: 5px;
 `;
 
-const ContinueToAppButton = styled(Button)`
+const ContinueIntoAppButton = styled(Button)`
   margin-top: 15px;
   padding: 10px 20px;
 
@@ -140,6 +147,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
   }
 
   async function handleSignInButtonClick() {
+    trackSignInButtonClicked();
     if (isLoading) return;
     setIsLoading(true);
     setError('');
@@ -153,21 +161,29 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
     try {
       await signIn(email);
       setIsSignedIn(true);
+      trackSignInFinished();
     } catch (error) {
       console.error(error.message);
       setError(error.message);
+      trackSignInFailed(error);
     } finally {
       setIsLoading(false);
     }
   }
 
   function handleSignInAgainButtonClick() {
+    trackSignInAgainButtonClicked();
     cancelSignIn()
     setIsLoading(false);
   }
 
   function handleEmailInputOnKeyDown(e: any) {
     if (e.key === 'Enter') handleSignInButtonClick();
+  }
+
+  function handleContinueIntoAppButtonClick() {
+    trackContinueIntoAppButtonClicked();
+    onCloseRequest?.();
   }
 
   return (
@@ -244,9 +260,9 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
             You are signed in!
           </Title>
           <CheckIcon />
-          <ContinueToAppButton onClick={handleCloseRequest}>
+          <ContinueIntoAppButton onClick={handleContinueIntoAppButtonClick}>
             Continue into the app
-          </ContinueToAppButton>
+          </ContinueIntoAppButton>
         </>
       }
     </StyledModal>

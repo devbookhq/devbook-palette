@@ -26,6 +26,8 @@ import electron, {
   saveDocSources,
   getCachedDocSources,
   IPCMessage,
+  trackSignInModalOpened,
+  trackSignInModalClosed,
 } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -974,12 +976,14 @@ function Home() {
   }, []);
 
   const openSignInModal = useCallback(() => {
+    trackSignInModalOpened();
     dispatch({
       type: ReducerActionType.OpenSignInModal,
     });
   }, []);
 
   const closeSignInModal = useCallback(() => {
+    trackSignInModalClosed();
     dispatch({
       type: ReducerActionType.CloseSignInModal,
     });

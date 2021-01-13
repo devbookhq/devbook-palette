@@ -2,7 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { AuthInfo, signOut, AuthState } from 'Auth';
-import { openSignInModal } from 'mainProcess';
+import {
+  openSignInModal,
+  trackSignOutButtonClicked,
+} from 'mainProcess';
 
 import Button from 'components/Button';
 import Loader from 'components/Loader';
@@ -60,6 +63,11 @@ function Account({ authInfo }: AccountProps) {
     || authInfo.state === AuthState.LoadingUserMetadata
     || authInfo.state === AuthState.SigningOutUser;
 
+  function handleSignOutButtonClicked() {
+    trackSignOutButtonClicked();
+    signOut();
+  }
+
   return (
     <Base title="Account">
       <Container>
@@ -72,7 +80,7 @@ function Account({ authInfo }: AccountProps) {
             <Email>
               {authInfo.metadata.email}
             </Email>
-            <SignOutButton onClick={() => signOut()}>
+            <SignOutButton onClick={handleSignOutButtonClicked}>
               Sign Out
             </SignOutButton>
           </>
