@@ -132,7 +132,7 @@ export async function signIn(email: string) {
       const didToken = await magic.auth.loginWithCredential(credential);
 
       if (didToken) {
-        authInfo = { isLoading: false, isSignedIn: true };
+        authInfo = { isLoading: true, isSignedIn: true };
         authState.emit('changed', authInfo);
         updateUserData(didToken);
         return resolve();
@@ -164,6 +164,9 @@ export async function refreshAuth() {
     const isUserSignedIn = await magic.user.isLoggedIn();
 
     if (isUserSignedIn) {
+      authInfo = { isLoading: true, isSignedIn: true };
+      authState.emit('changed', authInfo);
+
       authInfo = { user: await magic.user.getMetadata(), isLoading: false, isSignedIn: true };
     } else {
       authInfo = { isLoading: false };
