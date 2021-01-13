@@ -1287,6 +1287,7 @@ function Home() {
     trackShortcut({ action: 'Search in doc page' });
   }, [activeFilter, searchInDocPage]);
 
+  // 'cmd+shift+f' hotkey - open docs filter modal.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+shift+f' : 'alt+shift+f', () => {
     // A search filter different from Docs is active.
     if (activeFilter !== ResultsFilter.Docs) return;
@@ -1296,7 +1297,11 @@ function Home() {
     if (state.isDocsFilterModalOpened) closeDocsFilterModal();
     else openDocsFilterModal();
     trackShortcut({ action: 'Filter docs' });
-  }, [activeFilter, state.isDocsFilterModalOpened]);
+  }, [
+    activeFilter,
+    state.isDocsFilterModalOpened,
+    isUserSignedInWithOrWithoutMetadata,
+  ]);
   /* //////////////////// */
 
   useIPCRenderer(IPCMessage.OpenSignInModal, () => {
