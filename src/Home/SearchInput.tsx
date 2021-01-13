@@ -203,6 +203,8 @@ interface SearchInputProps {
 
   isLoading?: boolean;
   isModalOpened?: boolean;
+  isSignInModalOpened?: boolean;
+  isDocsFilterModalOpened?: boolean;
 }
 
 function SearchInput({
@@ -213,6 +215,8 @@ function SearchInput({
   onFilterSelect,
   isLoading,
   isModalOpened,
+  isSignInModalOpened,
+  isDocsFilterModalOpened,
 }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -276,6 +280,17 @@ function SearchInput({
     if (isModalOpened) inputRef?.current?.blur();
     else inputRef?.current?.focus();
   }, [isModalOpened]);
+
+  useEffect(() => {
+    if (isSignInModalOpened) inputRef?.current?.blur();
+    else inputRef?.current?.focus();
+  }, [isSignInModalOpened]);
+
+  useEffect(() => {
+    console.log('SEARCH INPUT docs filter modal', isDocsFilterModalOpened);
+    if (isDocsFilterModalOpened) inputRef?.current?.blur();
+    else inputRef?.current?.focus();
+  }, [isDocsFilterModalOpened]);
 
   return (
     <Container

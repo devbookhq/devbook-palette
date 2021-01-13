@@ -1250,7 +1250,12 @@ function Home() {
 
     hideMainWindow();
     trackShortcut({ action: 'Hide main window' });
-  }, [state.modalItem, state.isSearchingInDocPage, state.isDocsFilterModalOpened]);
+  }, [
+   state.modalItem,
+   state.isSearchingInDocPage,
+   state.isDocsFilterModalOpened,
+   state.isSignInModalOpened,
+ ]);
 
   // 'cmd+o' hotkey - open the focused result in a browser.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+o' : 'alt+o', () => {
@@ -1441,6 +1446,8 @@ function Home() {
           onFilterSelect={f => setSearchFilter(f)}
           isLoading={isActiveFilterLoading}
           isModalOpened={!!state.modalItem}
+          isSignInModalOpened={state.isSignInModalOpened}
+          isDocsFilterModalOpened={state.isDocsFilterModalOpened}
         />
 
         {!state.search.query
