@@ -18,12 +18,9 @@ const DocPageContainer = styled.div`
   height: 100%;
   width: 100%;
   min-width: 1px;
-  // background: #1b1b1b;
   background: #1f1e1e;
 
-  //color: #E3E3E3;
   color: #c1c9d2;
-  //color: #ced3d8;
   font-size: 14px;
   line-height: 1.65em;
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Ubuntu,sans-serif;
@@ -498,8 +495,7 @@ const ChevronUp = styled(chevronImg)`
   transform: rotate(180deg);
 `;
 
-const ChevronDown = styled(chevronImg)`
-`;
+const ChevronDown = styled(chevronImg)``;
 
 function getTextNodeChildren(node: Node) {
   let nodes: Node[] = [];
