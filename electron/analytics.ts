@@ -8,6 +8,7 @@ import debounce from './utils/debounce';
 const client = new Analytics('BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf', { flushAt: 5 });
 const store = new ElectronStore();
 
+let isSignedIn = false;
 let userID = store.get('userID', uuidv4());
 store.set('userID', userID);
 
@@ -38,8 +39,11 @@ export function changeAnalyticsUser(user?: { userID: string, email: string }) {
         email: user.email,
       },
     });
+
+    isSignedIn = false;
     userID = user.userID;
   } else {
+    isSignedIn = false;
     userID = savedUserID;
   }
 }
@@ -49,6 +53,7 @@ export function trackShowApp() {
     event: 'Showed app',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
@@ -60,6 +65,7 @@ export function trackOnboardingStarted() {
     event: 'Onboarding started',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
@@ -71,6 +77,7 @@ export function trackOnboardingFinished() {
     event: 'Onboarding finished',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
@@ -82,6 +89,7 @@ export function trackConnectGitHubStarted() {
     event: 'Connecting GitHub started',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
@@ -93,6 +101,7 @@ export function trackConnectGitHubFinished() {
     event: 'Connecting GitHub finished',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
@@ -104,6 +113,7 @@ export function trackShortcut(shortcutInfo: { action: string, hotkey: string }) 
     event: 'Shortcut used',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
       ...shortcutInfo,
@@ -116,6 +126,7 @@ function trackSearch(searchInfo: any) {
     event: 'Search',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
       ...searchInfo,
@@ -130,6 +141,7 @@ export function trackModalOpened(modalInfo: any) {
     event: 'Modal opened',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
       ...modalInfo,
@@ -138,43 +150,47 @@ export function trackModalOpened(modalInfo: any) {
 }
 
 export function trackSignInModalOpened() {
-    client.track({
-      event: 'Sign in modal opened',
-      userId: userID,
-      properties: {
-        platform,
-        appVersion,
-      },
-    });
-  }
-  
+  client.track({
+    event: 'Sign in modal opened',
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+    },
+  });
+}
+
 export function trackSignInModalClosed() {
   client.track({
     event: 'Sign in modal closed',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
   });
 }
-  
+
 export function trackSignInButtonClicked() {
   client.track({
     event: 'Sign in button clicked',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
   });
 }
-  
+
 export function trackSignInAgainButtonClicked() {
   client.track({
     event: 'Sign in again button clicked',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
@@ -186,6 +202,7 @@ export function trackSignInFinished() {
     event: 'Sign in finished',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
@@ -197,6 +214,7 @@ export function trackSignInFailed(error: string) {
     event: 'Continue into app button clicked',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
       error,
@@ -209,6 +227,7 @@ export function trackContinueIntoAppButtonClicked() {
     event: 'Continue into app button clicked',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
@@ -220,10 +239,9 @@ export function trackSignOutButtonClicked() {
     event: 'Sign out button clicked',
     userId: userID,
     properties: {
+      isSignedIn,
       platform,
       appVersion,
     },
   });
 }
-
-
