@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Resizable } from 're-resizable';
 
-import { authInfo, signIn } from 'Auth';
+import { authInfo } from 'Auth';
 import electron, {
   isDev,
   hideMainWindow,
@@ -46,6 +46,7 @@ import {
 } from 'search/docs';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
+import Loader from 'components/Loader';
 import SignInModal from 'Auth/SignInModal';
 
 import SearchInput, { ResultsFilter } from './SearchInput';
@@ -154,6 +155,10 @@ const DocSearchResults = styled.div`
 
   border-right: 2px solid #3B3A4A;
   background: #262736;
+`;
+
+const DocsLoader = styled(Loader)`
+  margin-top: 50px;
 `;
 
 type SearchResultItem = StackOverflowResult | CodeResult | DocResult;
@@ -765,8 +770,6 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
 function Home() {
   const docPageSearchInputRef = useRef<HTMLInputElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
-
-  const isUserSignedIn = !!authInfo.user;
 
   const debouncedQuery = useDebounce(state.search.query.trim(), 400);
   const debouncedLastSearchedQuery = useDebounce(state.search.lastSearchedQuery.trim(), 400);
@@ -1442,35 +1445,6 @@ function Home() {
           <InfoMessage>Nothing found</InfoMessage>
         }
 
-        {state.search.query
-          && activeFilter === ResultsFilter.Docs
-          && isUserSignedIn
-          && !isAnyDocSourceIncluded
-          && !isActiveFilterLoading
-          &&
-          <>
-            <InfoMessage>No documentation is enabled</InfoMessage>
-            <EnableDocSourcesButton
-              onClick={openDocsFilterModal}
-            >
-              Enable documentations
-            </EnableDocSourcesButton>
-          </>
-        }
-
-        {activeFilter === ResultsFilter.Docs
-          && !isUserSignedIn
-          &&
-          <>
-            <InfoMessage>You need to sign in to search documentations</InfoMessage>
-            <SignInButton
-              onClick={openSignInModal}
-            >
-              Sign in to Devbook
-            </SignInButton>
-          </>
-        }
-
         {activeFilter === ResultsFilter.GitHubCode
           && !state.gitHubAccount.isConnected
           &&
@@ -1485,6 +1459,41 @@ function Home() {
               Read more about privacy and what access Devbook needs
             </GitHubPrivacyLink> */}
           </GitHubConnect>
+        }
+
+        {activeFilter === ResultsFilter.Docs
+          && authInfo.isLoading
+          &&
+            <DocsLoader/>
+        }
+        {activeFilter === ResultsFilter.Docs
+          && !authInfo.user
+          && !authInfo.isLoading
+          &&
+          <>
+            <InfoMessage>You need to sign in to search documentations</InfoMessage>
+            <SignInButton
+              onClick={openSignInModal}
+            >
+              Sign in to Devbook
+            </SignInButton>
+          </>
+        }
+
+        {state.search.query
+          && activeFilter === ResultsFilter.Docs
+          && authInfo.user
+          && !isAnyDocSourceIncluded
+          && !isActiveFilterLoading
+          &&
+          <>
+            <InfoMessage>No documentation is enabled</InfoMessage>
+            <EnableDocSourcesButton
+              onClick={openDocsFilterModal}
+            >
+              Enable documentations
+            </EnableDocSourcesButton>
+          </>
         }
 
         {state.search.query
@@ -1521,7 +1530,7 @@ function Home() {
 
             {activeFilter === ResultsFilter.Docs
               && isAnyDocSourceIncluded
-              && isUserSignedIn
+              && authInfo.user
               &&
               <DocsWrapper>
                 <Resizable
@@ -1591,7 +1600,7 @@ function Home() {
             {/* Docs search results */}
             {!state.modalItem
               && activeFilter === ResultsFilter.Docs
-              && isUserSignedIn
+              && authInfo.user
               && isAnyDocSourceIncluded
               &&
               <DocsSearchHotkeysPanel

@@ -233,7 +233,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
           </Title>
           <CheckIcon />
           <ContinueToAppButton onClick={handleCloseRequest}>
-            Continue to app
+            Continue into the app
           </ContinueToAppButton>
         </>
       }
