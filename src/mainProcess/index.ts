@@ -1,6 +1,7 @@
 import electron from './electron';
 import { ResultsFilter } from 'Home/SearchInput';
 import { DocSource } from 'search/docs';
+import { refreshAuth } from 'Auth';
 
 enum IPCMessage {
   GetCachedDocSources = 'GetCachedDocSources',
@@ -11,6 +12,10 @@ enum IPCMessage {
 electron.ipcRenderer.on('console', (_, args) => {
   const [type, ...consoleArgs] = args;
   console[type as 'log' | 'error']?.('[main]:', ...consoleArgs);
+});
+
+electron.ipcRenderer.on('refresh-auth', () => {
+  refreshAuth();
 });
 
 const app = electron.app || electron.remote.app;
@@ -84,8 +89,16 @@ export function userDidChangeShortcut(shortcut: string) {
   electron.ipcRenderer.send('user-did-change-shortcut', { shortcut });
 }
 
+export function refreshAuthInOtherWindows() {
+  electron.ipcRenderer.send('refresh-auth');
+}
+
 export function openPreferences() {
   electron.ipcRenderer.send('open-preferences');
+}
+
+export function openSignInModal() {
+  electron.ipcRenderer.send('open-sign-in-modal');
 }
 
 export function postponeUpdate() {

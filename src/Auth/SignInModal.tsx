@@ -7,8 +7,7 @@ import styled from 'styled-components';
 
 import Modal from 'components/Modal';
 import Button from 'components/Button';
-import { signIn, cancelSignIn } from 'Auth';
-
+import { signIn } from 'Auth';
 
 const StyledModal = styled(Modal)`
   height: 100%;
@@ -66,7 +65,6 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
 
   async function handleCloseRequest() {
     onCloseRequest?.();
-    cancelSignIn()
   }
 
   async function handleSignIn() {
@@ -78,6 +76,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
     setError('');
     try {
       await signIn(email);
+      onCloseRequest?.();
     } catch (error) {
       console.error(error.message);
       setError('Problem signing in');
@@ -91,16 +90,6 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
       onCloseRequest={handleCloseRequest}
     >
       <EmailInput disabled={isLoading} value={email} onChange={handleEmailInputChange} />
-
-      {
-        isLoading
-        &&
-        <CancelSignInButton
-          onClick={cancelSignIn}
-        >
-          Cancel
-       </CancelSignInButton>
-      }
 
       {
         !isLoading

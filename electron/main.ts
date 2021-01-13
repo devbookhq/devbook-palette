@@ -334,6 +334,21 @@ ipcMain.on('restart-and-update', () => {
 
 ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo));
 
+ipcMain.on('refresh-auth', (event) => {
+  if (event.sender.id !== mainWindow?.window?.id) {
+    mainWindow?.webContents?.send('refresh-auth');
+  }
+
+  if (event.sender.id !== preferencesWindow?.window?.id) {
+    preferencesWindow?.webContents?.send('refresh-auth');
+  }
+});
+
+ipcMain.on('open-sign-in-modal', () => {
+  mainWindow?.show();
+  mainWindow?.webContents?.send('open-sign-in-modal');
+});
+
 ipcMain.on('track-modal-opened', (_, modalInfo: any) => trackModalOpened(modalInfo));
 
 ipcMain.on('save-search-query', (_, { query }: { query: string }) => {
@@ -422,5 +437,3 @@ ipcMain.handle(IPCMessage.GetCachedDocSources, async () => {
 ipcMain.on(IPCMessage.SaveDocSources, (_, { docSources }) => {
   store.set(StoreKey.DocSources, docSources);
 });
-
-
