@@ -68,7 +68,7 @@ function Account({ user }: AccountProps) {
               You are not signed in
             </SignInText>
 
-            <SignInButton onClick={() => { }}>
+            <SignInButton onClick={openSignInModal}>
               Sign in to Devbook
             </SignInButton>
           </SignInWrapper>

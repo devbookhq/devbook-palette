@@ -51,7 +51,7 @@ export async function signIn(email: string) {
     email,
   });
 
-  openLink(`${url}/signin/${sessionID}?${params}`);
+  await openLink(`${url}/signin/${sessionID}?${params}`);
 
   let credential: string | undefined = undefined;
 
@@ -66,10 +66,15 @@ export async function signIn(email: string) {
       credential = result.data.credential;
       break;
     } catch (error) {
+      if (error.response?.status === 500) {
+        throw new Error('Sign-in session expired');
+      }
+
       if (error.response?.status !== 404) {
         // console.error(error);
         break;
       }
+
     }
     await timeout(1200);
   }
@@ -110,7 +115,6 @@ export async function refreshAuth() {
     authInfo = { isLoading: false };
   }
   authState.emit('changed', authInfo);
-  refreshAuthInOtherWindows();
 }
 
 refreshAuth();
