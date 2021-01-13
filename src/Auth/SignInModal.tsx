@@ -205,6 +205,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
           <InputWrapper>
             <InputTitle>EMAIL</InputTitle>
             <EmailInput
+              autoFocus
               placeholder="your@email.com"
               value={email}
               onChange={handleEmailInputChange}
