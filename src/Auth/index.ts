@@ -41,66 +41,107 @@ export async function signOut() {
   }
 }
 
+let signInInProgressCancel: (() => void) | undefined = undefined;
+
+export function cancelSignIn() {
+  signInInProgressCancel?.();
+}
+
 export async function signIn(email: string) {
-  const url = 'https://dev.usedevbook.com/auth';
-  // const url = 'http://localhost:3002/auth';
+  cancelSignIn();
 
-  const sessionID = generateSessionID();
+  let resolveHandle: any;
 
-  const params = querystring.encode({
-    email,
-  });
+  let isCanceled = false;
 
-  await openLink(`${url}/signin/${sessionID}?${params}`);
-
-  let credential: string | undefined = undefined;
-
-  while (!credential) {
-    try {
-      const result = await axios.get(`${url}/credential/${sessionID}`, {
-        params: {
-          email,
-        },
-      });
-
-      credential = result.data.credential;
-      break;
-    } catch (error) {
-      if (error.response?.status === 500) {
-        throw new Error('Sign-in session expired');
-      }
-
-      if (error.response?.status !== 404) {
-        // console.error(error);
-        break;
-      }
-    }
-    await timeout(1200);
+  function getIsCancelled() {
+    return isCanceled;
   }
 
-  if (!credential) {
-    return;
-  }
+  const cancelableSignIn = new Promise<void>(async (resolve, reject) => {
 
-  try {
-    const didToken = await magic.auth.loginWithCredential(credential);
-    const userMetadata = await magic.user.getMetadata()
-    console.log('public address', userMetadata.publicAddress);
+    resolveHandle = resolve;
 
-    await axios.post(`${url}/signin`, {
-      didToken,
+    const url = 'https://dev.usedevbook.com/auth';
+    // const url = 'http://localhost:3002/auth';
+
+    const sessionID = generateSessionID();
+
+    const params = querystring.encode({
+      email,
     });
 
-    // await aliasAnalyticsUser(userMetadata.publicAddress);
+    await openLink(`${url}/signin/${sessionID}?${params}`);
 
-    authInfo = { user: userMetadata, isLoading: false };
-    authState.emit('changed', authInfo);
-    refreshAuthInOtherWindows();
+    let credential: string | undefined = undefined;
 
-  } catch (error) {
-    console.error(error);
-  }
+    const requestLimit = 60 * 15;
+
+    for (let i = 0; i < requestLimit; i++) {
+      if (getIsCancelled()) {
+        break;
+      }
+
+      if (credential) {
+        break;
+      }
+
+      try {
+        const result = await axios.get(`${url}/credential/${sessionID}`, {
+          params: {
+            email,
+          },
+        });
+
+        credential = result.data.credential;
+        break;
+
+      } catch (error) {
+        if (error.response?.status !== 404) {
+          // console.error(error);
+          break;
+        }
+      }
+      await timeout(1000);
+    }
+
+    if (getIsCancelled()) {
+      return resolve();
+    }
+
+    if (!credential && !getIsCancelled()) {
+      return reject();
+    }
+
+    try {
+      const didToken = await magic.auth.loginWithCredential(credential);
+      const userMetadata = await magic.user.getMetadata()
+      console.log('public address', userMetadata.publicAddress);
+
+      await axios.post(`${url}/signin`, {
+        didToken,
+      });
+
+      // await aliasAnalyticsUser(userMetadata.publicAddress);
+
+      authInfo = { user: userMetadata, isLoading: false };
+      authState.emit('changed', authInfo);
+      refreshAuthInOtherWindows();
+
+    } catch (error) {
+      console.error(error);
+    }
+    return resolve();
+  });
+
+  signInInProgressCancel = () => {
+    isCanceled = true;
+    resolveHandle();
+  };
+
+  return cancelableSignIn;
 }
+
 
 export async function refreshAuth() {
   try {
