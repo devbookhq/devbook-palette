@@ -201,6 +201,10 @@ export async function signIn(email: string) {
     }
 
     if (isCancelled) {
+
+      axios.delete
+
+
       return reject({ message: 'Sign in was cancelled' });
     }
 
