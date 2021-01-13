@@ -75,7 +75,7 @@ export const authEmitter = new EventEmitter();
 export let authInfo: AuthInfo = { state: AuthState.LoadingUser };
 
 const url = isDev ? 'https://dev.usedevbook.com/auth' : 'https://api.usedevbook.com/auth';
-// const url = 'http://localhost:3002/auth';
+
 const magicAPIKey = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
 const magic = new Magic(magicAPIKey);
 
@@ -132,7 +132,7 @@ async function syncUserMetadata(didToken: string) {
     refreshAuthInOtherWindows();
 
     try {
-      await axios.post(`${url}/signin`, {
+      await axios.post(`${url}/user`, {
         didToken,
       });
     } catch (error) {
