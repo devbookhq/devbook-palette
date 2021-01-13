@@ -1,4 +1,4 @@
-// Electron requires were moved into this separate file, because there were several cyclic dependencies,
+// Electron requires were moved into this separate file because there were several cyclic dependencies,
 // preventing starting the app.
 const electron = window.require('electron') as typeof import('electron');
 
