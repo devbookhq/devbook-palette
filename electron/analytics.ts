@@ -22,16 +22,20 @@ client.identify({
   },
 });
 
-export function aliasAnalyticsUser(newUserID: string) {
+export function changeAnalyticsUser(newUserID?: string) {
   const deviceUserID = store.get('userID', uuidv4());
   store.set('userID', userID);
 
-  client.alias({
-    previousId: deviceUserID,
-    userId: newUserID,
-  });
+  if (newUserID) {
+    client.alias({
+      previousId: deviceUserID,
+      userId: newUserID,
+    });
 
-  userID = newUserID;
+    userID = newUserID;
+  } else {
+    userID = deviceUserID;
+  }
 }
 
 export function trackShowApp() {

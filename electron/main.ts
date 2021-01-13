@@ -19,7 +19,7 @@ import {
   trackConnectGitHubStarted,
   trackModalOpened,
   trackShortcut,
-  aliasAnalyticsUser,
+  changeAnalyticsUser,
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
@@ -322,8 +322,8 @@ ipcMain.on('connect-github', () => {
   trackConnectGitHubStarted();
 });
 
-ipcMain.handle('alias-analytics-user', async (_, { userID }: { userID: string }) => {
-  aliasAnalyticsUser(userID);
+ipcMain.on('change-analytics-user', async (_, { userID }: { userID?: string }) => {
+  changeAnalyticsUser(userID);
 });
 
 ipcMain.on('open-preferences', () => openPreferences());
