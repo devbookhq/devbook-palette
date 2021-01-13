@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import Base from './Base';
 import Button from 'components/Button';
 import { MagicUserMetadata, signOut } from 'Auth';
+import { openSignInModal } from 'mainProcess';
 
 const Container = styled.div`
   width: 100%;
@@ -67,8 +68,7 @@ function Account({ user }: AccountProps) {
               You are not signed in
             </SignInText>
 
-            {/* TODO: Implement onClick */}
-            <SignInButton onClick={() => { }}>
+            <SignInButton onClick={openSignInModal}>
               Sign in to Devbook
             </SignInButton>
           </SignInWrapper>

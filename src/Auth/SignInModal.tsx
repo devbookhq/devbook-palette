@@ -4,11 +4,9 @@ import styled from 'styled-components';
 import Modal from 'components/Modal';
 import Button from 'components/Button';
 import Loader from 'components/Loader';
-
 import { ReactComponent as checkIcon } from 'img/check-circle.svg';
 
 import { signIn, cancelSignIn } from './index';
-
 
 const StyledModal = styled(Modal)`
   padding: 15px;
@@ -138,7 +136,6 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
 
   async function handleCloseRequest() {
     onCloseRequest?.();
-    cancelSignIn()
   }
 
   async function handleSignInButtonClick() {
@@ -244,4 +241,3 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
 }
 
 export default SignInModal;
-

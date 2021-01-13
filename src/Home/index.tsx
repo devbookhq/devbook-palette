@@ -1271,6 +1271,10 @@ function Home() {
   }, [activeFilter, state.isDocsFilterModalOpened]);
   /* //////////////////// */
 
+  useIPCRenderer('open-sign-in-modal', () => {
+    openSignInModal();
+  });
+
   useIPCRenderer('github-access-token', async (_, { accessToken }: { accessToken: string | null }) => {
     if (accessToken === null) {
       disconnectGitHub();

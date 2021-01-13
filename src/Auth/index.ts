@@ -8,6 +8,7 @@ import {
 } from 'mainProcess/electron';
 import {
   openLink,
+  refreshAuthInOtherWindows,
 } from 'mainProcess';
 
 export const authState = new EventEmitter();
@@ -28,26 +29,19 @@ function timeout(ms: number) {
 
 const magic = new Magic('pk_test_2AE829E9A03C1FA0');
 
-const cancelSignInToken = axios.CancelToken.source();
-
-let signInCanceled = false;
-
-export function cancelSignIn() {
-  signInCanceled = true;
-  cancelSignInToken.cancel();
-}
-
 export async function signOut() {
   try {
     await magic.user.logout();
-    await checkUser();
+    authInfo = { isLoading: false };
+    authState.emit('changed', authInfo);
+    refreshAuthInOtherWindows();
+
   } catch (error) {
     console.error(error);
   }
 }
 
 export async function signIn(email: string) {
-  signInCanceled = false;
   const url = 'https://dev.usedevbook.com/auth';
   // const url = 'http://localhost:3002/auth';
 
@@ -57,27 +51,30 @@ export async function signIn(email: string) {
     email,
   });
 
-  openLink(`${url}/signin/${sessionID}?${params}`);
+  await openLink(`${url}/signin/${sessionID}?${params}`);
 
   let credential: string | undefined = undefined;
 
-  while (!signInCanceled && !credential) {
+  while (!credential) {
     try {
       const result = await axios.get(`${url}/credential/${sessionID}`, {
         params: {
           email,
         },
-        cancelToken: cancelSignInToken.token,
       });
 
       credential = result.data.credential;
       break;
     } catch (error) {
+      if (error.response?.status === 500) {
+        throw new Error('Sign-in session expired');
+      }
+
       if (error.response?.status !== 404) {
-        signInCanceled = true;
-        console.error(error);
+        // console.error(error);
         break;
       }
+
     }
     await timeout(1200);
   }
@@ -96,20 +93,28 @@ export async function signIn(email: string) {
     });
 
     // await aliasAnalyticsUser(userMetadata.publicAddress);
-    await checkUser();
+
+    authInfo = { user: userMetadata, isLoading: false };
+    authState.emit('changed', authInfo);
+    refreshAuthInOtherWindows();
+
   } catch (error) {
     console.error(error);
   }
 }
 
-async function checkUser() {
-  const isUserSignedIn = await magic.user.isLoggedIn();
-  if (isUserSignedIn) {
-    authInfo = { user: await magic.user.getMetadata(), isLoading: false };
-  } else {
+export async function refreshAuth() {
+  try {
+    const isUserSignedIn = await magic.user.isLoggedIn();
+    if (isUserSignedIn) {
+      authInfo = { user: await magic.user.getMetadata(), isLoading: false };
+    } else {
+      authInfo = { isLoading: false };
+    }
+  } catch (error) {
     authInfo = { isLoading: false };
   }
   authState.emit('changed', authInfo);
 }
 
-checkUser();
+refreshAuth();
