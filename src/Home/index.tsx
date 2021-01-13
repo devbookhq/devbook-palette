@@ -1379,6 +1379,8 @@ function Home() {
     trackSearch({
       activeFilter: activeFilter.toString(),
     });
+  // TODO WARNING - Don't include 'searchAll' in the deps array
+  // otherwise an infinite cycle will start. Why?
   }, [
     debouncedQuery,
     debouncedLastSearchedQuery,

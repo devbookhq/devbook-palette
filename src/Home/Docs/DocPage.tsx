@@ -630,18 +630,6 @@ function DocPage({
     const el = document.createElement('html');
     el.innerHTML = html;
 
-    /*
-    const codes = el.getElementsByTagName('code');
-    for (const code of codes) {
-      const codeText = (code as HTMLElement).innerText;
-      if (codeText) {
-        // TODO: We could use the correct langague highlight based on the documentation.
-        const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
-        code.innerHTML = codeHTML;
-      }
-    }
-    */
-
     const pres = el.getElementsByTagName('pre');
     for (const pre of pres) {
       const codeText = (pre as HTMLElement).innerText;
@@ -653,6 +641,7 @@ function DocPage({
     }
 
     // TODO: Load TEX language.
+    /*
     const maths = el.getElementsByTagName('math');
     for (const math of maths) {
       //console.log('math', math);
@@ -665,6 +654,7 @@ function DocPage({
         math.innerHTML = mathHTML;
       }
     }
+    */
 
     return el.outerHTML || '<html></html>';
   }
@@ -764,7 +754,7 @@ function DocPage({
 
     const textNodes = getTextNodeChildren(containerRef.current as Node);
     let wholeText = '';
-    textNodes.map(n => {
+    textNodes.forEach(n => {
       wholeText += n.nodeValue || '';
     });
 
@@ -785,6 +775,10 @@ function DocPage({
         if (highlight.index === 0) selectHighlight(highlight);
       }
     }
+  // Note - we don't want to include 'highlights' in the deps array
+  // because we would end up in an infinite cycle.
+  // We just want to remove highlights every time user changes the
+  // query. Not when highlights change.
   }, [setHighlights, debouncedSearchQuery]);
 
   useEffect(() => {
