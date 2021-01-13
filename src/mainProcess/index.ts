@@ -1,7 +1,7 @@
 import electron, { isDev } from './electron';
 import { ResultsFilter } from 'Home/SearchInput';
 import { DocSource } from 'search/docs';
-import { refreshAuth } from 'Auth';
+import { refreshAuthInfo } from 'Auth';
 import { PreferencesPage } from 'Preferences';
 
 export enum IPCMessage {
@@ -20,7 +20,7 @@ electron.ipcRenderer.on('console', (_, args) => {
 });
 
 electron.ipcRenderer.on(IPCMessage.RefreshAuth, () => {
-  refreshAuth();
+  refreshAuthInfo();
 });
 
 export function getGlobalShortcut() {

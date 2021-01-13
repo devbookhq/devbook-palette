@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { AuthInfo, signOut } from 'Auth';
+import { AuthInfo, signOut, AuthState } from 'Auth';
 import { openSignInModal } from 'mainProcess';
 
 import Button from 'components/Button';
@@ -56,17 +56,21 @@ interface AccountProps {
 }
 
 function Account({ authInfo }: AccountProps) {
+  const isLoading = authInfo.state === AuthState.LoadingUser
+    || authInfo.state === AuthState.LoadingUserMetadata
+    || authInfo.state === AuthState.SigningOutUser;
+
   return (
     <Base title="Account">
       <Container>
-        {authInfo.isLoading &&
-          <StyledLoader/>
+        {isLoading &&
+          < StyledLoader />
         }
 
-        {!authInfo.isLoading && authInfo.user &&
+        {!isLoading && authInfo.state === AuthState.UserAndMetadataLoaded &&
           <>
             <Email>
-              {authInfo.user.email}
+              {authInfo.metadata.email}
             </Email>
             <SignOutButton onClick={() => signOut()}>
               Sign Out
@@ -74,7 +78,7 @@ function Account({ authInfo }: AccountProps) {
           </>
         }
 
-        {!authInfo.isLoading && !authInfo.user &&
+        {!isLoading && authInfo.state === AuthState.NoUser &&
           <SignInWrapper>
             <SignInText>
               You are not signed in

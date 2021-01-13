@@ -6,7 +6,7 @@ import './index.css';
 import { notifyViewReady, } from './mainProcess';
 import * as serviceWorker from './serviceWorker';
 import App from './App';
-import { authState } from 'Auth';
+import { authEmitter } from 'Auth';
 
 ReactDOM.render(
   <React.StrictMode>
@@ -16,7 +16,7 @@ ReactDOM.render(
   document.getElementById('root'),
 );
 
-authState.on('changed', () => {
+authEmitter.on('changed', () => {
   ReactDOM.render(
     <React.StrictMode>
       <App />

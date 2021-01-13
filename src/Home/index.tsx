@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Resizable } from 're-resizable';
 
-import { authInfo } from 'Auth';
+import { authInfo, AuthState } from 'Auth';
 import electron, {
   isDev,
   hideMainWindow,
@@ -769,6 +769,13 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
 }
 
 function Home() {
+  const isUserLoading = authInfo.state === AuthState.LoadingUser
+    || authInfo.state === AuthState.LoadingUserMetadata
+    || authInfo.state === AuthState.SigningOutUser;
+
+  const isUserSignedInWithOrWithoutMetadata = authInfo.state === AuthState.LoadingUserMetadata
+    || authInfo.state === AuthState.UserAndMetadataLoaded;
+
   const docPageSearchInputRef = useRef<HTMLInputElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
@@ -1275,7 +1282,7 @@ function Home() {
     // A search filter different from Docs is active.
     if (activeFilter !== ResultsFilter.Docs) return;
     // Docs search filter is active but user isn't signed in.
-    if (activeFilter === ResultsFilter.Docs && !authInfo.isSignedIn) return;
+    if (activeFilter === ResultsFilter.Docs && !isUserSignedInWithOrWithoutMetadata) return;
 
     if (state.isDocsFilterModalOpened) closeDocsFilterModal();
     else openDocsFilterModal();
@@ -1471,13 +1478,14 @@ function Home() {
         }
 
         {activeFilter === ResultsFilter.Docs
-          && authInfo.isLoading
+          && isUserLoading
+          && !isUserSignedInWithOrWithoutMetadata
           &&
           <DocsLoader />
         }
         {activeFilter === ResultsFilter.Docs
-          && !authInfo.isSignedIn
-          && !authInfo.isLoading
+          && !isUserLoading
+          && !isUserSignedInWithOrWithoutMetadata
           &&
           <>
             <InfoMessage>You need to sign in to search documentations</InfoMessage>
@@ -1491,7 +1499,7 @@ function Home() {
 
         {state.search.query
           && activeFilter === ResultsFilter.Docs
-          && authInfo.isSignedIn
+          && isUserSignedInWithOrWithoutMetadata
           && !isAnyDocSourceIncluded
           && !isActiveFilterLoading
           &&
@@ -1539,7 +1547,7 @@ function Home() {
 
             {activeFilter === ResultsFilter.Docs
               && isAnyDocSourceIncluded
-              && authInfo.isSignedIn
+              && isUserSignedInWithOrWithoutMetadata
               &&
               <DocsWrapper>
                 <Resizable
@@ -1609,7 +1617,7 @@ function Home() {
             {/* Docs search results */}
             {!state.modalItem
               && activeFilter === ResultsFilter.Docs
-              && authInfo.isSignedIn
+              && isUserSignedInWithOrWithoutMetadata
               && isAnyDocSourceIncluded
               &&
               <DocsSearchHotkeysPanel
