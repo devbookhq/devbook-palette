@@ -23,17 +23,10 @@ import {
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
-import PreferencesWindow from './PreferencesWindow';
+import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import Auth from './Auth';
 import MainWindow from './MainWindow';
-
-enum IPCMessage {
-  GetCachedDocSources = 'GetCachedDocSources',
-  SaveDocSources = 'SaveDocSources',
-  RefreshAuth = 'RefreshAuth',
-  OpenSignInModal = 'OpenSignInModal',
-  ChangeUserInMain = 'ChangeUserInMain',
-}
+import { IPCMessage } from './ipc';
 
 enum StoreKey {
   DocSources = 'docSources',
@@ -179,11 +172,11 @@ function hideMainWindow() {
   }
 }
 
-function openPreferences() {
+function openPreferences(page?: PreferencesPage) {
   if (!preferencesWindow || !preferencesWindow.window) {
-    preferencesWindow = new PreferencesWindow(PORT, () => onboardingWindow?.window?.isVisible(), taskBarIcon);
+    preferencesWindow = new PreferencesWindow(PORT, () => onboardingWindow?.window?.isVisible(), taskBarIcon, page);
   }
-  preferencesWindow.show();
+  preferencesWindow.show(page);
   hideMainWindow();
 }
 
@@ -336,7 +329,9 @@ ipcMain.on(IPCMessage.ChangeUserInMain, async (_, user: { userID: string, email:
   }
 });
 
-ipcMain.on('open-preferences', () => openPreferences());
+ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => {
+  openPreferences(page);
+});
 
 ipcMain.on('restart-and-update', () => {
   restartAndUpdate();

@@ -1,17 +1,31 @@
 import * as electron from 'electron';
 import * as path from 'path';
+import { inspect } from 'util';
 import * as process from 'process';
 import isDev from './utils/isDev';
-import { inspect } from 'util';
+import { IPCMessage } from './ipc';
+
+export enum PreferencesPage {
+  General = 'general',
+  Integrations = 'integrations',
+  Account = 'account',
+}
 
 class PreferencesWindow {
   public window: electron.BrowserWindow | undefined;
+  private port: number;
 
   public get webContents() {
     return this.window?.webContents;
   }
 
-  public constructor(PORT: number, isOnboardingVisible: () => boolean | undefined, taskBarIcon: electron.NativeImage) {
+  public constructor(
+    port: number,
+    isOnboardingVisible: () => boolean | undefined,
+    taskBarIcon: electron.NativeImage,
+    page?: PreferencesPage,
+  ) {
+    this.port = port;
     this.window = new electron.BrowserWindow({
       width: 850,
       height: 600,
@@ -46,7 +60,8 @@ class PreferencesWindow {
     });
 
     if (isDev) {
-      this.window.loadURL(`http://localhost:${PORT}/index.html#/preferences`);
+      const url = `http://localhost:${port}/index.html#/preferences` + (page ? `/${page}` : '');
+      this.window.loadURL(url);
       // Hot Reloading
       require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
@@ -55,7 +70,8 @@ class PreferencesWindow {
       });
       this.window.webContents.openDevTools();
     } else {
-      this.window.loadURL(`file://${__dirname}/../index.html#/preferences`);
+      const url = `file://${__dirname}/../index.html#/preferences` + (page ? `/${page}` : '');
+      this.window.loadURL(url);
     }
 
     if (process.platform === 'darwin') {
@@ -71,8 +87,19 @@ class PreferencesWindow {
     this.window?.hide();
   }
 
-  public show() {
+  public show(page?: PreferencesPage) {
     this.window?.show();
+    if (page) {
+      this.window?.webContents?.send(IPCMessage.GoToPreferencesPage, { page });
+    }
+    /*
+    if (page) {
+      const url = `http://localhost:${this.port}/index.html#/preferences` + (page ? `/${page}` : '');
+      console.log('WINDOW SHOW URL', url);
+      this.window?.loadURL(url);
+      // TODO: Show page.
+    }
+    */
   }
 }
 

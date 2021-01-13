@@ -6,8 +6,6 @@ import React, {
 import styled from 'styled-components';
 
 import useIPCRenderer from 'hooks/useIPCRenderer';
-import Loader from 'components/Loader';
-import Hotkey, { Key } from './HotkeysPanel/Hotkey';
 import electron, {
   openPreferences,
   isDev,
@@ -15,10 +13,14 @@ import electron, {
   restartAndUpdate,
   postponeUpdate,
 } from 'mainProcess';
+import Loader from 'components/Loader';
+import { PreferencesPage } from 'Preferences';
 
 import { ReactComponent as userProfileIcon } from 'img/user-profile.svg';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
+
+import Hotkey, { Key } from './HotkeysPanel/Hotkey';
 
 const Container = styled.div`
   width: 100%;
@@ -318,10 +320,10 @@ function SearchInput({
           ))}
         </FiltersWrapper>
         {isDev && <Dev>[dev build]</Dev>}
-        <UserProfileButton onClick={openPreferences}>
+        <UserProfileButton onClick={() => openPreferences(PreferencesPage.Account)}>
           <UserProfileIcon />
         </UserProfileButton>
-        <PreferencesButton onClick={openPreferences}>
+        <PreferencesButton onClick={() => openPreferences(PreferencesPage.General)}>
           <PreferencesIcon />
         </PreferencesButton>
       </Menu>
