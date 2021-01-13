@@ -628,18 +628,6 @@ function DocPage({
     const el = document.createElement('html');
     el.innerHTML = html;
 
-    /*
-    const codes = el.getElementsByTagName('code');
-    for (const code of codes) {
-      const codeText = (code as HTMLElement).innerText;
-      if (codeText) {
-        // TODO: We could use the correct langague highlight based on the documentation.
-        const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
-        code.innerHTML = codeHTML;
-      }
-    }
-    */
-
     const pres = el.getElementsByTagName('pre');
     for (const pre of pres) {
       const codeText = (pre as HTMLElement).innerText;
@@ -651,6 +639,7 @@ function DocPage({
     }
 
     // TODO: Load TEX language.
+    /*
     const maths = el.getElementsByTagName('math');
     for (const math of maths) {
       //console.log('math', math);
@@ -663,6 +652,7 @@ function DocPage({
         math.innerHTML = mathHTML;
       }
     }
+    */
 
     return el.outerHTML || '<html></html>';
   }
