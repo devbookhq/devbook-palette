@@ -2,7 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { AuthInfo, signOut } from 'Auth';
-import { openSignInModal } from 'mainProcess';
+import {
+  openSignInModal,
+  trackSignOutButtonClicked,
+} from 'mainProcess';
 
 import Button from 'components/Button';
 import Loader from 'components/Loader';
@@ -56,6 +59,11 @@ interface AccountProps {
 }
 
 function Account({ authInfo }: AccountProps) {
+  function handleSignOutButtonClicked() {
+    trackSignOutButtonClicked();
+    signOut();
+  }
+
   return (
     <Base title="Account">
       <Container>
@@ -68,7 +76,7 @@ function Account({ authInfo }: AccountProps) {
             <Email>
               {authInfo.user.email}
             </Email>
-            <SignOutButton onClick={() => signOut()}>
+            <SignOutButton onClick={handleSignOutButtonClicked}>
               Sign Out
             </SignOutButton>
           </>

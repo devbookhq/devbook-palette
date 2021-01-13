@@ -5,4 +5,13 @@ export enum IPCMessage {
   ChangeUserInMain = 'ChangeUserInMain',
   OpenSignInModal = 'OpenSignInModal',
   RefreshAuth = 'RefreshAuth',
+
+  TrackSignInModalOpened = 'TrackSignInModalOpened',
+  TrackSignInModalClosed = 'TrackSignInModalClosed',
+  TrackSignInButtonClicked = 'TrackSignInButtonClicked',
+  TrackSignInAgainButtonClicked = 'TrackSignInAgainButtonClicked',
+  TrackSignInFinished = 'TrackSignInFinished',
+  TrackSignInFailed = 'TrackSignInFailed',
+  TrackContinueIntoAppButtonClicked = 'TrackContinueIntoAppButtonClicked',
+  TrackSignOutButtonClicked = 'TrackSignOutButtonClicked',
 }

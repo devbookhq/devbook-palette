@@ -38,7 +38,6 @@ export function changeAnalyticsUser(user?: { userID: string, email: string }) {
         email: user.email,
       },
     });
-
     userID = user.userID;
   } else {
     userID = savedUserID;
@@ -139,27 +138,92 @@ export function trackModalOpened(modalInfo: any) {
 }
 
 export function trackSignInModalOpened() {
-
-}
-
+    client.track({
+      event: 'Sign in modal opened',
+      userId: userID,
+      properties: {
+        platform,
+        appVersion,
+      },
+    });
+  }
+  
 export function trackSignInModalClosed() {
-
+  client.track({
+    event: 'Sign in modal closed',
+    userId: userID,
+    properties: {
+      platform,
+      appVersion,
+    },
+  });
 }
-
+  
 export function trackSignInButtonClicked() {
-
+  client.track({
+    event: 'Sign in button clicked',
+    userId: userID,
+    properties: {
+      platform,
+      appVersion,
+    },
+  });
 }
-
+  
 export function trackSignInAgainButtonClicked() {
-
+  client.track({
+    event: 'Sign in again button clicked',
+    userId: userID,
+    properties: {
+      platform,
+      appVersion,
+    },
+  });
 }
 
 export function trackSignInFinished() {
+  client.track({
+    event: 'Sign in finished',
+    userId: userID,
+    properties: {
+      platform,
+      appVersion,
+    },
+  });
+}
 
+export function trackSignInFailed(error: string) {
+  client.track({
+    event: 'Continue into app button clicked',
+    userId: userID,
+    properties: {
+      platform,
+      appVersion,
+      error,
+    },
+  });
+}
+
+export function trackContinueIntoAppButtonClicked() {
+  client.track({
+    event: 'Continue into app button clicked',
+    userId: userID,
+    properties: {
+      platform,
+      appVersion,
+    },
+  });
 }
 
 export function trackSignOutButtonClicked() {
-
+  client.track({
+    event: 'Sign out button clicked',
+    userId: userID,
+    properties: {
+      platform,
+      appVersion,
+    },
+  });
 }
 
 

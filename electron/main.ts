@@ -20,6 +20,14 @@ import {
   trackModalOpened,
   trackShortcut,
   changeAnalyticsUser,
+  trackSignInModalOpened,
+  trackSignInModalClosed,
+  trackSignInButtonClicked,
+  trackSignInAgainButtonClicked,
+  trackSignInFinished,
+  trackSignInFailed,
+  trackContinueIntoAppButtonClicked,
+  trackSignOutButtonClicked,
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
@@ -442,3 +450,36 @@ ipcMain.handle(IPCMessage.GetCachedDocSources, async () => {
 ipcMain.on(IPCMessage.SaveDocSources, (_, { docSources }) => {
   store.set(StoreKey.DocSources, docSources);
 });
+
+ipcMain.on(IPCMessage.TrackSignInModalOpened, () => {
+  trackSignInModalOpened()
+});
+
+ipcMain.on(IPCMessage.TrackSignInModalClosed, () => {
+  trackSignInModalClosed()
+});
+
+ipcMain.on(IPCMessage.TrackSignInButtonClicked, () => {
+  trackSignInButtonClicked()
+});
+
+ipcMain.on(IPCMessage.TrackSignInAgainButtonClicked, () => {
+  trackSignInAgainButtonClicked()
+});
+
+ipcMain.on(IPCMessage.TrackSignInFinished, () => {
+  trackSignInFinished()
+});
+
+ipcMain.on(IPCMessage.TrackSignInFailed, (_, { error }: { error: string }) => {
+  trackSignInFailed(error)
+});
+
+ipcMain.on(IPCMessage.TrackContinueIntoAppButtonClicked, () => {
+  trackContinueIntoAppButtonClicked()
+});
+
+ipcMain.on(IPCMessage.TrackSignOutButtonClicked, () => {
+  trackSignOutButtonClicked()
+});
+

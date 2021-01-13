@@ -92,15 +92,8 @@ class PreferencesWindow {
     if (page) {
       this.window?.webContents?.send(IPCMessage.GoToPreferencesPage, { page });
     }
-    /*
-    if (page) {
-      const url = `http://localhost:${this.port}/index.html#/preferences` + (page ? `/${page}` : '');
-      console.log('WINDOW SHOW URL', url);
-      this.window?.loadURL(url);
-      // TODO: Show page.
-    }
-    */
   }
 }
 
 export default PreferencesWindow;
+

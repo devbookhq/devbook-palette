@@ -11,6 +11,15 @@ export enum IPCMessage {
   OpenSignInModal = 'OpenSignInModal',
   ChangeUserInMain = 'ChangeUserInMain',
   GoToPreferencesPage = 'GoToPreferencesPage',
+
+  TrackSignInModalOpened = 'TrackSignInModalOpened',
+  TrackSignInModalClosed = 'TrackSignInModalClosed',
+  TrackSignInButtonClicked = 'TrackSignInButtonClicked',
+  TrackSignInAgainButtonClicked = 'TrackSignInAgainButtonClicked',
+  TrackSignInFinished = 'TrackSignInFinished',
+  TrackSignInFailed = 'TrackSignInFailed',
+  TrackContinueIntoAppButtonClicked = 'TrackContinueIntoAppButtonClicked',
+  TrackSignOutButtonClicked = 'TrackSignOutButtonClicked',
 }
 
 // So we see logs from the main process in the Chrome debug tools.
@@ -139,6 +148,38 @@ export function getCachedDocSources(): Promise<DocSource[]> {
 
 export function saveDocSources(docSources: DocSource[]) {
   return electron.ipcRenderer.send(IPCMessage.SaveDocSources, { docSources });
+}
+
+export function trackSignInModalOpened() {
+  return electron.ipcRenderer.send(IPCMessage.TrackSignInModalOpened);
+}
+
+export function trackSignInModalClosed() {
+  return electron.ipcRenderer.send(IPCMessage.TrackSignInModalClosed);
+}
+
+export function trackSignInButtonClicked() {
+  return electron.ipcRenderer.send(IPCMessage.TrackSignInButtonClicked);
+}
+
+export function trackSignInAgainButtonClicked() {
+  return electron.ipcRenderer.send(IPCMessage.TrackSignInAgainButtonClicked);
+}
+
+export function trackSignInFinished() {
+  return electron.ipcRenderer.send(IPCMessage.TrackSignInFinished);
+}
+
+export function trackSignInFailed(error: string) {
+  return electron.ipcRenderer.send(IPCMessage.TrackSignInFailed, { error });
+}
+
+export function trackContinueIntoAppButtonClicked() {
+  return electron.ipcRenderer.send(IPCMessage.TrackContinueIntoAppButtonClicked);
+}
+
+export function trackSignOutButtonClicked() {
+  return electron.ipcRenderer.send(IPCMessage.TrackSignOutButtonClicked);
 }
 
 export { isDev };
