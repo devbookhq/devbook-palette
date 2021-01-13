@@ -287,7 +287,6 @@ function SearchInput({
   }, [isSignInModalOpened]);
 
   useEffect(() => {
-    console.log('SEARCH INPUT docs filter modal', isDocsFilterModalOpened);
     if (isDocsFilterModalOpened) inputRef?.current?.blur();
     else inputRef?.current?.focus();
   }, [isDocsFilterModalOpened]);
