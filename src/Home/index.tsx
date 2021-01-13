@@ -1403,8 +1403,7 @@ function Home() {
         />
       }
 
-      {
-        state.isSignInModalOpened &&
+      {state.isSignInModalOpened &&
         <SignInModal
           onCloseRequest={closeSignInModal}
         />
@@ -1467,7 +1466,7 @@ function Home() {
             <SignInButton
               onClick={openSignInModal}
             >
-              Sign In
+              Sign in to Devbook
             </SignInButton>
           </>
         }

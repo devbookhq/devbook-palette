@@ -3,7 +3,10 @@ import styled from 'styled-components';
 
 import Modal from 'components/Modal';
 import Button from 'components/Button';
-import { signIn } from 'Auth';
+import Loader from 'components/Loader';
+import { ReactComponent as checkIcon } from 'img/check-circle.svg';
+
+import { signIn, cancelSignIn } from './index';
 
 const StyledModal = styled(Modal)`
   padding: 15px;
@@ -46,6 +49,35 @@ const SignInButton = styled(Button)`
   border-radius: 5px;
 `;
 
+const ContinueToAppButton = styled(Button)`
+  margin-top: 15px;
+  padding: 10px 20px;
+
+  font-size: 15px;
+  font-weight: 500;
+
+  border-radius: 5px;
+`;
+
+const SignInAgainButton = styled(Button)`
+  margin-top: 15px;
+  padding: 10px 20px;
+
+  color: #535BD7;
+  font-size: 15px;
+  font-weight: 500;
+
+  border-radius: 5px;
+  background: transparent;
+  border: 1px solid #535BD7;
+
+  :hover {
+    background: transparent;
+    color: #646CEA;
+    border: 1px solid #646CEA;
+  }
+`;
+
 const InputWrapper = styled.div`
   margin-bottom: 20px;
   width: 100%;
@@ -84,6 +116,10 @@ const EmailInput = styled.input`
   background: #23222D;
 `;
 
+const CheckIcon = styled(checkIcon)`
+  margin-top: 20px;
+`;
+
 interface SignInModalProps {
   onCloseRequest?: () => void;
 }
@@ -92,6 +128,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isSignedIn, setIsSignedIn] = useState(false);
 
   function handleEmailInputChange(e: any) {
     setEmail(e.target.value);
@@ -101,7 +138,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
     onCloseRequest?.();
   }
 
-  async function handleSignIn() {
+  async function handleSignInButtonClick() {
     if (isLoading) return;
     setIsLoading(true);
     setError('');
@@ -113,46 +150,92 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
 
     try {
       await signIn(email);
-      onCloseRequest?.();
+      setIsSignedIn(true);
     } catch (error) {
       console.error(error.message);
-      setError('Problem signing in');
+      setError(error.message);
     } finally {
       setIsLoading(false);
     }
+  }
+
+  function handleSignInAgainButtonClick() {
+    cancelSignIn()
+    setIsLoading(false);
   }
 
   return (
     <StyledModal
       onCloseRequest={handleCloseRequest}
     >
-      <Title>
-        Sign in with your email
-      </Title>
+      {!isSignedIn && !isLoading &&
+        <>
+          <Title>
+            Sign in with your email
+          </Title>
 
-      <Description>
-        Click on the sign-in button and you'll receive an email with a sign-in link.
-      </Description>
+          <Description>
+            Click on the sign-in button to receive an email with a sign-in link.
+          </Description>
 
-      <InputWrapper>
-        <InputTitle>EMAIL</InputTitle>
-        <EmailInput
-          placeholder="your@email.com"
-          value={email}
-          onChange={handleEmailInputChange}
-        />
-     </InputWrapper>
+          <InputWrapper>
+            <InputTitle>EMAIL</InputTitle>
+            <EmailInput
+              placeholder="your@email.com"
+              value={email}
+              onChange={handleEmailInputChange}
+            />
+         </InputWrapper>
 
-      {error &&
-        <Error>
-          {error}
-        </Error>
+          {error &&
+            <Error>
+              {error}
+            </Error>
+          }
+          <SignInButton
+            onClick={handleSignInButtonClick}
+          >
+            Sign in to Devbook
+         </SignInButton>
+        </>
       }
-      <SignInButton
-        onClick={handleSignIn}
-      >
-        Sign in to Devbook
-     </SignInButton>
+
+      {!isSignedIn && isLoading &&
+        <>
+          <Title>
+            Check your email
+          </Title>
+
+          <Description>
+            Waiting for you to click on the sign-in link in the email...
+          </Description>
+
+          <Loader/>
+
+          {error &&
+            <Error>
+              {error}
+            </Error>
+          }
+          <SignInAgainButton
+            onClick={handleSignInAgainButtonClick}
+          >
+            Sign in again
+         </SignInAgainButton>
+        </>
+      }
+
+      {isSignedIn &&
+        <>
+          <Title>
+            You are signed in!
+          </Title>
+          <CheckIcon/>
+          <ContinueToAppButton onClick={handleCloseRequest}>
+            Continue to app
+          </ContinueToAppButton>
+        </>
+      }
     </StyledModal>
   );
 }
