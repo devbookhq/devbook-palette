@@ -91,7 +91,6 @@ function Integrations() {
       try {
         const accessToken = await getGithubAccessToken();
         if (!accessToken) {
-          console.log('No GitHub Account connected');
           return;
         }
         const login = await getGitHubLogin(accessToken);
@@ -108,7 +107,6 @@ function Integrations() {
   }, []);
 
   useIPCRenderer('github-access-token', async (event, { accessToken }: { accessToken: string | null }) => {
-    console.log('access', accessToken);
     try {
       if (accessToken === null) {
         setGitHubLogin(undefined);
