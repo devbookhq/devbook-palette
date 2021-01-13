@@ -701,13 +701,11 @@ function DocPage({
     if (target.tagName === 'A' || target.parentNode.tagName === 'A') {
       let link = target.getAttribute('href') || target.parentNode.getAttribute('href');
       if (!link.startsWith('http://') && !link.startsWith('https://')) {
-        console.log(link);
         const urlWithoutExtension = new URL(link, pageURL);
         const hash = urlWithoutExtension.hash;
         const urlWithoutExtensionAndHash = new URL('', pageURL);
 
         link = urlWithoutExtensionAndHash.href + (hasHTMLExtension ? '.html' : '') + hash;
-        console.log(link);
       }
       openLink(link);
       e.preventDefault();
@@ -775,10 +773,10 @@ function DocPage({
         if (highlight.index === 0) selectHighlight(highlight);
       }
     }
-  // Note - we don't want to include 'highlights' in the deps array
-  // because we would end up in an infinite cycle.
-  // We just want to remove highlights every time user changes the
-  // query. Not when highlights change.
+    // Note - we don't want to include 'highlights' in the deps array
+    // because we would end up in an infinite cycle.
+    // We just want to remove highlights every time user changes the
+    // query. Not when highlights change.
   }, [setHighlights, debouncedSearchQuery]);
 
   useEffect(() => {
