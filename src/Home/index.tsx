@@ -1479,7 +1479,7 @@ function Home() {
             <GitHubConnectTitle>
               Connect your GitHub account to search on GitHub
             </GitHubConnectTitle>
-            <ConnectGitHubButton onClick={connectGitHub()}>
+            <ConnectGitHubButton onClick={connectGitHub}>
               Connect my GitHub account
             </ConnectGitHubButton>
             {/* <GitHubPrivacyLink onClick={openPrivacyTerms}>
