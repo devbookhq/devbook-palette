@@ -22,19 +22,26 @@ client.identify({
   },
 });
 
-export function changeAnalyticsUser(newUserID?: string) {
-  const deviceUserID = store.get('userID', uuidv4());
-  store.set('userID', userID);
+export function changeAnalyticsUser(user?: { userID: string, email: string }) {
+  const savedUserID = store.get('userID', uuidv4());
+  store.set('userID', savedUserID);
 
-  if (newUserID) {
+  if (user) {
     client.alias({
-      previousId: deviceUserID,
-      userId: newUserID,
+      previousId: savedUserID,
+      userId: user.userID,
     });
 
-    userID = newUserID;
+    client.identify({
+      userId: user.userID,
+      traits: {
+        email: user.email,
+      },
+    });
+
+    userID = user.userID;
   } else {
-    userID = deviceUserID;
+    userID = savedUserID;
   }
 }
 
