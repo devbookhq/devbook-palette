@@ -74,7 +74,6 @@ export async function signIn(email: string) {
         // console.error(error);
         break;
       }
-
     }
     await timeout(1200);
   }
