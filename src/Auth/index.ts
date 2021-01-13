@@ -134,7 +134,7 @@ async function syncUserMetadata(didToken: string) {
     refreshAuthInOtherWindows();
 
     try {
-      await axios.post(`${url}/user`, {
+      await axios.post(`${url}/signin`, {
         didToken,
       });
     } catch (error) {
