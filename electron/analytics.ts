@@ -28,19 +28,21 @@ export function changeAnalyticsUser(user?: { userID: string, email: string }) {
   store.set('userID', savedUserID);
 
   if (user) {
+    client.identify({
+      userId: savedUserID,
+      traits: {
+        platform,
+        appVersion,
+        email: user.email,
+      },
+    });
+
     client.alias({
       previousId: savedUserID,
       userId: user.userID,
     });
 
-    client.identify({
-      userId: user.userID,
-      traits: {
-        email: user.email,
-      },
-    });
-
-    isSignedIn = false;
+    isSignedIn = true;
     userID = user.userID;
   } else {
     isSignedIn = false;

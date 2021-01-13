@@ -330,10 +330,10 @@ ipcMain.on('connect-github', () => {
 ipcMain.on(IPCMessage.ChangeUserInMain, async (_, user: { userID: string, email: string } | undefined) => {
   if (user) {
     // TODO: Test segment usedID aliasing again, with the whole sign-in flow
-    // changeAnalyticsUser(user.userID, user.email);
+    changeAnalyticsUser(user);
     store.set(StoreKey.Email, user.email);
   } else {
-    // changeAnalyticsUser();
+    changeAnalyticsUser();
   }
 });
 
@@ -482,4 +482,3 @@ ipcMain.on(IPCMessage.TrackContinueIntoAppButtonClicked, () => {
 ipcMain.on(IPCMessage.TrackSignOutButtonClicked, () => {
   trackSignOutButtonClicked()
 });
-

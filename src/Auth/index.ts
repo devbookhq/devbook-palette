@@ -134,7 +134,7 @@ async function syncUserMetadata(didToken: string) {
     refreshAuthInOtherWindows();
 
     try {
-      await axios.post(`${url}/signin`, {
+      await axios.post(`${url}/user`, {
         didToken,
       });
     } catch (error) {
@@ -201,6 +201,10 @@ export async function signIn(email: string) {
     }
 
     if (isCancelled) {
+
+      axios.delete
+
+
       return reject({ message: 'Sign in was cancelled' });
     }
 
