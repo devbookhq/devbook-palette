@@ -143,6 +143,7 @@ const DocPageContainer = styled.div`
   }
 
   iframe {
+    width: 100%;
     padding: 3px;
     border-radius: 5px;
     background: #fff;
