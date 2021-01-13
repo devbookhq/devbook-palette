@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { AuthInfo, signOut, AuthState } from 'Auth';
+import { AuthInfo, signOut, AuthState, AuthContext } from 'Auth';
 import {
   openSignInModal,
   trackSignOutButtonClicked,
@@ -54,11 +54,9 @@ const StyledLoader = styled(Loader)`
 
 const SignInButton = styled(Button)``;
 
-interface AccountProps {
-  authInfo: AuthInfo;
-}
+function Account() {
+  const authInfo = useContext(AuthContext);
 
-function Account({ authInfo }: AccountProps) {
   const isLoading = authInfo.state === AuthState.LoadingUser
     || authInfo.state === AuthState.LoadingUserMetadata
     || authInfo.state === AuthState.SigningOutUser;

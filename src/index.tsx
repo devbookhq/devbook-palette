@@ -6,20 +6,24 @@ import './index.css';
 import { notifyViewReady, } from './mainProcess';
 import * as serviceWorker from './serviceWorker';
 import App from './App';
-import { authEmitter } from 'Auth';
+import { authEmitter, AuthContext, auth } from 'Auth';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <AuthContext.Provider value={auth}>
+      <App />
+    </AuthContext.Provider>
   </React.StrictMode>
   ,
   document.getElementById('root'),
 );
 
-authEmitter.on('changed', () => {
+authEmitter.on('changed', (authInfo) => {
   ReactDOM.render(
     <React.StrictMode>
-      <App />
+      <AuthContext.Provider value={authInfo}>
+        <App />
+      </AuthContext.Provider>
     </React.StrictMode>
     ,
     document.getElementById('root'),

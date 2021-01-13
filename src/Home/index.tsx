@@ -4,12 +4,13 @@ import React, {
   useCallback,
   useReducer,
   useMemo,
+  useContext,
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Resizable } from 're-resizable';
 
-import { authInfo, AuthState } from 'Auth';
+import { AuthContext, AuthState } from 'Auth';
 import electron, {
   isDev,
   hideMainWindow,
@@ -771,6 +772,8 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
 }
 
 function Home() {
+  const authInfo = useContext(AuthContext);
+
   const isUserLoading = authInfo.state === AuthState.LoadingUser
     || authInfo.state === AuthState.LoadingUserMetadata
     || authInfo.state === AuthState.SigningOutUser;
@@ -1251,11 +1254,11 @@ function Home() {
     hideMainWindow();
     trackShortcut({ action: 'Hide main window' });
   }, [
-   state.modalItem,
-   state.isSearchingInDocPage,
-   state.isDocsFilterModalOpened,
-   state.isSignInModalOpened,
- ]);
+    state.modalItem,
+    state.isSearchingInDocPage,
+    state.isDocsFilterModalOpened,
+    state.isSignInModalOpened,
+  ]);
 
   // 'cmd+o' hotkey - open the focused result in a browser.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+o' : 'alt+o', () => {

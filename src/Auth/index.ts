@@ -1,3 +1,4 @@
+import { createContext } from 'react';
 import { Magic, MagicUserMetadata } from 'magic-sdk';
 import axios from 'axios';
 import { EventEmitter } from 'events';
@@ -72,7 +73,9 @@ export type AuthInfo = FailedSignOutAuthInfo
 export type { MagicUserMetadata };
 
 export const authEmitter = new EventEmitter();
-export let authInfo: AuthInfo = { state: AuthState.LoadingUser };
+
+export let auth: AuthInfo = { state: AuthState.LoadingUser };
+export const AuthContext = createContext<AuthInfo>(auth);
 
 const url = isDev ? 'https://dev.usedevbook.com/auth' : 'https://api.usedevbook.com/auth';
 
@@ -81,7 +84,7 @@ const magic = new Magic(magicAPIKey);
 
 let signInCancelHandle: (() => void) | undefined = undefined;
 
-refreshAuthInfo();
+refreshAuth();
 
 function changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
   if (auth.state === AuthState.UserAndMetadataLoaded) {
@@ -97,21 +100,21 @@ function generateSessionID() {
   return encodeURIComponent(crypto.randomBytes(64).toString('base64'));
 };
 
-function updateAuthInfo(newAuthInfo: AuthInfo) {
-  authInfo = newAuthInfo;
-  authEmitter.emit('changed', authInfo);
-  changeAnalyticsUserAndSaveEmail(authInfo);
+function updateAuth(newAuth: AuthInfo) {
+  auth = newAuth;
+  authEmitter.emit('changed', auth);
+  changeAnalyticsUserAndSaveEmail(auth);
 }
 
 export async function signOut() {
-  const oldAuthInfo = authInfo;
-  updateAuthInfo({ state: AuthState.SigningOutUser });
+  const oldAuth = auth;
+  updateAuth({ state: AuthState.SigningOutUser });
   try {
     await magic.user.logout();
-    updateAuthInfo({ state: AuthState.NoUser });
+    updateAuth({ state: AuthState.NoUser });
     refreshAuthInOtherWindows();
   } catch (error) {
-    updateAuthInfo(oldAuthInfo);
+    updateAuth(oldAuth);
     refreshAuthInOtherWindows();
 
     console.error(error.message);
@@ -123,12 +126,12 @@ export function cancelSignIn() {
 }
 
 async function syncUserMetadata(didToken: string) {
-  updateAuthInfo({ state: AuthState.LoadingUserMetadata });
+  updateAuth({ state: AuthState.LoadingUserMetadata });
 
   try {
     const metadata = await magic.user.getMetadata()
 
-    updateAuthInfo({ state: AuthState.UserAndMetadataLoaded, metadata });
+    updateAuth({ state: AuthState.UserAndMetadataLoaded, metadata });
     refreshAuthInOtherWindows();
 
     try {
@@ -140,7 +143,7 @@ async function syncUserMetadata(didToken: string) {
     }
 
   } catch (error) {
-    updateAuthInfo({ state: AuthState.NoUser, error: AuthError.FailedLoadingUserMetadata });
+    updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUserMetadata });
     refreshAuthInOtherWindows();
 
     console.error(error.message);
@@ -151,6 +154,8 @@ async function syncUserMetadata(didToken: string) {
 
 export async function signIn(email: string) {
   cancelSignIn();
+
+  updateAuth({ state: AuthState.LoadingUser });
 
   let rejectHandle: (reason?: any) => void;
   let isCancelled = false;
@@ -201,14 +206,17 @@ export async function signIn(email: string) {
     if (isCancelled) {
       try {
         await axios.delete(`${url}/credential/${sessionID}`);
+        updateAuth({ state: AuthState.NoUser });
         return reject({ message: 'Sign in was cancelled' });
       } catch (error) {
         console.error(error.message);
+        updateAuth({ state: AuthState.NoUser });
         return reject({ message: 'Sign in could not be cancelled' });
       }
     }
 
     if (!credential && !isCancelled) {
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUser });
       return reject({ message: 'Getting credential for sign in timed out' });
     }
 
@@ -216,16 +224,15 @@ export async function signIn(email: string) {
       const didToken = await magic.auth.loginWithCredential(credential);
 
       if (didToken) {
-        updateAuthInfo({ state: AuthState.LoadingUserMetadata });
+        updateAuth({ state: AuthState.LoadingUserMetadata });
         syncUserMetadata(didToken);
         return resolve();
-      } else {
-        updateAuthInfo({ state: AuthState.NoUser, error: AuthError.FailedLoadingUser });
       }
 
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUser });
       return reject({ message: 'Could not complete the sign in' });
     } catch (error) {
-      console.error(error);
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUser });
       return reject({ message: error.message });
     }
   });
@@ -238,25 +245,25 @@ export async function signIn(email: string) {
   return cancelableSignIn;
 }
 
-export async function refreshAuthInfo() {
-  updateAuthInfo({ state: AuthState.LoadingUser });
+export async function refreshAuth() {
+  updateAuth({ state: AuthState.LoadingUser });
 
   try {
     const isUserSignedIn = await magic.user.isLoggedIn();
 
     if (!isUserSignedIn) {
-      updateAuthInfo({ state: AuthState.NoUser });
+      updateAuth({ state: AuthState.NoUser });
       return;
     }
 
-    updateAuthInfo({ state: AuthState.LoadingUserMetadata });
+    updateAuth({ state: AuthState.LoadingUserMetadata });
 
     try {
       const metadata = await magic.user.getMetadata();
-      updateAuthInfo({ state: AuthState.UserAndMetadataLoaded, metadata });
+      updateAuth({ state: AuthState.UserAndMetadataLoaded, metadata });
 
     } catch (error) {
-      updateAuthInfo({ state: AuthState.NoUser, error: AuthError.FailedLoadingUserMetadata });
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUserMetadata });
       refreshAuthInOtherWindows();
 
       console.error(error.message);
@@ -265,7 +272,7 @@ export async function refreshAuthInfo() {
     }
 
   } catch (error) {
-    updateAuthInfo({ state: AuthState.NoUser, error: AuthError.FailedLoadingUser });
+    updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUser });
 
     console.error(error.message);
   }
