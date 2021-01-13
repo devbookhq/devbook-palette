@@ -733,7 +733,6 @@ function DocPage({
       openLink(url);
       e.preventDefault();
     }
-    e.preventDefault();
   }
 
   useHotkeys('up', () => {
