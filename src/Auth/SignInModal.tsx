@@ -75,6 +75,7 @@ const SignInAgainButton = styled(Button)`
     background: transparent;
     color: #646CEA;
     border: 1px solid #646CEA;
+    cursor: pointer;
   }
 `;
 
@@ -185,7 +186,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
               value={email}
               onChange={handleEmailInputChange}
             />
-         </InputWrapper>
+          </InputWrapper>
 
           {error &&
             <Error>
@@ -210,7 +211,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
             Waiting for you to click on the sign-in link in the email...
           </Description>
 
-          <Loader/>
+          <Loader />
 
           {error &&
             <Error>
@@ -230,7 +231,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
           <Title>
             You are signed in!
           </Title>
-          <CheckIcon/>
+          <CheckIcon />
           <ContinueToAppButton onClick={handleCloseRequest}>
             Continue to app
           </ContinueToAppButton>

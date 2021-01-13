@@ -9,7 +9,7 @@ import {
 import {
   openLink,
   isDev,
-  changeAnalyticsUser,
+  changeUserInMain,
   refreshAuthInOtherWindows,
 } from 'mainProcess';
 import { timeout } from 'utils';
@@ -25,11 +25,11 @@ const magic = new Magic(magicAPIKey);
 
 let signInCancelHandle: (() => void) | undefined = undefined;
 
-authState.on('changed', (auth: AuthInfo) => {
+function changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
+  const email = auth?.user?.email || undefined;
   const userID = auth?.user?.publicAddress || undefined;
-  // TODO: Test segment usedID aliasing again, with the whole sign-in flow
-  // changeAnalyticsUser(userID);
-});
+  changeUserInMain(userID && email ? { userID, email } : undefined);
+}
 
 refreshAuth();
 
@@ -42,6 +42,7 @@ export async function signOut() {
     await magic.user.logout();
     authInfo = { isLoading: false };
     authState.emit('changed', authInfo);
+    changeAnalyticsUserAndSaveEmail(authInfo);
     refreshAuthInOtherWindows();
 
   } catch (error) {
@@ -122,6 +123,7 @@ export async function signIn(email: string) {
 
       authInfo = { user: userMetadata, isLoading: false };
       authState.emit('changed', authInfo);
+      changeAnalyticsUserAndSaveEmail(authInfo);
       refreshAuthInOtherWindows();
 
     } catch (error) {
@@ -154,4 +156,5 @@ export async function refreshAuth() {
     authInfo = { isLoading: false };
   }
   authState.emit('changed', authInfo);
+  changeAnalyticsUserAndSaveEmail(authInfo);
 }

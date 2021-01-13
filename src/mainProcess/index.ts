@@ -30,8 +30,8 @@ export function connectGitHub() {
   electron.ipcRenderer.send('connect-github');
 }
 
-export function changeAnalyticsUser(userID?: string) {
-  electron.ipcRenderer.send('change-analytics-user', { userID });
+export function changeUserInMain(user?: { userID: string, email: string }) {
+  electron.ipcRenderer.send('change-user-in-main', user);
 }
 
 export function removeGitHub() {

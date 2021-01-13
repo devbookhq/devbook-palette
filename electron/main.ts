@@ -322,8 +322,14 @@ ipcMain.on('connect-github', () => {
   trackConnectGitHubStarted();
 });
 
-ipcMain.on('change-analytics-user', async (_, { userID }: { userID?: string }) => {
-  changeAnalyticsUser(userID);
+ipcMain.on('change-user-in-main', async (_, user: { userID: string, email: string } | undefined) => {
+  if (user) {
+    // TODO: Test segment usedID aliasing again, with the whole sign-in flow
+    // changeAnalyticsUser(user.userID);
+    store.set('email', user.email);
+  } else {
+    // changeAnalyticsUser();
+  }
 });
 
 ipcMain.on('open-preferences', () => openPreferences());
