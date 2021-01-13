@@ -1231,6 +1231,11 @@ function Home() {
       return;
     }
 
+    if (state.isSignInModalOpened) {
+      closeSignInModal();
+      return;
+    }
+
     hideMainWindow();
     trackShortcut({ action: 'Hide main window' });
   }, [state.modalItem, state.isSearchingInDocPage, state.isDocsFilterModalOpened]);
@@ -1266,7 +1271,10 @@ function Home() {
   }, [activeFilter, searchInDocPage]);
 
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+shift+f' : 'alt+shift+f', () => {
+    // A search filter different from Docs is active.
     if (activeFilter !== ResultsFilter.Docs) return;
+    // Docs search filter is active but user isn't signed in.
+    if (activeFilter === ResultsFilter.Docs && !authInfo.user) return;
 
     if (state.isDocsFilterModalOpened) closeDocsFilterModal();
     else openDocsFilterModal();

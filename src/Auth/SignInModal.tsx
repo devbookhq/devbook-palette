@@ -146,6 +146,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
 
     if (!email) {
       setError('Email is empty')
+      setIsLoading(false);
       return;
     }
 
@@ -165,11 +166,17 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
     setIsLoading(false);
   }
 
+  function handleEmailInputOnKeyDown(e: any) {
+    if (e.key === 'Enter') handleSignInButtonClick();
+  }
+
   return (
     <StyledModal
       onCloseRequest={handleCloseRequest}
     >
-      {!isSignedIn && !isLoading &&
+      {!isSignedIn
+        && !isLoading
+        &&
         <>
           <Title>
             Sign in with your email
@@ -185,6 +192,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
               placeholder="your@email.com"
               value={email}
               onChange={handleEmailInputChange}
+              onKeyDown={handleEmailInputOnKeyDown}
             />
           </InputWrapper>
 
@@ -201,23 +209,27 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
         </>
       }
 
-      {!isSignedIn && isLoading &&
+      {!isSignedIn
+        && isLoading
+        && !error
+        &&
         <>
           <Title>
             Check your email
           </Title>
 
           <Description>
-            Waiting for you to click on the sign-in link in the email...
+            We just sent an email with the sign-in link to the following email address:
+            <br/>
+            <strong>{email}</strong>
+          </Description>
+
+          <Description>
+            Click on the link and you'll be signed-in in a few seconds...
           </Description>
 
           <Loader />
 
-          {error &&
-            <Error>
-              {error}
-            </Error>
-          }
           <SignInAgainButton
             onClick={handleSignInAgainButtonClick}
           >
