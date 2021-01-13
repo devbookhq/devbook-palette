@@ -103,7 +103,7 @@ const GitHubConnect = styled.div`
 `;
 
 const ConnectGitHubButton = styled(Button)`
-  margin-bottom: 15px;
+  margin-top: 30px;
   padding: 10px 20px;
 
   font-size: 15px;
@@ -113,11 +113,11 @@ const ConnectGitHubButton = styled(Button)`
 `;
 
 const GitHubConnectTitle = styled(InfoMessage)`
-  margin: 0 0 30px;
+  margin: 0;
 `;
 
 const SignInButton = styled(Button)`
-  margin-top: 15px;
+  margin-top: 30px;
   padding: 10px 20px;
 
   font-size: 15px;
