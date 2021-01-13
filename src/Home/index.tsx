@@ -25,6 +25,7 @@ import electron, {
   getDocSearchResultsDefaultWidth,
   saveDocSources,
   getCachedDocSources,
+  IPCMessage,
 } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -1274,7 +1275,7 @@ function Home() {
     // A search filter different from Docs is active.
     if (activeFilter !== ResultsFilter.Docs) return;
     // Docs search filter is active but user isn't signed in.
-    if (activeFilter === ResultsFilter.Docs && !authInfo.user) return;
+    if (activeFilter === ResultsFilter.Docs && !authInfo.isSignedIn) return;
 
     if (state.isDocsFilterModalOpened) closeDocsFilterModal();
     else openDocsFilterModal();
@@ -1282,7 +1283,7 @@ function Home() {
   }, [activeFilter, state.isDocsFilterModalOpened]);
   /* //////////////////// */
 
-  useIPCRenderer('open-sign-in-modal', () => {
+  useIPCRenderer(IPCMessage.OpenSignInModal, () => {
     openSignInModal();
   });
 
@@ -1472,10 +1473,10 @@ function Home() {
         {activeFilter === ResultsFilter.Docs
           && authInfo.isLoading
           &&
-            <DocsLoader/>
+          <DocsLoader />
         }
         {activeFilter === ResultsFilter.Docs
-          && !authInfo.user
+          && !authInfo.isSignedIn
           && !authInfo.isLoading
           &&
           <>
@@ -1490,7 +1491,7 @@ function Home() {
 
         {state.search.query
           && activeFilter === ResultsFilter.Docs
-          && authInfo.user
+          && authInfo.isSignedIn
           && !isAnyDocSourceIncluded
           && !isActiveFilterLoading
           &&
@@ -1538,7 +1539,7 @@ function Home() {
 
             {activeFilter === ResultsFilter.Docs
               && isAnyDocSourceIncluded
-              && authInfo.user
+              && authInfo.isSignedIn
               &&
               <DocsWrapper>
                 <Resizable
@@ -1608,7 +1609,7 @@ function Home() {
             {/* Docs search results */}
             {!state.modalItem
               && activeFilter === ResultsFilter.Docs
-              && authInfo.user
+              && authInfo.isSignedIn
               && isAnyDocSourceIncluded
               &&
               <DocsSearchHotkeysPanel

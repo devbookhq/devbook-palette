@@ -14,12 +14,13 @@ import {
 } from 'mainProcess';
 import { timeout } from 'utils';
 
-export type AuthInfo = { user?: MagicUserMetadata, isLoading?: boolean };
+export type AuthInfo = { user?: MagicUserMetadata, isLoading?: boolean, isSignedIn?: boolean };
 export type { MagicUserMetadata };
 
 export const authState = new EventEmitter();
 export let authInfo: AuthInfo = { isLoading: true };
 
+const url = isDev ? 'https://dev.usedevbook.com/auth' : 'https://api.usedevbook.com/auth';
 const magicAPIKey = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
 const magic = new Magic(magicAPIKey);
 
@@ -54,6 +55,22 @@ export function cancelSignIn() {
   signInCancelHandle?.();
 }
 
+async function updateUserData(didToken: string) {
+  try {
+    const userMetadata = await magic.user.getMetadata()
+    await axios.post(`${url}/signin`, {
+      didToken,
+    });
+
+    authInfo = { user: userMetadata, isLoading: false, isSignedIn: true };
+    authState.emit('changed', authInfo);
+    changeAnalyticsUserAndSaveEmail(authInfo);
+    refreshAuthInOtherWindows();
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
 export async function signIn(email: string) {
   cancelSignIn();
 
@@ -62,8 +79,6 @@ export async function signIn(email: string) {
 
   const cancelableSignIn = new Promise<void>(async (resolve, reject) => {
     rejectHandle = reject;
-
-    const url = isDev ? 'https://dev.usedevbook.com/auth' : 'https://api.usedevbook.com/auth';
 
     const sessionID = generateSessionID();
 
@@ -115,22 +130,22 @@ export async function signIn(email: string) {
 
     try {
       const didToken = await magic.auth.loginWithCredential(credential);
-      const userMetadata = await magic.user.getMetadata()
 
-      await axios.post(`${url}/signin`, {
-        didToken,
-      });
+      if (didToken) {
+        authInfo = { isLoading: false, isSignedIn: true };
+        authState.emit('changed', authInfo);
+        updateUserData(didToken);
+        return resolve();
+      } else {
+        authInfo = { isLoading: false };
+        authState.emit('changed', authInfo);
+      }
 
-      authInfo = { user: userMetadata, isLoading: false };
-      authState.emit('changed', authInfo);
-      changeAnalyticsUserAndSaveEmail(authInfo);
-      refreshAuthInOtherWindows();
-
+      return reject({ message: 'Could not complete the sign in' });
     } catch (error) {
       console.error(error);
+      return reject({ message: error.message });
     }
-
-    return resolve();
   });
 
   signInCancelHandle = () => {
@@ -147,8 +162,9 @@ export async function refreshAuth() {
 
   try {
     const isUserSignedIn = await magic.user.isLoggedIn();
+
     if (isUserSignedIn) {
-      authInfo = { user: await magic.user.getMetadata(), isLoading: false };
+      authInfo = { user: await magic.user.getMetadata(), isLoading: false, isSignedIn: true };
     } else {
       authInfo = { isLoading: false };
     }
