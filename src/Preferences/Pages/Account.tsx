@@ -57,9 +57,11 @@ const SignInButton = styled(Button)``;
 function Account() {
   const authInfo = useContext(AuthContext);
 
-  const isLoading = authInfo.state === AuthState.LoadingUser
-    || authInfo.state === AuthState.LoadingUserMetadata
-    || authInfo.state === AuthState.SigningOutUser;
+  const isLoading =
+    authInfo.state === AuthState.LookingForStoredUser ||
+    authInfo.state === AuthState.SigningOutUser ||
+    authInfo.state === AuthState.SigningInUser ||
+    authInfo.state === AuthState.FetchingUserMetadata;
 
   function handleSignOutButtonClicked() {
     trackSignOutButtonClicked();

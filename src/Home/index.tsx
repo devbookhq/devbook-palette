@@ -794,12 +794,15 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
 function Home() {
   const authInfo = useContext(AuthContext);
 
-  const isUserLoading = authInfo.state === AuthState.LoadingUser
-    || authInfo.state === AuthState.LoadingUserMetadata
-    || authInfo.state === AuthState.SigningOutUser;
+  const isUserLoading =
+    authInfo.state === AuthState.LookingForStoredUser ||
+    authInfo.state === AuthState.SigningOutUser ||
+    authInfo.state === AuthState.SigningInUser ||
+    authInfo.state === AuthState.FetchingUserMetadata;
 
-  const isUserSignedInWithOrWithoutMetadata = authInfo.state === AuthState.LoadingUserMetadata
-    || authInfo.state === AuthState.UserAndMetadataLoaded;
+  const isUserSignedInWithOrWithoutMetadata =
+    authInfo.state === AuthState.FetchingUserMetadata ||
+    authInfo.state === AuthState.UserAndMetadataLoaded;
 
   const docPageSearchInputRef = useRef<HTMLInputElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
@@ -1408,8 +1411,8 @@ function Home() {
     trackSearch({
       activeFilter: activeFilter.toString(),
     });
-  // TODO WARNING - Don't include 'searchAll' in the deps array
-  // otherwise an infinite cycle will start. Why?
+    // TODO WARNING - Don't include 'searchAll' in the deps array
+    // otherwise an infinite cycle will start. Why?
   }, [
     debouncedQuery,
     debouncedLastSearchedQuery,
