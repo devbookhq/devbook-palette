@@ -16,17 +16,21 @@ import {
 import { timeout } from 'utils';
 
 export enum AuthError {
+  // The error when the looking for a valid stored user failed - probably because of the network connection.
+  // User is no signed in and no metadata are present.
+  FailedLookingForStoredUser = 'Failed looking for stored user',
+
   // The error when the user sign out failed.
   // User is signed in and metadata may be present.
   FailedSigningOutUser = 'Failed signing out user',
 
   // The error when the user sign in failed.
   // User is not signed in and no metadata are present.
-  FailedLoadingUser = 'Failed loading user',
+  FailedSigningInUser = 'Failed signing in user',
 
-  // The rror when the fetching of user's metadata failed after the user was successfuly signed in.
+  // The error when the fetching of user's metadata failed after the user was successfuly signed in.
   // User was explicitly signed out and no metadata are present.
-  FailedLoadingUserMetadata = 'Failed loading user metadata',
+  FailedFetchingUserMetadata = 'Failed feching user metadata',
 }
 
 export enum AuthState {
@@ -35,9 +39,14 @@ export enum AuthState {
   NoUser,
 
   // LOADING STATE
-  // The initial state when the app starts and the state after user start the sign-in flow.
+  // The initial state when the app starts.
   // User is not signed in and no metadata are present.
-  LoadingUser,
+  LookingForStoredUser,
+
+  // LOADING STATE
+  // The state after user start the sign-in flow.
+  // User is not signed in and no metadata are present.
+  SigningInUser,
 
   // LOADING STATE
   // The state when the sign out was requested but was not completed yet.
@@ -47,34 +56,40 @@ export enum AuthState {
   // LOADING STATE
   // The state when the user is signed in, but the app is still fetching user metadata.
   // User is signed in, but metadata are not fetched yet. 
-  LoadingUserMetadata,
+  FetchingUserMetadata,
 
   // The state when the user is signed in and the metadata were successfuly fetched.
   // User is signed in and metadata are present.
   UserAndMetadataLoaded,
 }
 
-type FailedSignOutAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedSigningOutUser, metadata?: MagicUserMetadata };
-type FailedLoadingAuthInfo = { state: AuthState.NoUser, error: AuthError };
-type InitialAuthInfo = { state: AuthState.NoUser };
-type SuccessfulAuthInfo = { state: AuthState.UserAndMetadataLoaded, metadata: MagicUserMetadata };
-type LoadingUserAuthInfo = { state: AuthState.LoadingUser }
-type LoadingUserMetadataAuthInfo = { state: AuthState.LoadingUserMetadata }
-type SigningOutUserAuthInfo = { state: AuthState.SigningOutUser }
+type FailedLookingForStoredUserAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser };
+type FailedSigningOutAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedSigningOutUser, metadata?: MagicUserMetadata };
+type FailedSigningInAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedSigningInUser };
+type FailedFetchingUserMetadataAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata };
+type LookingForStoredUserAuthInfo = { state: AuthState.LookingForStoredUser }
+type NoUserAuthInfo = { state: AuthState.NoUser };
+type FetchingUserMetadataAuthInfo = { state: AuthState.FetchingUserMetadata }
+type SigningInUserAuthInfo = { state: AuthState.SigningInUser }
+type SigningOutUserAuthInfo = { state: AuthState.SigningOutUser, metadata?: MagicUserMetadata }
+type UserAndMetadataLoadedAuthInfo = { state: AuthState.UserAndMetadataLoaded, metadata: MagicUserMetadata };
 
-export type AuthInfo = FailedSignOutAuthInfo
-  | FailedLoadingAuthInfo
-  | InitialAuthInfo
-  | SuccessfulAuthInfo
-  | LoadingUserAuthInfo
-  | LoadingUserMetadataAuthInfo
+export type AuthInfo = FailedSigningOutAuthInfo
+  | FailedSigningInAuthInfo
+  | NoUserAuthInfo
+  | FailedLookingForStoredUserAuthInfo
+  | FailedFetchingUserMetadataAuthInfo
+  | SigningInUserAuthInfo
+  | UserAndMetadataLoadedAuthInfo
+  | LookingForStoredUserAuthInfo
+  | FetchingUserMetadataAuthInfo
   | SigningOutUserAuthInfo;
 
 export type { MagicUserMetadata };
 
 export const authEmitter = new EventEmitter();
 
-export let auth: AuthInfo = { state: AuthState.LoadingUser };
+export let auth: AuthInfo = { state: AuthState.LookingForStoredUser };
 export const AuthContext = createContext<AuthInfo>(auth);
 
 const url = isDev ? 'https://dev.usedevbook.com/auth' : 'https://api.usedevbook.com/auth';
@@ -126,7 +141,7 @@ export function cancelSignIn() {
 }
 
 async function syncUserMetadata(didToken: string) {
-  updateAuth({ state: AuthState.LoadingUserMetadata });
+  updateAuth({ state: AuthState.FetchingUserMetadata });
 
   try {
     const metadata = await magic.user.getMetadata()
@@ -143,7 +158,7 @@ async function syncUserMetadata(didToken: string) {
     }
 
   } catch (error) {
-    updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUserMetadata });
+    updateAuth({ state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata });
     refreshAuthInOtherWindows();
 
     console.error(error.message);
@@ -155,7 +170,7 @@ async function syncUserMetadata(didToken: string) {
 export async function signIn(email: string) {
   cancelSignIn();
 
-  updateAuth({ state: AuthState.LoadingUser });
+  updateAuth({ state: AuthState.SigningInUser });
 
   let rejectHandle: (reason?: any) => void;
   let isCancelled = false;
@@ -216,7 +231,7 @@ export async function signIn(email: string) {
     }
 
     if (!credential && !isCancelled) {
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUser });
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
       return reject({ message: 'Getting credential for sign in timed out' });
     }
 
@@ -224,15 +239,15 @@ export async function signIn(email: string) {
       const didToken = await magic.auth.loginWithCredential(credential);
 
       if (didToken) {
-        updateAuth({ state: AuthState.LoadingUserMetadata });
+        updateAuth({ state: AuthState.FetchingUserMetadata });
         syncUserMetadata(didToken);
         return resolve();
       }
 
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUser });
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
       return reject({ message: 'Could not complete the sign in' });
     } catch (error) {
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUser });
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
       return reject({ message: error.message });
     }
   });
@@ -246,7 +261,7 @@ export async function signIn(email: string) {
 }
 
 export async function refreshAuth() {
-  updateAuth({ state: AuthState.LoadingUser });
+  updateAuth({ state: AuthState.LookingForStoredUser });
 
   try {
     const isUserSignedIn = await magic.user.isLoggedIn();
@@ -256,14 +271,14 @@ export async function refreshAuth() {
       return;
     }
 
-    updateAuth({ state: AuthState.LoadingUserMetadata });
+    updateAuth({ state: AuthState.FetchingUserMetadata });
 
     try {
       const metadata = await magic.user.getMetadata();
       updateAuth({ state: AuthState.UserAndMetadataLoaded, metadata });
 
     } catch (error) {
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUserMetadata });
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata });
       refreshAuthInOtherWindows();
 
       console.error(error.message);
@@ -272,7 +287,7 @@ export async function refreshAuth() {
     }
 
   } catch (error) {
-    updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLoadingUser });
+    updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
 
     console.error(error.message);
   }
