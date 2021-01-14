@@ -138,8 +138,10 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
 
   const auth = useContext(AuthContext);
 
-  const isLoading = auth.state === AuthState.LookingForStoredUser;
-  const isSignedIn = auth.state === AuthState.FetchingUserMetadata
+  const isLoading = auth.state === AuthState.SigningInUser;
+
+  const isSignedIn =
+    auth.state === AuthState.FetchingUserMetadata
     || auth.state === AuthState.UserAndMetadataLoaded;
 
   function handleEmailInputChange(e: any) {
@@ -153,32 +155,26 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
   async function handleSignInButtonClick() {
     trackSignInButtonClicked();
     if (isLoading) return;
-    // setIsLoading(true);
     setError('');
 
     if (!email) {
       setError('Email is empty')
-      // setIsLoading(false);
       return;
     }
 
     try {
       await signIn(email);
-      // setIsSignedIn(true);
       trackSignInFinished();
     } catch (error) {
       console.error(error.message);
       setError(error.message);
       trackSignInFailed(error);
-    } finally {
-      // setIsLoading(false);
     }
   }
 
   function handleSignInAgainButtonClick() {
     trackSignInAgainButtonClicked();
     cancelSignIn();
-    // setIsLoading(false);
   }
 
   function handleEmailInputOnKeyDown(e: any) {
