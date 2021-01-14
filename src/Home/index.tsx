@@ -1513,7 +1513,7 @@ function Home() {
             */}
 
             {activeFilter === ResultsFilter.Docs
-              && (authInfo.state === AuthState.NoUser || authInfo.state === AuthState.UserAndMetadataLoaded)
+              && (authInfo.state === AuthState.UserAndMetadataLoaded || authInfo.state === AuthState.FetchingUserMetadata)
               &&
               <InfoMessage>Type your search query</InfoMessage>
             }
