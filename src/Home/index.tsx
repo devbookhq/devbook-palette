@@ -1366,7 +1366,15 @@ function Home() {
       setSearchFilter(filter);
 
       const lastQuery = await getSavedSearchQuery();
-      setSearchQuery(lastQuery);
+      if (!lastQuery) {
+        // We do this so the 'isLoading' field is set to false
+        // for each search filter.
+        searchingSuccess(ResultsFilter.StackOverflow, []);
+        searchingSuccess(ResultsFilter.GitHubCode, []);
+        searchingSuccess(ResultsFilter.Docs, []);
+      } else {
+        setSearchQuery(lastQuery);
+      }
 
       try {
         // We merge the cached doc sources and the fetched ones
@@ -1498,7 +1506,23 @@ function Home() {
           && (state.gitHubAccount.isConnected || activeFilter !== ResultsFilter.GitHubCode)
           && !isActiveFilterLoading
           &&
-          <InfoMessage>Type your search query</InfoMessage>
+          <>
+            {/*
+              We can show the text right away for SO and GitHubCode because
+              we don't have to wait until a user account is loaded.
+            */}
+
+            {activeFilter === ResultsFilter.Docs
+              && (authInfo.state === AuthState.NoUser || authInfo.state === AuthState.UserAndMetadataLoaded)
+              &&
+              <InfoMessage>Type your search query</InfoMessage>
+            }
+
+            {activeFilter !== ResultsFilter.Docs
+              &&
+              <InfoMessage>Type your search query</InfoMessage>
+            }
+          </>
         }
 
         {state.search.query
