@@ -1315,7 +1315,7 @@ function Home() {
   }, [activeFilter, openFocusedGitHubCodeItemInVSCode]);
 
   // 'cmd+f' hotkey - search in a doc page.
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+f' : 'alt+f', () => {
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+f' : 'ctrl+f', () => {
     if (activeFilter !== ResultsFilter.Docs) return;
     searchInDocPage();
     docPageSearchInputRef?.current?.focus();
@@ -1323,7 +1323,7 @@ function Home() {
   }, [activeFilter, searchInDocPage]);
 
   // 'cmd+shift+f' hotkey - open docs filter modal.
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+shift+f' : 'alt+shift+f', () => {
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+shift+f' : 'ctrl+shift+f', () => {
     // A search filter different from Docs is active.
     if (activeFilter !== ResultsFilter.Docs) return;
     // Docs search filter is active but user isn't signed in.
@@ -1533,23 +1533,23 @@ function Home() {
         {activeFilter === ResultsFilter.Docs
           && authInfo.state === AuthState.LookingForStoredUser
           &&
-            <DocsLoader/>
+          <DocsLoader />
         }
 
         {activeFilter === ResultsFilter.Docs
           && authInfo.state === AuthState.SigningInUser
           &&
-            <>
-              <DocsLoader/>
-              <InfoMessage>
-                You're being signed in. Please check your email.
+          <>
+            <DocsLoader />
+            <InfoMessage>
+              You're being signed in. Please check your email.
               </InfoMessage>
-              <SignInAgainButton
-                onClick={openSignInModal}
-              >
-                Sign in with a different email
+            <SignInAgainButton
+              onClick={openSignInModal}
+            >
+              Sign in with a different email
               </SignInAgainButton>
-            </>
+          </>
         }
 
         {activeFilter === ResultsFilter.Docs
