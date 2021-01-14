@@ -1531,10 +1531,16 @@ function Home() {
         }
 
         {activeFilter === ResultsFilter.Docs
+          && authInfo.state === AuthState.LookingForStoredUser
+          &&
+            <DocsLoader/>
+        }
+
+        {activeFilter === ResultsFilter.Docs
           && authInfo.state === AuthState.SigningInUser
           &&
             <>
-              <DocsLoader />
+              <DocsLoader/>
               <InfoMessage>
                 You're being signed in. Please check your email.
               </InfoMessage>
