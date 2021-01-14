@@ -61,7 +61,7 @@ class GitHubOAuth {
   }
 
   private static async getAccessToken(code: string) {
-    const result = await axios.post('https://api.usedevbook.app/getOAuthAccessToken', {
+    const result = await axios.post('https://api.usedevbook.com/getOAuthAccessToken', {
       code,
     });
     return result.data.accessToken;

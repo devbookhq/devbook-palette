@@ -1108,12 +1108,18 @@ function Home() {
         await searchDocs(query, docSources);
         if (isGitHubConnected) {
           await searchGHCode(query);
+        } else {
+          // We do this so the 'isLoading' field for GitHubCode is set to false.
+          searchingSuccess(ResultsFilter.GitHubCode, []);
         }
         break;
 
       case ResultsFilter.GitHubCode:
         if (isGitHubConnected) {
           await searchGHCode(query);
+        } else {
+          // We do this so the 'isLoading' field for GitHubCode is set to false.
+          searchingSuccess(ResultsFilter.GitHubCode, []);
         }
         await searchSO(query);
         await searchDocs(query, docSources);
@@ -1124,6 +1130,9 @@ function Home() {
         await searchSO(query);
         if (isGitHubConnected) {
           await searchGHCode(query);
+        } else {
+          // We do this so the 'isLoading' field for GitHubCode is set to false.
+          searchingSuccess(ResultsFilter.GitHubCode, []);
         }
         break;
     }
