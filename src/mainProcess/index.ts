@@ -95,7 +95,7 @@ export function trackModalOpened(modalInfo: {
 }
 
 export function userDidChangeShortcut(shortcut: string) {
-  electron.ipcRenderer.send('user-did-change-hortcut', { shortcut });
+  electron.ipcRenderer.send('user-did-change-shortcut', { shortcut });
 }
 
 export function refreshAuthInOtherWindows() {

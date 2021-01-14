@@ -295,7 +295,9 @@ app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 /////////// IPC events ///////////
 ipcMain.on('hide-window', () => hideMainWindow());
 
-ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => trySetGlobalShortcut(shortcut));
+ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => {
+  trySetGlobalShortcut(shortcut)
+});
 
 ipcMain.on('finish-onboarding', () => {
   // TODO: This should be onboardingWindow?.close() but it produces a runtime error when toggling
@@ -307,11 +309,6 @@ ipcMain.on('finish-onboarding', () => {
     app.dock.hide();
   }
   trackOnboardingFinished();
-});
-
-ipcMain.on('register-default-shortcut', () => {
-  const shortcut = store.get('globalShortcut', 'Alt+Space');
-  trySetGlobalShortcut(shortcut);
 });
 
 ipcMain.on('track-shortcut', (event, shortcutInfo: { hotkey: string, action: string }) => {

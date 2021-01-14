@@ -108,7 +108,6 @@ function TrayPage(props: TrayPageProps) {
     props.onDidChangeShortcut(shortcut);
   }
 
-
   return (
     <Container>
       <Titles>
