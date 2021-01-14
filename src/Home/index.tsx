@@ -126,6 +126,26 @@ const SignInButton = styled(Button)`
   border-radius: 5px;
 `;
 
+const SignInAgainButton = styled(Button)`
+  margin-top: 30px;
+  padding: 10px 20px;
+
+  color: #535BD7;
+  font-size: 15px;
+  font-weight: 500;
+
+  border-radius: 5px;
+  background: transparent;
+  border: 1px solid #535BD7;
+
+  :hover {
+    background: transparent;
+    color: #646CEA;
+    border: 1px solid #646CEA;
+    cursor: pointer;
+  }
+`;
+
 const EnableDocSourcesButton = styled(Button)`
   margin: 15px 0;
   padding: 10px 20px;
@@ -1508,11 +1528,21 @@ function Home() {
         }
 
         {activeFilter === ResultsFilter.Docs
-          && isUserLoading
-          && !isUserSignedInWithOrWithoutMetadata
+          && authInfo.state === AuthState.SigningInUser
           &&
-          <DocsLoader />
+            <>
+              <DocsLoader />
+              <InfoMessage>
+                You're being signed in. Please check your email.
+              </InfoMessage>
+              <SignInAgainButton
+                onClick={openSignInModal}
+              >
+                Sign in with a different email
+              </SignInAgainButton>
+            </>
         }
+
         {activeFilter === ResultsFilter.Docs
           && !isUserLoading
           && !isUserSignedInWithOrWithoutMetadata
