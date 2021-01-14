@@ -148,12 +148,12 @@ interface HotkeyProps {
 function renderKey(key: Key) {
   return (
     <>
-      {key === Key.Alt && <AltKeyImg/>}
-      {key === Key.Shift && <ShiftKeyImg/>}
-      {key === Key.Command && <CommandKeyImg/>}
-      {key === Key.Enter && <EnterKeyImg/>}
-      {key === Key.ArrowUp && <ArrowUpKey/>}
-      {key === Key.ArrowDown && <ArrowDownKey/>}
+      {key === Key.Alt && <AltKeyImg />}
+      {key === Key.Shift && <ShiftKeyImg />}
+      {key === Key.Command && <CommandKeyImg />}
+      {key === Key.Enter && <EnterKeyImg />}
+      {key === Key.ArrowUp && <ArrowUpKey />}
+      {key === Key.ArrowDown && <ArrowDownKey />}
     </>
   );
 }
@@ -185,8 +185,8 @@ function Hotkey({ className, hotkey }: HotkeyProps) {
 
 
           {!Object.values(VisualConcat).includes(hotkey[0] as VisualConcat)
-           && !Object.values(Key).includes(hotkey[0] as Key)
-           &&
+            && !Object.values(Key).includes(hotkey[0] as Key)
+            &&
             <Container className={className}>
               <TextKey>{hotkey[0] as string}</TextKey>
             </Container>
@@ -211,4 +211,3 @@ function Hotkey({ className, hotkey }: HotkeyProps) {
 }
 
 export default Hotkey;
-
