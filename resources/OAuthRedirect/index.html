@@ -48,19 +48,27 @@
       line-height: 24px;
     }
 
-    .title {
+    .title-wrapper {
       margin: 0 0 16px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
 
+    .check {
+      margin-right: 10px;
+    }
+
+    .title {
       font-size: 22px;
-      font-weight: 300;
+      font-weight: 500;
     }
 
     .description {
       margin: 16px 0 24px;
-
+      font-size: 16px;
+      color: #C1C9D2;
       line-height: 140%;
-      font-size: 14px;
-      color: #5A5A6F;
     }
   </style>
 </head>
@@ -71,7 +79,10 @@
       <img src="logo.png" class="logo" />
       <h2 class="name">Devbook</h2>
     </div>
-    <h1 class="title">GitHub was successfully connected</h1>
+    <div class="title-wrapper">
+      <img src="./check.svg" class="check">
+      <h1 class="title">GitHub is connected.</h1>
+    </div>
     <p class="description">You can close this tab and continue
       using Devbook.</p>
   </div>
