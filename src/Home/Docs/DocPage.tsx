@@ -8,7 +8,7 @@ import Prism from 'prismjs';
 
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import { openLink } from 'mainProcess';
+import electron, { openLink } from 'mainProcess';
 import useDebounce from 'hooks/useDebounce';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
 
@@ -739,6 +739,22 @@ function DocPage({
 
     if (containerRef?.current) {
       containerRef.current.scrollBy(0, 15);
+    }
+  }, { filter: () => true }, [isSearchingInDocPage, isDocsFilterModalOpened]);
+
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+up' : 'ctrl+up', () => {
+    if (isSearchingInDocPage || isDocsFilterModalOpened) return;
+
+    if (containerRef?.current) {
+      containerRef.current.scrollTo(0, 0);
+    }
+  }, { filter: () => true }, [isSearchingInDocPage, isDocsFilterModalOpened]);
+
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+down' : 'ctrl+down', () => {
+    if (isSearchingInDocPage || isDocsFilterModalOpened) return;
+
+    if (containerRef?.current) {
+      containerRef.current.scrollTo(0, containerRef.current.scrollHeight);
     }
   }, { filter: () => true }, [isSearchingInDocPage, isDocsFilterModalOpened]);
 

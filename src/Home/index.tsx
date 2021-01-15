@@ -1317,10 +1317,12 @@ function Home() {
   // 'cmd+f' hotkey - search in a doc page.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+f' : 'ctrl+f', () => {
     if (activeFilter !== ResultsFilter.Docs) return;
+    if (state.isDocsFilterModalOpened) return;
+
     searchInDocPage();
     docPageSearchInputRef?.current?.focus();
     trackShortcut({ action: 'Search in doc page' });
-  }, [activeFilter, searchInDocPage]);
+  }, [activeFilter, searchInDocPage, state.isDocsFilterModalOpened]);
 
   // 'cmd+shift+f' hotkey - open docs filter modal.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+shift+f' : 'ctrl+shift+f', () => {
