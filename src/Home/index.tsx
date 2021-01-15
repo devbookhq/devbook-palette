@@ -156,12 +156,38 @@ const EnableDocSourcesButton = styled(Button)`
   border-radius: 5px;
 `;
 
+
 const DocsWrapper = styled.div`
   width: 100%;
   height: 100%;
   display: flex;
   align-items: flex-start;
   overflow: hidden;
+`;
+
+const DocsResultsWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  aligm-items: flex-start;
+`;
+
+const EnabledDocsText = styled.span`
+  padding: 5px 10px;
+
+  font-size: 14px;
+  color: #6787ff;
+  font-weight: 500;
+
+  background: #262736;
+  border-right: 2px solid #3b3a4a;
+  border-bottom: 2px solid #3b3a4a;
+
+  :hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
 `;
 
 const DocSearchResults = styled.div`
@@ -1655,16 +1681,26 @@ function Home() {
                   enable={{ right: true }}
                   onResizeStop={(e, dir, ref) => handleDocSearchResultsResizeStop(e, dir, ref)}
                 >
-                  <DocSearchResults>
-                    {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
-                      <DocSearchResultItem
-                        key={idx}
-                        docResult={d}
-                        focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
-                        onClick={() => focusResultItem(ResultsFilter.Docs, idx, FocusState.NoScroll)}
-                      />
-                    ))}
-                  </DocSearchResults>
+                  <DocsResultsWrapper>
+                    <EnabledDocsText
+                      onClick={openDocsFilterModal}
+                    >
+                      {state.docSources.filter(ds => ds.isIncludedInSearch).length === state.docSources.length
+                      ? 'Searching in all documentations'
+                      : `Searching in ${state.docSources.filter(ds => ds.isIncludedInSearch).length} out of ${state.docSources.length} documentations`
+                      }
+                    </EnabledDocsText>
+                    <DocSearchResults>
+                      {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
+                        <DocSearchResultItem
+                          key={idx}
+                          docResult={d}
+                          focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+                          onClick={() => focusResultItem(ResultsFilter.Docs, idx, FocusState.NoScroll)}
+                        />
+                      ))}
+                    </DocSearchResults>
+                   </DocsResultsWrapper>
                 </Resizable>
                 <DocPage
                   isDocsFilterModalOpened={state.isDocsFilterModalOpened}

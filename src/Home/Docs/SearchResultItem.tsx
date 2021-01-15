@@ -12,8 +12,6 @@ import FocusState from '../SearchItemFocusState';
 const maxSummaryLength = 180;
 
 const Container = styled.div<{ isFocused?: boolean }>`
-  // min-height: 80px;
-  // max-height: 120px;
   width: 100%;
   padding: 10px;
 
@@ -60,6 +58,12 @@ const Summary = styled.div`
   font-size: 14px;
   font-weight: 400;
   color: #A2A1A1;
+
+
+  color: #c1c9d2;
+  font-size: 14px;
+  line-height: 1.65em;
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Ubuntu,sans-serif;
 `;
 
 interface SearchResultItemProps {
