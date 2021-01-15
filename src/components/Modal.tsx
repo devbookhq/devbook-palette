@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import useLockBodyScroll from 'hooks/useLockBodyScroll';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import { ReactComponent as closeImg } from 'img/close.svg';
 
 const Overlay = styled.div`
@@ -64,6 +65,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(({
   tabIndex,
 }, ref) => {
   useLockBodyScroll();
+  useOnClickOutside(ref, onCloseRequest);
 
   return (
     <Overlay>

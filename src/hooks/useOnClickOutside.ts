@@ -5,7 +5,7 @@ function useOnClickOutside(ref: any, handler: any) {
     () => {
       const listener = (event: any) => {
         // Do nothing if clicking ref's element or descendent elements
-        if (!ref.current || ref.current.contains(event.target)) {
+        if (!ref || !ref.current || ref.current.contains(event.target)) {
           return;
         }
         handler(event);

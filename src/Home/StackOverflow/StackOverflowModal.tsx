@@ -30,7 +30,7 @@ const StyledModal = styled(Modal)`
 
   overflow-y: auto;
   background: #1C1B26;
-  border-radius: 20px 20px 0 0;
+  border-radius: 5px 5px 0 0;
 `;
 
 const Question = styled.div`
