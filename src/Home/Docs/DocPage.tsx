@@ -701,10 +701,11 @@ function DocPage({
     if (target.tagName === 'A' || target.parentNode.tagName === 'A') {
       let link = target.getAttribute('href') || target.parentNode.getAttribute('href');
       if (!link.startsWith('http://') && !link.startsWith('https://')) {
+
         const urlWithoutExtension = new URL(link, pageURL);
         const hash = urlWithoutExtension.hash;
-        const urlWithoutExtensionAndHash = new URL('', pageURL);
-
+        const urlWithoutExtensionAndHash = new URL('', urlWithoutExtension);
+        
         link = urlWithoutExtensionAndHash.href + (hasHTMLExtension ? '.html' : '') + hash;
       }
       openLink(link);
@@ -716,7 +717,7 @@ function DocPage({
       if (!link.startsWith('http://') && !link.startsWith('https://')) {
         const urlWithoutExtension = new URL(link, pageURL);
         const hash = urlWithoutExtension.hash;
-        const urlWithoutExtensionAndHash = new URL('', pageURL);
+        const urlWithoutExtensionAndHash = new URL('', urlWithoutExtension);
 
         link = urlWithoutExtensionAndHash.href + (hasHTMLExtension ? '.html' : '') + hash;
       }
