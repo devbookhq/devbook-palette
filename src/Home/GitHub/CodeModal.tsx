@@ -1,7 +1,11 @@
-import React from 'react';
+import React, {
+  useState,
+  useRef,
+} from 'react';
 import styled from 'styled-components';
 
 import { openLink } from 'mainProcess';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import {
   CodeResult,
   FilePreview,
@@ -112,11 +116,13 @@ function CodeModal({
   codeResult,
   onCloseRequest,
 }: CodeModalProps) {
-  const filePreview: FilePreview = {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [filePreview] = useState<FilePreview>({
     indices: codeResult.absoluteIndices,
     fragment: codeResult.fileContent,
     startLine: 1,
-  };
+  });
+  useOnClickOutside(modalRef, onCloseRequest);
 
   async function handleOpenExternalLinkButton() {
     const firstPreview = codeResult.filePreviews[0];
@@ -126,6 +132,7 @@ function CodeModal({
 
   return (
     <StyledModal
+      ref={modalRef}
       onCloseRequest={onCloseRequest}
     >
       <Header>

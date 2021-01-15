@@ -6,6 +6,7 @@ import React, {
 import styled from 'styled-components';
 
 import { openLink } from 'mainProcess';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import {
   StackOverflowResult,
   StackOverflowAnswer,
@@ -170,6 +171,7 @@ function StackOverflowModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const [sortedAnswers, setSortedAnswers] = useState<StackOverflowAnswer[]>([]);
   const [mostUpvotedIdx, setMostUpvotedIdx] = useState(-1);
+  useOnClickOutside(modalRef, onCloseRequest);
 
   function handleQuestionTitleClick(e: any) {
     openLink(soResult.question.link);
@@ -268,5 +270,4 @@ function StackOverflowModal({
     </StyledModal>
   );
 }
-
 export default StackOverflowModal;

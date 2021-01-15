@@ -1,4 +1,5 @@
 import React, {
+  useRef,
   useState,
   useEffect,
   useCallback,
@@ -7,6 +8,7 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import { openLink } from 'mainProcess';
+import useOnClickOutside from 'hooks/useOnClickOutside';
 import { DocSource } from 'search/docs';
 import Modal from 'components/Modal';
 import { ReactComponent as searchImg } from 'img/search.svg';
@@ -169,6 +171,9 @@ function DocsFilterModal({
   onDocSourceClick,
   onCloseRequest,
 }: DocsFilterModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(modalRef, onCloseRequest);
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -184,6 +189,7 @@ function DocsFilterModal({
   const notIncludedVisibleSources = useCallback(() => {
     return notIncludedSources.filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))));
   }, [notIncludedSources, searchQuery]);
+
 
   function escapeRegex(s: string) {
     return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -271,6 +277,7 @@ function DocsFilterModal({
   return (
     <StyledModal
       onCloseRequest={onCloseRequest}
+      ref={modalRef}
     >
       <SearchWrapper>
         <SearchImg/>
