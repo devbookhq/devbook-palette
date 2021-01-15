@@ -19,7 +19,6 @@ import StackOverflowBody from './StackOverflowBody';
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   max-width: 100%;
-  padding-bottom: 30px;
   margin-bottom: 30px;
 
   display: flex;
