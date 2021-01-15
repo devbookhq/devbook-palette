@@ -35,7 +35,7 @@ const StyledCode = styled(Code)`
 `;
 
 const Header = styled.div`
-  header: ${headerHeight}px;
+  height: ${headerHeight}px;
   width: 100%;
   max-width: 100%;
   padding: 10px;
