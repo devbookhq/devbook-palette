@@ -6,6 +6,7 @@ import { openLink } from 'mainProcess';
 import Prism from 'prismjs';
 
 const Body = styled.div`
+  /*
   * {
     font-size: 14px;
     font-weight: 400;
@@ -13,10 +14,17 @@ const Body = styled.div`
     color: #fff;
   }
 
+
   strong {
     font-weight: 600;
     font-size: 14px;
   }
+  */
+
+  color: #c1c9d2;
+  font-size: 14px;
+  line-height: 1.65em;
+  font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica Neue,Ubuntu,sans-serif;
 
   hr {
     border: none;
@@ -30,7 +38,7 @@ const Body = styled.div`
 
     color: #D9D9DA;
     font-family: 'Roboto Mono';
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 400;
 
     background: #2a2933;
@@ -61,14 +69,25 @@ const Body = styled.div`
     padding: 10px;
     overflow-y: auto;
 
-    background: #23222D;
-    border-radius: 3px;
+    font-size: 13px;
+    font-weight: 500;
     font-family: 'Roboto Mono';
+    background: #373648;
+    border-left: 4px solid #5861d6;
+    border-radius: 3px;
 
     code {
       padding: 0;
       background: transparent;
-      line-height: 18px;
+      line-height: 1.4em;
+    }
+  }
+
+  a {
+    color: #4CACD6;
+    text-decoration: underline;
+    code {
+      text-decoration: none;
     }
   }
 
@@ -83,11 +102,6 @@ const Body = styled.div`
 
   h3 {
     font-size: 14px;
-  }
-
-  a {
-    color: #4CACD6;
-    text-decoration: underline;
   }
 
   img {
