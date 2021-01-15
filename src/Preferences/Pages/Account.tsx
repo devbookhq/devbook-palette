@@ -1,7 +1,11 @@
 import React, { useContext } from 'react';
 import styled from 'styled-components';
 
-import { AuthInfo, signOut, AuthState, AuthContext } from 'Auth';
+import {
+  signOut,
+  AuthState,
+  AuthContext,
+} from 'Auth';
 import {
   openSignInModal,
   trackSignOutButtonClicked,
