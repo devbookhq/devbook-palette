@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import devbookPreviewSOImg from 'img/devbook-preview-so.png';
-import devbookPreviewCodeImg from 'img/devbook-preview-code.png';
+import devbookPreviewSOImg from 'img/onboarding-so-preview.png';
+import devbookPreviewCodeImg from 'img/onboarding-code-preview.png';
+import devbookPreviewDocsImg from 'img/onboarding-docs-preview.png';
 
 const Container = styled.div`
   width: 100%;
@@ -66,15 +67,17 @@ const FeatureButton = styled.button<{ selected?: boolean }>`
 `;
 
 const DevbookImg = styled.img`
+  margin: 20px 0 10px;
   height: auto;
-  max-width: 1000px;
+  max-width: 850px;
   width: 100%;
+  box-shadow: 0px 4px 25px 10px rgba(0, 0, 0, 0.25);
 `;
-
 
 enum Feature {
   StackOverflow,
   GitHubCode,
+  Docs,
 }
 
 function IntroductionPage() {
@@ -103,6 +106,13 @@ function IntroductionPage() {
         >
           Search code on GitHub
         </FeatureButton>
+        <Delimiter/>
+        <FeatureButton
+          selected={activeFeature === Feature.Docs}
+          onClick={() => setActiveFeature(Feature.Docs)}
+        >
+          Search in documentation
+        </FeatureButton>
       </FeaturesWrapper>
 
       {activeFeature === Feature.StackOverflow &&
@@ -110,6 +120,9 @@ function IntroductionPage() {
       }
       {activeFeature === Feature.GitHubCode &&
         <DevbookImg src={devbookPreviewCodeImg} />
+      }
+      {activeFeature === Feature.Docs &&
+        <DevbookImg src={devbookPreviewDocsImg} />
       }
     </Container>
   );

@@ -17,7 +17,7 @@ class OnboardingWindow {
       width: 1250,
       height: 720,
       minWidth: 800,
-      minHeight: 400,
+      minHeight: 680,
       backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
       icon: process.platform === 'linux' ? taskBarIcon : undefined,
