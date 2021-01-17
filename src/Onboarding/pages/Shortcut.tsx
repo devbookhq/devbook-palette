@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { ReactComponent as CheckIcon } from 'img/check.svg';
 import electron from 'mainProcess';
+
+import { ReactComponent as CheckIcon } from 'img/check.svg';
 
 const Container = styled.div`
   width: 100%;
@@ -108,6 +109,15 @@ function TrayPage(props: TrayPageProps) {
     props.onDidChangeShortcut(shortcut);
   }
 
+  function getShortcutText() {
+    if (electron.remote.process.platform === 'darwin') {
+      if (selectedShortcut === 'Alt+Space') return 'Option+Space';
+      else if (selectedShortcut === 'Command+Alt+Space') return 'Command+Option+Space';
+      else return selectedShortcut;
+    }
+    return selectedShortcut;
+  }
+
   return (
     <Container>
       <Titles>
@@ -124,18 +134,19 @@ function TrayPage(props: TrayPageProps) {
             1. Choose a global shortcut
           </Step>
           <Select value={selectedShortcut} onChange={e => handleShortcutChange(e.target.value)}>
-            <option value="Alt+Space">Alt+Space</option>
             <option value="Control+Space">Control+Space</option>
             <option value="Shift+Space">Shift+Space</option>
             {electron.remote.process.platform === 'darwin' &&
               <>
+                <option value="Alt+Space">Option+Space</option>
                 <option value="Command+Space">Command+Space</option>
                 <option value="Command+Shift+Space">Command+Shift+Space</option>
-                <option value="Command+Alt+Space">Command+Alt+Space</option>
+                <option value="Command+Alt+Space">Command+Option+Space</option>
               </>
             }
             {electron.remote.process.platform !== 'darwin' &&
               <>
+                <option value="Alt+Space">Alt+Space</option>
                 <option value="Control+Shift+Space">Control+Shift+Space</option>
                 <option value="Control+Alt+Space">Control+Alt+Space</option>
               </>
@@ -147,7 +158,7 @@ function TrayPage(props: TrayPageProps) {
           <Step>
             {props.didHitShortcut && <CheckIconDone />}
             {!props.didHitShortcut && <CheckIconNotDone />}
-            2. Hit <Shortcut>{selectedShortcut}</Shortcut> to show Devbook
+            2. Hit <Shortcut>{getShortcutText()}</Shortcut> to show Devbook
           </Step>
         </StepWrapper>
       </Steps>
