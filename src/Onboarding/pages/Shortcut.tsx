@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import electron from 'mainProcess';
 
-import { ReactComponent as altKeyIcon } from 'img/alt-key.svg';
 import { ReactComponent as CheckIcon } from 'img/check.svg';
 
 const Container = styled.div`
@@ -76,18 +75,6 @@ const Select = styled.select`
   font-weight: 500;
   :hover {
     cursor: pointer;
-  }
-`;
-
-const AltKeyIcon = styled(altKeyIcon)`
-  width: auto;
-  height: 11px;
-  :not(:last-child) {
-    margin-right: 7px;
-  }
-
-  path {
-    fill: white;
   }
 `;
 
