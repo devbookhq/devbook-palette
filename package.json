@@ -68,17 +68,17 @@
     "start": "craco start",
     "build": "craco build && tsc -p electron",
     "postinstall": "electron-builder install-app-deps",
-    "electron:dev": "concurrently \"BROWSER=none npm run start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && tsc -p electron && electron --enable-logging .\"",
-    "electron:build-mac-unnotarized": "npm run build && NOTARIZATION=none electron-builder build --mac --publish always",
+    "electron:dev": "concurrently \"npx cross-env BROWSER=none npm run start\" \"wait-on http://localhost:3000 && tsc -p electron -w\" \"wait-on http://localhost:3000 && tsc -p electron && electron --enable-logging .\"",
+    "electron:build-mac-unnotarized": "npm run build && npx cross-env NOTARIZATION=none electron-builder build --mac --publish always",
     "electron:build-win": "npm run build && electron-builder build --win --publish always",
     "electron:build-linux": "npm run build && electron-builder build --linux --publish always",
     "electron:build-mac": "npm run build && electron-builder build --mac --publish always",
-    "upload:win": "BUCKET=devbook-publish && gsutil cp gs://$BUCKET/latest.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest.yml && echo Devbook-*.exe latest.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
-    "upload:mac": "BUCKET=devbook-publish && gsutil cp gs://$BUCKET/latest-mac.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-mac.yml && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
-    "upload:linux": "BUCKET=devbook-publish && gsutil cp gs://$BUCKET/latest-linux.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-linux.yml && echo Devbook-*.AppImage latest-linux.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
-    "release:win": "rm -rf dist && npm run electron:build-win && npm run upload:win",
-    "release:mac": "rm -rf dist && npm run electron:build-mac && npm run upload:mac",
-    "release:linux": "rm -rf dist && npm run electron:build-linux && npm run upload:linux"
+    "upload:win": "bash -l scripts/upload-win.sh",
+    "upload:mac": "npx cross-env BUCKET=devbook-publish && gsutil cp gs://$BUCKET/latest-mac.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-mac.yml && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
+    "upload:linux": "npx cross-env BUCKET=devbook-publish && gsutil cp gs://$BUCKET/latest-linux.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-linux.yml && echo Devbook-*.AppImage latest-linux.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
+    "release:win": "npx rimraf dist && npm run electron:build-win && npm run upload:win",
+    "release:mac": "npx rimraf dist && npm run electron:build-mac && npm run upload:mac",
+    "release:linux": "npx rimraf dist && npm run electron:build-linux && npm run upload:linux"
   },
   "dependencies": {
     "analytics-node": "^3.5.0",
@@ -117,6 +117,7 @@
     "electron-notarize": "^1.0.0",
     "electron-reload": "^1.5.0",
     "react-scripts": "^4.0.1",
+    "rimraf": "^3.0.2",
     "typescript": "^4.0.2",
     "wait-on": "^5.2.1"
   }
