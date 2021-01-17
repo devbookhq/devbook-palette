@@ -16,7 +16,7 @@
     "artifactName": "${productName}-${version}.${ext}",
     "publish": {
       "provider": "generic",
-      "url": "https://storage.googleapis.com/devbook-test/"
+      "url": "https://storage.googleapis.com/devbook-publish/"
     },
     "afterSign": "scripts/notarize.js",
     "icon": "./build/icon.png",
