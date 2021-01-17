@@ -174,6 +174,8 @@ function DocsFilterModal({
   const modalRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(modalRef, onCloseRequest);
 
+  const selectedDocRow = useRef<HTMLDivElement>(null);
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -230,6 +232,7 @@ function DocsFilterModal({
       setSelectedIdx(c => c -= 1);
     }
     setLastUseNavigation(Navigation.Keys);
+    selectedDocRow?.current?.scrollIntoView({ block: 'end' });
   }, { filter: () => true }, [selectedIdx]);
 
   useHotkeys('down', () => {
@@ -237,6 +240,7 @@ function DocsFilterModal({
       setSelectedIdx(c => c += 1);
     }
     setLastUseNavigation(Navigation.Keys);
+    selectedDocRow?.current?.scrollIntoView({ block: 'end' });
   }, { filter: () => true }, [selectedIdx, notIncludedVisibleSources, includedVisibleSources]);
 
   useHotkeys('enter', () => {
@@ -310,6 +314,7 @@ function DocsFilterModal({
             <DocsListIncluded>
               {includedVisibleSources().map((ds, idx) => (
                 <DocRow
+                  ref={selectedIdx === idx ? selectedDocRow : null}
                   key={idx}
                   onMouseOver={() => handleDocRowMouseOver(idx, true)}
                   onClick={() => toggleDocSource(ds, true)}
@@ -331,6 +336,7 @@ function DocsFilterModal({
             <DocsListNotIncluded>
               {notIncludedVisibleSources().map((ds, idx) => (
                 <DocRow
+                  ref={selectedIdx === idx ? selectedDocRow : null}
                   key={idx}
                   onMouseOver={() => handleDocRowMouseOver(idx, false)}
                   onClick={() => toggleDocSource(ds, false)}
