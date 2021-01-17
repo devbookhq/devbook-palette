@@ -20,7 +20,7 @@ class OnboardingWindow {
       minHeight: 680,
       backgroundColor: '#1C1B26',
       titleBarStyle: 'hiddenInset',
-      icon: process.platform === 'linux' ? taskBarIcon : undefined,
+      icon: process.platform === 'linux' || process.platform === 'win32' ? taskBarIcon : undefined,
       title: 'Devbook Onboarding',
       webPreferences: {
         contextIsolation: false,
@@ -30,7 +30,7 @@ class OnboardingWindow {
       },
     });
 
-    if (process.platform === 'linux') {
+    if (process.platform === 'linux' || process.platform === 'win32') {
       this.window.removeMenu();
     }
 

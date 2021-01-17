@@ -31,7 +31,7 @@ class PreferencesWindow {
       minHeight: 400,
       title: 'Devbook Preferencess',
       backgroundColor: '#1C1B26',
-      icon: process.platform === 'linux' ? taskBarIcon : undefined,
+      icon: process.platform === 'linux' || process.platform === 'win32' ? taskBarIcon : undefined,
       titleBarStyle: 'hiddenInset',
       webPreferences: {
         contextIsolation: false,
@@ -41,7 +41,7 @@ class PreferencesWindow {
       },
     });
 
-    if (process.platform === 'linux') {
+    if (process.platform === 'linux' || process.platform === 'win32') {
       this.window.removeMenu();
     }
 

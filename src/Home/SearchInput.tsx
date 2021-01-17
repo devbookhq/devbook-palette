@@ -325,7 +325,7 @@ function SearchInput({
                   hotkey={[Key.Command, `${idx + 1}`]}
                 />
               }
-              {electron.remote.process.platform === 'linux' &&
+              {electron.remote.process.platform !== 'darwin' &&
                 <Hotkey
                   hotkey={['Alt + ', `${idx + 1}`]}
                 />

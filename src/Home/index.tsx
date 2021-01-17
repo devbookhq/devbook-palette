@@ -170,7 +170,7 @@ const DocsResultsWrapper = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  aligm-items: flex-start;
+  align-items: flex-start;
 `;
 
 const EnabledDocsText = styled.span`
