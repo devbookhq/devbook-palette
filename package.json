@@ -73,7 +73,7 @@
     "electron:build-win": "npm run build && electron-builder build --win --publish always",
     "electron:build-linux": "npm run build && electron-builder build --linux --publish always",
     "electron:build-mac": "npm run build && electron-builder build --mac --publish always",
-    "upload:win": "bash -l scripts/upload-win.sh",
+    "upload:win": "bash.exe -l scripts/upload-win.sh",
     "upload:mac": "npx cross-env BUCKET=devbook-publish && gsutil cp gs://$BUCKET/latest-mac.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-mac.yml && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
     "upload:linux": "npx cross-env BUCKET=devbook-publish && gsutil cp gs://$BUCKET/latest-linux.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-linux.yml && echo Devbook-*.AppImage latest-linux.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
     "release:win": "npx rimraf dist && npm run electron:build-win && npm run upload:win",
