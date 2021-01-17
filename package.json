@@ -112,6 +112,7 @@
     "@types/webpack-env": "^1.15.2",
     "concurrently": "^5.2.0",
     "craco": "0.0.3",
+    "cross-env": "^7.0.3",
     "electron": "^11.1.1",
     "electron-builder": "^22.9.1",
     "electron-notarize": "^1.0.0",
