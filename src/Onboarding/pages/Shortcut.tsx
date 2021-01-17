@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { ReactComponent as CheckIcon } from 'img/check.svg';
 import electron from 'mainProcess';
+
+import { ReactComponent as altKeyIcon } from 'img/alt-key.svg';
+import { ReactComponent as CheckIcon } from 'img/check.svg';
 
 const Container = styled.div`
   width: 100%;
@@ -77,6 +79,18 @@ const Select = styled.select`
   }
 `;
 
+const AltKeyIcon = styled(altKeyIcon)`
+  width: auto;
+  height: 11px;
+  :not(:last-child) {
+    margin-right: 7px;
+  }
+
+  path {
+    fill: white;
+  }
+`;
+
 const CheckIconDone = styled(CheckIcon)`
   margin-right: 10px;
   height: 19px;
@@ -124,18 +138,19 @@ function TrayPage(props: TrayPageProps) {
             1. Choose a global shortcut
           </Step>
           <Select value={selectedShortcut} onChange={e => handleShortcutChange(e.target.value)}>
-            <option value="Alt+Space">Alt+Space</option>
             <option value="Control+Space">Control+Space</option>
             <option value="Shift+Space">Shift+Space</option>
             {electron.remote.process.platform === 'darwin' &&
               <>
+                <option value="Alt+Space">Option+Space</option>
                 <option value="Command+Space">Command+Space</option>
                 <option value="Command+Shift+Space">Command+Shift+Space</option>
-                <option value="Command+Alt+Space">Command+Alt+Space</option>
+                <option value="Command+Alt+Space">Command+Option+Space</option>
               </>
             }
             {electron.remote.process.platform === 'linux' &&
               <>
+                <option value="Alt+Space">Alt+Space</option>
                 <option value="Control+Shift+Space">Control+Shift+Space</option>
                 <option value="Control+Alt+Space">Control+Alt+Space</option>
               </>
