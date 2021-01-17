@@ -109,6 +109,15 @@ function TrayPage(props: TrayPageProps) {
     props.onDidChangeShortcut(shortcut);
   }
 
+  function getShortcutText() {
+    if (electron.remote.process.platform === 'darwin') {
+      if (selectedShortcut === 'Alt+Space') return 'Option+Space';
+      else if (selectedShortcut === 'Command+Alt+Space') return 'Command+Option+Space';
+      else return selectedShortcut;
+    }
+    return selectedShortcut;
+  }
+
   return (
     <Container>
       <Titles>
@@ -149,7 +158,7 @@ function TrayPage(props: TrayPageProps) {
           <Step>
             {props.didHitShortcut && <CheckIconDone />}
             {!props.didHitShortcut && <CheckIconNotDone />}
-            2. Hit <Shortcut>{selectedShortcut}</Shortcut> to show Devbook
+            2. Hit <Shortcut>{getShortcutText()}</Shortcut> to show Devbook
           </Step>
         </StepWrapper>
       </Steps>
