@@ -174,6 +174,7 @@ const DocsResultsWrapper = styled.div`
 `;
 
 const EnabledDocsText = styled.span`
+  width: 100%;
   padding: 5px 10px;
 
   font-size: 14px;
