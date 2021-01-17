@@ -1,26 +1,14 @@
+import { IPCMessage } from './ipc';
 import electron, { isDev } from './electron';
 import { ResultsFilter } from 'Home/SearchInput';
 import { DocSource } from 'search/docs';
-import { refreshAuth } from 'Auth';
+import {
+  AuthInfo,
+  updateAuth,
+  signOut,
+  auth,
+} from 'Auth';
 import { PreferencesPage } from 'Preferences';
-
-export enum IPCMessage {
-  GetCachedDocSources = 'GetCachedDocSources',
-  SaveDocSources = 'SaveDocSources',
-  RefreshAuth = 'RefreshAuth',
-  OpenSignInModal = 'OpenSignInModal',
-  ChangeUserInMain = 'ChangeUserInMain',
-  GoToPreferencesPage = 'GoToPreferencesPage',
-
-  TrackSignInModalOpened = 'TrackSignInModalOpened',
-  TrackSignInModalClosed = 'TrackSignInModalClosed',
-  TrackSignInButtonClicked = 'TrackSignInButtonClicked',
-  TrackSignInAgainButtonClicked = 'TrackSignInAgainButtonClicked',
-  TrackSignInFinished = 'TrackSignInFinished',
-  TrackSignInFailed = 'TrackSignInFailed',
-  TrackContinueIntoAppButtonClicked = 'TrackContinueIntoAppButtonClicked',
-  TrackSignOutButtonClicked = 'TrackSignOutButtonClicked',
-}
 
 // So we see logs from the main process in the Chrome debug tools.
 electron.ipcRenderer.on('console', (_, args) => {
@@ -28,9 +16,26 @@ electron.ipcRenderer.on('console', (_, args) => {
   console[type as 'log' | 'error']?.('[main]:', ...consoleArgs);
 });
 
-electron.ipcRenderer.on(IPCMessage.RefreshAuth, () => {
-  refreshAuth();
+// This event can be only send TO mainWindow
+electron.ipcRenderer.on(IPCMessage.GetAuthFromMainWindow, () => {
+  setAuthInOtherWindows(auth);
 });
+
+electron.ipcRenderer.on(IPCMessage.SetAuthInOtherWindows, (_, auth: AuthInfo) => {
+  updateAuth(auth);
+});
+
+electron.ipcRenderer.on(IPCMessage.SignOut, () => {
+  signOut();
+});
+
+export function setAuthInOtherWindows(auth: AuthInfo) {
+  electron.ipcRenderer.send(IPCMessage.SetAuthInOtherWindows, auth);
+}
+
+export function signOutUser() {
+  return electron.ipcRenderer.send(IPCMessage.SignOut);
+}
 
 export function getGlobalShortcut() {
   return electron.ipcRenderer.invoke('get-global-shortcut') as Promise<string>;
@@ -98,8 +103,8 @@ export function userDidChangeShortcut(shortcut: string) {
   electron.ipcRenderer.send('user-did-change-shortcut', { shortcut });
 }
 
-export function refreshAuthInOtherWindows() {
-  electron.ipcRenderer.send(IPCMessage.RefreshAuth);
+export function getAuthFromMainWindow() {
+  electron.ipcRenderer.send(IPCMessage.GetAuthFromMainWindow);
 }
 
 export function openPreferences(page?: PreferencesPage) {

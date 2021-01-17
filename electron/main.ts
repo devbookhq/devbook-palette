@@ -284,10 +284,9 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  if (!onboardingWindow?.window && isFirstRun) {
-
+  if (!isFirstRun || onboardingWindow?.window) {
+    preferencesWindow?.show();
   }
-  else preferencesWindow?.show();
 });
 
 app.on('will-quit', () => electron.globalShortcut.unregisterAll());
@@ -295,7 +294,7 @@ app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 /////////// IPC events ///////////
 ipcMain.on('hide-window', () => hideMainWindow());
 
-ipcMain.on('user-did-change-shortcut', (event, { shortcut }) => {
+ipcMain.on('user-did-change-shortcut', (_, { shortcut }) => {
   trySetGlobalShortcut(shortcut)
 });
 
@@ -311,7 +310,7 @@ ipcMain.on('finish-onboarding', () => {
   trackOnboardingFinished();
 });
 
-ipcMain.on('track-shortcut', (event, shortcutInfo: { hotkey: string, action: string }) => {
+ipcMain.on('track-shortcut', (_, shortcutInfo: { hotkey: string, action: string }) => {
   trackShortcut(shortcutInfo);
 });
 
@@ -324,16 +323,6 @@ ipcMain.on('connect-github', () => {
   trackConnectGitHubStarted();
 });
 
-ipcMain.on(IPCMessage.ChangeUserInMain, async (_, user: { userID: string, email: string } | undefined) => {
-  if (user) {
-    // TODO: Test segment usedID aliasing again, with the whole sign-in flow
-    changeAnalyticsUser(user);
-    store.set(StoreKey.Email, user.email);
-  } else {
-    changeAnalyticsUser();
-  }
-});
-
 ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => {
   openPreferences(page);
 });
@@ -342,15 +331,30 @@ ipcMain.on('restart-and-update', () => {
   restartAndUpdate();
 });
 
-ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo));
-
-ipcMain.on(IPCMessage.RefreshAuth, (event) => {
-  if (event.sender.id !== mainWindow?.window?.id) {
-    mainWindow?.webContents?.send(IPCMessage.RefreshAuth);
+ipcMain.on(IPCMessage.ChangeUserInMain, async (_, user: { userID: string, email: string } | undefined) => {
+  if (user) {
+    changeAnalyticsUser(user);
+    store.set(StoreKey.Email, user.email);
+  } else {
+    changeAnalyticsUser();
   }
+});
 
-  if (event.sender.id !== preferencesWindow?.window?.id) {
-    preferencesWindow?.webContents?.send(IPCMessage.RefreshAuth);
+ipcMain.on(IPCMessage.SignOut, (event) => {
+  if (event.sender.id !== mainWindow?.window?.id) {
+    mainWindow?.webContents?.send(IPCMessage.SignOut);
+  }
+});
+
+ipcMain.on(IPCMessage.SetAuthInOtherWindows, (event, auth) => {
+  if (event.sender.id === mainWindow?.window?.id) {
+    preferencesWindow?.webContents?.send(IPCMessage.SetAuthInOtherWindows, auth);
+  }
+});
+
+ipcMain.on(IPCMessage.GetAuthFromMainWindow, (event) => {
+  if (event.sender.id !== mainWindow?.window?.id) {
+    mainWindow?.webContents?.send(IPCMessage.GetAuthFromMainWindow);
   }
 });
 
@@ -447,6 +451,8 @@ ipcMain.handle(IPCMessage.GetCachedDocSources, async () => {
 ipcMain.on(IPCMessage.SaveDocSources, (_, { docSources }) => {
   store.set(StoreKey.DocSources, docSources);
 });
+
+ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo));
 
 ipcMain.on(IPCMessage.TrackSignInModalOpened, () => {
   trackSignInModalOpened()

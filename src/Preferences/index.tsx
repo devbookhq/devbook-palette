@@ -11,10 +11,11 @@ import {
 } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 
+import { IPCMessage } from 'mainProcess/ipc';
 import electron, {
-  IPCMessage,
   getUpdateStatus,
   restartAndUpdate,
+  getAuthFromMainWindow,
 } from 'mainProcess';
 import Button from 'components/Button';
 import useIPCRenderer from 'hooks/useIPCRenderer';
@@ -126,6 +127,10 @@ function Preferences() {
       }
     }
     checkUpdateStatus();
+  }, []);
+
+  useEffect(() => {
+    getAuthFromMainWindow();
   }, []);
 
   useIPCRenderer('update-available', () => {

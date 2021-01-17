@@ -10,7 +10,8 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Resizable } from 're-resizable';
 
-import { AuthContext, AuthState } from 'Auth';
+import { IPCMessage } from 'mainProcess/ipc';
+import { AuthContext, AuthState, refreshAuth } from 'Auth';
 import electron, {
   isDev,
   hideMainWindow,
@@ -26,7 +27,6 @@ import electron, {
   getDocSearchResultsDefaultWidth,
   saveDocSources,
   getCachedDocSources,
-  IPCMessage,
   trackSignInModalOpened,
   trackSignInModalClosed,
 } from 'mainProcess';
@@ -1486,6 +1486,10 @@ function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.docSources]);
 
+  useEffect(() => {
+    refreshAuth();
+  }, []);
+
   return (
     <>
       {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
@@ -1687,8 +1691,8 @@ function Home() {
                       onClick={openDocsFilterModal}
                     >
                       {state.docSources.filter(ds => ds.isIncludedInSearch).length === state.docSources.length
-                      ? 'Searching in all documentations'
-                      : `Searching in ${state.docSources.filter(ds => ds.isIncludedInSearch).length} out of ${state.docSources.length} documentations`
+                        ? 'Searching in all documentations'
+                        : `Searching in ${state.docSources.filter(ds => ds.isIncludedInSearch).length} out of ${state.docSources.length} documentations`
                       }
                     </EnabledDocsText>
                     <DocSearchResults>
@@ -1701,7 +1705,7 @@ function Home() {
                         />
                       ))}
                     </DocSearchResults>
-                   </DocsResultsWrapper>
+                  </DocsResultsWrapper>
                 </Resizable>
                 <DocPage
                   isDocsFilterModalOpened={state.isDocsFilterModalOpened}

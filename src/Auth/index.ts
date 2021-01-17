@@ -11,7 +11,7 @@ import {
   openLink,
   isDev,
   changeUserInMain,
-  refreshAuthInOtherWindows,
+  setAuthInOtherWindows,
 } from 'mainProcess';
 import { timeout } from 'utils';
 
@@ -99,8 +99,6 @@ const magic = new Magic(magicAPIKey);
 
 let signInCancelHandle: (() => void) | undefined = undefined;
 
-refreshAuth();
-
 function changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
   if (auth.state === AuthState.UserAndMetadataLoaded) {
     const email = auth?.metadata?.email || undefined;
@@ -115,10 +113,11 @@ function generateSessionID() {
   return encodeURIComponent(crypto.randomBytes(64).toString('base64'));
 };
 
-function updateAuth(newAuth: AuthInfo) {
+export function updateAuth(newAuth: AuthInfo) {
   auth = newAuth;
   authEmitter.emit('changed', auth);
   changeAnalyticsUserAndSaveEmail(auth);
+  setAuthInOtherWindows(auth);
 }
 
 export async function signOut() {
@@ -127,10 +126,8 @@ export async function signOut() {
   try {
     await magic.user.logout();
     updateAuth({ state: AuthState.NoUser });
-    refreshAuthInOtherWindows();
   } catch (error) {
     updateAuth(oldAuth);
-    refreshAuthInOtherWindows();
 
     console.error(error.message);
   }
@@ -147,7 +144,6 @@ async function syncUserMetadata(didToken: string) {
     const metadata = await magic.user.getMetadata()
 
     updateAuth({ state: AuthState.UserAndMetadataLoaded, metadata });
-    refreshAuthInOtherWindows();
 
     try {
       await axios.post(`${url}/user`, {
@@ -159,7 +155,6 @@ async function syncUserMetadata(didToken: string) {
 
   } catch (error) {
     updateAuth({ state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata });
-    refreshAuthInOtherWindows();
 
     console.error(error.message);
 
@@ -279,7 +274,6 @@ export async function refreshAuth() {
 
     } catch (error) {
       updateAuth({ state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata });
-      refreshAuthInOtherWindows();
 
       console.error(error.message);
 

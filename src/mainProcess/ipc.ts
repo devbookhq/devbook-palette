@@ -1,12 +1,12 @@
 export enum IPCMessage {
   GetCachedDocSources = 'GetCachedDocSources',
   SaveDocSources = 'SaveDocSources',
-  GoToPreferencesPage = 'GoToPreferencesPage',
-  ChangeUserInMain = 'ChangeUserInMain',
-  OpenSignInModal = 'OpenSignInModal',
-  SignOut = 'SignOut',
   GetAuthFromMainWindow = 'GetAuthFromMainWindow',
   SetAuthInOtherWindows = 'SetAuthInOtherWindows',
+  OpenSignInModal = 'OpenSignInModal',
+  ChangeUserInMain = 'ChangeUserInMain',
+  SignOut = 'SignOut',
+  GoToPreferencesPage = 'GoToPreferencesPage',
 
   TrackSignInModalOpened = 'TrackSignInModalOpened',
   TrackSignInModalClosed = 'TrackSignInModalClosed',

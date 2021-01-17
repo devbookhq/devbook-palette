@@ -2,12 +2,12 @@ import React, { useContext } from 'react';
 import styled from 'styled-components';
 
 import {
-  signOut,
   AuthState,
   AuthContext,
 } from 'Auth';
 import {
   openSignInModal,
+  signOutUser,
   trackSignOutButtonClicked,
 } from 'mainProcess';
 
@@ -68,8 +68,8 @@ function Account() {
     authInfo.state === AuthState.FetchingUserMetadata;
 
   function handleSignOutButtonClicked() {
+    signOutUser();
     trackSignOutButtonClicked();
-    signOut();
   }
 
   return (
