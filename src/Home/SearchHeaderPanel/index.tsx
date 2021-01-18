@@ -6,8 +6,7 @@ import React, {
 import styled from 'styled-components';
 
 import useIPCRenderer from 'hooks/useIPCRenderer';
-import useDebounce from 'hooks/useDebounce';
-import electron, {
+import {
   openPreferences,
   isDev,
   getUpdateStatus,
@@ -21,7 +20,8 @@ import { ReactComponent as userProfileIcon } from 'img/user-profile.svg';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
 
-import Hotkey, { Key } from './HotkeysPanel/Hotkey';
+import ResultsFiltersMenu, { ResultsFilter } from './ResultsFiltersMenu';
+import SearchInput from './SearchInput';
 
 const Container = styled.div`
   width: 100%;
@@ -33,41 +33,6 @@ const Container = styled.div`
   background: #25252E;
 `;
 
-const InputWrapper = styled.div<{ isFocused?: boolean }>`
-  min-height: 46px;
-  width: 100%;
-  padding-bottom: 5px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  border-bottom: 1px solid #3B3A4A;
-`;
-
-const Input = styled.input`
-  padding: 10px 15px;
-  flex: 1;
-
-  color: white;
-  font-family: 'Roboto Mono';
-  font-weight: 600;
-  font-size: 14px;
-
-  border: none;
-  outline: none;
-  background: transparent;
-
-  ::placeholder {
-    color: #5A5A6F;
-  }
-`;
-
-const StyledLoader = styled(Loader)`
-  position: relative;
-  right: 2px;
-`;
-
 const Menu = styled.div`
   width: 100%;
   padding: 10px;
@@ -75,34 +40,6 @@ const Menu = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-`;
-
-const FiltersWrapper = styled.div`
-  flex: 1;
-  display: flex;
-  width: 100%;
-`;
-
-const Filter = styled.div`
-  margin-right: 10px;
-  display: flex;
-  align-items: center;
-`;
-
-const FilterButton = styled.button<{ selected?: boolean }>`
-  color: ${props => props.selected ? 'white' : '#5A5A6F'};
-  font-family: 'Poppins';
-  font-size: 15px;
-  font-weight: 500;
-
-  background: none;
-  border: none;
-
-  :hover {
-    transition: background 170ms ease-in;
-    cursor: pointer;
-    color: white;
-  }
 `;
 
 const UserProfileIcon = styled(userProfileIcon)`
@@ -188,16 +125,27 @@ const CloseIcon = styled(closeIcon)`
   }
 `;
 
-export enum ResultsFilter {
-  StackOverflow = 'StackOverflow',
-  GitHubCode = 'GitHubCode',
-  Docs = 'Docs',
-}
+const StyledLoader = styled(Loader)`
+  position: relative;
+  right: 2px;
+`;
 
-interface SearchInputProps {
+const SearchInputContainer = styled.div<{ isFocused?: boolean }>`
+  min-height: 46px;
+  width: 100%;
+  padding-bottom: 5px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border-bottom: 1px solid #3B3A4A;
+`;
+
+interface SearchHeaderPanelProps {
   placeholder?: string;
   value: string;
-  onChange: (e: any) => void;
+  onDebouncedChange: (value: string) => void;
 
   activeFilter: ResultsFilter;
   onFilterSelect: (f: ResultsFilter) => void;
@@ -208,31 +156,21 @@ interface SearchInputProps {
   isDocsFilterModalOpened?: boolean;
 }
 
-function SearchInput({
-  placeholder,
+function SearchHeaderPanel({
   value,
-  onChange,
+  placeholder,
+  onDebouncedChange,
   activeFilter,
   onFilterSelect,
   isLoading,
   isModalOpened,
   isSignInModalOpened,
   isDocsFilterModalOpened,
-}: SearchInputProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [isInputFocused, setIsInputFocused] = useState(false);
+}: SearchHeaderPanelProps) {
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [isUpdatePanelOpened, setIsUpdatePanelOpened] = useState(true);
-
-  const [val, setVal] = useState('');
-
-  const trimmedVal = val.trim();
-
-  const newVal = useDebounce(trimmedVal, 400);
-
-  useEffect(() => {
-    onChange({ target: { value: newVal } });
-  }, [newVal]);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   function handleContentMouseDown(e: any) {
     // Prevent blur when user is clicking on the filter buttons under the input element.
@@ -242,14 +180,6 @@ function SearchInput({
     }
   };
 
-  function handleInputKeyDown(e: any) {
-    // We want to prevent cursor from moving when the up or down arrow is pressed.
-    // The default behavior is that cursor moves either to the start or to the end.
-    // 38 - up arrow
-    // 40 - down arrow
-    if (e.keyCode === 38 || e.keyCode === 40) e.preventDefault();
-  }
-
   function handleUpdate() {
     restartAndUpdate();
   }
@@ -258,17 +188,6 @@ function SearchInput({
     setIsUpdatePanelOpened(false);
     postponeUpdate();
   }
-
-  function getResultsFilterDisplayName(resultsFilter: ResultsFilter) {
-    if (resultsFilter === ResultsFilter.GitHubCode) {
-      return 'GitHub';
-    }
-    return resultsFilter;
-  }
-
-  useIPCRenderer('did-show-main-window', () => {
-    if (!isModalOpened) inputRef?.current?.focus();
-  });
 
   useIPCRenderer('update-available', (_, { isReminder }: { isReminder?: boolean }) => {
     setIsUpdateAvailable(true);
@@ -287,63 +206,30 @@ function SearchInput({
     checkUpdateStatus();
   }, []);
 
-  useEffect(() => {
-    if (isModalOpened) inputRef?.current?.blur();
-    else inputRef?.current?.focus();
-  }, [isModalOpened]);
-
-  useEffect(() => {
-    if (isSignInModalOpened) inputRef?.current?.blur();
-    else inputRef?.current?.focus();
-  }, [isSignInModalOpened]);
-
-  useEffect(() => {
-    if (isDocsFilterModalOpened) inputRef?.current?.blur();
-    else inputRef?.current?.focus();
-  }, [isDocsFilterModalOpened]);
-
   return (
     <Container
       onMouseDown={handleContentMouseDown}
     >
-      <InputWrapper
+      <SearchInputContainer
         isFocused={isInputFocused}
       >
-        <Input
-          ref={inputRef}
+        <SearchInput
+          inputRef={inputRef}
+          setIsInputFocused={setIsInputFocused}
+          initialValue={value}
           placeholder={placeholder}
-          value={val}
-          onChange={(e: any) => setVal(e.target.value)}
-          onFocus={() => setIsInputFocused(true)}
-          onBlur={() => setIsInputFocused(false)}
-          onKeyDown={handleInputKeyDown}
+          onDebouncedChange={onDebouncedChange}
+          isModalOpened={isModalOpened}
+          isSignInModalOpened={isSignInModalOpened}
+          isDocsFilterModalOpened={isDocsFilterModalOpened}
         />
         {isLoading && <StyledLoader />}
-      </InputWrapper>
+      </SearchInputContainer>
       <Menu>
-        <FiltersWrapper>
-          {Object.values(ResultsFilter).map((f, idx) => (
-            <Filter
-              key={f}
-            >
-              <FilterButton
-                selected={activeFilter === f}
-                onClick={() => onFilterSelect(f)}
-              >{getResultsFilterDisplayName(f)}
-              </FilterButton>
-              {electron.remote.process.platform === 'darwin' &&
-                <Hotkey
-                  hotkey={[Key.Command, `${idx + 1}`]}
-                />
-              }
-              {electron.remote.process.platform !== 'darwin' &&
-                <Hotkey
-                  hotkey={['Alt + ', `${idx + 1}`]}
-                />
-              }
-            </Filter>
-          ))}
-        </FiltersWrapper>
+        <ResultsFiltersMenu
+          activeFilter={activeFilter}
+          onFilterSelect={onFilterSelect}
+        />
         {isDev && <Dev>[dev build]</Dev>}
         <UserProfileButton onClick={() => openPreferences(PreferencesPage.Account)}>
           <UserProfileIcon />
@@ -368,4 +254,6 @@ function SearchInput({
   );
 }
 
-export default SearchInput;
+export { ResultsFilter };
+
+export default SearchHeaderPanel;

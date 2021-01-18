@@ -53,7 +53,7 @@ import Button from 'components/Button';
 import Loader from 'components/Loader';
 import SignInModal from 'Auth/SignInModal';
 
-import SearchInput, { ResultsFilter } from './SearchInput';
+import SearchHeaderPanel, { ResultsFilter } from './SearchHeaderPanel';
 import {
   StackOverflowSearchHotkeysPanel,
   StackOverflowModalHotkeysPanel,
@@ -1198,13 +1198,13 @@ function Home() {
     }
   }
 
-  function handleSearchInputChange(e: any) {
+  function handleSearchInputChange(value: string) {
     // User explicitely deleted the query. We should remove all results.
-    if (!e.target.value) {
+    if (!value) {
       clearResults();
       return;
     }
-    setSearchQuery(e.target.value);
+    setSearchQuery(value);
   }
 
   function handleDocSearchResultsResizeStop(e: any, dir: any, elRef: HTMLElement) {
@@ -1450,6 +1450,8 @@ function Home() {
     });
     // TODO WARNING - Don't include 'searchAll' in the deps array
     // otherwise an infinite cycle will start. Why?
+    // Answer - `searchAll` function is defined in the body of the component 
+    // and with each rerender it is defined again, thus having a new identity and triggering deps change.
   }, [
     debouncedQuery,
     debouncedLastSearchedQuery,
@@ -1521,10 +1523,10 @@ function Home() {
       }
 
       <Container>
-        <SearchInput
-          placeholder="Search StackOverflow, code on GitHub, and docs"
+        <SearchHeaderPanel
           value={state.search.query}
-          onChange={handleSearchInputChange}
+          placeholder="Search StackOverflow, code on GitHub, and docs"
+          onDebouncedChange={handleSearchInputChange}
           activeFilter={activeFilter}
           onFilterSelect={f => setSearchFilter(f)}
           isLoading={isActiveFilterLoading}
