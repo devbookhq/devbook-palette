@@ -85,7 +85,7 @@ function SearchResultItem({
   }, [docResult]);
 
   useEffect(() => {
-    if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
+    if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView({ block: 'nearest' });
   }, [focusState]);
 
   return (
