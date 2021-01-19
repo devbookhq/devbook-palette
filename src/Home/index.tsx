@@ -1735,9 +1735,11 @@ function Home() {
             }
             {/*-------------------------------------------------------------*/}
 
-
             {/* GitHub search results + GitHub modal hotkeys */}
-            {!state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
+            {!state.modalItem
+              && activeFilter === ResultsFilter.GitHubCode
+              && state.gitHubAccount.isConnected
+              &&
               <GitHubCodeSearchHotkeysPanel
                 onOpenClick={() => openModal(activeFocusedItem)}
                 onOpenInVSCodeClick={openFocusedGitHubCodeItemInVSCode}

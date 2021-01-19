@@ -13,7 +13,7 @@ import {
   changeUserInMain,
   setAuthInOtherWindows,
 } from 'mainProcess';
-import { timeout } from 'utils';
+import timeout from 'utils/timeout';
 
 export enum AuthError {
   // The error when the looking for a valid stored user failed - probably because of the network connection.
@@ -92,7 +92,7 @@ export const authEmitter = new EventEmitter();
 export let auth: AuthInfo = { state: AuthState.LookingForStoredUser };
 export const AuthContext = createContext<AuthInfo>(auth);
 
-const url = isDev ? 'https://dev.usedevbook.com/auth' : 'https://api.usedevbook.com/auth';
+const BASE_URL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
 
 const magicAPIKey = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
 const magic = new Magic(magicAPIKey);
@@ -146,7 +146,7 @@ async function syncUserMetadata(didToken: string) {
     updateAuth({ state: AuthState.UserAndMetadataLoaded, metadata });
 
     try {
-      await axios.post(`${url}/user`, {
+      await axios.post(`${BASE_URL}/auth/user`, {
         didToken,
       });
     } catch (error) {
@@ -180,7 +180,7 @@ export async function signIn(email: string) {
       ...isDev && { test: 'true' },
     });
 
-    await openLink(`${url}/signin/${sessionID}?${params}`);
+    await openLink(`${BASE_URL}/auth/signin/${sessionID}?${params}`);
 
     let credential: string | undefined = undefined;
 
@@ -196,7 +196,7 @@ export async function signIn(email: string) {
       }
 
       try {
-        const result = await axios.get(`${url}/credential/${sessionID}`, {
+        const result = await axios.get(`${BASE_URL}/auth/credential/${sessionID}`, {
           params: {
             email,
           },
@@ -215,7 +215,7 @@ export async function signIn(email: string) {
 
     if (isCancelled) {
       try {
-        await axios.delete(`${url}/credential/${sessionID}`);
+        await axios.delete(`${BASE_URL}/auth/credential/${sessionID}`);
         updateAuth({ state: AuthState.NoUser });
         return reject({ message: 'Sign in was cancelled' });
       } catch (error) {

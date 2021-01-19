@@ -2,79 +2,92 @@ import crypto from 'crypto';
 import { shell } from 'electron';
 import { EventEmitter } from 'events';
 import axios from 'axios';
-import querystring from 'querystring';
-import path from 'path';
-import { app } from 'electron';
 import isDev from './utils/isDev';
+import timeout from './utils/timeout';
 
-function getRandomToken() {
-  return crypto.randomBytes(48).toString('hex');
-}
+const BASE_URL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
+
+function generateSessionID() {
+  return encodeURIComponent(crypto.randomBytes(64).toString('base64'));
+};
 
 function openLink(url: string) {
   return shell.openExternal(url);
 }
 
 class GitHubOAuth {
-  private static PORT = 8020;
-  private static GITHUB_CONFIG = {
-    client_id: 'edcfabd8a71a394620a0',
-    redirect_uri: `http://localhost:${GitHubOAuth.PORT}`,
-    login: '',
-    scope: '',
-    allow_signup: 'true',
-  };
-
-  private stateTokens: { [state: string]: boolean } = {};
-
   public emitter = new EventEmitter();
 
-  public constructor(private showApp: any, private hideApp: any) {
+  private getAccessTokenCancelHandle?: () => void;
 
-    this.app.all('/', async (req, res) => {
-      const code = req.query['code'] as string;
-      const state = req.query['state'] as string;
+  private async getAccessToken(sessionID: string) {
+    this.getAccessTokenCancelHandle?.();
 
-      if (!this.stateTokens[state]) {
-        return res.status(404).send();
+    let resolveHandle: (reason?: any) => void;
+    let isCancelled = false;
+
+    const cancelableGetAccessToken = new Promise<void>(async (resolve, reject) => {
+      resolveHandle = resolve;
+
+      let accessToken: string | undefined = undefined;
+
+      const requestLimit = 15 * 60;
+
+      for (let i = 0; i < requestLimit; i++) {
+        if (isCancelled) {
+          break;
+        }
+
+        if (accessToken) {
+          break;
+        }
+
+        try {
+          const result = await axios.get(`${BASE_URL}/github/oauth/accessToken/${sessionID}`);
+          accessToken = result.data.accessToken;
+          break;
+
+        } catch (error) {
+          if (error.response?.status !== 503) {
+            console.error(error.message);
+            this.emitter.emit('error', { error: 'Could not connect GitHub' });
+            return;
+          }
+        }
+        await timeout(1500);
       }
 
-      try {
-        const accessToken = await GitHubOAuth.getAccessToken(code);
+      if (isCancelled) {
+        try {
+          return axios.delete(`${BASE_URL}/github/oauth/accessToken/${sessionID}`);
+        } catch (error) {
+          console.error(error.message);
+        }
+      }
+
+      if (accessToken) {
         this.emitter.emit('access-token', { accessToken });
-        res.redirect('/redirect');
-      } catch (error) {
-        console.error(error.message);
-        this.emitter.emit('error', { message: error.message });
-        res.status(500).send();
-      } finally {
-        delete this.stateTokens[state];
-        this.showApp();
+      } else {
+        this.emitter.emit('error', { error: 'GitHub OAuth timeout' });
       }
+      return resolve();
     });
 
-    this.app.listen(GitHubOAuth.PORT);
-  }
+    this.getAccessTokenCancelHandle = () => {
+      isCancelled = true;
+      resolveHandle();
+    };
 
-  private static async getAccessToken(code: string) {
-    const result = await axios.post('https://api.usedevbook.com/getOAuthAccessToken', {
-      code,
-    });
-    return result.data.accessToken;
+    return cancelableGetAccessToken;
   }
 
   public async requestOAuth() {
-    const state = getRandomToken();
-    this.stateTokens[state] = true;
+    const sessionID = generateSessionID();
 
-    const queryParams = querystring.stringify({
-      ...GitHubOAuth.GITHUB_CONFIG,
-      state,
-    });
-    const url = `https://github.com/login/oauth/authorize?${queryParams}`;
+    const link = isDev ? `${BASE_URL}/github/oauth/authorize/${sessionID}` : `${BASE_URL}/github/oauth/authorize/${sessionID}`;
+    await openLink(link);
 
-    openLink(url);
-    this.hideApp();
+    await this.getAccessToken(sessionID);
   }
 }
 

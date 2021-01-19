@@ -154,13 +154,11 @@ let preferencesWindow: PreferencesWindow | undefined = undefined;
 
 const store = new Store();
 
-const gitHubOAuth = new GitHubOAuth(
-  () => mainWindow?.show(),
-  () => hideMainWindow(),
-);
+const gitHubOAuth = new GitHubOAuth();
 
 gitHubOAuth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
   mainWindow?.webContents?.send('github-access-token', { accessToken });
+  mainWindow?.show();
   preferencesWindow?.webContents?.send('github-access-token', { accessToken });
   store.set('github', accessToken);
   trackConnectGitHubFinished();
@@ -168,6 +166,7 @@ gitHubOAuth.emitter.on('access-token', async ({ accessToken }: { accessToken: st
 
 gitHubOAuth.emitter.on('error', ({ message }: { message: string }) => {
   mainWindow?.webContents?.send('github-error', { message });
+  mainWindow?.show();
   preferencesWindow?.webContents?.send('github-error', { message });
 });
 
@@ -320,6 +319,7 @@ ipcMain.handle('get-global-shortcut', () => {
 
 ipcMain.on('connect-github', () => {
   gitHubOAuth.requestOAuth();
+  hideMainWindow();
   trackConnectGitHubStarted();
 });
 
