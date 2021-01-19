@@ -1,4 +1,3 @@
-import express from 'express';
 import crypto from 'crypto';
 import { shell } from 'electron';
 import { EventEmitter } from 'events';
@@ -25,15 +24,12 @@ class GitHubOAuth {
     scope: '',
     allow_signup: 'true',
   };
-  private static redirectHTMLPath = path.join(app.getAppPath(), isDev ? '' : '..', 'resources', 'OAuthRedirect');
 
   private stateTokens: { [state: string]: boolean } = {};
-  private app = express();
 
   public emitter = new EventEmitter();
 
   public constructor(private showApp: any, private hideApp: any) {
-    this.app.use('/redirect', express.static(GitHubOAuth.redirectHTMLPath));
 
     this.app.all('/', async (req, res) => {
       const code = req.query['code'] as string;
