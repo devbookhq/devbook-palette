@@ -1450,7 +1450,7 @@ function Home() {
     });
     // TODO WARNING - Don't include 'searchAll' in the deps array
     // otherwise an infinite cycle will start. Why?
-    // Answer - `searchAll` function is defined in the body of the component 
+    // Answer - `searchAll` function is defined in the body of the component
     // and with each rerender it is defined again, thus having a new identity and triggering deps change.
   }, [
     debouncedQuery,
