@@ -1568,7 +1568,7 @@ function Home() {
           && !isActiveFilterLoading
           // Don't show "Nothing found" when user is searching docs but disabled
           // all doc sources.
-          && !(activeFilter === ResultsFilter.Docs && !isAnyDocSourceIncluded)
+          && !(activeFilter === ResultsFilter.Docs && (!isAnyDocSourceIncluded || !isUserSignedInWithOrWithoutMetadata))
           &&
           <InfoMessage>Nothing found</InfoMessage>
         }
