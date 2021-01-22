@@ -122,10 +122,10 @@ export function updateAuth(newAuth: AuthInfo) {
 
 export async function signOut() {
   const oldAuth = auth;
-  updateAuth({ state: AuthState.SigningOutUser });
+  updateAuth({ ...auth, state: AuthState.SigningOutUser });
   try {
     await magic.user.logout();
-    updateAuth({ state: AuthState.NoUser });
+    updateAuth({ ...auth, state: AuthState.NoUser });
   } catch (error) {
     updateAuth(oldAuth);
 
@@ -150,14 +150,16 @@ async function syncUserMetadata(didToken: string) {
         didToken,
       });
     } catch (error) {
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
       console.error('Failed sending user metadata to the server', error.message);
+      signOut();
+      return;
     }
 
   } catch (error) {
     updateAuth({ state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata });
 
     console.error(error.message);
-
     signOut();
   }
 }
