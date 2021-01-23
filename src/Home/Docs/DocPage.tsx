@@ -12,6 +12,7 @@ import electron, { openLink } from 'mainCommunication';
 import useDebounce from 'hooks/useDebounce';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
 
+// Leave this here until we have separate CSS file for all docs (some are still not finished).
 const DocPageContainer = styled.div`
   flex: 1;
   padding: 10px 15px 20px;
@@ -705,7 +706,7 @@ function DocPage({
         const urlWithoutExtension = new URL(link, pageURL);
         const hash = urlWithoutExtension.hash;
         const urlWithoutExtensionAndHash = new URL('', urlWithoutExtension);
-        
+
         link = urlWithoutExtensionAndHash.href + (hasHTMLExtension ? '.html' : '') + hash;
       }
       openLink(link);
@@ -842,7 +843,7 @@ function DocPage({
           </SearchControls>
         </SearchInputWrapper>
       }
-      <DocPageContainer
+      <div
         id="doc-page"
         onClick={handleDocPageClick}
         ref={containerRef}
