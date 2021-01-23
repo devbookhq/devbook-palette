@@ -18,11 +18,14 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "isolatedModules": true,
-    "baseUrl": "./src",
+    "baseUrl": "src",
     "noImplicitThis": false,
     "noFallthroughCasesInSwitch": true
   },
   "include": [
-    "src"
+    "src",
+  ],
+  "exclude": [
+    "src/main"
   ]
 }

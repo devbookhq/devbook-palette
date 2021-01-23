@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+
 import devbookPreviewSOImg from 'img/onboarding-so-preview.png';
 import devbookPreviewCodeImg from 'img/onboarding-code-preview.png';
 import devbookPreviewDocsImg from 'img/onboarding-docs-preview.png';
@@ -42,7 +43,7 @@ const FeaturesWrapper = styled.div`
 `;
 
 const Delimiter = styled.div`
-  margin 0 10px;
+  margin: 0 10px;
 
   width: 25px;
   height: 0px;

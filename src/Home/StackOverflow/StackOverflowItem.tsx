@@ -5,16 +5,16 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 import {
   StackOverflowResult,
   StackOverflowAnswer,
   AnswerType,
 } from 'search/stackOverflow';
 import { openLink } from 'mainProcess';
-
 import FocusState from '../SearchItemFocusState';
 import StackOverflowBody from './StackOverflowBody';
+
+import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
@@ -292,4 +292,3 @@ function StackOverflowItem ({
 }
 
 export default StackOverflowItem;
-

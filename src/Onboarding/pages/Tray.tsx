@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
+
 import electron from 'mainProcess';
+
 import trayPreviewMacImg from 'img/tray-preview-mac.png';
 import trayPreviewWinImg from 'img/tray-preview-win.png';
 import trayPreviewDebImg from 'img/tray-preview-deb.png';

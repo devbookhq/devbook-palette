@@ -3,6 +3,7 @@ import ElectronStore from 'electron-store';
 import * as path from 'path';
 import { inspect } from 'util';
 
+
 import isDev from './utils/isDev';
 
 class MainWindow {

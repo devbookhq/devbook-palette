@@ -15,13 +15,12 @@ import {
 } from 'mainProcess';
 import Loader from 'components/Loader';
 import { PreferencesPage } from 'Preferences';
+import ResultsFiltersMenu, { ResultsFilter } from './ResultsFiltersMenu';
+import SearchInput from './SearchInput';
 
 import { ReactComponent as userProfileIcon } from 'img/user-profile.svg';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
-
-import ResultsFiltersMenu, { ResultsFilter } from './ResultsFiltersMenu';
-import SearchInput from './SearchInput';
 
 const Container = styled.div`
   width: 100%;

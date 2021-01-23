@@ -10,7 +10,6 @@ import {
   signOutUser,
   trackSignOutButtonClicked,
 } from 'mainProcess';
-
 import Button from 'components/Button';
 import Loader from 'components/Loader';
 

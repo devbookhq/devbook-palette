@@ -1,5 +1,6 @@
-import { isDev } from 'mainProcess';
 import axios from 'axios';
+
+import { isDev } from 'mainProcess';
 
 interface Page {
   route: string[];
@@ -39,4 +40,3 @@ export async function fetchDocSources(): Promise<DocSource[]> {
   const result = await axios.get(url);
   return result.data.docs.map((ds: DocSource) => ({...ds, isIncludedInSearch: true}));
 }
-

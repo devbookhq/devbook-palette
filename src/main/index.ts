@@ -34,7 +34,7 @@ import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
-import { IPCMessage } from './ipc';
+import { IPCMessage } from '../mainProcess/ipc';
 
 enum StoreKey {
   DocSources = 'docSources',
@@ -382,7 +382,6 @@ ipcMain.on('postpone-update', () => {
     if (postponeHandler) {
       clearTimeout(postponeHandler);
     }
-    // TODO: Switch setTimeout for a cron job - https://github.com/kelektiv/node-cron
     postponeHandler = setTimeout(() => {
       mainWindow?.webContents?.send('update-available', { isReminder: true });
     }, 19 * 60 * 60 * 1000);

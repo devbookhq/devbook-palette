@@ -5,4 +5,3 @@ enum FocusState {
 }
 
 export default FocusState;
-

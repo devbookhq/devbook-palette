@@ -9,6 +9,7 @@ import electron, {
   userDidChangeShortcut,
   getGlobalShortcut,
 } from 'mainProcess';
+
 import Base from './Base';
 
 const InfoMessage = styled.div`

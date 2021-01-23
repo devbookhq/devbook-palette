@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom';
 
 import './index.css';
 
-import { notifyViewReady, } from './mainProcess';
-import * as serviceWorker from './serviceWorker';
-import App from './App';
+import { notifyViewReady, } from 'mainProcess';
+import * as serviceWorker from 'serviceWorker';
+import App from 'App';
 import { authEmitter, AuthContext, auth } from 'Auth';
 
 ReactDOM.render(

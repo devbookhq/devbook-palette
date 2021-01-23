@@ -11,9 +11,13 @@ import {
 import Modal from 'components/Modal';
 import Button from 'components/Button';
 import Loader from 'components/Loader';
+import {
+  signIn,
+  cancelSignIn,
+  AuthContext,
+  AuthState,
+} from '.';
 import { ReactComponent as checkIcon } from 'img/check-circle.svg';
-
-import { signIn, cancelSignIn, AuthContext, AuthState } from './index';
 
 const StyledModal = styled(Modal)`
   padding: 15px;

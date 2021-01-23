@@ -2,8 +2,9 @@ import * as electron from 'electron';
 import * as path from 'path';
 import { inspect } from 'util';
 import * as process from 'process';
+
 import isDev from './utils/isDev';
-import { IPCMessage } from './ipc';
+import { IPCMessage } from '../mainProcess/ipc';
 
 export enum PreferencesPage {
   General = 'general',

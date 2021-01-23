@@ -6,12 +6,11 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 import { CodeResult } from 'search/gitHub';
 import { openLink } from 'mainProcess';
-
-import FocusState from '../SearchItemFocusState';
 import Code from './Code';
+import FocusState from '../SearchItemFocusState';
+import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;

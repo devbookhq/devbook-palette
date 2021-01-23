@@ -21,7 +21,7 @@ const DragHeader = styled.div`
   width: 100%;
   background: transparent;
   -webkit-app-region: drag;
-  -webkit-user-select: non: el.values[0],;
+  -webkit-user-select: none;
 `;
 
 const Container = styled.div`

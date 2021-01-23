@@ -1,6 +1,6 @@
 import React from 'react';
-import electron from 'mainProcess';
 
+import electron from 'mainProcess';
 import { Key } from '../Hotkey';
 import Panel from '../Panel';
 
@@ -31,4 +31,3 @@ function SearchHotkeysPanel({
 }
 
 export default SearchHotkeysPanel;
-

@@ -165,96 +165,104 @@ async function syncUserMetadata(didToken: string) {
 }
 
 export async function signIn(email: string) {
-  cancelSignIn();
 
-  updateAuth({ state: AuthState.SigningInUser });
-
-  let rejectHandle: (reason?: any) => void;
-  let isCancelled = false;
-
-  const cancelableSignIn = new Promise<void>(async (resolve, reject) => {
-    rejectHandle = reject;
-
-    const sessionID = generateSessionID();
-
-    const params = querystring.encode({
-      email,
-      ...isDev && { test: 'true' },
-    });
-
-    await openLink(`${BASE_URL}/auth/signin/${sessionID}?${params}`);
-
-    let credential: string | undefined = undefined;
-
-    const requestLimit = 15 * 60;
-
-    for (let i = 0; i < requestLimit; i++) {
-      if (isCancelled) {
-        break;
-      }
-
-      if (credential) {
-        break;
-      }
-
-      try {
-        const result = await axios.get(`${BASE_URL}/auth/credential/${sessionID}`, {
-          params: {
-            email,
-          },
-        });
-
-        credential = result.data.credential;
-        break;
-
-      } catch (error) {
-        if (error.response?.status !== 404) {
-          break;
-        }
-      }
-      await timeout(1000);
-    }
-
-    if (isCancelled) {
-      try {
-        await axios.delete(`${BASE_URL}/auth/credential/${sessionID}`);
-        updateAuth({ state: AuthState.NoUser });
-        return reject({ message: 'Sign in was cancelled' });
-      } catch (error) {
-        console.error(error.message);
-        updateAuth({ state: AuthState.NoUser });
-        return reject({ message: 'Sign in could not be cancelled' });
-      }
-    }
-
-    if (!credential && !isCancelled) {
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
-      return reject({ message: 'Getting credential for sign in timed out' });
-    }
-
-    try {
-      const didToken = await magic.auth.loginWithCredential(credential);
-
-      if (didToken) {
-        updateAuth({ state: AuthState.FetchingUserMetadata });
-        syncUserMetadata(didToken);
-        return resolve();
-      }
-
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
-      return reject({ message: 'Could not complete the sign in' });
-    } catch (error) {
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
-      return reject({ message: error.message });
-    }
+  magic.auth.loginWithMagicLink({
+    redirectURI: 'https://dev.usedevbook.com',
+    showUI: true,
+    email,
   });
 
-  signInCancelHandle = () => {
-    rejectHandle({ message: 'Sign in was cancelled' });
-    isCancelled = true;
-  };
+  return;
+  // cancelSignIn();
 
-  return cancelableSignIn;
+  // updateAuth({ state: AuthState.SigningInUser });
+
+  // let rejectHandle: (reason?: any) => void;
+  // let isCancelled = false;
+
+  // const cancelableSignIn = new Promise<void>(async (resolve, reject) => {
+  //   rejectHandle = reject;
+
+  //   const sessionID = generateSessionID();
+
+  //   const params = querystring.encode({
+  //     email,
+  //     ...isDev && { test: 'true' },
+  //   });
+
+  //   await openLink(`${BASE_URL}/auth/signin/${sessionID}?${params}`);
+
+  //   let credential: string | undefined = undefined;
+
+  //   const requestLimit = 15 * 60;
+
+  //   for (let i = 0; i < requestLimit; i++) {
+  //     if (isCancelled) {
+  //       break;
+  //     }
+
+  //     if (credential) {
+  //       break;
+  //     }
+
+  //     try {
+  //       const result = await axios.get(`${BASE_URL}/auth/credential/${sessionID}`, {
+  //         params: {
+  //           email,
+  //         },
+  //       });
+
+  //       credential = result.data.credential;
+  //       break;
+
+  //     } catch (error) {
+  //       if (error.response?.status !== 404) {
+  //         break;
+  //       }
+  //     }
+  //     await timeout(1000);
+  //   }
+
+  //   if (isCancelled) {
+  //     try {
+  //       await axios.delete(`${BASE_URL}/auth/credential/${sessionID}`);
+  //       updateAuth({ state: AuthState.NoUser });
+  //       return reject({ message: 'Sign in was cancelled' });
+  //     } catch (error) {
+  //       console.error(error.message);
+  //       updateAuth({ state: AuthState.NoUser });
+  //       return reject({ message: 'Sign in could not be cancelled' });
+  //     }
+  //   }
+
+  //   if (!credential && !isCancelled) {
+  //     updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
+  //     return reject({ message: 'Getting credential for sign in timed out' });
+  //   }
+
+  //   try {
+  //     const didToken = await magic.auth.loginWithCredential(credential);
+
+  //     if (didToken) {
+  //       updateAuth({ state: AuthState.FetchingUserMetadata });
+  //       syncUserMetadata(didToken);
+  //       return resolve();
+  //     }
+
+  //     updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
+  //     return reject({ message: 'Could not complete the sign in' });
+  //   } catch (error) {
+  //     updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
+  //     return reject({ message: error.message });
+  //   }
+  // });
+
+  // signInCancelHandle = () => {
+  //   rejectHandle({ message: 'Sign in was cancelled' });
+  //   isCancelled = true;
+  // };
+
+  // return cancelableSignIn;
 }
 
 export async function refreshAuth() {

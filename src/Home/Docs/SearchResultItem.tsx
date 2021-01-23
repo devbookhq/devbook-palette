@@ -6,7 +6,6 @@ import React, {
 import styled from 'styled-components';
 
 import { DocResult } from 'search/docs';
-
 import FocusState from '../SearchItemFocusState';
 
 const maxSummaryLength = 180;
@@ -102,4 +101,3 @@ function SearchResultItem({
 }
 
 export default React.memo(SearchResultItem);
-
