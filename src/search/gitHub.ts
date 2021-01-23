@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
   isDev,
   getGithubAccessToken,
-} from 'mainProcess';
+} from 'mainCommunication';
 
 // TODO: These types are also present in the `devbook` repository - move them into a shared library.
 export interface FilePreview {

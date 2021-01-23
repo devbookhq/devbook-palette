@@ -10,7 +10,7 @@ import {
   getGithubAccessToken,
   connectGitHub,
   removeGitHub,
-} from 'mainProcess';
+} from 'mainCommunication';
 import Button from 'components/Button';
 import Base from './Base';
 

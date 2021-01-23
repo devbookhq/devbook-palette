@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import electron from 'mainProcess';
+import electron from 'mainCommunication';
 import Hotkey, { Key } from '../HotkeysPanel/Hotkey';
 
 const Container = styled.div`

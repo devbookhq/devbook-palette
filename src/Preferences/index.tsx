@@ -11,12 +11,12 @@ import {
 } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 
-import { IPCMessage } from 'mainProcess/ipc';
+import { IPCMessage } from 'mainCommunication/ipc';
 import electron, {
   getUpdateStatus,
   restartAndUpdate,
   getAuthFromMainWindow,
-} from 'mainProcess';
+} from 'mainCommunication';
 import Button from 'components/Button';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 

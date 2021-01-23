@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { isDev } from 'mainProcess';
+import { isDev } from 'mainCommunication';
 
 export enum AnswerType {
   Accepted = 'Accepted answer',

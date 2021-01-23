@@ -6,13 +6,13 @@ import { EventEmitter } from 'events';
 import {
   crypto,
   querystring,
-} from 'mainProcess/electron';
+} from 'mainCommunication/electron';
 import {
   openLink,
   isDev,
   changeUserInMain,
   setAuthInOtherWindows,
-} from 'mainProcess';
+} from 'mainCommunication';
 import timeout from 'utils/timeout';
 
 export enum AuthError {

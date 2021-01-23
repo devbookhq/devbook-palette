@@ -9,7 +9,7 @@ import {
   openSignInModal,
   signOutUser,
   trackSignOutButtonClicked,
-} from 'mainProcess';
+} from 'mainCommunication';
 import Button from 'components/Button';
 import Loader from 'components/Loader';
 

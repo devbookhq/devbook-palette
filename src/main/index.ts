@@ -34,7 +34,7 @@ import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
-import { IPCMessage } from '../mainProcess/ipc';
+import { IPCMessage } from '../mainCommunication/ipc';
 
 enum StoreKey {
   DocSources = 'docSources',

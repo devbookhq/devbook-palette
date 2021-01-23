@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import {
   userDidChangeShortcut,
   finishOnboarding,
-} from 'mainProcess';
+} from 'mainCommunication';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
 import IntroductionPage from './pages/Introduction';

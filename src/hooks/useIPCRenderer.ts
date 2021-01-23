@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import electron from 'mainProcess';
+import electron from 'mainCommunication';
 
 function useIPCRenderer(eventName: string, handler: (paramObj: any, ...args: any) => void, deps: any[] = []) {
   useEffect(() => {
