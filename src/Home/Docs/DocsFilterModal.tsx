@@ -7,7 +7,7 @@ import React, {
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import { openLink } from 'mainProcess';
+import { openLink } from 'mainCommunication';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import { DocSource } from 'search/docs';
 import Modal from 'components/Modal';

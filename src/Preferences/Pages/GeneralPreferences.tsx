@@ -8,7 +8,7 @@ import Select from 'components/Select';
 import electron, {
   userDidChangeShortcut,
   getGlobalShortcut,
-} from 'mainProcess';
+} from 'mainCommunication';
 
 import Base from './Base';
 

@@ -10,7 +10,7 @@ import {
   StackOverflowAnswer,
   AnswerType,
 } from 'search/stackOverflow';
-import { openLink } from 'mainProcess';
+import { openLink } from 'mainCommunication';
 import FocusState from '../SearchItemFocusState';
 import StackOverflowBody from './StackOverflowBody';
 

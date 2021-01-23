@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 
 import './index.css';
 
-import { notifyViewReady, } from 'mainProcess';
+import { notifyViewReady, } from 'mainCommunication';
 import * as serviceWorker from 'serviceWorker';
 import App from 'App';
 import { authEmitter, AuthContext, auth } from 'Auth';

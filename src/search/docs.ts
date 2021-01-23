@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { isDev } from 'mainProcess';
+import { isDev } from 'mainCommunication';
 
 interface Page {
   route: string[];

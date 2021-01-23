@@ -4,7 +4,7 @@ import { inspect } from 'util';
 import * as process from 'process';
 
 import isDev from './utils/isDev';
-import { IPCMessage } from '../mainProcess/ipc';
+import { IPCMessage } from '../mainCommunication/ipc';
 
 export enum PreferencesPage {
   General = 'general',

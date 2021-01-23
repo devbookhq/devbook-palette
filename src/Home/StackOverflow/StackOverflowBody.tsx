@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import Prism from 'prismjs';
 
-import { openLink } from 'mainProcess';
+import { openLink } from 'mainCommunication';
 
 const Body = styled.div`
   /*

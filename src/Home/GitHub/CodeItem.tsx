@@ -7,7 +7,7 @@ import React, {
 import styled from 'styled-components';
 
 import { CodeResult } from 'search/gitHub';
-import { openLink } from 'mainProcess';
+import { openLink } from 'mainCommunication';
 import Code from './Code';
 import FocusState from '../SearchItemFocusState';
 import { ReactComponent as externalLinkImg } from 'img/external-link.svg';

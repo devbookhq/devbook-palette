@@ -7,7 +7,7 @@ import {
   trackSignInFinished,
   trackSignInFailed,
   trackContinueIntoAppButtonClicked,
-} from 'mainProcess';
+} from 'mainCommunication';
 import Modal from 'components/Modal';
 import Button from 'components/Button';
 import Loader from 'components/Loader';

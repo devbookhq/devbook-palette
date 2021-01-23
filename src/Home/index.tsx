@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Resizable } from 're-resizable';
 
-import { IPCMessage } from 'mainProcess/ipc';
+import { IPCMessage } from 'mainCommunication/ipc';
 import { AuthContext, AuthState, refreshAuth } from 'Auth';
 import electron, {
   isDev,
@@ -29,7 +29,7 @@ import electron, {
   getCachedDocSources,
   trackSignInModalOpened,
   trackSignInModalClosed,
-} from 'mainProcess';
+} from 'mainCommunication';
 import useDebounce from 'hooks/useDebounce';
 import {
   search as searchStackOverflow,

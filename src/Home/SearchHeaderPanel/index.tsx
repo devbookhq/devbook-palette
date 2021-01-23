@@ -12,7 +12,7 @@ import {
   getUpdateStatus,
   restartAndUpdate,
   postponeUpdate,
-} from 'mainProcess';
+} from 'mainCommunication';
 import Loader from 'components/Loader';
 import { PreferencesPage } from 'Preferences';
 import ResultsFiltersMenu, { ResultsFilter } from './ResultsFiltersMenu';

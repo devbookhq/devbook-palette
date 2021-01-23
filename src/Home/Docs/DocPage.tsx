@@ -8,7 +8,7 @@ import Prism from 'prismjs';
 
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import electron, { openLink } from 'mainProcess';
+import electron, { openLink } from 'mainCommunication';
 import useDebounce from 'hooks/useDebounce';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
 

@@ -4,7 +4,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import { openLink } from 'mainProcess';
+import { openLink } from 'mainCommunication';
 import useOnClickOutside from 'hooks/useOnClickOutside';
 import {
   CodeResult,

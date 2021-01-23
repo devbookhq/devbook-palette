@@ -1,6 +1,6 @@
 import React from 'react';
 
-import electron from 'mainProcess';
+import electron from 'mainCommunication';
 import { Key, VisualConcat } from '../Hotkey';
 import Panel from '../Panel';
 
