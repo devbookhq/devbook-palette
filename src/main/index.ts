@@ -384,7 +384,7 @@ ipcMain.on('postpone-update', () => {
     }
     postponeHandler = setTimeout(() => {
       mainWindow?.webContents?.send('update-available', { isReminder: true });
-    }, 19 * 60 * 60 * 1000);
+    }, 19 * 60 * 60 * 1000) as unknown as NodeJS.Timeout;
   }
 });
 
