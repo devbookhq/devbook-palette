@@ -3,9 +3,13 @@ import { v4 as uuidv4 } from 'uuid';
 import { app } from 'electron';
 import ElectronStore from 'electron-store';
 
+import isDev from './utils/isDev';
 import debounce from './utils/debounce';
 
-const client = new Analytics('BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf', { flushAt: 5 });
+const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
+const SEGMENT_FLUSH = isDev ? 1 : 5;
+
+const client = new Analytics(SEGMENT_WRITE_KEY, { flushAt: SEGMENT_FLUSH });
 const store = new ElectronStore();
 
 let isSignedIn = false;
