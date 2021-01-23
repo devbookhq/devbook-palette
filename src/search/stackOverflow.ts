@@ -1,5 +1,6 @@
-import { isDev } from 'mainProcess';
 import axios from 'axios';
+
+import { isDev } from 'mainProcess';
 
 export enum AnswerType {
   Accepted = 'Accepted answer',
@@ -16,7 +17,6 @@ export interface StackOverflowQuestion {
   html: string;
   timestamp: number;
   votes: number;
-  // comments: StackOverflowComment[];
 }
 
 export interface StackOverflowAnswer {
@@ -24,7 +24,6 @@ export interface StackOverflowAnswer {
   votes: number;
   isAccepted: boolean;
   timestamp: number;
-  // comments: StackOverflowComment[];
 }
 
 export interface StackOverflowResult {
@@ -39,4 +38,3 @@ export async function search(query: string): Promise<StackOverflowResult[]> {
   const result = await axios.post(url, { query });
   return result.data.results;
 }
-

@@ -1,9 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
+import Prism from 'prismjs';
 
 import { openLink } from 'mainProcess';
-
-import Prism from 'prismjs';
 
 const Body = styled.div`
   /*
@@ -175,4 +174,3 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
 });
 
 export default StackOverflowBody;
-

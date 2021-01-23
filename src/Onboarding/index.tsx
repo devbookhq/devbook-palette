@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
+
 import {
   userDidChangeShortcut,
   finishOnboarding,
 } from 'mainProcess';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
-
 import IntroductionPage from './pages/Introduction';
 import ShortcutPage from './pages/Shortcut';
 

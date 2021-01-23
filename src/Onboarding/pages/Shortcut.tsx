@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+
 import electron from 'mainProcess';
 
 import { ReactComponent as CheckIcon } from 'img/check.svg';

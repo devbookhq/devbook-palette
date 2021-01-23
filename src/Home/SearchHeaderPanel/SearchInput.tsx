@@ -1,17 +1,11 @@
 import React, {
-  useRef,
   useState,
   useEffect,
 } from 'react';
 import styled from 'styled-components';
 
-import { getSavedSearchQuery } from 'mainProcess';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import useDebounce from 'hooks/useDebounce';
-import Loader from 'components/Loader';
-import { init } from 'search/gitHub';
-
-
 
 const Input = styled.input`
   padding: 10px 15px;

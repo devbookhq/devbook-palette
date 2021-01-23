@@ -20,11 +20,11 @@ import electron, {
 import Button from 'components/Button';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 
-import logo from 'img/logo.png';
-
 import GeneralPreferences from './Pages/GeneralPreferences';
 import Integrations from './Pages/Integrations';
 import Account from './Pages/Account';
+
+import logo from 'img/logo.png';
 
 const Container = styled.div`
   width: 100%;

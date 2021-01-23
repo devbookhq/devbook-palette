@@ -12,9 +12,9 @@ import {
   removeGitHub,
 } from 'mainProcess';
 import Button from 'components/Button';
-import gitHubImg from 'img/github.png';
-
 import Base from './Base';
+
+import gitHubImg from 'img/github.png';
 
 const InfoMessage = styled.div`
   margin: auto;

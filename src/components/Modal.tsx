@@ -85,4 +85,3 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(({
 });
 
 export default Modal;
-

@@ -1,8 +1,9 @@
+import axios from 'axios';
+
 import {
   isDev,
   getGithubAccessToken,
 } from 'mainProcess';
-import axios from 'axios';
 
 // TODO: These types are also present in the `devbook` repository - move them into a shared library.
 export interface FilePreview {

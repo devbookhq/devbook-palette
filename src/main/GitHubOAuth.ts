@@ -2,8 +2,9 @@ import crypto from 'crypto';
 import { shell } from 'electron';
 import { EventEmitter } from 'events';
 import axios from 'axios';
+
 import isDev from './utils/isDev';
-import timeout from './utils/timeout';
+import timeout from '../utils/timeout';
 
 const BASE_URL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
 
