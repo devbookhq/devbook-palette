@@ -89,7 +89,6 @@ if (!isDev) {
   autoUpdater.requestHeaders = null;
 
   app.on('ready', () => {
-    // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron.
     setInterval(() => {
       autoUpdater.checkForUpdates();
     }, 10 * 60 * 1000);

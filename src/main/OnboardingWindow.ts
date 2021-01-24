@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as process from 'process';
 import { inspect } from 'util';
 
+import serve from './serve';
 import isDev from './utils/isDev';
 
 class OnboardingWindow {
@@ -55,7 +56,9 @@ class OnboardingWindow {
       });
       this.window.webContents.openDevTools();
     } else {
-      this.window.loadURL(`file://${__dirname}/../index.html#/onboarding`);
+      serve(this.window);
+      this.window.loadURL(`devbook://index.html#/onboarding`);
+      // this.window.loadURL(`file://${__dirname}/../index.html#/onboarding`);
     }
   }
 

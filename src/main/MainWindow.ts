@@ -3,6 +3,7 @@ import ElectronStore from 'electron-store';
 import * as path from 'path';
 import { inspect } from 'util';
 
+import serve from './serve';
 import isDev from './utils/isDev';
 
 class MainWindow {
@@ -88,17 +89,19 @@ class MainWindow {
     });
 
     if (isDev) {
-      this.window.loadURL(`http://localhost:${PORT}/index.html`);
+      serve(this.window);
+      this.window.loadURL(`devbook://localhost:3000/index.html`);
       // Hot Reloading
-      require('electron-reload')(__dirname, {
-        electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
-        forceHardReset: true,
-        hardResetMethod: 'exit',
-      });
+      // require('electron-reload')(__dirname, {
+      //   electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
+      //   forceHardReset: true,
+      //   hardResetMethod: 'exit',
+      // });
 
-      this.webContents?.openDevTools();
+      // this.webContents?.openDevTools();
     } else {
-      this.window.loadURL(`file://${__dirname}/../index.html#/`);
+      serve(this.window);
+      this.window.loadURL(`devbook://index.html#/`);
     }
   }
 

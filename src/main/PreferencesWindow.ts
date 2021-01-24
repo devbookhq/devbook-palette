@@ -3,6 +3,7 @@ import * as path from 'path';
 import { inspect } from 'util';
 import * as process from 'process';
 
+import serve from './serve';
 import isDev from './utils/isDev';
 import { IPCMessage } from '../mainCommunication/ipc';
 
@@ -20,7 +21,7 @@ class PreferencesWindow {
   }
 
   public constructor(
-    private port: number,
+    PORT: number,
     isOnboardingVisible: () => boolean | undefined,
     taskBarIcon: electron.NativeImage,
     page?: PreferencesPage,
@@ -59,7 +60,7 @@ class PreferencesWindow {
     });
 
     if (isDev) {
-      const url = `http://localhost:${this.port}/index.html#/preferences` + (page ? `/${page}` : '');
+      const url = `http://localhost:${PORT}/index.html#/preferences` + (page ? `/${page}` : '');
       this.window.loadURL(url);
       // Hot Reloading
       require('electron-reload')(__dirname, {
@@ -69,7 +70,9 @@ class PreferencesWindow {
       });
       this.window.webContents.openDevTools();
     } else {
-      const url = `file://${__dirname}/../index.html#/preferences` + (page ? `/${page}` : '');
+      serve(this.window);
+      const url = `devbook://index.html#/preferences` + (page ? `/${page}` : '');
+      // const url = `file://${__dirname}/../index.html#/preferences` + (page ? `/${page}` : '');
       this.window.loadURL(url);
     }
 
