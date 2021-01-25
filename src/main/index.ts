@@ -276,15 +276,14 @@ app.on('activate', () => {
 app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 
 /////////// IPC events ///////////
-ipcMain.handle('is-dev', () => isDev);
-ipcMain.handle('get-saved-search-query', () => store.get(StoreKey.LastQuery, ''));
-ipcMain.handle('get-saved-search-filter', () => store.get(StoreKey.SearchFilter, ''));
-ipcMain.handle('update-status', () => isUpdateAvailable);
-ipcMain.handle('get-doc-search-results-default-width', () => store.get(StoreKey.DocSearchResultsDefaultWidth, 200));
+ipcMain.handle(IPCMessage.GetSavedSearchQuery, () => store.get(StoreKey.LastQuery, ''));
+ipcMain.handle(IPCMessage.GetSavedSearchFilter, () => store.get(StoreKey.SearchFilter, ''));
+ipcMain.handle(IPCMessage.UpdateStatus, () => isUpdateAvailable);
+ipcMain.handle(IPCMessage.GetDocSearchResultsDefaultWidth, () => store.get(StoreKey.DocSearchResultsDefaultWidth, 200));
 ipcMain.handle(IPCMessage.GetGlobalShortcut, () => store.get(StoreKey.GlobalShortcut, 'Alt+Space'));
 ipcMain.handle(IPCMessage.GetCachedDocSources, () => store.get(StoreKey.DocSources, []));
 
-ipcMain.on('finish-onboarding', () => {
+ipcMain.on(IPCMessage.FinishedOnboarding, () => {
   // TODO: This should be onboardingWindow?.close() but it produces a runtime error when toggling
   // a visibility on the main window.
   onboardingWindow?.hide();
@@ -328,7 +327,7 @@ ipcMain.on(IPCMessage.OpenSignInModal, () => {
   mainWindow?.webContents?.send(IPCMessage.OpenSignInModal);
 });
 
-ipcMain.on('postpone-update',
+ipcMain.on(IPCMessage.PostponeUpdate,
   () => {
     if (isUpdateAvailable) {
       if (postponeHandler) {
@@ -340,16 +339,16 @@ ipcMain.on('postpone-update',
     }
   });
 
-ipcMain.on('user-did-change-shortcut', (_, { shortcut }) => trySetGlobalShortcut(shortcut));
-ipcMain.on('hide-window', () => hideMainWindow());
-ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => openPreferences(page));
-ipcMain.on('restart-and-update', () => restartAndUpdate());
-ipcMain.on('save-search-query', (_, { query }: { query: string }) => store.set(StoreKey.LastQuery, query));
-ipcMain.on('save-search-filter', (_, { filter }: { filter: string }) => store.set(StoreKey.SearchFilter, filter));
-ipcMain.on('save-doc-search-results-default-width', (_, { width }: { width: number }) => store.set(StoreKey.DocSearchResultsDefaultWidth, width));
-ipcMain.on('track-modal-opened', (_, modalInfo: any) => trackModalOpened(modalInfo));
-ipcMain.on('track-shortcut', (_, shortcutInfo: { hotkey: string, action: string }) => trackShortcut(shortcutInfo));
-ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo));
+ipcMain.on(IPCMessage.UsedDidChangeShortcut, (_, { shortcut }) => trySetGlobalShortcut(shortcut));
+ipcMain.on(IPCMessage.HideWindow, () => hideMainWindow());
+ipcMain.on(IPCMessage.OpenPreferences, (_, { page }: { page?: PreferencesPage }) => openPreferences(page));
+ipcMain.on(IPCMessage.RestartAndUpdate, () => restartAndUpdate());
+ipcMain.on(IPCMessage.SaveSearchQuery, (_, { query }: { query: string }) => store.set(StoreKey.LastQuery, query));
+ipcMain.on(IPCMessage.SaveSearchFilter, (_, { filter }: { filter: string }) => store.set(StoreKey.SearchFilter, filter));
+ipcMain.on(IPCMessage.SaveDocSearchResultsDefaultWidth, (_, { width }: { width: number }) => store.set(StoreKey.DocSearchResultsDefaultWidth, width));
+ipcMain.on(IPCMessage.TrackModalOpened, (_, modalInfo: any) => trackModalOpened(modalInfo));
+ipcMain.on(IPCMessage.TrackShortcut, (_, shortcutInfo: { hotkey: string, action: string }) => trackShortcut(shortcutInfo));
+ipcMain.on(IPCMessage.TrackSearch, (_, searchInfo: any) => trackSearchDebounced(searchInfo));
 ipcMain.on(IPCMessage.SaveDocSources, (_, { docSources }) => store.set(StoreKey.DocSources, docSources));
 ipcMain.on(IPCMessage.TrackSignInModalOpened, () => trackSignInModalOpened());
 ipcMain.on(IPCMessage.TrackSignInModalClosed, () => trackSignInModalClosed());

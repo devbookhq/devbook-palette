@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 
 import './index.css';
 
-import { notifyViewReady, } from 'mainCommunication';
 import * as serviceWorker from 'serviceWorker';
 import App from 'App';
 import { authEmitter, AuthContext, auth } from 'Auth';
@@ -29,8 +28,6 @@ authEmitter.on('changed', (authInfo) => {
     document.getElementById('root'),
   );
 });
-
-notifyViewReady();
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
