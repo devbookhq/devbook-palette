@@ -15,7 +15,10 @@ import {
 } from 'mainCommunication';
 import timeout from 'utils/timeout';
 
-export enum AuthError {
+const BASE_URL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
+const MAGIC_API_KEY = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
+
+enum AuthError {
   // The error when the looking for a valid stored user failed - probably because of the network connection.
   // User is no signed in and no metadata are present.
   FailedLookingForStoredUser = 'Failed looking for stored user',
@@ -85,17 +88,12 @@ export type AuthInfo = FailedSigningOutAuthInfo
   | FetchingUserMetadataAuthInfo
   | SigningOutUserAuthInfo;
 
-export type { MagicUserMetadata };
-
 export const authEmitter = new EventEmitter();
 
 export let auth: AuthInfo = { state: AuthState.LookingForStoredUser };
 export const AuthContext = createContext<AuthInfo>(auth);
 
-const BASE_URL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
-
-const magicAPIKey = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
-const magic = new Magic(magicAPIKey);
+const magic = new Magic(MAGIC_API_KEY);
 
 let signInCancelHandle: (() => void) | undefined = undefined;
 

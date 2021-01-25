@@ -6,6 +6,7 @@ import styled from 'styled-components';
 
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import useDebounce from 'hooks/useDebounce';
+import { IPCMessage } from 'mainCommunication/ipc';
 
 const Input = styled.input`
   padding: 10px 15px;
@@ -82,7 +83,7 @@ function SearchInput({
     if (e.keyCode === 38 || e.keyCode === 40) e.preventDefault();
   }
 
-  useIPCRenderer('did-show-main-window', () => {
+  useIPCRenderer(IPCMessage.DidShowMainWindow, () => {
     if (!isModalOpened) inputRef?.current?.focus();
   });
 

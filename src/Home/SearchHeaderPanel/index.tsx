@@ -14,13 +14,14 @@ import {
   postponeUpdate,
 } from 'mainCommunication';
 import Loader from 'components/Loader';
-import { PreferencesPage } from 'Preferences';
+import { PreferencesPage } from 'Preferences/PreferencesPage';
 import ResultsFiltersMenu, { ResultsFilter } from './ResultsFiltersMenu';
 import SearchInput from './SearchInput';
 
 import { ReactComponent as userProfileIcon } from 'img/user-profile.svg';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
+import { IPCMessage } from 'mainCommunication/ipc';
 
 const Container = styled.div`
   width: 100%;
@@ -188,7 +189,7 @@ function SearchHeaderPanel({
     postponeUpdate();
   }
 
-  useIPCRenderer('update-available', (_, { isReminder }: { isReminder?: boolean }) => {
+  useIPCRenderer(IPCMessage.UpdateAvailable, (_, { isReminder }: { isReminder?: boolean }) => {
     setIsUpdateAvailable(true);
     if (isReminder) {
       setIsUpdatePanelOpened(true);

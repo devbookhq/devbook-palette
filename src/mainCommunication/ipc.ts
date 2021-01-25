@@ -5,11 +5,36 @@ export enum IPCMessage {
   GetAuthFromMainWindow = 'GetAuthFromMainWindow',
   SetAuthInOtherWindows = 'SetAuthInOtherWindows',
 
+  UsedDidChangeShortcut = 'UserDidChangeShortcut',
+  GetGlobalShortcut = 'GetGlobalShortcut',
+
+  GetSavedSearchQuery = 'GetSavedSearchQuery',
+  SaveSearchQuery = 'SaveSearchQuery',
+
+  GetSavedSearchFilter = 'GetSavedSearchFilter',
+  SaveSearchFilter = 'SaveSearchFilter',
+
+  SaveDocSearchResultsDefaultWidth = 'SaveDocSearchResultsDefaultWidth',
+  GetDocSearchResultsDefaultWidth = 'GetDocSearchResultsDefaultWidth',
+
   ChangeUserInMain = 'ChangeUserInMain',
   OpenSignInModal = 'OpenSignInModal',
+
   SignOut = 'SignOut',
 
   GoToPreferencesPage = 'GoToPreferencesPage',
+  OpenPreferences = 'OpenPreferences',
+
+  FinishedOnboarding = 'FinishedOnboarding',
+
+  ViewReady = 'ViewReady',
+  DidShowMainWindow = 'DidShowMainWindow',
+  HideWindow = 'HideWindow',
+
+  PostponeUpdate = 'PostponeUpdate',
+  UpdateStatus = 'UpdateStatus',
+  UpdateAvailable = 'UpdateAvailable',
+  RestartAndUpdate = 'RestartAndUpdate',
 
   TrackSignInModalOpened = 'TrackSignInModalOpened',
   TrackSignInModalClosed = 'TrackSignInModalClosed',
@@ -19,4 +44,9 @@ export enum IPCMessage {
   TrackSignInFailed = 'TrackSignInFailed',
   TrackContinueIntoAppButtonClicked = 'TrackContinueIntoAppButtonClicked',
   TrackSignOutButtonClicked = 'TrackSignOutButtonClicked',
+  TrackShortcut = 'TrackShortcut',
+  TrackSearch = 'TrackSearch',
+  TrackModalOpened = 'TrackModalOpened',
+
+  Console = 'Console',
 }

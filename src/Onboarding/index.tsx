@@ -9,6 +9,7 @@ import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
 import IntroductionPage from './pages/Introduction';
 import ShortcutPage from './pages/Shortcut';
+import { IPCMessage } from 'mainCommunication/ipc';
 
 const Container = styled.div`
   margin-top: 7px;
@@ -63,7 +64,7 @@ function Onboarding() {
   const [pageIndex, setPageIndex] = useState(0);
   const [didShowMainWindow, setDidShowMainWindow] = useState(false);
 
-  useIPCRenderer('did-show-main-window', () => {
+  useIPCRenderer(IPCMessage.DidShowMainWindow, () => {
     setDidShowMainWindow(true);
   });
 

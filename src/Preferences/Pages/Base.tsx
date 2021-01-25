@@ -29,16 +29,14 @@ function Base({
   title,
   children,
 }: BaseProps) {
-   return (
+  return (
     <Container>
       <Title>{title}</Title>
       <Content>
         {children}
       </Content>
-     </Container>
-   );
+    </Container>
+  );
 }
 
-
 export default Base;
-

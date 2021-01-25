@@ -6,6 +6,12 @@ import ElectronStore from 'electron-store';
 import isDev from './utils/isDev';
 import debounce from './utils/debounce';
 
+enum AnalyticsEvent {
+  ShowedApp = 'Showed app',
+  OnboardingStarted = 'Onboarding started',
+  OnboardingFinished = 'Onboarding finished',
+}
+
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
 const SEGMENT_FLUSH = isDev ? 1 : 5;
 
@@ -56,7 +62,7 @@ export function changeAnalyticsUser(user?: { userID: string, email: string }) {
 
 export function trackShowApp() {
   client.track({
-    event: 'Showed app',
+    event: AnalyticsEvent.ShowedApp,
     userId: userID,
     properties: {
       isSignedIn,
@@ -68,7 +74,7 @@ export function trackShowApp() {
 
 export function trackOnboardingStarted() {
   client.track({
-    event: 'Onboarding started',
+    event: AnalyticsEvent.OnboardingStarted,
     userId: userID,
     properties: {
       isSignedIn,
@@ -80,31 +86,7 @@ export function trackOnboardingStarted() {
 
 export function trackOnboardingFinished() {
   client.track({
-    event: 'Onboarding finished',
-    userId: userID,
-    properties: {
-      isSignedIn,
-      platform,
-      appVersion,
-    },
-  });
-}
-
-export function trackConnectGitHubStarted() {
-  client.track({
-    event: 'Connecting GitHub started',
-    userId: userID,
-    properties: {
-      isSignedIn,
-      platform,
-      appVersion,
-    },
-  });
-}
-
-export function trackConnectGitHubFinished() {
-  client.track({
-    event: 'Connecting GitHub finished',
+    event: AnalyticsEvent.OnboardingFinished,
     userId: userID,
     properties: {
       isSignedIn,

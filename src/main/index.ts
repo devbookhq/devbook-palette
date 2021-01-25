@@ -2,21 +2,18 @@ import * as path from 'path';
 import * as process from 'process';
 import * as electron from 'electron';
 import Store from 'electron-store';
-import fs from 'fs';
 import {
   app,
   ipcMain,
 } from 'electron';
-import tmp from 'tmp';
 import { autoUpdater } from 'electron-updater';
+
 import isDev from './utils/isDev';
 import {
   trackShowApp,
   trackOnboardingFinished,
   trackOnboardingStarted,
   trackSearchDebounced,
-  trackConnectGitHubFinished,
-  trackConnectGitHubStarted,
   trackModalOpened,
   trackShortcut,
   changeAnalyticsUser,
@@ -31,21 +28,27 @@ import {
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
-import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
-import GitHubOAuth from './GitHubOAuth';
+import PreferencesWindow from './PreferencesWindow';
+import { PreferencesPage } from '../Preferences/PreferencesPage';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
 
 enum StoreKey {
   DocSources = 'docSources',
   Email = 'email',
+  OpenAtLogin = 'openAtLogin',
+  FirstRun = 'firstRun',
+  GlobalShortcut = 'globalShortcut',
+  LastQuery = 'lastQuery',
+  SearchFilter = 'searchFilter',
+  DocSearchResultsDefaultWidth = 'docSearchResultsDefaultWidth',
 }
 
 const PORT = 3000;
 
 // Set up logs so logging from the main process can be seen in the browser.
 function logInRendered(...args: any) {
-  mainWindow?.webContents?.send('console', args);
+  mainWindow?.webContents?.send(IPCMessage.Console, args);
 }
 
 const oldLog = console.log;
@@ -89,7 +92,6 @@ if (!isDev) {
   autoUpdater.requestHeaders = null;
 
   app.on('ready', () => {
-    // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron.
     setInterval(() => {
       autoUpdater.checkForUpdates();
     }, 10 * 60 * 1000);
@@ -98,8 +100,8 @@ if (!isDev) {
   autoUpdater.on('update-downloaded', () => {
     isUpdateAvailable = true;
 
-    mainWindow?.webContents?.send('update-available', {});
-    preferencesWindow?.webContents?.send('update-available', {});
+    mainWindow?.webContents?.send(IPCMessage.UpdateAvailable, {});
+    preferencesWindow?.webContents?.send(IPCMessage.UpdateAvailable, {});
 
     tray?.setIsUpdateAvailable(true);
   });
@@ -121,9 +123,6 @@ async function restartAndUpdate() {
     });
   }
 }
-
-// Automatically delete temporary files after the application exit.
-tmp.setGracefulCleanup();
 
 // https://stackoverflow.com/questions/41664208/electron-tray-icon-change-depending-on-dark-theme
 let trayIcon: electron.NativeImage;
@@ -154,21 +153,7 @@ let preferencesWindow: PreferencesWindow | undefined = undefined;
 
 const store = new Store();
 
-const gitHubOAuth = new GitHubOAuth();
-
-gitHubOAuth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
-  mainWindow?.webContents?.send('github-access-token', { accessToken });
-  mainWindow?.show();
-  preferencesWindow?.webContents?.send('github-access-token', { accessToken });
-  store.set('github', accessToken);
-  trackConnectGitHubFinished();
-});
-
-gitHubOAuth.emitter.on('error', ({ message }: { message: string }) => {
-  mainWindow?.webContents?.send('github-error', { message });
-  mainWindow?.show();
-  preferencesWindow?.webContents?.send('github-error', { message });
-});
+let postponeHandler: NodeJS.Timeout | undefined;
 
 function hideMainWindow() {
   mainWindow?.hide();
@@ -187,11 +172,11 @@ function openPreferences(page?: PreferencesPage) {
   hideMainWindow();
 }
 
-const shouldOpenAtLogin = store.get('openAtLogin', true);
+const shouldOpenAtLogin = store.get(StoreKey.OpenAtLogin, true);
 
 app.setLoginItemSettings({ openAtLogin: shouldOpenAtLogin });
 
-let isFirstRun = store.get('firstRun', true);
+let isFirstRun = store.get(StoreKey.FirstRun, true);
 
 if (process.platform === 'darwin' && !isFirstRun) {
   // Hide the dock icon only when the onboarding process is complete.
@@ -203,7 +188,7 @@ if (process.platform === 'darwin' && !isFirstRun) {
 function toggleVisibilityOnMainWindow() {
   if (!mainWindow || !mainWindow.window) {
     mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
-    onboardingWindow?.webContents?.send('did-show-main-window');
+    onboardingWindow?.webContents?.send(IPCMessage.DidShowMainWindow);
     return;
   }
 
@@ -211,8 +196,8 @@ function toggleVisibilityOnMainWindow() {
     hideMainWindow();
   } else {
     mainWindow?.show();
-    mainWindow?.webContents?.send('did-show-main-window');
-    onboardingWindow?.webContents?.send('did-show-main-window');
+    mainWindow?.webContents?.send(IPCMessage.DidShowMainWindow);
+    onboardingWindow?.webContents?.send(IPCMessage.DidShowMainWindow);
   }
 }
 
@@ -226,7 +211,7 @@ function trySetGlobalShortcut(shortcut: string) {
     return;
   }
 
-  store.set('globalShortcut', shortcut);
+  store.set(StoreKey.GlobalShortcut, shortcut);
 }
 
 /////////// App Events ///////////
@@ -242,10 +227,10 @@ app.once('ready', async () => {
     );
   }
 
-  isFirstRun = store.get('firstRun', true);
+  isFirstRun = store.get(StoreKey.FirstRun, true);
 
   // If user registered a global shortcut from the previos session, load it and register again.
-  const savedShortcut = store.get('globalShortcut');
+  const savedShortcut = store.get(StoreKey.GlobalShortcut);
   if (savedShortcut) {
     // TODO: Since we still don't offer for a user to change the shortcut after onboarding
     // this might fail and user won't be able to show Devbook through a shortcut ever again.
@@ -256,13 +241,13 @@ app.once('ready', async () => {
     onShowDevbookClick: toggleVisibilityOnMainWindow,
     // TODO: What if the main window is undefined?
     onOpenAtLoginClick: () => {
-      const currentVal = store.get('openAtLogin', true);
-      store.set('openAtLogin', !currentVal);
+      const currentVal = store.get(StoreKey.OpenAtLogin, true);
+      store.set(StoreKey.OpenAtLogin, !currentVal);
       tray.setOpenAtLogin(!currentVal);
     },
     openPreferences: () => openPreferences(),
     onQuitClick: () => app.quit(),
-    shouldOpenAtLogin: store.get('openAtLogin', true),
+    shouldOpenAtLogin: store.get(StoreKey.OpenAtLogin, true),
     version: app.getVersion(),
     restartAndUpdate,
     isUpdateAvailable,
@@ -291,44 +276,24 @@ app.on('activate', () => {
 app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 
 /////////// IPC events ///////////
-ipcMain.on('hide-window', () => hideMainWindow());
-
-ipcMain.on('user-did-change-shortcut', (_, { shortcut }) => {
-  trySetGlobalShortcut(shortcut)
-});
+ipcMain.handle('is-dev', () => isDev);
+ipcMain.handle('get-saved-search-query', () => store.get(StoreKey.LastQuery, ''));
+ipcMain.handle('get-saved-search-filter', () => store.get(StoreKey.SearchFilter, ''));
+ipcMain.handle('update-status', () => isUpdateAvailable);
+ipcMain.handle('get-doc-search-results-default-width', () => store.get(StoreKey.DocSearchResultsDefaultWidth, 200));
+ipcMain.handle(IPCMessage.GetGlobalShortcut, () => store.get(StoreKey.GlobalShortcut, 'Alt+Space'));
+ipcMain.handle(IPCMessage.GetCachedDocSources, () => store.get(StoreKey.DocSources, []));
 
 ipcMain.on('finish-onboarding', () => {
   // TODO: This should be onboardingWindow?.close() but it produces a runtime error when toggling
   // a visibility on the main window.
   onboardingWindow?.hide();
-  store.set('firstRun', false);
+  store.set(StoreKey.FirstRun, false);
   isFirstRun = false;
   if (!preferencesWindow?.window?.isVisible() && process.platform === 'darwin') {
     app.dock.hide();
   }
   trackOnboardingFinished();
-});
-
-ipcMain.on('track-shortcut', (_, shortcutInfo: { hotkey: string, action: string }) => {
-  trackShortcut(shortcutInfo);
-});
-
-ipcMain.handle('get-global-shortcut', () => {
-  return store.get('globalShortcut', 'Alt+Space');
-});
-
-ipcMain.on('connect-github', () => {
-  gitHubOAuth.requestOAuth();
-  hideMainWindow();
-  trackConnectGitHubStarted();
-});
-
-ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => {
-  openPreferences(page);
-});
-
-ipcMain.on('restart-and-update', () => {
-  restartAndUpdate();
 });
 
 ipcMain.on(IPCMessage.ChangeUserInMain, async (_, user: { userID: string, email: string } | undefined) => {
@@ -363,124 +328,34 @@ ipcMain.on(IPCMessage.OpenSignInModal, () => {
   mainWindow?.webContents?.send(IPCMessage.OpenSignInModal);
 });
 
-ipcMain.on('track-modal-opened', (_, modalInfo: any) => trackModalOpened(modalInfo));
-
-ipcMain.on('save-search-query', (_, { query }: { query: string }) => {
-  store.set('lastQuery', query);
-});
-
-ipcMain.on('save-search-filter', (_, { filter }: { filter: string }) => {
-  store.set('searchFilter', filter);
-});
-
-ipcMain.handle('github-access-token', () => store.get('github', null));
-
-let postponeHandler: NodeJS.Timeout | undefined;
-
-ipcMain.on('postpone-update', () => {
-  if (isUpdateAvailable) {
-    if (postponeHandler) {
-      clearTimeout(postponeHandler);
+ipcMain.on('postpone-update',
+  () => {
+    if (isUpdateAvailable) {
+      if (postponeHandler) {
+        clearTimeout(postponeHandler);
+      }
+      postponeHandler = setTimeout(() => {
+        mainWindow?.webContents?.send(IPCMessage.UpdateAvailable, { isReminder: true });
+      }, 19 * 60 * 60 * 1000) as unknown as NodeJS.Timeout;
     }
-    postponeHandler = setTimeout(() => {
-      mainWindow?.webContents?.send('update-available', { isReminder: true });
-    }, 19 * 60 * 60 * 1000) as unknown as NodeJS.Timeout;
-  }
-});
+  });
 
-ipcMain.handle('remove-github', async () => {
-  store.delete('github');
-  mainWindow?.webContents?.send('github-access-token', { accessToken: null });
-  preferencesWindow?.webContents?.send('github-access-token', { accessToken: null });
-});
-
-ipcMain.handle('create-tmp-file', async (_, { filePath, fileContent }: { filePath: string, fileContent: string }) => {
-  const basename = path.basename(filePath);
-  try {
-    const { name } = await new Promise<{ name: string, fd: number }>((resolve, reject) => {
-      tmp.file({
-        template: `tmp-XXXXXX-${basename}`,
-      }, (error, name, fd) => {
-        if (error) {
-          return reject(error);
-        }
-
-        fs.write(fd, fileContent, (error) => {
-          if (error) {
-            return reject(error);
-          }
-          return resolve({ name, fd });
-        });
-      });
-    });
-    return name;
-  } catch (error) {
-    console.error(error.message);
-  }
-});
-
-ipcMain.handle('is-dev', () => {
-  return isDev;
-});
-
-ipcMain.handle('get-saved-search-query', () => {
-  return store.get('lastQuery', '');
-});
-
-ipcMain.handle('get-saved-search-filter', async () => {
-  return store.get('searchFilter', '');
-});
-
-ipcMain.handle('update-status', () => {
-  return isUpdateAvailable;
-});
-
-ipcMain.on('save-doc-search-results-default-width', (_, { width }: { width: number }) => {
-  store.set('docSearchResultsDefaultWidth', width);
-});
-
-ipcMain.handle('get-doc-search-results-default-width', () => {
-  return store.get('docSearchResultsDefaultWidth', 200);
-});
-
-ipcMain.handle(IPCMessage.GetCachedDocSources, async () => {
-  return store.get(StoreKey.DocSources, []);
-});
-
-ipcMain.on(IPCMessage.SaveDocSources, (_, { docSources }) => {
-  store.set(StoreKey.DocSources, docSources);
-});
-
+ipcMain.on('user-did-change-shortcut', (_, { shortcut }) => trySetGlobalShortcut(shortcut));
+ipcMain.on('hide-window', () => hideMainWindow());
+ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => openPreferences(page));
+ipcMain.on('restart-and-update', () => restartAndUpdate());
+ipcMain.on('save-search-query', (_, { query }: { query: string }) => store.set(StoreKey.LastQuery, query));
+ipcMain.on('save-search-filter', (_, { filter }: { filter: string }) => store.set(StoreKey.SearchFilter, filter));
+ipcMain.on('save-doc-search-results-default-width', (_, { width }: { width: number }) => store.set(StoreKey.DocSearchResultsDefaultWidth, width));
+ipcMain.on('track-modal-opened', (_, modalInfo: any) => trackModalOpened(modalInfo));
+ipcMain.on('track-shortcut', (_, shortcutInfo: { hotkey: string, action: string }) => trackShortcut(shortcutInfo));
 ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo));
-
-ipcMain.on(IPCMessage.TrackSignInModalOpened, () => {
-  trackSignInModalOpened()
-});
-
-ipcMain.on(IPCMessage.TrackSignInModalClosed, () => {
-  trackSignInModalClosed()
-});
-
-ipcMain.on(IPCMessage.TrackSignInButtonClicked, () => {
-  trackSignInButtonClicked()
-});
-
-ipcMain.on(IPCMessage.TrackSignInAgainButtonClicked, () => {
-  trackSignInAgainButtonClicked()
-});
-
-ipcMain.on(IPCMessage.TrackSignInFinished, () => {
-  trackSignInFinished()
-});
-
-ipcMain.on(IPCMessage.TrackSignInFailed, (_, { error }: { error: string }) => {
-  trackSignInFailed(error)
-});
-
-ipcMain.on(IPCMessage.TrackContinueIntoAppButtonClicked, () => {
-  trackContinueIntoAppButtonClicked()
-});
-
-ipcMain.on(IPCMessage.TrackSignOutButtonClicked, () => {
-  trackSignOutButtonClicked()
-});
+ipcMain.on(IPCMessage.SaveDocSources, (_, { docSources }) => store.set(StoreKey.DocSources, docSources));
+ipcMain.on(IPCMessage.TrackSignInModalOpened, () => trackSignInModalOpened());
+ipcMain.on(IPCMessage.TrackSignInModalClosed, () => trackSignInModalClosed());
+ipcMain.on(IPCMessage.TrackSignInButtonClicked, () => trackSignInButtonClicked());
+ipcMain.on(IPCMessage.TrackSignInAgainButtonClicked, () => trackSignInAgainButtonClicked());
+ipcMain.on(IPCMessage.TrackSignInFinished, () => trackSignInFinished());
+ipcMain.on(IPCMessage.TrackSignInFailed, (_, { error }: { error: string }) => trackSignInFailed(error));
+ipcMain.on(IPCMessage.TrackContinueIntoAppButtonClicked, () => trackContinueIntoAppButtonClicked());
+ipcMain.on(IPCMessage.TrackSignOutButtonClicked, () => trackSignOutButtonClicked());

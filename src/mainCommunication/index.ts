@@ -8,10 +8,10 @@ import {
   signOut,
   auth,
 } from 'Auth';
-import { PreferencesPage } from 'Preferences';
+import { PreferencesPage } from 'Preferences/PreferencesPage';
 
 // So we see logs from the main process in the Chrome debug tools.
-electron.ipcRenderer.on('console', (_, args) => {
+electron.ipcRenderer.on(IPCMessage.Console, (_, args) => {
   const [type, ...consoleArgs] = args;
   console[type as 'log' | 'error']?.('[main]:', ...consoleArgs);
 });
@@ -38,23 +38,15 @@ export function signOutUser() {
 }
 
 export function getGlobalShortcut() {
-  return electron.ipcRenderer.invoke('get-global-shortcut') as Promise<string>;
+  return electron.ipcRenderer.invoke(IPCMessage.GetGlobalShortcut) as Promise<string>;
 }
 
 export function openLink(url: string) {
   return electron.shell.openExternal(url);
 }
 
-export function connectGitHub() {
-  electron.ipcRenderer.send('connect-github');
-}
-
 export function changeUserInMain(user?: { userID: string, email: string }) {
   electron.ipcRenderer.send(IPCMessage.ChangeUserInMain, user);
-}
-
-export function removeGitHub() {
-  return electron.ipcRenderer.invoke('remove-github');
 }
 
 export function getSavedSearchQuery(): Promise<string> {
@@ -129,14 +121,6 @@ export function restartAndUpdate() {
 
 export function getUpdateStatus(): Promise<boolean> {
   return electron.ipcRenderer.invoke('update-status');
-}
-
-export function getGithubAccessToken(): Promise<string | null> {
-  return electron.ipcRenderer.invoke('github-access-token');
-}
-
-export function createTmpFile(options: { fileContent: string, filePath: string }): Promise<string | undefined> {
-  return electron.ipcRenderer.invoke('create-tmp-file', options);
 }
 
 export function saveDocSearchResultsDefaultWidth(width: number) {
