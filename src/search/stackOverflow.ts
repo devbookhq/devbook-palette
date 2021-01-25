@@ -6,12 +6,8 @@ export enum AnswerType {
   Accepted = 'Accepted answer',
   MostUpvoted = 'Most upvoted answer',
 }
-// TODO: These types are also present in the `devbook-server` repository - move them into a shared library.
-export interface StackOverflowComment {
-  html: string;
-}
 
-export interface StackOverflowQuestion {
+interface StackOverflowQuestion {
   link: string;
   title: string;
   html: string;

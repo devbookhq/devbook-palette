@@ -5,12 +5,7 @@ import * as process from 'process';
 
 import isDev from './utils/isDev';
 import { IPCMessage } from '../mainCommunication/ipc';
-
-export enum PreferencesPage {
-  General = 'general',
-  Integrations = 'integrations',
-  Account = 'account',
-}
+import { PreferencesPage } from '../Preferences/PreferencesPage';
 
 class PreferencesWindow {
   public window: electron.BrowserWindow | undefined;

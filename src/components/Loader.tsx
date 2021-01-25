@@ -41,7 +41,7 @@ const Container = styled.div`
   }
 `;
 
-export interface LoaderProps {
+interface LoaderProps {
   className?: string;
 }
 

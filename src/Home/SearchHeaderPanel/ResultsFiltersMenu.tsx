@@ -34,7 +34,6 @@ const FilterButton = styled.button<{ selected?: boolean }>`
 
 export enum ResultsFilter {
   StackOverflow = 'StackOverflow',
-  GitHubCode = 'GitHubCode',
   Docs = 'Docs',
 }
 
@@ -48,13 +47,6 @@ function ResultsFiltersMenu({
   onFilterSelect,
 }: ResultsFiltersMenuProps) {
 
-  function getResultsFilterDisplayName(resultsFilter: ResultsFilter) {
-    if (resultsFilter === ResultsFilter.GitHubCode) {
-      return 'GitHub';
-    }
-    return resultsFilter;
-  }
-
   return (
     <Container>
       {Object.values(ResultsFilter).map((f, idx) => (
@@ -64,7 +56,7 @@ function ResultsFiltersMenu({
           <FilterButton
             selected={activeFilter === f}
             onClick={() => onFilterSelect(f)}
-          >{getResultsFilterDisplayName(f)}
+          >{f}
           </FilterButton>
           {electron.remote.process.platform === 'darwin' &&
             <Hotkey

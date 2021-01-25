@@ -15,7 +15,7 @@ import { AuthContext, AuthState, refreshAuth } from 'Auth';
 import electron, {
   isDev,
   hideMainWindow,
-  connectGitHub, openLink, createTmpFile,
+  openLink,
   trackModalOpened,
   trackSearch,
   trackShortcut,
@@ -36,13 +36,6 @@ import {
   StackOverflowResult,
 } from 'search/stackOverflow';
 import {
-  searchCode as searchGitHubCode,
-  CodeResult,
-  init as initGitHub,
-  disconnect as disconnectGitHub,
-  FilePreview,
-} from 'search/gitHub';
-import {
   search as searchDocumentations,
   fetchDocSources,
   DocResult,
@@ -57,15 +50,11 @@ import SearchHeaderPanel, { ResultsFilter } from './SearchHeaderPanel';
 import {
   StackOverflowSearchHotkeysPanel,
   StackOverflowModalHotkeysPanel,
-  GitHubCodeSearchHotkeysPanel,
-  GitHubCodeModalHotkeysPanel,
   DocsSearchHotkeysPanel,
 } from './HotkeysPanel';
 import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
-import CodeItem from './GitHub/CodeItem';
-import CodeModal from './GitHub/CodeModal';
 import {
   DocSearchResultItem,
   DocPage,
@@ -93,27 +82,6 @@ const InfoMessage = styled.div`
   color: #5A5A6F;
   font-size: 16px;
   font-weight: 600;
-`;
-
-const GitHubConnect = styled.div`
-  margin: 100px auto 0;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-`;
-
-const ConnectGitHubButton = styled(Button)`
-  margin-top: 30px;
-  padding: 10px 20px;
-
-  font-size: 15px;
-  font-weight: 500;
-
-  border-radius: 5px;
-`;
-
-const GitHubConnectTitle = styled(InfoMessage)`
-  margin: 0;
 `;
 
 const SignInButton = styled(Button)`
@@ -212,8 +180,8 @@ const DocsLoader = styled(Loader)`
   margin-top: 50px;
 `;
 
-type SearchResultItem = StackOverflowResult | CodeResult | DocResult;
-type SearchResultItems = StackOverflowResult[] | CodeResult[] | DocResult[];
+type SearchResultItem = StackOverflowResult | DocResult;
+type SearchResultItems = StackOverflowResult[] | DocResult[];
 type SearchResults = {
   [key in ResultsFilter]: {
     items: SearchResultItems;
@@ -239,14 +207,9 @@ enum ReducerActionType {
 
   FocusResultItem,
 
-  // StackOverflow + GitHubCode modal.
+  // StackOverflow modal.
   OpenModal,
   CloseModal,
-
-  StartConnectingGitHub,
-  ConnectingGitHubSuccess,
-  ConnectingGitHubFail,
-  DisconnectGitHubAccount,
 
   SetDocSearchResultsDefaultWidth,
   CacheDocSearchResultsWidth,
@@ -338,25 +301,6 @@ interface CloseModal {
   type: ReducerActionType.CloseModal;
 }
 
-interface StartConnectingGitHub {
-  type: ReducerActionType.StartConnectingGitHub;
-}
-
-interface ConnectingGitHubSuccess {
-  type: ReducerActionType.ConnectingGitHubSuccess;
-}
-
-interface ConnectingGitHubFail {
-  type: ReducerActionType.ConnectingGitHubFail;
-  payload: {
-    errorMessage: string;
-  };
-}
-
-interface DisconnectGitHubAccount {
-  type: ReducerActionType.DisconnectGitHubAccount;
-}
-
 interface SetDocSearchResultsDefaultWidth {
   type: ReducerActionType.SetDocSearchResultsDefaultWidth;
   payload: {
@@ -430,10 +374,6 @@ type ReducerAction = SetSearchQuery
   | FocusResultItem
   | OpenModal
   | CloseModal
-  | StartConnectingGitHub
-  | ConnectingGitHubSuccess
-  | ConnectingGitHubFail
-  | DisconnectGitHubAccount
   | SetDocSearchResultsDefaultWidth
   | CacheDocSearchResultsWidth
   | SearchInDocPage
@@ -456,10 +396,6 @@ interface State {
   };
   results: SearchResults;
   modalItem: SearchResultItem | undefined;
-  gitHubAccount: {
-    isLoading: boolean;
-    isConnected: boolean;
-  },
   errorMessage: string;
   layout: {
     docSearchResultsDefaultWidth: number;
@@ -489,15 +425,6 @@ const initialState: State = {
         focusState: FocusState.NoScroll,
       },
     },
-    [ResultsFilter.GitHubCode]: {
-      items: [],
-      isLoading: true,
-      scrollTopPosition: 0,
-      focusedIdx: {
-        idx: 0,
-        focusState: FocusState.NoScroll,
-      },
-    },
     [ResultsFilter.Docs]: {
       items: [],
       isLoading: true,
@@ -509,10 +436,6 @@ const initialState: State = {
     },
   },
   modalItem: undefined,
-  gitHubAccount: {
-    isLoading: false,
-    isConnected: false,
-  },
   errorMessage: '',
   layout: {
     docSearchResultsDefaultWidth: 200,
@@ -680,48 +603,6 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
       return {
         ...state,
         modalItem: undefined,
-      };
-    }
-    case ReducerActionType.StartConnectingGitHub: {
-      return {
-        ...state,
-        gitHubAccount: {
-          ...state.gitHubAccount,
-          isLoading: true,
-          isConnected: false,
-        },
-      };
-    }
-    case ReducerActionType.ConnectingGitHubSuccess: {
-      return {
-        ...state,
-        gitHubAccount: {
-          ...state.gitHubAccount,
-          isLoading: false,
-          isConnected: true,
-        },
-      };
-    }
-    case ReducerActionType.ConnectingGitHubFail: {
-      const { errorMessage } = reducerAction.payload;
-      return {
-        ...state,
-        errorMessage,
-        gitHubAccount: {
-          ...state.gitHubAccount,
-          isLoading: false,
-          isConnected: false,
-        },
-      };
-    }
-    case ReducerActionType.DisconnectGitHubAccount: {
-      return {
-        ...state,
-        gitHubAccount: {
-          ...state.gitHubAccount,
-          isLoading: false,
-          isConnected: false,
-        },
       };
     }
     case ReducerActionType.SetDocSearchResultsDefaultWidth: {
@@ -945,9 +826,6 @@ function Home() {
     if ((item as StackOverflowResult).question) {
       // Item is StackOverflowResult.
       url = (item as StackOverflowResult).question.link;
-    } else if ((item as CodeResult).fileURL) {
-      // Item is CodeResult.
-      url = (item as CodeResult).fileURL;
     }
     trackModalOpened({
       activeFilter: activeFilter.toString(),
@@ -962,31 +840,6 @@ function Home() {
   const closeModal = useCallback(() => {
     dispatch({
       type: ReducerActionType.CloseModal,
-    });
-  }, []);
-
-  const startConnectingGitHub = useCallback(() => {
-    dispatch({
-      type: ReducerActionType.StartConnectingGitHub,
-    });
-  }, []);
-
-  const connectingGitHubSuccess = useCallback(() => {
-    dispatch({
-      type: ReducerActionType.ConnectingGitHubSuccess,
-    });
-  }, []);
-
-  const connectingGitHubFail = useCallback((errorMessage: string) => {
-    dispatch({
-      type: ReducerActionType.ConnectingGitHubFail,
-      payload: { errorMessage },
-    });
-  }, []);
-
-  const disconnectGitHubAccount = useCallback(() => {
-    dispatch({
-      type: ReducerActionType.DisconnectGitHubAccount,
     });
   }, []);
 
@@ -1084,47 +937,6 @@ function Home() {
     if (item) openLink(item.question.link);
   }, [state.results]);
 
-  const openFocusedGitHubCodeItemInVSCode = useCallback(() => {
-    const idx = state.results[ResultsFilter.GitHubCode].focusedIdx.idx;
-    const item = state.results[ResultsFilter.GitHubCode].items[idx] as CodeResult;
-    if (!item) return;
-    openFileInVSCode(item.filePath, item.fileContent, item.filePreviews);
-  }, [state.results]);
-
-  function openFocusedGitHubCodeItemInBrowser() {
-    const idx = state.results[ResultsFilter.GitHubCode].focusedIdx.idx
-    const item = state.results[ResultsFilter.GitHubCode].items[idx] as CodeResult;
-    const firstPreview = item?.filePreviews[0];
-    const gitHubFileURL = firstPreview ? `${item.fileURL}#L${firstPreview.startLine + 3}` : item?.fileURL;
-    if (gitHubFileURL) openLink(gitHubFileURL);
-  }
-
-  // TODO: Create a reducer action.
-  async function openFileInVSCode(path: string, content: string, filePreviews: FilePreview[]) {
-    const tmpPath = await createTmpFile({
-      filePath: path,
-      fileContent: content,
-    });
-    if (tmpPath) {
-      const firstPreview = filePreviews[0];
-      const vscodeFileURL = firstPreview ? `vscode://file/${tmpPath}:${firstPreview.startLine + 3}` : `vscode://file/${tmpPath}`;
-      await openLink(vscodeFileURL);
-    } else {
-      // TODO: Handle error for user.
-      console.error('Cannot create tmp file with the file content.')
-    }
-  }
-
-  async function searchGHCode(query: string) {
-    try {
-      startSearching(ResultsFilter.GitHubCode);
-      const results = await searchGitHubCode(query);
-      searchingSuccess(ResultsFilter.GitHubCode, results);
-    } catch (error) {
-      searchingFail(ResultsFilter.GitHubCode, error.message);
-    }
-  }
-
   async function searchSO(query: string) {
     try {
       startSearching(ResultsFilter.StackOverflow);
@@ -1151,51 +963,9 @@ function Home() {
     }
   }
 
-  async function searchAll(query: string, filter: ResultsFilter, isGitHubConnected: boolean, docSources: DocSource[]) {
-    switch (filter) {
-      case ResultsFilter.StackOverflow:
-        await searchSO(query);
-        await searchDocs(query, docSources);
-        if (isGitHubConnected) {
-          await searchGHCode(query);
-        } else {
-          // We do this so the 'isLoading' field for GitHubCode is set to false.
-          searchingSuccess(ResultsFilter.GitHubCode, []);
-        }
-        break;
-
-      case ResultsFilter.GitHubCode:
-        if (isGitHubConnected) {
-          await searchGHCode(query);
-        } else {
-          // We do this so the 'isLoading' field for GitHubCode is set to false.
-          searchingSuccess(ResultsFilter.GitHubCode, []);
-        }
-        await searchSO(query);
-        await searchDocs(query, docSources);
-        break;
-
-      case ResultsFilter.Docs:
-        await searchDocs(query, docSources);
-        await searchSO(query);
-        if (isGitHubConnected) {
-          await searchGHCode(query);
-        } else {
-          // We do this so the 'isLoading' field for GitHubCode is set to false.
-          searchingSuccess(ResultsFilter.GitHubCode, []);
-        }
-        break;
-    }
-  }
-
-  async function tryToLoadGitHubAccount() {
-    try {
-      startConnectingGitHub();
-      await initGitHub();
-      connectingGitHubSuccess();
-    } catch (error) {
-      connectingGitHubFail(`GitHub account either isn't connected or there was an error loading credentials. ${error.message}`);
-    }
+  async function searchAll(query: string, docSources: DocSource[]) {
+    await searchSO(query);
+    await searchDocs(query, docSources);
   }
 
   function handleSearchInputChange(value: string) {
@@ -1217,22 +987,15 @@ function Home() {
   }
 
   /* HOTKEYS */
-  // 'cmd+1' hotkey - change search filter to SO questions.
+  // 'cmd+1/alt+1' hotkey - change search filter to SO questions.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
     if (state.modalItem) return;
     setSearchFilter(ResultsFilter.StackOverflow);
     trackShortcut({ action: 'Change filter to SO' });
   }, { filter: () => true }, [state.modalItem, setSearchFilter]);
 
-  // 'cmd+2' hotkey - change search filter to GitHub Code search.
+  // 'cmd+2/alt+2' hotkey - change search filter to Docs search.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+2' : 'alt+2', () => {
-    if (state.modalItem) return;
-    setSearchFilter(ResultsFilter.GitHubCode);
-    trackShortcut({ action: 'Change filter to Code' });
-  }, { filter: () => true }, [state.modalItem, setSearchFilter]);
-
-  // 'cmd+3' hotkey - change search filter to Docs search.
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+3' : 'alt+3', () => {
     if (state.modalItem) return;
     setSearchFilter(ResultsFilter.Docs);
     trackShortcut({ action: 'Change filter to Docs' });
@@ -1326,20 +1089,8 @@ function Home() {
         openFocusedSOItemInBrowser();
         trackShortcut({ action: 'Open SO item in browser' });
         break;
-      case ResultsFilter.GitHubCode:
-        openFocusedGitHubCodeItemInBrowser();
-        trackShortcut({ action: 'Open Code item in browser' });
-        break;
     }
-  }, [activeFilter, openFocusedGitHubCodeItemInBrowser, openFocusedGitHubCodeItemInBrowser]);
-
-  // 'cmd+i' hotkey - open the GitHubCode result in a vscode.
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+i' : 'alt+i', () => {
-    if (activeFilter === ResultsFilter.GitHubCode) {
-      openFocusedGitHubCodeItemInVSCode();
-      trackShortcut({ action: 'Open code in VSCode' });
-    }
-  }, [activeFilter, openFocusedGitHubCodeItemInVSCode]);
+  }, [activeFilter, openFocusedSOItemInBrowser]);
 
   // 'cmd+f' hotkey - search in a doc page.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+f' : 'ctrl+f', () => {
@@ -1372,20 +1123,8 @@ function Home() {
     openSignInModal();
   });
 
-  useIPCRenderer('github-access-token', async (_, { accessToken }: { accessToken: string | null }) => {
-    if (accessToken === null) {
-      disconnectGitHub();
-      disconnectGitHubAccount(); // The state reducer's action.
-      return;
-    }
-    tryToLoadGitHubAccount();
-    if (debouncedQuery) searchGHCode(debouncedQuery);
-  }, [debouncedQuery]);
-
   // Run only on the initial render.
   // Get the cached search query and search filter.
-  // Try to load GitHub account if user linked their
-  // GitHub in the past.
   useEffect(() => {
     async function loadCachedData() {
       const width = await getDocSearchResultsDefaultWidth();
@@ -1399,7 +1138,6 @@ function Home() {
         // We do this so the 'isLoading' field is set to false
         // for each search filter.
         searchingSuccess(ResultsFilter.StackOverflow, []);
-        searchingSuccess(ResultsFilter.GitHubCode, []);
         searchingSuccess(ResultsFilter.Docs, []);
       } else {
         setSearchQuery(lastQuery);
@@ -1424,7 +1162,6 @@ function Home() {
       setIsLoadingCachedData(false);
     }
     loadCachedData();
-    tryToLoadGitHubAccount();
     // We want to run this only during the first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -1441,8 +1178,6 @@ function Home() {
 
     searchAll(
       debouncedQuery,
-      activeFilter,
-      state.gitHubAccount.isConnected,
       state.docSources,
     );
     trackSearch({
@@ -1456,7 +1191,6 @@ function Home() {
     debouncedQuery,
     debouncedLastSearchedQuery,
     activeFilter,
-    state.gitHubAccount.isConnected,
     state.docSources,
   ]);
 
@@ -1501,13 +1235,6 @@ function Home() {
         />
       }
 
-      {state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
-        <CodeModal
-          codeResult={state.modalItem as CodeResult}
-          onCloseRequest={closeModal}
-        />
-      }
-
       {state.isDocsFilterModalOpened && activeFilter === ResultsFilter.Docs &&
         <DocsFilterModal
           docSources={state.docSources}
@@ -1525,7 +1252,7 @@ function Home() {
       <Container>
         <SearchHeaderPanel
           value={state.search.query}
-          placeholder="Search StackOverflow, code on GitHub, and docs"
+          placeholder="Search StackOverflow or docs"
           onDebouncedChange={handleSearchInputChange}
           activeFilter={activeFilter}
           onFilterSelect={f => setSearchFilter(f)}
@@ -1536,14 +1263,11 @@ function Home() {
         />
 
         {!state.search.query
-          // We don't want to show this if users selected GitHubCode filter
-          // and haven't connected their GitHub account yet.
-          && (state.gitHubAccount.isConnected || activeFilter !== ResultsFilter.GitHubCode)
           && !isActiveFilterLoading
           &&
           <>
             {/*
-              We can show the text right away for SO and GitHubCode because
+              We can show the text right away for SO because
               we don't have to wait until a user account is loaded.
             */}
 
@@ -1561,9 +1285,6 @@ function Home() {
         }
 
         {state.search.query
-          // We don't want to show this if users selected GitHubCode filter
-          // and haven't connected their GitHub account yet.
-          && (state.gitHubAccount.isConnected || activeFilter !== ResultsFilter.GitHubCode)
           && hasActiveFilterEmptyResults
           && !isActiveFilterLoading
           // Don't show "Nothing found" when user is searching docs but disabled
@@ -1571,22 +1292,6 @@ function Home() {
           && !(activeFilter === ResultsFilter.Docs && (!isAnyDocSourceIncluded || !isUserSignedInWithOrWithoutMetadata))
           &&
           <InfoMessage>Nothing found</InfoMessage>
-        }
-
-        {activeFilter === ResultsFilter.GitHubCode
-          && !state.gitHubAccount.isConnected
-          &&
-          <GitHubConnect>
-            <GitHubConnectTitle>
-              Connect your GitHub account to search on GitHub
-            </GitHubConnectTitle>
-            <ConnectGitHubButton onClick={connectGitHub}>
-              Connect my GitHub account
-            </ConnectGitHubButton>
-            {/* <GitHubPrivacyLink onClick={openPrivacyTerms}>
-              Read more about privacy and what access Devbook needs
-            </GitHubPrivacyLink> */}
-          </GitHubConnect>
         }
 
         {activeFilter === ResultsFilter.Docs
@@ -1646,7 +1351,7 @@ function Home() {
           && !isActiveFilterLoading
           &&
           <>
-            {(activeFilter === ResultsFilter.StackOverflow || activeFilter === ResultsFilter.GitHubCode) &&
+            {activeFilter === ResultsFilter.StackOverflow &&
               <SearchResultsWrapper>
                 {activeFilter === ResultsFilter.StackOverflow
                   && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
@@ -1656,18 +1361,6 @@ function Home() {
                       focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
                       onHeaderClick={() => focusResultItem(ResultsFilter.StackOverflow, idx, FocusState.NoScroll)}
                       onTitleClick={() => openModal(sor)}
-                    />
-                  ))}
-
-                {activeFilter === ResultsFilter.GitHubCode
-                  && state.gitHubAccount.isConnected
-                  && (state.results[ResultsFilter.GitHubCode].items as CodeResult[]).map((cr, idx) => (
-                    <CodeItem
-                      key={idx}
-                      codeResult={cr}
-                      focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
-                      onHeaderClick={() => focusResultItem(ResultsFilter.GitHubCode, idx, FocusState.NoScroll)}
-                      onFilePathClick={() => openModal(cr)}
                     />
                   ))}
               </SearchResultsWrapper>
@@ -1730,26 +1423,6 @@ function Home() {
             {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
               <StackOverflowModalHotkeysPanel
                 onOpenInBrowserClick={openFocusedSOItemInBrowser}
-                onCloseClick={closeModal}
-              />
-            }
-            {/*-------------------------------------------------------------*/}
-
-            {/* GitHub search results + GitHub modal hotkeys */}
-            {!state.modalItem
-              && activeFilter === ResultsFilter.GitHubCode
-              && state.gitHubAccount.isConnected
-              &&
-              <GitHubCodeSearchHotkeysPanel
-                onOpenClick={() => openModal(activeFocusedItem)}
-                onOpenInVSCodeClick={openFocusedGitHubCodeItemInVSCode}
-                onOpenInBrowserClick={openFocusedGitHubCodeItemInBrowser}
-              />
-            }
-            {state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
-              <GitHubCodeModalHotkeysPanel
-                onOpenInVSCodeClick={openFocusedGitHubCodeItemInVSCode}
-                onOpenInBrowserClick={openFocusedGitHubCodeItemInBrowser}
                 onCloseClick={closeModal}
               />
             }

@@ -118,20 +118,8 @@ export enum Key {
   ArrowDown = 'KeyArrowDown',
 }
 
-
 // TODO: Naming of enums, types, and interfaces here is not great.
 // If someone can come up with better names please go ahead and change them.
-
-/*
-export enum Key {
-  Alt,
-  Shift,
-  Command,
-  Enter,
-  ArrowUp,
-  ArrowDown,
-}
-*/
 
 export enum VisualConcat {
   Plus = 'VisualConcatPlus',
