@@ -50,49 +50,45 @@ export function changeUserInMain(user?: { userID: string, email: string }) {
 }
 
 export function getSavedSearchQuery(): Promise<string> {
-  return electron.ipcRenderer.invoke('get-saved-search-query');
+  return electron.ipcRenderer.invoke(IPCMessage.GetSavedSearchQuery);
 }
 
 export async function getSavedSearchFilter(): Promise<ResultsFilter> {
-  const filter = await (electron.ipcRenderer.invoke('get-saved-search-filter') as Promise<string>);
+  const filter = await (electron.ipcRenderer.invoke(IPCMessage.GetSavedSearchFilter) as Promise<string>);
   return ResultsFilter[filter as ResultsFilter] || ResultsFilter.StackOverflow;
 }
 
-export function notifyViewReady() {
-  electron.ipcRenderer.send('view-ready');
-}
-
 export function trackShortcut(shortcutInfo: { action: string }) {
-  electron.ipcRenderer.send('track-shortcut', { shortcutInfo });
+  electron.ipcRenderer.send(IPCMessage.TrackShortcut, { shortcutInfo });
 }
 
 export function hideMainWindow() {
-  electron.ipcRenderer.send('hide-window');
+  electron.ipcRenderer.send(IPCMessage.HideWindow);
 }
 
 export function saveSearchQuery(query: string) {
-  electron.ipcRenderer.send('save-search-query', { query });
+  electron.ipcRenderer.send(IPCMessage.SaveSearchQuery, { query });
 }
 
 export function saveSearchFilter(filter: ResultsFilter) {
-  electron.ipcRenderer.send('save-search-filter', { filter: filter.toString() });
+  electron.ipcRenderer.send(IPCMessage.SaveSearchFilter, { filter: filter.toString() });
 }
 
 export function trackSearch(searchInfo: {
   activeFilter: string,
 }) {
-  electron.ipcRenderer.send('track-search', searchInfo);
+  electron.ipcRenderer.send(IPCMessage.TrackSearch, searchInfo);
 }
 
 export function trackModalOpened(modalInfo: {
   activeFilter: string,
   url: string;
 }) {
-  electron.ipcRenderer.send('track-modal-opened', modalInfo);
+  electron.ipcRenderer.send(IPCMessage.TrackModalOpened, modalInfo);
 }
 
 export function userDidChangeShortcut(shortcut: string) {
-  electron.ipcRenderer.send('user-did-change-shortcut', { shortcut });
+  electron.ipcRenderer.send(IPCMessage.UsedDidChangeShortcut, { shortcut });
 }
 
 export function getAuthFromMainWindow() {
@@ -100,7 +96,7 @@ export function getAuthFromMainWindow() {
 }
 
 export function openPreferences(page?: PreferencesPage) {
-  electron.ipcRenderer.send('open-preferences', { page });
+  electron.ipcRenderer.send(IPCMessage.OpenPreferences, { page });
 }
 
 export function openSignInModal() {
@@ -108,27 +104,27 @@ export function openSignInModal() {
 }
 
 export function postponeUpdate() {
-  electron.ipcRenderer.send('postpone-update');
+  electron.ipcRenderer.send(IPCMessage.PostponeUpdate);
 }
 
 export function finishOnboarding() {
-  electron.ipcRenderer.send('finish-onboarding');
+  electron.ipcRenderer.send(IPCMessage.FinishedOnboarding);
 }
 
 export function restartAndUpdate() {
-  electron.ipcRenderer.send('restart-and-update');
+  electron.ipcRenderer.send(IPCMessage.RestartAndUpdate);
 }
 
 export function getUpdateStatus(): Promise<boolean> {
-  return electron.ipcRenderer.invoke('update-status');
+  return electron.ipcRenderer.invoke(IPCMessage.UpdateStatus);
 }
 
 export function saveDocSearchResultsDefaultWidth(width: number) {
-  electron.ipcRenderer.send('save-doc-search-results-default-width', { width });
+  electron.ipcRenderer.send(IPCMessage.SaveDocSearchResultsDefaultWidth, { width });
 }
 
 export function getDocSearchResultsDefaultWidth(): Promise<number> {
-  return electron.ipcRenderer.invoke('get-doc-search-results-default-width');
+  return electron.ipcRenderer.invoke(IPCMessage.GetDocSearchResultsDefaultWidth);
 }
 
 export function getCachedDocSources(): Promise<DocSource[]> {

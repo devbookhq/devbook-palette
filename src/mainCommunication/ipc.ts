@@ -27,7 +27,6 @@ export enum IPCMessage {
 
   FinishedOnboarding = 'FinishedOnboarding',
 
-  ViewReady = 'ViewReady',
   DidShowMainWindow = 'DidShowMainWindow',
   HideWindow = 'HideWindow',
 
