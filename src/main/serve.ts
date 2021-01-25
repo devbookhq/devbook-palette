@@ -37,23 +37,6 @@ function serve(options: any) {
 
   options.directory = path.resolve(electron.app.getAppPath(), options.directory);
 
-  const httpHandler = async (request: electron.ProtocolRequest, callback: (response: electron.ProtocolResponse) => void) => {
-    const indexPath = path.join(decodeURIComponent(new URL(request.url).pathname));
-    console.log(indexPath);
-    callback({ url: indexPath });
-    // const filePath = path.join(options.directory, decodeURIComponent(new URL(request.url).pathname));
-    // const resolvedPath = await getPath(filePath);
-    // const fileExtension = path.extname(filePath);
-
-    // if (resolvedPath || !fileExtension || fileExtension === '.html' || fileExtension === '.asar') {
-    //   callback({
-    //     path: resolvedPath || indexPath
-    //   });
-    // } else {
-    //   callback({ error: FILE_NOT_FOUND });
-    // }
-  };
-
   const fileHandler = async (request: electron.ProtocolRequest, callback: (response: electron.ProtocolResponse) => void) => {
     const indexPath = path.join(options.directory, 'index.html');
     const filePath = path.join(options.directory, decodeURIComponent(new URL(request.url).pathname));
@@ -90,8 +73,7 @@ function serve(options: any) {
 
     electron.app.setAsDefaultProtocolClient('devbook');
 
-    // session.protocol.registerFileProtocol(options.scheme, fileHandler);
-    session.protocol.registerHttpProtocol(options.scheme, httpHandler);
+    session.protocol.registerFileProtocol(options.scheme, fileHandler);
   });
 
   return (window_: electron.BrowserWindow) => window_.loadURL(`${options.scheme}://-`);

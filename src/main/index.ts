@@ -82,6 +82,22 @@ if (!isFirstInstance) {
   });
 }
 
+app.on('open-url', (event, url) => {
+  if (url === 'devbook://auth') {
+    console.log('OPENED DEEPLINK URL HERE', url);
+
+    event.preventDefault();
+  }
+});
+
+app.on('open-file', (event, url) => {
+  if (url === 'devbook://auth') {
+    console.log('OPENED DEEPLINK FILE HERE', url);
+
+    event.preventDefault();
+  }
+});
+
 // Auto-updating
 let isUpdateAvailable = false;
 
