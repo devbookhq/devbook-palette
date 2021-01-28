@@ -172,7 +172,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
     } catch (error) {
       console.error(error.message);
       setError(error.message);
-      trackSignInFailed(error);
+      trackSignInFailed(error.message);
     }
   }
 
