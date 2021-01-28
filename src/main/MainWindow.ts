@@ -2,6 +2,7 @@ import * as electron from 'electron';
 import ElectronStore from 'electron-store';
 import * as path from 'path';
 import { inspect } from 'util';
+import { StoreKey } from './StoreKey';
 
 import isDev from './utils/isDev';
 
@@ -13,8 +14,8 @@ class MainWindow {
   }
 
   public constructor(PORT: number, store: ElectronStore, hideWindow: () => void, private trackShowApp: () => void, startHidden?: boolean) {
-    const [mainWinWidth, mainWinHeight] = store.get('mainWinSize', [900, 500]);
-    const [mainWinPosX, mainWinPosY] = store.get('mainWinPosition', [undefined, undefined]);
+    const [mainWinWidth, mainWinHeight] = store.get(StoreKey.MainWinSize, [900, 500]);
+    const [mainWinPosX, mainWinPosY] = store.get(StoreKey.MainWinPosition, [undefined, undefined]);
 
     this.window = new electron.BrowserWindow({
       x: mainWinPosX,
@@ -53,23 +54,23 @@ class MainWindow {
     this.window.on('resize', () => {
       if (this.window) {
         const [width, height] = this.window.getSize();
-        store.set('mainWinSize', [width, height]);
+        store.set(StoreKey.MainWinSize, [width, height]);
       }
     });
 
     this.window.on('moved', () => {
       if (this.window) {
         const [x, y] = this.window.getPosition();
-        store.set('mainWinPosition', [x, y]);
+        store.set(StoreKey.MainWinPosition, [x, y]);
       }
     });
 
     this.window.on('close', () => {
       if (this.window) {
         const [width, height] = this.window.getSize();
-        store.set('mainWinSize', [width, height]);
+        store.set(StoreKey.MainWinSize, [width, height]);
         const [x, y] = this.window.getPosition();
-        store.set('mainWinPosition', [x, y]);
+        store.set(StoreKey.MainWinPosition, [x, y]);
       }
     });
 

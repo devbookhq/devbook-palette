@@ -32,17 +32,8 @@ import PreferencesWindow from './PreferencesWindow';
 import { PreferencesPage } from '../Preferences/PreferencesPage';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
+import { StoreKey } from './StoreKey';
 
-enum StoreKey {
-  DocSources = 'docSources',
-  Email = 'email',
-  OpenAtLogin = 'openAtLogin',
-  FirstRun = 'firstRun',
-  GlobalShortcut = 'globalShortcut',
-  LastQuery = 'lastQuery',
-  SearchFilter = 'searchFilter',
-  DocSearchResultsDefaultWidth = 'docSearchResultsDefaultWidth',
-}
 
 const PORT = 3000;
 
