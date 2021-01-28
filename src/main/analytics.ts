@@ -9,8 +9,24 @@ import { StoreKey } from './StoreKey';
 
 enum AnalyticsEvent {
   ShowedApp = 'Showed app',
+
   OnboardingStarted = 'Onboarding started',
   OnboardingFinished = 'Onboarding finished',
+
+  ShortcutUsed = 'Shortcut used',
+
+  Search = 'Search',
+
+  ModalOpened = 'Modal opened',
+
+  SignInModalOpened = 'Sign in modal opened',
+  SignInModalClosed = 'Sign in modal closed',
+  SignInButtonClicked = 'Sign in button clicked',
+  SignInAgainButtonClicked = 'Sign in again button clicked',
+  SignInFinished = 'Sign in finished',
+  SignInFailed = 'Sign in failed',
+  ContinueIntoAppButtonClicked = 'Continue into app button clicked',
+  SignOutButtonClicked = 'Sign out button clicked',
 }
 
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
@@ -99,7 +115,7 @@ export function trackOnboardingFinished() {
 
 export function trackShortcut(shortcutInfo: { action: string, hotkey: string }) {
   client.track({
-    event: 'Shortcut used',
+    event: AnalyticsEvent.ShortcutUsed,
     userId: userID,
     properties: {
       isSignedIn,
@@ -112,7 +128,7 @@ export function trackShortcut(shortcutInfo: { action: string, hotkey: string }) 
 
 function trackSearch(searchInfo: any) {
   client.track({
-    event: 'Search',
+    event: AnalyticsEvent.Search,
     userId: userID,
     properties: {
       isSignedIn,
@@ -127,7 +143,7 @@ export const trackSearchDebounced = debounce(trackSearch, 3000);
 
 export function trackModalOpened(modalInfo: any) {
   client.track({
-    event: 'Modal opened',
+    event: AnalyticsEvent.ModalOpened,
     userId: userID,
     properties: {
       isSignedIn,
@@ -140,7 +156,7 @@ export function trackModalOpened(modalInfo: any) {
 
 export function trackSignInModalOpened() {
   client.track({
-    event: 'Sign in modal opened',
+    event: AnalyticsEvent.SignInModalOpened,
     userId: userID,
     properties: {
       isSignedIn,
@@ -152,7 +168,7 @@ export function trackSignInModalOpened() {
 
 export function trackSignInModalClosed() {
   client.track({
-    event: 'Sign in modal closed',
+    event: AnalyticsEvent.SignInModalClosed,
     userId: userID,
     properties: {
       isSignedIn,
@@ -164,7 +180,7 @@ export function trackSignInModalClosed() {
 
 export function trackSignInButtonClicked() {
   client.track({
-    event: 'Sign in button clicked',
+    event: AnalyticsEvent.SignInButtonClicked,
     userId: userID,
     properties: {
       isSignedIn,
@@ -176,7 +192,7 @@ export function trackSignInButtonClicked() {
 
 export function trackSignInAgainButtonClicked() {
   client.track({
-    event: 'Sign in again button clicked',
+    event: AnalyticsEvent.SignInAgainButtonClicked,
     userId: userID,
     properties: {
       isSignedIn,
@@ -188,7 +204,7 @@ export function trackSignInAgainButtonClicked() {
 
 export function trackSignInFinished() {
   client.track({
-    event: 'Sign in finished',
+    event: AnalyticsEvent.SignInFinished,
     userId: userID,
     properties: {
       isSignedIn,
@@ -200,7 +216,7 @@ export function trackSignInFinished() {
 
 export function trackSignInFailed(error: string) {
   client.track({
-    event: 'Continue into app button clicked',
+    event: AnalyticsEvent.SignInFailed,
     userId: userID,
     properties: {
       isSignedIn,
@@ -213,7 +229,7 @@ export function trackSignInFailed(error: string) {
 
 export function trackContinueIntoAppButtonClicked() {
   client.track({
-    event: 'Continue into app button clicked',
+    event: AnalyticsEvent.ContinueIntoAppButtonClicked,
     userId: userID,
     properties: {
       isSignedIn,
@@ -225,7 +241,7 @@ export function trackContinueIntoAppButtonClicked() {
 
 export function trackSignOutButtonClicked() {
   client.track({
-    event: 'Sign out button clicked',
+    event: AnalyticsEvent.SignOutButtonClicked,
     userId: userID,
     properties: {
       isSignedIn,
