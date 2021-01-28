@@ -5,6 +5,7 @@ import ElectronStore from 'electron-store';
 
 import isDev from './utils/isDev';
 import debounce from './utils/debounce';
+import { StoreKey } from './StoreKey';
 
 enum AnalyticsEvent {
   ShowedApp = 'Showed app',
@@ -19,8 +20,8 @@ const client = new Analytics(SEGMENT_WRITE_KEY, { flushAt: SEGMENT_FLUSH });
 const store = new ElectronStore();
 
 let isSignedIn = false;
-let userID = store.get('userID', uuidv4());
-store.set('userID', userID);
+let userID = store.get(StoreKey.UserID, uuidv4());
+store.set(StoreKey.UserID, userID);
 
 const appVersion = app.getVersion();
 const platform = process.platform;
@@ -34,8 +35,8 @@ client.identify({
 });
 
 export function changeAnalyticsUser(user?: { userID: string, email: string }) {
-  const savedUserID = store.get('userID', uuidv4());
-  store.set('userID', savedUserID);
+  const savedUserID = store.get(StoreKey.UserID, uuidv4());
+  store.set(StoreKey.UserID, savedUserID);
 
   if (user) {
     client.identify({
