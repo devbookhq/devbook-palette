@@ -33,7 +33,11 @@ import { PreferencesPage } from '../Preferences/PreferencesPage';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
 import { StoreKey } from './StoreKey';
+import { ExtensionsManager } from './extensions';
 
+const manager = new ExtensionsManager();
+
+manager.enableExtension('testing-extension');
 
 const PORT = 3000;
 
