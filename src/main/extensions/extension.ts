@@ -86,6 +86,7 @@ export class Extension {
   }
 
   public constructor(public extensionID: string) {
+    // TODO: Change this to reflect handle the path in the non-dev version too.
     const extensionProcessPath = path.resolve('./build/main/extensions/extensionProcess/index.js');
     const extensionModulePath = path.join('lib', 'extensions', extensionID, 'src');
 
