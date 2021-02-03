@@ -32,7 +32,6 @@ import electron, {
 } from 'mainCommunication';
 import useDebounce from 'hooks/useDebounce';
 import {
-  search as searchStackOverflow,
   StackOverflowResult,
 } from 'search/stackOverflow';
 import {
@@ -60,6 +59,7 @@ import {
   DocPage,
   DocsFilterModal,
 } from './Docs';
+import { ExtensionsContext } from 'Extensions';
 
 const Container = styled.div`
   height: 100%;
@@ -701,6 +701,16 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
 
 function Home() {
   const authInfo = useContext(AuthContext);
+  const extensions = useContext(ExtensionsContext);
+
+  const stackoverflow = extensions?.extensions['stackoverflow'];
+
+  const searchStackOverflow = useCallback(async (query: string) => {
+    if (extensions.extensions['stackoverflow'].isReady) {
+      return (await stackoverflow?.processQuery(query)).results as unknown as StackOverflowResult[];
+    }
+    return [];
+  }, [extensions]);
 
   const isUserLoading =
     authInfo.state === AuthState.LookingForStoredUser ||
@@ -1164,7 +1174,9 @@ function Home() {
     loadCachedData();
     // We want to run this only during the first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [
+    extensions.extensions['stackoverflow']?.isReady,
+  ]);
 
   // Log error messages.
   useEffect(() => {

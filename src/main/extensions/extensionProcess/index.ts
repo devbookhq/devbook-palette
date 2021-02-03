@@ -9,12 +9,13 @@ import {
   RequestDataMap,
 } from '../message';
 import { Responder } from './responseHandler';
-import { ExtensionModule } from './extensionModule';
+import { ExtensionModuleHandler } from './extensionModuleHandler';
 
 export class ExtensionProcess {
-  private extensionModule: ExtensionModule;
+  private extensionModule: ExtensionModuleHandler;
 
   public constructor() {
+    console.log('MODULE PATH', process.env.EXTENSION_MODULE_PATH);
     if (!process.send) {
       console.error('Process has no parent.');
       process.exit(1);
@@ -31,12 +32,14 @@ export class ExtensionProcess {
     }
 
     process.on('message', async <D>(message: ToExtensionMessage<D>) => {
+      console.log('handle message', message);
       if (message.type !== ExtensionMessageType.Request) return;
+
 
       type RequestDataType = RequestDataMap[typeof message.requestType];
 
       const responseHandler = new Responder(message);
-      const requestHandler = this.extensionModule.getHandler(message.requestType);
+      const requestHandler = this.extensionModule.getExport(message.requestType);
 
       if (!requestHandler) {
         return responseHandler.sendErrorResponse(
@@ -58,9 +61,10 @@ export class ExtensionProcess {
     const extensionModulePath = path.resolve(process.env.EXTENSION_MODULE_PATH);
 
     try {
-      this.extensionModule = new ExtensionModule(extensionModulePath);
+      this.extensionModule = new ExtensionModuleHandler(extensionModulePath);
       this.sendStatus(ExtensionStatus.Ready, undefined);
     } catch (error) {
+      console.log('loaded', error);
       this.sendStatus(
         ExtensionStatus.Exit,
         { reason: `Cannot load extension module from path "${extensionModulePath}"` },
@@ -69,7 +73,7 @@ export class ExtensionProcess {
     }
   }
 
-  public sendStatus<D>(status: ExtensionStatus, data: D) {
+  private sendStatus<D>(status: ExtensionStatus, data: D) {
     if (!process.send) throw new Error('Process has no parent to send response to.');
 
     const statusMessage: StatusMessage<D> = {
@@ -81,6 +85,7 @@ export class ExtensionProcess {
   }
 }
 
-console.log('[Extension process] EXTENSION PROCESS STARTED');
 
 export default require.main === module && new ExtensionProcess();
+
+console.log('[Extension process] EXTENSION PROCESS STARTED');
