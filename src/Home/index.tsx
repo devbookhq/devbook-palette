@@ -31,15 +31,6 @@ import electron, {
   trackSignInModalClosed,
 } from 'mainCommunication';
 import useDebounce from 'hooks/useDebounce';
-import {
-  StackOverflowResult,
-} from 'search/stackOverflow';
-import {
-  search as searchDocumentations,
-  fetchDocSources,
-  DocResult,
-  DocSource,
-} from 'search/docs';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
 import Loader from 'components/Loader';
@@ -52,14 +43,20 @@ import {
   DocsSearchHotkeysPanel,
 } from './HotkeysPanel';
 import FocusState from './SearchItemFocusState';
-import StackOverflowModal from './StackOverflow/StackOverflowModal';
-import StackOverflowItem from './StackOverflow/StackOverflowItem';
+import { ExtensionsContext } from 'Extensions';
 import {
+  StackOverflowModal,
+  StackOverflowItem,
+  StackOverflowResult,
+} from './StackOverflow';
+import {
+  DocsFilterModal,
   DocSearchResultItem,
   DocPage,
-  DocsFilterModal,
+  DocResult,
+  DocSource,
 } from './Docs';
-import { ExtensionsContext } from 'Extensions';
+
 
 const Container = styled.div`
   height: 100%;
@@ -701,16 +698,37 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
 
 function Home() {
   const authInfo = useContext(AuthContext);
-  const extensions = useContext(ExtensionsContext);
 
-  const stackoverflow = extensions?.extensions['stackoverflow'];
+  // Extensions
+  const extensionManager = useContext(ExtensionsContext);
 
+  const stackoverflowExtension = extensionManager?.extensions.stackoverflow;
+  const docsExtension = extensionManager?.extensions.docs;
+
+  // Types of the search results and docSources are for now in the Docs and StackOverflow subcomponents, 
+  // because with the change to the unified search the types will be changed and unified as well,
+  // therefore we don't want to devise a system for handling extension specific search result types now.
   const searchStackOverflow = useCallback(async (query: string) => {
-    if (extensions.extensions['stackoverflow'].isReady) {
-      return (await stackoverflow?.processQuery(query)).results as unknown as StackOverflowResult[];
+    if (stackoverflowExtension?.isReady) {
+      return (await stackoverflowExtension.search({ query })).results as unknown as StackOverflowResult[];
     }
     return [];
-  }, [extensions]);
+  }, [extensionManager]);
+
+  const fetchDocSources = useCallback(async () => {
+    if (docsExtension?.isReady) {
+      return (await docsExtension.getSources()) as unknown as DocSource[];
+    }
+    return [];
+  }, [extensionManager]);
+
+  const searchDocumentations = useCallback(async (query: string, sources: DocSource[]) => {
+    if (docsExtension?.isReady) {
+      return (await docsExtension.search({ query, sources })) as unknown as DocResult[];
+    }
+    return [];
+  }, [extensionManager]);
+
 
   const isUserLoading =
     authInfo.state === AuthState.LookingForStoredUser ||
@@ -1175,7 +1193,8 @@ function Home() {
     // We want to run this only during the first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    extensions.extensions['stackoverflow']?.isReady,
+    extensionManager.extensions['stackoverflow']?.isReady,
+    extensionManager.extensions['docs']?.isReady,
   ]);
 
   // Log error messages.

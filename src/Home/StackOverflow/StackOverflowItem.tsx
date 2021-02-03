@@ -5,16 +5,37 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import {
-  StackOverflowResult,
-  StackOverflowAnswer,
-  AnswerType,
-} from 'search/stackOverflow';
 import { openLink } from 'mainCommunication';
 import FocusState from '../SearchItemFocusState';
 import StackOverflowBody from './StackOverflowBody';
 
 import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
+
+export enum AnswerType {
+  Accepted = 'Accepted answer',
+  MostUpvoted = 'Most upvoted answer',
+}
+
+export interface StackOverflowQuestion {
+  link: string;
+  title: string;
+  html: string;
+  timestamp: number;
+  votes: number;
+}
+
+export interface StackOverflowAnswer {
+  html: string;
+  votes: number;
+  isAccepted: boolean;
+  timestamp: number;
+}
+
+export interface StackOverflowResult {
+  question: StackOverflowQuestion;
+  answers: StackOverflowAnswer[];
+}
+
 
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
@@ -178,7 +199,7 @@ interface StackOverflowItemProps {
   onTitleClick: (e: any) => void;
 }
 
-function StackOverflowItem ({
+function StackOverflowItem({
   soResult,
   focusState,
   onHeaderClick,
@@ -254,7 +275,7 @@ function StackOverflowItem ({
             }}
           />
           <ExternalLinkButton onClick={handleOpenExternalLinkButton}>
-            <ExternalLinkImg/>
+            <ExternalLinkImg />
           </ExternalLinkButton>
         </QuestionTitleWrapper>
 

@@ -5,8 +5,24 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import { DocResult } from 'search/docs';
 import FocusState from '../SearchItemFocusState';
+
+export interface Page {
+  route: string[];
+  breadcrumbs: string[];
+  html: string;
+  documentation: string;
+  name: string;
+  summary: string;
+  hasHTMLExtension: boolean;
+  pageURL: string;
+}
+
+export interface DocResult {
+  score: number;
+  id: string;
+  page: Page;
+}
 
 const maxSummaryLength = 180;
 

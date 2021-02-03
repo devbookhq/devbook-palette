@@ -1,1 +1,1 @@
-export { ExtensionsManager } from './extensionsManager';
+export { ExtensionsManager, ExtensionID } from './extensionsManager';
