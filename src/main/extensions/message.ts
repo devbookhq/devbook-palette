@@ -64,16 +64,13 @@ export enum ExtensionStatusError {
 }
 
 export enum ExtensionRequestType {
-  Query = 'Query',
-  Test = 'Test',
+  Search = 'search',
 }
 
 export interface RequestDataMap {
-  [ExtensionRequestType.Query]: { query: string };
-  [ExtensionRequestType.Test]: { test: 'test' };
+  [ExtensionRequestType.Search]: { query: string };
 };
 
 export interface ResponseDataMap {
-  [ExtensionRequestType.Query]: { results: string[] };
-  [ExtensionRequestType.Test]: { test: 'test' };
+  [ExtensionRequestType.Search]: { results: unknown[] };
 };

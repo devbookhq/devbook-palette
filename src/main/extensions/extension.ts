@@ -36,36 +36,34 @@ export class Extension {
     this.statusEmitter.on(status, listener);
   }
 
-  private removeOnStatus<D = unknown>(status: ExtensionStatus, listener: StatusListener<D>) {
+  private removeOnStatus<D>(status: ExtensionStatus, listener: StatusListener<D>) {
     this.statusEmitter.off(status, listener);
   }
 
-  public onceExit(listener: StatusListener<undefined>) {
+  public onceExit(listener: StatusListener<void>) {
     if (this.isReady) {
-      listener({
+      return listener({
         type: ExtensionMessageType.Status,
         status: ExtensionStatus.Exit,
         data: undefined,
       });
-      return;
     }
-    const onceListener = (message: StatusMessage<undefined>) => {
+    const onceListener = (message: StatusMessage<void>) => {
       this.removeOnStatus(ExtensionStatus.Exit, onceListener);
       listener(message);
     }
     this.onStatus(ExtensionStatus.Exit, onceListener);
   }
 
-  public onceReady(listener: StatusListener<undefined>) {
+  public onceReady(listener: StatusListener<void>) {
     if (this.isReady) {
-      listener({
+      return listener({
         type: ExtensionMessageType.Status,
         status: ExtensionStatus.Ready,
         data: undefined,
       });
-      return;
     }
-    const onceListener = (message: StatusMessage<undefined>) => {
+    const onceListener = (message: StatusMessage<void>) => {
       this.removeOnStatus(ExtensionStatus.Ready, onceListener);
       listener(message);
     }
@@ -73,13 +71,13 @@ export class Extension {
   }
 
   public async processQuery(query: string) {
-    const requestType = ExtensionRequestType.Query;
+    const requestType = ExtensionRequestType.Search;
 
     type RequestDataType = RequestDataMap[typeof requestType];
     type ResponseDataType = ResponseDataMap[typeof requestType];
 
     const result = await this.handleRequest<RequestDataType, ResponseDataType>({
-      requestType: ExtensionRequestType.Query,
+      requestType: ExtensionRequestType.Search,
       data: { query },
     });
     return result;
@@ -88,7 +86,8 @@ export class Extension {
   public constructor(public extensionID: string) {
     // TODO: Change this to reflect handle the path in the non-dev version too.
     const extensionProcessPath = path.resolve('./build/main/extensions/extensionProcess/index.js');
-    const extensionModulePath = path.join('lib', 'extensions', extensionID, 'src');
+    const extensionModulePath = path.resolve('./build/main/extensions/extensionModules', extensionID);
+    // const extensionModulePath = path.resolve('lib', 'extensions', extensionID, 'src');
 
     this.extensionProcess = fork(extensionProcessPath, undefined, {
       // stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
@@ -119,7 +118,7 @@ export class Extension {
     this.extensionProcess.kill();
   }
 
-  private hookIPC<D>(id: string) {
+  private waitForResponse<D>(id: string) {
     return new Promise<ResponseMessage<D>>((resolve, reject) => {
       const ipcHandle = (message: FromExtensionMessage<D>) => {
         if (message.type === ExtensionMessageType.Status || message.type === ExtensionMessageType.ErrorStatus) return;
@@ -130,6 +129,8 @@ export class Extension {
               return resolve(message);
             case ExtensionMessageType.ErrorResponse:
               return reject(message.error);
+            default:
+              return reject('Unknown message type');
           }
         }
       }
@@ -142,9 +143,7 @@ export class Extension {
       throw new Error(`Extension "${this.extensionID}" is not running`);
     }
     const id = uuidv4();
-
-    const responsePromise = this.hookIPC<O>(id);
-
+    const response = this.waitForResponse<O>(id);
     const request: RequestMessage<I> = {
       ...requestOptions,
       type: ExtensionMessageType.Request,
@@ -152,6 +151,6 @@ export class Extension {
     };
 
     this.extensionProcess.send(request);
-    return (await responsePromise).data;
+    return (await response).data;
   }
 }
