@@ -2,6 +2,7 @@ import { fork, ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import isDev from '../utils/isDev';
 
 import {
   ExtensionRequestType,
@@ -13,6 +14,7 @@ import {
   RequestMessage,
   RequestDataMap,
   ResponseDataMap,
+  Source,
 } from './message';
 
 interface StatusListener<D> {
@@ -70,15 +72,28 @@ export class Extension {
     this.onStatus(ExtensionStatus.Ready, onceListener);
   }
 
-  public async processQuery(query: string) {
+  public async getSources() {
+    const requestType = ExtensionRequestType.GetSources;
+
+    type RequestDataType = RequestDataMap[typeof requestType];
+    type ResponseDataType = ResponseDataMap[typeof requestType];
+
+    const result = await this.handleRequest<RequestDataType, ResponseDataType>({
+      requestType,
+      data: {},
+    });
+    return result;
+  }
+
+  public async search(data: { query: string, sources?: Source[] }) {
     const requestType = ExtensionRequestType.Search;
 
     type RequestDataType = RequestDataMap[typeof requestType];
     type ResponseDataType = ResponseDataMap[typeof requestType];
 
     const result = await this.handleRequest<RequestDataType, ResponseDataType>({
-      requestType: ExtensionRequestType.Search,
-      data: { query },
+      requestType,
+      data,
     });
     return result;
   }
@@ -86,12 +101,10 @@ export class Extension {
   public constructor(public extensionID: string) {
     // TODO: Change this to reflect handle the path in the non-dev version too.
     const extensionProcessPath = path.resolve('./build/main/extensions/extensionProcess/index.js');
-    const extensionModulePath = path.resolve('./build/main/extensions/extensionModules', extensionID);
-    // const extensionModulePath = path.resolve('lib', 'extensions', extensionID, 'src');
+    const extensionModulePath = path.resolve('./build/main/extensions/extensionModules', extensionID)
 
     this.extensionProcess = fork(extensionProcessPath, undefined, {
-      // stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
-      stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+      stdio: isDev ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'ignore', 'ignore', 'ipc'],
       env: {
         ...process.env,
         EXTENSION_ID: extensionID,
@@ -128,7 +141,7 @@ export class Extension {
             case ExtensionMessageType.Response:
               return resolve(message);
             case ExtensionMessageType.ErrorResponse:
-              return reject(message.error);
+              return reject(message.data);
             default:
               return reject('Unknown message type');
           }

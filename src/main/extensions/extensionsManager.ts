@@ -1,26 +1,30 @@
 import { EventEmitter } from 'events';
 import { Extension } from './extension';
 
+export enum ExtensionID {
+  StackOverflow = 'stackoverflow',
+  Documentations = 'docs',
+}
+
 export class ExtensionsManager {
-  public extensions: { [extensionID: string]: Extension } = {};
+  public extensions: { [extensionID in ExtensionID]?: Extension } = {};
   public emitter = new EventEmitter();
 
-  public async enableExtension(extensionID: string) {
+  public async enableExtension(extensionID: ExtensionID) {
     if (this.extensions[extensionID]?.isReady) return;
 
     this.extensions[extensionID] = new Extension(extensionID);
-    this.extensions[extensionID].onceExit(() => {
+    this.extensions[extensionID]?.onceExit(() => {
       delete this.extensions[extensionID];
       this.emitter.emit('changed', this);
     });
-    return new Promise<Extension>((resolve) => this.extensions[extensionID].onceReady(() => {
-      resolve(this.extensions[extensionID]);
-      console.log('extension', extensionID, 'ready');  
+    return new Promise<ExtensionID>((resolve) => this.extensions[extensionID]?.onceReady(() => {
+      resolve(extensionID);
       this.emitter.emit('changed', this);
     }));
   }
 
-  public disableExtension(extensionID: string) {
+  public disableExtension(extensionID: ExtensionID) {
     this.extensions[extensionID]?.terminate();
     delete this.extensions[extensionID];
   }

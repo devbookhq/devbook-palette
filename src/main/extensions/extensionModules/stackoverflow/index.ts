@@ -33,9 +33,5 @@ export const search: ModuleExportsType[ExtensionRequestType.Search] = async (dat
   if (process.env.NODE_ENV === 'development') url = 'https://dev.usedevbook.com/search/stackoverflow';
 
   const result = await axios.post(url, { query: data.query });
-
-  console.log('query', result.data.results);
   return { results: result.data.results };
 }
-
-console.log('STACKOVERFLOW STARTED');

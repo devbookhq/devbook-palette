@@ -9,13 +9,18 @@ import { useHotkeys } from 'react-hotkeys-hook';
 
 import { openLink } from 'mainCommunication';
 import useOnClickOutside from 'hooks/useOnClickOutside';
-import { DocSource } from 'search/docs';
 import Modal from 'components/Modal';
 import { ReactComponent as searchImg } from 'img/search.svg';
 
 enum Navigation {
   Mouse,
   Keys,
+}
+
+export interface DocSource {
+  slug: string;
+  name: string;
+  isIncludedInSearch: boolean;
 }
 
 const StyledModal = styled(Modal)`
@@ -200,11 +205,11 @@ function DocsFilterModal({
   function toggleDocSource(docSource: DocSource, includedSlice: boolean) {
     if (includedSlice) {
       setIncludedSources(c =>
-        c.map(ds => ds.slug === docSource.slug ? {...ds, isIncludedInSearch: !ds.isIncludedInSearch} : ds)
+        c.map(ds => ds.slug === docSource.slug ? { ...ds, isIncludedInSearch: !ds.isIncludedInSearch } : ds)
       );
     } else {
       setNotIncludedSources(c =>
-        c.map(ds => ds.slug === docSource.slug ? {...ds, isIncludedInSearch: !ds.isIncludedInSearch} : ds)
+        c.map(ds => ds.slug === docSource.slug ? { ...ds, isIncludedInSearch: !ds.isIncludedInSearch } : ds)
       );
     }
     onDocSourceClick(docSource);
@@ -284,7 +289,7 @@ function DocsFilterModal({
       ref={modalRef}
     >
       <SearchWrapper>
-        <SearchImg/>
+        <SearchImg />
         <SearchInput
           autoFocus
           onKeyDown={handleInputKeyDown}
@@ -325,7 +330,7 @@ function DocsFilterModal({
                   <DocToggle
                     type="checkbox"
                     checked={ds.isIncludedInSearch}
-                    onChange={() => {}}
+                    onChange={() => { }}
                   />
                 </DocRow>
               ))}
@@ -347,7 +352,7 @@ function DocsFilterModal({
                   <DocToggle
                     type="checkbox"
                     checked={ds.isIncludedInSearch}
-                    onChange={() => {}}
+                    onChange={() => { }}
                   />
                 </DocRow>
               ))}

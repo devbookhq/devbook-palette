@@ -15,7 +15,6 @@ export class ExtensionProcess {
   private extensionModule: ExtensionModuleHandler;
 
   public constructor() {
-    console.log('MODULE PATH', process.env.EXTENSION_MODULE_PATH);
     if (!process.send) {
       console.error('Process has no parent.');
       process.exit(1);
@@ -32,7 +31,6 @@ export class ExtensionProcess {
     }
 
     process.on('message', async <D>(message: ToExtensionMessage<D>) => {
-      console.log('handle message', message);
       if (message.type !== ExtensionMessageType.Request) return;
 
 
@@ -48,6 +46,7 @@ export class ExtensionProcess {
       }
 
       try {
+        console.log(message.requestType);
         const responseData = await requestHandler(message.data as unknown as RequestDataType);
         return responseHandler.sendResponse(responseData);
       } catch (error) {
@@ -64,7 +63,6 @@ export class ExtensionProcess {
       this.extensionModule = new ExtensionModuleHandler(extensionModulePath);
       this.sendStatus(ExtensionStatus.Ready, undefined);
     } catch (error) {
-      console.log('loaded', error);
       this.sendStatus(
         ExtensionStatus.Exit,
         { reason: `Cannot load extension module from path "${extensionModulePath}"` },
@@ -85,7 +83,4 @@ export class ExtensionProcess {
   }
 }
 
-
 export default require.main === module && new ExtensionProcess();
-
-console.log('[Extension process] EXTENSION PROCESS STARTED');

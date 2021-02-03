@@ -65,12 +65,21 @@ export enum ExtensionStatusError {
 
 export enum ExtensionRequestType {
   Search = 'search',
+  GetSources = 'getSources',
+}
+
+export interface Source {
+  slug: string;
+  name: string;
+  isIncludedInSearch: boolean;
 }
 
 export interface RequestDataMap {
-  [ExtensionRequestType.Search]: { query: string };
+  [ExtensionRequestType.Search]: { query: string, sources?: Source[] };
+  [ExtensionRequestType.GetSources]: {};
 };
 
 export interface ResponseDataMap {
   [ExtensionRequestType.Search]: { results: unknown[] };
+  [ExtensionRequestType.GetSources]: { sources: Source[] };
 };

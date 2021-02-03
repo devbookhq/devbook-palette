@@ -11,7 +11,7 @@ import {
   StackOverflowResult,
   StackOverflowAnswer,
   AnswerType,
-} from 'search/stackOverflow';
+} from './StackOverflowItem';
 import Modal from 'components/Modal';
 
 import StackOverflowBody from './StackOverflowBody';
@@ -201,14 +201,14 @@ function StackOverflowModal({
 
     // Place the accepted answer at the start but only if it isn't already at the start.
     if (acceptedIdx !== -1
-        && soResult.answers.length >= 2
-        && soResult.answers[acceptedIdx].votes < soResult.answers[0].votes
+      && soResult.answers.length >= 2
+      && soResult.answers[acceptedIdx].votes < soResult.answers[0].votes
     ) {
       const answers = [
         soResult.answers[acceptedIdx],
         ...soResult.answers.slice(0, acceptedIdx),
-        ...soResult.answers.slice(acceptedIdx+1)
-       ];
+        ...soResult.answers.slice(acceptedIdx + 1)
+      ];
       setMostUpvotedIdx(1);
       setSortedAnswers(answers);
     } else {

@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { ModuleExportsType } from '../../extensionProcess/extensionModuleHandler';
+import { ExtensionRequestType, Source } from '../../message';
 
 interface Page {
   route: string[];
@@ -17,24 +19,18 @@ export interface DocResult {
   page: Page;
 }
 
-export interface DocSource {
-  slug: string;
-  name: string;
-  isIncludedInSearch: boolean;
+export const search: ModuleExportsType[ExtensionRequestType.Search] = async (data) => {
+  let url = 'https://api.usedevbook.com/search/docs';
+  if (process.env.NODE_ENV === 'development') url = 'https://dev.usedevbook.com/search/docs';
+
+  const result = await axios.post(url, { query: data.query, filter: data.sources && data.sources.length > 0 ? data.sources.map(ds => ds.slug) : undefined });
+  return result.data.results;
 }
 
-// export async function search(data: { query: string, docSources: DocSource[]}): Promise<DocResult[]> {
-//   let url = 'https://api.usedevbook.com/search/docs';
-//   if (process.env.NODE_ENV === 'development') url = 'https://dev.usedevbook.com/search/docs';
+export const getSources: ModuleExportsType[ExtensionRequestType.GetSources] = async () => {
+  let url = 'https://api.usedevbook.com/search/docs';
+  if (process.env.NODE_ENV === 'development') url = 'https://dev.usedevbook.com/search/docs';
 
-//   const result = await axios.post(url, { query, filter: docSources.length > 0 ? docSources.map(ds => ds.slug) : undefined });
-//   return result.data.results;
-// }
-
-// export async function fetchDocSources(): Promise<DocSource[]> {
-//   let url = 'https://api.usedevbook.com/search/docs';
-//   if (process.env.NODE_ENV === 'development') url = 'https://dev.usedevbook.com/search/docs';
-
-//   const result = await axios.get(url);
-//   return result.data.docs.map((ds: DocSource) => ({ ...ds, isIncludedInSearch: true }));
-// }
+  const result = await axios.get(url);
+  return result.data.docs.map((ds: Source) => ({ ...ds, isIncludedInSearch: true }));
+}
