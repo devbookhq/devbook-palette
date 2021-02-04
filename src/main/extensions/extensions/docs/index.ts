@@ -1,23 +1,9 @@
 import axios from 'axios';
+
+// These imports are only types for easier development,
+// they will be distributed in a separate module.
 import { ModuleExportsType } from '../../extensionProcess/extensionModuleHandler';
 import { ExtensionRequestType, Source } from '../../message';
-
-interface Page {
-  route: string[];
-  breadcrumbs: string[];
-  html: string;
-  documentation: string;
-  name: string;
-  summary: string;
-  hasHTMLExtension: boolean;
-  pageURL: string;
-}
-
-export interface DocResult {
-  score: number;
-  id: string;
-  page: Page;
-}
 
 export const search: ModuleExportsType[ExtensionRequestType.Search] = async (data) => {
   let url = 'https://api.usedevbook.com/search/docs';

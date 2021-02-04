@@ -33,7 +33,6 @@ export class ExtensionProcess {
     process.on('message', async <D>(message: ToExtensionMessage<D>) => {
       if (message.type !== ExtensionMessageType.Request) return;
 
-
       type RequestDataType = RequestDataMap[typeof message.requestType];
 
       const responseHandler = new Responder(message);
@@ -46,7 +45,6 @@ export class ExtensionProcess {
       }
 
       try {
-        console.log(message.requestType);
         const responseData = await requestHandler(message.data as unknown as RequestDataType);
         return responseHandler.sendResponse(responseData);
       } catch (error) {
