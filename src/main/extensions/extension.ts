@@ -3,6 +3,7 @@ import { EventEmitter } from 'events';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import isDev from '../utils/isDev';
+import { app } from 'electron';
 
 import {
   ExtensionRequestType,
@@ -99,9 +100,10 @@ export class Extension {
   }
 
   public constructor(public extensionID: string) {
-    // TODO: Change this to reflect handle the path in the non-dev version too.
-    const extensionProcessPath = path.resolve('./build/main/extensions/extensionProcess/index.js');
-    const extensionModulePath = path.resolve('./build/main/extensions/extensionModules', extensionID)
+    const root = app.getAppPath();
+
+    const extensionProcessPath = path.resolve(root, 'build', 'main', 'extensions', 'extensionProcess', 'index.js');
+    const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'extensionModules', extensionID);
 
     this.extensionProcess = fork(extensionProcessPath, undefined, {
       stdio: isDev ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'ignore', 'ignore', 'ipc'],
