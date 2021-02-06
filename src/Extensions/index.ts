@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { extensions } from '../mainCommunication/electron';
+import { extensions } from 'mainCommunication/electron';
 import { ExtensionsManager } from 'main/extensions';
 
 export const extensionsManager = new extensions.ExtensionsManager();
