@@ -6,17 +6,16 @@ import isDev from '../utils/isDev';
 import { app } from 'electron';
 
 import {
-  ExtensionRequestType,
-  ExtensionStatus,
+  Input,
+  Status,
   FromExtensionMessage,
-  ExtensionMessageType,
-  ResponseMessage,
+  Message,
+  OutputMessage,
   StatusMessage,
-  RequestMessage,
-  RequestDataMap,
-  ResponseDataMap,
-  Source,
-} from './message';
+  InputMessage,
+  InputData,
+  OutputData,
+} from '@devbookhq/extension';
 
 interface StatusListener<D> {
   (message: StatusMessage<D>): void;
@@ -35,65 +34,65 @@ export class Extension {
     return !this.extensionProcess.killed;
   }
 
-  private onStatus<D>(status: ExtensionStatus, listener: StatusListener<D>) {
+  private onStatus<D>(status: Status, listener: StatusListener<D>) {
     this.statusEmitter.on(status, listener);
   }
 
-  private removeOnStatus<D>(status: ExtensionStatus, listener: StatusListener<D>) {
+  private removeOnStatus<D>(status: Status, listener: StatusListener<D>) {
     this.statusEmitter.off(status, listener);
   }
 
   public onceExit(listener: StatusListener<void>) {
     if (this.isReady) {
       return listener({
-        type: ExtensionMessageType.Status,
-        status: ExtensionStatus.Exit,
+        type: Message.Status,
+        status: Status.Exit,
         data: undefined,
       });
     }
     const onceListener = (message: StatusMessage<void>) => {
-      this.removeOnStatus(ExtensionStatus.Exit, onceListener);
+      this.removeOnStatus(Status.Exit, onceListener);
       listener(message);
     }
-    this.onStatus(ExtensionStatus.Exit, onceListener);
+    this.onStatus(Status.Exit, onceListener);
   }
 
   public onceReady(listener: StatusListener<void>) {
     if (this.isReady) {
       return listener({
-        type: ExtensionMessageType.Status,
-        status: ExtensionStatus.Ready,
+        type: Message.Status,
+        status: Status.Ready,
         data: undefined,
       });
     }
     const onceListener = (message: StatusMessage<void>) => {
-      this.removeOnStatus(ExtensionStatus.Ready, onceListener);
+      this.removeOnStatus(Status.Ready, onceListener);
       listener(message);
     }
-    this.onStatus(ExtensionStatus.Ready, onceListener);
+    this.onStatus(Status.Ready, onceListener);
   }
 
   public async getSources() {
-    const requestType = ExtensionRequestType.GetSources;
+    const inputType = Input.GetSources;
 
-    type RequestDataType = RequestDataMap[typeof requestType];
-    type ResponseDataType = ResponseDataMap[typeof requestType];
+    type RequestDataType = InputData[typeof inputType];
+    type ResponseDataType = OutputData[typeof inputType];
 
     const result = await this.handleRequest<RequestDataType, ResponseDataType>({
-      requestType,
+      inputType,
       data: {},
     });
     return result;
   }
 
-  public async search(data: { query: string, sources?: Source[] }) {
-    const requestType = ExtensionRequestType.Search;
+  public async search(data: InputData[Input.Search]) {
+    const inputType = Input.Search;
 
-    type RequestDataType = RequestDataMap[typeof requestType];
-    type ResponseDataType = ResponseDataMap[typeof requestType];
+    type RequestDataType = InputData[typeof inputType];
+    type ResponseDataType = OutputData[typeof inputType];
 
     const result = await this.handleRequest<RequestDataType, ResponseDataType>({
-      requestType,
+      inputType,
       data,
     });
     return result;
@@ -102,8 +101,9 @@ export class Extension {
   public constructor(public extensionID: string) {
     const root = app.getAppPath();
 
-    const extensionProcessPath = path.resolve(root, 'build', 'main', 'extensions', 'extensionProcess', 'index.js');
-    const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'extensionModules', extensionID);
+    const extensionProcessPath = require.resolve('@devbookhq/extension');
+
+    const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'buildInExtensions', extensionID);
 
     this.extensionProcess = fork(extensionProcessPath, undefined, {
       stdio: isDev ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'ignore', 'ignore', 'ipc'],
@@ -117,7 +117,7 @@ export class Extension {
     });
 
     this.extensionProcess.on('message', <D>(message: FromExtensionMessage<D>) => {
-      if (message.type === ExtensionMessageType.Status) this.statusEmitter.emit(message.status, message);
+      if (message.type === Message.Status) this.statusEmitter.emit(message.status, message);
     });
 
     this.onceReady(() => {
@@ -134,15 +134,15 @@ export class Extension {
   }
 
   private waitForResponse<D>(id: string) {
-    return new Promise<ResponseMessage<D>>((resolve, reject) => {
+    return new Promise<OutputMessage<D>>((resolve, reject) => {
       const ipcHandle = (message: FromExtensionMessage<D>) => {
-        if (message.type === ExtensionMessageType.Status || message.type === ExtensionMessageType.ErrorStatus) return;
+        if (message.type === Message.Status || message.type === Message.StatusError) return;
         if (message.id === id) {
           this.extensionProcess.off('message', ipcHandle);
           switch (message.type) {
-            case ExtensionMessageType.Response:
+            case Message.Output:
               return resolve(message);
-            case ExtensionMessageType.ErrorResponse:
+            case Message.OutputError:
               return reject(message.data);
             default:
               return reject('Unknown message type');
@@ -153,15 +153,15 @@ export class Extension {
     });
   }
 
-  private async handleRequest<I, O>(requestOptions: Pick<RequestMessage<I>, 'data' | 'requestType'>) {
+  private async handleRequest<I, O>(requestOptions: Pick<InputMessage<I>, 'data' | 'inputType'>) {
     if (!this.isActive) {
       throw new Error(`Extension "${this.extensionID}" is not running`);
     }
     const id = uuidv4();
     const response = this.waitForResponse<O>(id);
-    const request: RequestMessage<I> = {
+    const request: InputMessage<I> = {
       ...requestOptions,
-      type: ExtensionMessageType.Request,
+      type: Message.Input,
       id,
     };
 

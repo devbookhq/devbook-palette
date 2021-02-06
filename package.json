@@ -89,6 +89,7 @@
     "release:linux": "npx rimraf dist && npm run electron:build-linux && npm run upload:linux"
   },
   "dependencies": {
+    "@devbookhq/extension": "0.0.3",
     "analytics-node": "^3.5.0",
     "axios": "^0.21.1",
     "electron-store": "^5.2.0",
