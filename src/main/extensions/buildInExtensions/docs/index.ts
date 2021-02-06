@@ -1,11 +1,12 @@
 import axios from 'axios';
 
-// These imports are only types for easier development,
-// they will be distributed in a separate module.
-import { ModuleExportsType } from '../../extensionProcess/extensionModuleHandler';
-import { ExtensionRequestType, Source } from '../../message';
+import {
+  ModuleExports,
+  Input,
+  Source,
+} from '@devbookhq/extension';
 
-export const search: ModuleExportsType[ExtensionRequestType.Search] = async (data) => {
+export const search: ModuleExports[Input.Search] = async (data) => {
   let url = 'https://api.usedevbook.com/search/docs';
   if (process.env.NODE_ENV === 'development') url = 'https://dev.usedevbook.com/search/docs';
 
@@ -13,7 +14,7 @@ export const search: ModuleExportsType[ExtensionRequestType.Search] = async (dat
   return result.data.results;
 }
 
-export const getSources: ModuleExportsType[ExtensionRequestType.GetSources] = async () => {
+export const getSources: ModuleExports[Input.GetSources] = async () => {
   let url = 'https://api.usedevbook.com/search/docs';
   if (process.env.NODE_ENV === 'development') url = 'https://dev.usedevbook.com/search/docs';
 
