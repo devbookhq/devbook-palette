@@ -145,7 +145,7 @@ export class Extension {
             case Message.OutputError:
               return reject(message.data);
             default:
-              return reject('Unknown message type');
+              return reject('Unknown message type.');
           }
         }
       }
@@ -155,7 +155,7 @@ export class Extension {
 
   private async handleRequest<I, O>(requestOptions: Pick<InputMessage<I>, 'data' | 'inputType'>) {
     if (!this.isActive) {
-      throw new Error(`Extension "${this.extensionID}" is not running`);
+      throw new Error(`Extension "${this.extensionID}" is not running.`);
     }
     const id = uuidv4();
     const response = this.waitForResponse<O>(id);
