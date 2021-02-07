@@ -1,11 +1,10 @@
 import axios from 'axios';
-
 import {
-  ModuleExports,
-  Input,
+  ExtensionExports,
+  Call,
 } from '@devbookhq/extension';
 
-export const search: ModuleExports[Input.Search] = async (data) => {
+export const search: ExtensionExports[Call.Search] = async (data) => {
   let url = 'https://api.usedevbook.com/search/stackoverflow';
   if (process.env.NODE_ENV === 'development') url = 'https://dev.usedevbook.com/search/stackoverflow';
 

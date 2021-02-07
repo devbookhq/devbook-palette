@@ -2,26 +2,26 @@ import { fork, ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import isDev from '../utils/isDev';
 import { app } from 'electron';
-
 import {
-  Input,
+  Call,
   Status,
   FromExtensionMessage,
   Message,
-  OutputMessage,
+  CallReturnMessage,
   StatusMessage,
-  InputMessage,
-  InputData,
-  OutputData,
+  CallMessage,
+  CallInput,
+  CallOutput,
 } from '@devbookhq/extension';
+
+import isDev from '../utils/isDev';
 
 interface StatusListener<D> {
   (message: StatusMessage<D>): void;
 }
 
-export class Extension {
+class Extension {
   private extensionProcess: ChildProcess;
   private statusEmitter = new EventEmitter();
   private isExtensionProcessReady = false;
@@ -73,29 +73,27 @@ export class Extension {
   }
 
   public async getSources() {
-    const inputType = Input.GetSources;
+    const callType = Call.GetSources;
 
-    type RequestDataType = InputData[typeof inputType];
-    type ResponseDataType = OutputData[typeof inputType];
+    type CurrentCallInput = CallInput[typeof callType];
+    type CurrentCallOutput = CallOutput[typeof callType];
 
-    const result = await this.handleRequest<RequestDataType, ResponseDataType>({
-      inputType,
+    return this.handleCall<CurrentCallInput, CurrentCallOutput>({
+      callType,
       data: {},
     });
-    return result;
   }
 
-  public async search(data: InputData[Input.Search]) {
-    const inputType = Input.Search;
+  public async search(data: CallInput[Call.Search]) {
+    const callType = Call.Search;
 
-    type RequestDataType = InputData[typeof inputType];
-    type ResponseDataType = OutputData[typeof inputType];
+    type CurrentCallInput = CallInput[typeof callType];
+    type CurrentCallOutput = CallOutput[typeof callType];
 
-    const result = await this.handleRequest<RequestDataType, ResponseDataType>({
-      inputType,
+    return this.handleCall<CurrentCallInput, CurrentCallOutput>({
+      callType,
       data,
     });
-    return result;
   }
 
   public constructor(public extensionID: string) {
@@ -103,7 +101,7 @@ export class Extension {
 
     const extensionProcessPath = require.resolve('@devbookhq/extension');
 
-    const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'buildInExtensions', extensionID);
+    const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'defaultExtensions', extensionID);
 
     this.extensionProcess = fork(extensionProcessPath, undefined, {
       stdio: isDev ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'ignore', 'ignore', 'ipc'],
@@ -133,39 +131,40 @@ export class Extension {
     this.extensionProcess.kill();
   }
 
-  private waitForResponse<D>(id: string) {
-    return new Promise<OutputMessage<D>>((resolve, reject) => {
-      const ipcHandle = (message: FromExtensionMessage<D>) => {
+  private waitForCall<D>(id: string) {
+    return new Promise<CallReturnMessage<D>>((resolve, reject) => {
+      const messageHandler = (message: FromExtensionMessage<D>) => {
         if (message.type === Message.Status || message.type === Message.StatusError) return;
         if (message.id === id) {
-          this.extensionProcess.off('message', ipcHandle);
+          this.extensionProcess.off('message', messageHandler);
           switch (message.type) {
-            case Message.Output:
+            case Message.CallReturn:
               return resolve(message);
-            case Message.OutputError:
+            case Message.CallError:
               return reject(message.data);
             default:
-              return reject('Unknown message type');
+              return reject('Unknown message type.');
           }
         }
       }
-      this.extensionProcess.on('message', ipcHandle);
+      this.extensionProcess.on('message', messageHandler);
     });
   }
 
-  private async handleRequest<I, O>(requestOptions: Pick<InputMessage<I>, 'data' | 'inputType'>) {
-    if (!this.isActive) {
-      throw new Error(`Extension "${this.extensionID}" is not running`);
-    }
+  private async handleCall<I, O>(options: Pick<CallMessage<I>, 'data' | 'callType'>) {
+    if (!this.isActive) throw new Error(`Extension "${this.extensionID}" is not running.`);
+
     const id = uuidv4();
-    const response = this.waitForResponse<O>(id);
-    const request: InputMessage<I> = {
-      ...requestOptions,
-      type: Message.Input,
+    const callReturn = this.waitForCall<O>(id);
+    const callMessage: CallMessage<I> = {
+      ...options,
+      type: Message.Call,
       id,
     };
 
-    this.extensionProcess.send(request);
-    return (await response).data;
+    this.extensionProcess.send(callMessage);
+    return (await callReturn).data;
   }
 }
+
+export default Extension;

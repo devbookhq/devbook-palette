@@ -1,12 +1,11 @@
 import axios from 'axios';
-
 import {
-  ModuleExports,
-  Input,
+  ExtensionExports,
+  Call,
   Source,
 } from '@devbookhq/extension';
 
-export const search: ModuleExports[Input.Search] = async (data) => {
+export const search: ExtensionExports[Call.Search] = async (data) => {
   let url = 'https://api.usedevbook.com/search/docs';
   if (process.env.NODE_ENV === 'development') url = 'https://dev.usedevbook.com/search/docs';
 
@@ -14,7 +13,7 @@ export const search: ModuleExports[Input.Search] = async (data) => {
   return result.data.results;
 }
 
-export const getSources: ModuleExports[Input.GetSources] = async () => {
+export const getSources: ExtensionExports[Call.GetSources] = async () => {
   let url = 'https://api.usedevbook.com/search/docs';
   if (process.env.NODE_ENV === 'development') url = 'https://dev.usedevbook.com/search/docs';
 
