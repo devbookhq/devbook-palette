@@ -4,15 +4,15 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { app } from 'electron';
 import {
-  Call,
+  Event,
   Status,
   FromExtensionMessage,
   Message,
-  CallReturnMessage,
+  EventReturnMessage,
   StatusMessage,
-  CallMessage,
-  CallInput,
-  CallOutput,
+  EventMessage,
+  EventInput,
+  EventOutput,
 } from '@devbookhq/extension';
 
 import isDev from '../utils/isDev';
@@ -73,25 +73,25 @@ class Extension {
   }
 
   public async getSources() {
-    const callType = Call.GetSources;
+    const eventType = Event.getSources;
 
-    type CurrentCallInput = CallInput[typeof callType];
-    type CurrentCallOutput = CallOutput[typeof callType];
+    type CurrentEventInput = EventInput[typeof eventType];
+    type CurrentEventOutput = EventOutput[typeof eventType];
 
-    return this.handleCall<CurrentCallInput, CurrentCallOutput>({
-      callType,
+    return this.handleEvent<CurrentEventInput, CurrentEventOutput>({
+      eventType: eventType,
       data: {},
     });
   }
 
-  public async search(data: CallInput[Call.Search]) {
-    const callType = Call.Search;
+  public async search(data: EventInput[Event.onDidQueryChange]) {
+    const eventType = Event.onDidQueryChange;
 
-    type CurrentCallInput = CallInput[typeof callType];
-    type CurrentCallOutput = CallOutput[typeof callType];
+    type CurrentEventInput = EventInput[typeof eventType];
+    type CurrentEventOutput = EventOutput[typeof eventType];
 
-    return this.handleCall<CurrentCallInput, CurrentCallOutput>({
-      callType,
+    return this.handleEvent<CurrentEventInput, CurrentEventOutput>({
+      eventType,
       data,
     });
   }
@@ -131,16 +131,16 @@ class Extension {
     this.extensionProcess.kill();
   }
 
-  private waitForCall<D>(id: string) {
-    return new Promise<CallReturnMessage<D>>((resolve, reject) => {
+  private waitForEvent<D>(id: string) {
+    return new Promise<EventReturnMessage<D>>((resolve, reject) => {
       const messageHandler = (message: FromExtensionMessage<D>) => {
-        if (message.type === Message.Status || message.type === Message.StatusError) return;
+        if (message.type !== Message.EventReturn && message.type !== Message.EventError) return;
         if (message.id === id) {
           this.extensionProcess.off('message', messageHandler);
           switch (message.type) {
-            case Message.CallReturn:
+            case Message.EventReturn:
               return resolve(message);
-            case Message.CallError:
+            case Message.EventError:
               return reject(message.data);
             default:
               return reject('Unknown message type.');
@@ -151,19 +151,19 @@ class Extension {
     });
   }
 
-  private async handleCall<I, O>(options: Pick<CallMessage<I>, 'data' | 'callType'>) {
+  private async handleEvent<I, O>(options: Pick<EventMessage<I>, 'data' | 'eventType'>) {
     if (!this.isActive) throw new Error(`Extension "${this.extensionID}" is not running.`);
 
     const id = uuidv4();
-    const callReturn = this.waitForCall<O>(id);
-    const callMessage: CallMessage<I> = {
+    const eventReturn = this.waitForEvent<O>(id);
+    const eventMessage: EventMessage<I> = {
       ...options,
-      type: Message.Call,
+      type: Message.Event,
       id,
     };
 
-    this.extensionProcess.send(callMessage);
-    return (await callReturn).data;
+    this.extensionProcess.send(eventMessage);
+    return (await eventReturn).data;
   }
 }
 
