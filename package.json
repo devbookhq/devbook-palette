@@ -5,7 +5,7 @@
   "private": true,
   "author": {
     "name": "FoundryLabs, Inc.",
-    "email": "vasek@usedevbook.com",
+    "email": "hello@usedevbook.com",
     "url": "https://usedevbook.com"
   },
   "homepage": ".",
@@ -89,7 +89,7 @@
     "release:linux": "npx rimraf dist && npm run electron:build-linux && npm run upload:linux"
   },
   "dependencies": {
-    "@devbookhq/extension": "0.0.7",
+    "@devbookhq/extension": "0.0.16",
     "analytics-node": "^3.5.0",
     "axios": "^0.21.1",
     "electron-store": "^5.2.0",
