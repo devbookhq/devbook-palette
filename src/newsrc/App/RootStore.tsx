@@ -1,6 +1,8 @@
 import React from 'react';
-import UIStore from 'newsrc/ui/ui.store';
+
 import TransportLayer from 'newsrc/layers/TransportLayer';
+import UIStore from 'newsrc/ui/ui.store';
+import UserStore from 'newsrc/user/user.store';
 
 const transport = new TransportLayer();
 
@@ -21,14 +23,20 @@ export function useRootStore() {
 }
 
 export default class RootStore {
-  uiStore: UIStore;
   transportLayer: TransportLayer;
+  uiStore: UIStore;
+  userStore: UserStore;
 
   constructor(transportLayer: TransportLayer) {
     this.transportLayer = transportLayer;
+
     this.uiStore = new UIStore(this);
+    // TODO: Load saved UI state asynchronously.
+    // Check mobx docs on how to handle async.
     const uiJSON = this.transportLayer.fetchUI();
     this.uiStore.initFromJSON(uiJSON);
+
+    this.userStore = new UserStore(this);
   }
 }
 

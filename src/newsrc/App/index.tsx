@@ -5,6 +5,19 @@ import styled from 'styled-components';
 import Toolbar from 'newsrc/Toolbar';
 import Board from 'newsrc/Board';
 
+// The electron window is set to be frameless.
+// Frameless window stops being draggable - this is the solution.
+const DragHeader = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 25px;
+  width: 100%;
+  background: transparent;
+  -webkit-app-region: drag;
+  -webkit-user-select: none;
+`;
+
 const FlexContainer = styled.div<{ direction?: 'row' | 'column' }>`
   width: 100%;
   height: 100%;
@@ -14,12 +27,15 @@ const FlexContainer = styled.div<{ direction?: 'row' | 'column' }>`
 
 function App() {
   return (
-    <FlexContainer>
-      <Toolbar/>
-      <FlexContainer direction="column">
-        <Board/>
+    <>
+      <DragHeader/>
+      <FlexContainer>
+        <Toolbar/>
+        <FlexContainer direction="column">
+          <Board/>
+        </FlexContainer>
       </FlexContainer>
-    </FlexContainer>
+    </>
   );
 }
 
