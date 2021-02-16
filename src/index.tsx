@@ -1,54 +1,36 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {
+  HashRouter as Router,
+  Switch,
+  Route,
+} from 'react-router-dom';
 
 import './index.css';
-
-import * as serviceWorker from 'serviceWorker';
-import App from 'App';
-import { authEmitter, AuthContext, auth } from 'Auth';
-import { extensionsEmitter, ExtensionsContext, extensionsManager } from 'Extensions';
+import App from './newsrc/App';
+import { RootStoreProvider } from './newsrc/App/RootStore';
 
 ReactDOM.render(
   <React.StrictMode>
-    <AuthContext.Provider value={auth}>
-      <ExtensionsContext.Provider value={extensionsManager}>
-        <App />
-      </ExtensionsContext.Provider>
-    </AuthContext.Provider>
+    <RootStoreProvider>
+      <Router>
+        <Switch>
+          <Route
+            path="/preferences"
+            exact
+          >
+          </Route>
+          <Route
+            path="/"
+            exact
+          >
+            <App/>
+          </Route>
+        </Switch>
+      </Router>
+    </RootStoreProvider>
   </React.StrictMode>
   ,
   document.getElementById('root'),
 );
 
-extensionsEmitter.on('changed', (extensionsManager) => {
-  ReactDOM.render(
-    <React.StrictMode>
-      <AuthContext.Provider value={auth}>
-        <ExtensionsContext.Provider value={extensionsManager}>
-          <App />
-        </ExtensionsContext.Provider>
-      </AuthContext.Provider>
-    </React.StrictMode>
-    ,
-    document.getElementById('root'),
-  );
-});
-
-authEmitter.on('changed', (authInfo) => {
-  ReactDOM.render(
-    <React.StrictMode>
-      <AuthContext.Provider value={authInfo}>
-        <ExtensionsContext.Provider value={extensionsManager}>
-          <App />
-        </ExtensionsContext.Provider>
-      </AuthContext.Provider>
-    </React.StrictMode>
-    ,
-    document.getElementById('root'),
-  );
-});
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();

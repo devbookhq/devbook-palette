@@ -20,7 +20,8 @@
     "isolatedModules": true,
     "baseUrl": "src",
     "noImplicitThis": false,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "useDefineForClassFields": true
   },
   "include": [
     "src",
