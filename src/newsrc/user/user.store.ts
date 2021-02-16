@@ -6,5 +6,4 @@ export default class UserStore {
   constructor(store: RootStore) {
     this.rootStore = store;
   }
-
 }
