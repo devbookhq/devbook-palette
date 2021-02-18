@@ -13,6 +13,7 @@ import {
 } from '@devbookhq/extension';
 import { makeAutoObservable, runInAction } from 'mobx';
 
+import { isDev } from '../../mainCommunication/electron'
 import { ExtensionID } from './extensionID';
 import * as ipc from './extensions.ipc';
 import type ExtensionsStore from './extensions.store';
@@ -42,7 +43,7 @@ class Extension {
     const extensionModulePath = ipc.path.resolve(root, 'build', 'main', 'extensions', 'defaultExtensions', extensionID);
 
     this.extensionProcess = ipc.fork(extensionProcessPath, undefined, {
-      stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
+      stdio: isDev ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'ignore', 'ignore', 'ipc'],
       env: {
         ...process.env,
         EXTENSION_ID: extensionID,
