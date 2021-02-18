@@ -1,3 +1,5 @@
+
+
 import React, {
   createContext,
   useContext,
@@ -7,6 +9,7 @@ import TransportLayer from 'newsrc/layers/TransportLayer';
 import UIStore from 'newsrc/ui/ui.store';
 import UserStore from 'newsrc/user/user.store';
 import ExtensionsStore from 'newsrc/extensions/extensions.store';
+import BoardStore from 'newsrc/NewBoard/board.store';
 
 const StoreContext = createContext<RootStore | undefined>(undefined);
 
@@ -29,6 +32,7 @@ class RootStore {
   readonly uiStore = new UIStore(this);
   readonly userStore = new UserStore(this);
   readonly extensionsStore = new ExtensionsStore(this);
+  readonly boardStore = new BoardStore(this);
 
   static get instance() {
     return RootStore._instance || (RootStore._instance = new RootStore())

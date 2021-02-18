@@ -1,14 +1,10 @@
-import React, {
-  useEffect,
-  useCallback,
-  useState,
-} from 'react';
+import React, {useRef} from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 
 import * as Colors from 'newsrc/ui/colors';
 import Tile from 'newsrc/Tile';
-import { Resizable } from 're-resizable';
+import { NumberSize, Resizable, ResizeCallback } from 're-resizable';
 
 import { useExtensionsStore } from 'newsrc/extensions/extensions.store';
 import { ExtensionID } from 'newsrc/extensions/extensionID';
@@ -29,13 +25,15 @@ const Container = styled.div`
   background: ${Colors.Charcoal.dark};
 `;
 
-const FirstTile = styled(Tile)`
+const TopTile = styled(Tile)`
   // margin: 8px;
-  // height: 100%;
-  // width: 50%;
-  flex: 1;
   height: 100%;
   width: 100%;
+  /*
+  height: 495px;
+  width: 685px;
+  */
+
   /*
   height: 648px;
   width: 440px;
@@ -47,26 +45,25 @@ const FirstTile = styled(Tile)`
   top: 16px;
   */
 
+  /*
   border-bottom: 1px solid purple;
   border-right: 1px solid green;
-`;
-
-const TileInsideResizable = styled(Tile)`
-  width: 100%;
-  height: 100%;
-`;
-
-const SecondTile = styled(Tile)`
-  margin: 12px;
-  height: 432px;
-  width: 400px;
-
-  position: relative;
-  /*
-  left: 24px;
-  top: 16px;
   */
 `;
+
+const BottomTile = styled(Tile)`
+  height: 100%;
+  width: 100%;
+  /*
+  height: 467px;
+  width: 1464px;
+  */
+  /*
+  border-bottom: 1px solid purple;
+  border-right: 1px solid green;
+  */
+`;
+
 
 const SplitHorizontal = styled.div`
   width: 100%;
@@ -74,7 +71,7 @@ const SplitHorizontal = styled.div`
   display: flex;
   justify-content: flex-start;
   // Yellow
-  background: rgba(255, 0, 0, 0.2);
+  //background: rgba(255, 0, 0, 0.2);
 `;
 
 const SplitVertical = styled.div`
@@ -84,16 +81,19 @@ const SplitVertical = styled.div`
   flex-direction: column;
   align-items: flex-start;
   // Green
-  background: rgba(0, 255, 0, 0.2);
+  //background: rgba(0, 255, 0, 0.2);
 `;
 
 function Board() {
-  const [soResults, setSOResults] = useState<any[]>([]);
+  const horizontalResizableRef = React.useRef<any>(null);
+  const verticalResizableRef = React.useRef<any>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [soResults, setSOResults] = React.useState<any[]>([]);
 
   const extensionsStore = useExtensionsStore();
   const stackoverflowExtension = extensionsStore.getExtension(ExtensionID.StackOverflow);
 
-  const searchStackOverflow = useCallback(async (query: string) => {
+  const searchStackOverflow = React.useCallback(async (query: string) => {
     if (stackoverflowExtension?.isReady) {
       return (await stackoverflowExtension.search({ query })).results as any[];
     }
@@ -101,7 +101,7 @@ function Board() {
     return [] as any;
   }, [stackoverflowExtension?.isReady]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     async function search() {
       const r = await searchStackOverflow('golang append buffer');
       console.log('FOUND', r);
@@ -110,52 +110,61 @@ function Board() {
     search();
   }, [searchStackOverflow]);
 
-  useEffect(() => {
+  React.useEffect(() => {
+    console.log('Starting width', horizontalResizableRef?.current.resizable.offsetWidth);
+    console.log('Starting height', horizontalResizableRef?.current.resizable.offsetHeight);
     for (let el of document.getElementsByClassName("vertical-resizable")) {
       (el as HTMLElement).style.height = '50%';
     }
   }, []);
 
+  function handleResizeHorizontal(event: any, dir: any, ref: HTMLDivElement, delta: NumberSize) {
+    console.log('ref', ref.offsetWidth);
+  }
+
   return (
     <Container>
-      <SplitVertical>
+        <SplitVertical>
+
+            <SplitHorizontal>
+              <Resizable
+                ref={horizontalResizableRef}
+                defaultSize={{
+                  width: '50%',
+                  height: '100%',
+                }}
+                minHeight="64"
+                minWidth="10%"
+                enable={{ right: true }}
+                onResizeStart={() => console.log('On Resize Start')}
+                onResizeStop={() => console.log('On Resize Stop')}
+                onResize={handleResizeHorizontal as ResizeCallback}
+              >
+                <TopTile
+                  isFocused
+                  results={soResults}
+                />
+              </Resizable>
+              <TopTile
+                results={soResults}
+              />
+            </SplitHorizontal>
 
         <SplitHorizontal>
           <Resizable
+            ref={verticalResizableRef}
+            className="vertical-resizable"
             defaultSize={{
               width: '50%',
               height: '100%',
             }}
-            grid={[16, 16]}
-            minHeight="64"
-            minWidth="10%"
-            enable={{ right: true }}
-          >
-
-            <FirstTile
-              isFocused
-              results={soResults}
-            />
-          </Resizable>
-          <FirstTile
+            enable={{ top: true }}
+            minHeight="10%"
+          />
+          <BottomTile
             results={soResults}
           />
         </SplitHorizontal>
-
-        <Resizable
-          className="vertical-resizable"
-          defaultSize={{
-            width: '100%',
-            height: '50px',
-          }}
-          grid={[16, 16]}
-          enable={{ top: true }}
-          minHeight="10%"
-        >
-          <FirstTile
-            results={soResults}
-          />
-        </Resizable>
       </SplitVertical>
     </Container>
   );

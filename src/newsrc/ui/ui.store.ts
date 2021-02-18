@@ -29,7 +29,6 @@ export default class UIStore {
       dispose: false,
     });
 
-    this.rootStore = rootStore;
     this.autosaveHandler = reaction(
       () => this.asJSON,
       json => {

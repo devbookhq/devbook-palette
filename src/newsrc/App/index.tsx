@@ -4,6 +4,7 @@ import styled from 'styled-components';
 
 import Toolbar from 'newsrc/Toolbar';
 import Board from 'newsrc/Board';
+import NewBoard from 'newsrc/NewBoard';
 
 // The electron window is set to be frameless.
 // Frameless window stops being draggable - this is the solution.
@@ -32,7 +33,7 @@ function App() {
       <FlexContainer>
         <Toolbar/>
         <FlexContainer direction="column">
-          <Board/>
+          <NewBoard/>
         </FlexContainer>
       </FlexContainer>
     </>
