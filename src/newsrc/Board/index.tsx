@@ -1,12 +1,17 @@
-import React from 'react';
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+} from 'react';
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 
 import * as Colors from 'newsrc/ui/colors';
 import Tile from 'newsrc/Tile';
 import { Resizable } from 're-resizable';
 
-
-import { ExtensionsContext } from 'Extensions';
+import { useExtensionsStore } from 'newsrc/extensions/extensions.store';
+import { ExtensionID } from 'newsrc/extensions/extensionID';
 
 // TODO: CSS-wise, this should probably be a grid?
 const Container = styled.div`
@@ -83,31 +88,29 @@ const SplitVertical = styled.div`
 `;
 
 function Board() {
-  const [soResults, setSOResults] = React.useState<any[]>([]);
+  const [soResults, setSOResults] = useState<any[]>([]);
 
-  const extensionManager = React.useContext(ExtensionsContext);
-  const stackoverflowExtension = extensionManager?.extensions.stackoverflow;
+  const extensionsStore = useExtensionsStore();
+  const stackoverflowExtension = extensionsStore.getExtension(ExtensionID.StackOverflow);
 
-  const searchStackOverflow = React.useCallback(async (query: string) => {
+  const searchStackOverflow = useCallback(async (query: string) => {
     if (stackoverflowExtension?.isReady) {
-      return (await stackoverflowExtension.search({ query })).results as unknown as any[];
+      return (await stackoverflowExtension.search({ query })).results as any[];
     }
     console.log('Extension is not ready');
-    return [];
-  }, [extensionManager]);
+    return [] as any;
+  }, [stackoverflowExtension?.isReady]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     async function search() {
       const r = await searchStackOverflow('golang append buffer');
       console.log('FOUND', r);
       setSOResults(r);
     }
     search();
-  }, [
-    extensionManager.extensions['stackoverflow']?.isReady,
-  ]);
+  }, [searchStackOverflow]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     for (let el of document.getElementsByClassName("vertical-resizable")) {
       (el as HTMLElement).style.height = '50%';
     }
@@ -115,48 +118,47 @@ function Board() {
 
   return (
     <Container>
-        <SplitVertical>
+      <SplitVertical>
 
-            <SplitHorizontal>
-              <Resizable
-                defaultSize={{
-                  width: '50%',
-                  height: '100%',
-                }}
-                grid={[16, 16]}
-                minHeight="64"
-                minWidth="10%"
-                enable={{ right: true }}
-              >
-
-                <FirstTile
-                  isFocused
-                  results={soResults}
-                />
-              </Resizable>
-              <FirstTile
-                results={soResults}
-              />
-            </SplitHorizontal>
-
+        <SplitHorizontal>
           <Resizable
-            className="vertical-resizable"
             defaultSize={{
-              width: '100%',
-              height: '50px',
+              width: '50%',
+              height: '100%',
             }}
             grid={[16, 16]}
-            enable={{ top: true }}
-            minHeight="10%"
+            minHeight="64"
+            minWidth="10%"
+            enable={{ right: true }}
           >
+
+            <FirstTile
+              isFocused
+              results={soResults}
+            />
+          </Resizable>
           <FirstTile
             results={soResults}
           />
-          </Resizable>
+        </SplitHorizontal>
+
+        <Resizable
+          className="vertical-resizable"
+          defaultSize={{
+            width: '100%',
+            height: '50px',
+          }}
+          grid={[16, 16]}
+          enable={{ top: true }}
+          minHeight="10%"
+        >
+          <FirstTile
+            results={soResults}
+          />
+        </Resizable>
       </SplitVertical>
     </Container>
   );
 }
 
-export default Board;
-
+export default observer(Board);
