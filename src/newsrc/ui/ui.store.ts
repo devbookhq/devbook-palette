@@ -15,7 +15,6 @@ export function useUIStore() {
 }
 
 export default class UIStore {
-  rootStore: RootStore;
   autosaveHandler: IReactionDisposer;
   private toolbar = {
     defaultWidth: 90,
@@ -23,7 +22,7 @@ export default class UIStore {
   };
   shouldAutoSave = true; // Whether to automatically save UI state on every change.
 
-  constructor(rootStore: RootStore) {
+  constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
       rootStore: false,
       autosaveHandler: false,
@@ -31,7 +30,6 @@ export default class UIStore {
       dispose: false,
     });
 
-    this.rootStore = rootStore;
     this.autosaveHandler = reaction(
       () => this.asJSON,
       json => {

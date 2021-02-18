@@ -3,6 +3,7 @@ import React from 'react';
 import TransportLayer from 'newsrc/layers/TransportLayer';
 import UIStore from 'newsrc/ui/ui.store';
 import UserStore from 'newsrc/user/user.store';
+import BoardStore from 'newsrc/NewBoard/board.store';
 
 const transport = new TransportLayer();
 
@@ -10,8 +11,8 @@ let store: RootStore;
 const StoreContext = React.createContext<RootStore | undefined>(undefined);
 
 export function RootStoreProvider({ children }: { children: React.ReactNode }) {
-  const root = store ?? new RootStore(transport);
-  return <StoreContext.Provider value={root}>{children}</StoreContext.Provider>;
+  store = store ?? new RootStore(transport);
+  return <StoreContext.Provider value={store}>{children}</StoreContext.Provider>;
 }
 
 export function useRootStore() {
@@ -26,6 +27,7 @@ export default class RootStore {
   transportLayer: TransportLayer;
   uiStore: UIStore;
   userStore: UserStore;
+  boardStore: BoardStore;
 
   constructor(transportLayer: TransportLayer) {
     this.transportLayer = transportLayer;
@@ -37,6 +39,7 @@ export default class RootStore {
     this.uiStore.initFromJSON(uiJSON);
 
     this.userStore = new UserStore(this);
+    this.boardStore = new BoardStore(this);
   }
 }
 

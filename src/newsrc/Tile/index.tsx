@@ -90,6 +90,13 @@ function Tile({ className, isFocused, results }: TileProps) {
       </TileHeader>
       <TileBody>
       {/*
+      {[...Array(40)].map((_, i) => (
+        <p key={i}>
+          Row {i}
+        </p>
+      ))}
+      */}
+      {/*
         {results.map(r => (
           <StackOverflowItem
             key={r.question.title}
