@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 
@@ -6,8 +6,9 @@ import * as Colors from 'newsrc/ui/colors';
 import Tile from 'newsrc/Tile';
 import { NumberSize, Resizable, ResizeCallback } from 're-resizable';
 
-import { useExtensionsStore } from 'newsrc/extensions/extensions.store';
 import { ExtensionID } from 'newsrc/extensions/extensionID';
+import { useExtensionsStore } from 'newsrc/extensions/extensions.store';
+import { useUserStore } from 'newsrc/user/user.store';
 
 // TODO: CSS-wise, this should probably be a grid?
 const Container = styled.div`
@@ -90,6 +91,12 @@ function Board() {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [soResults, setSOResults] = React.useState<any[]>([]);
 
+  const userStore = useUserStore();
+
+  useEffect(() => {
+    userStore.signIn('tomas@usedevbook.com');
+  }, [])
+
   const extensionsStore = useExtensionsStore();
   const stackoverflowExtension = extensionsStore.getExtension(ExtensionID.StackOverflow);
 
@@ -124,31 +131,31 @@ function Board() {
 
   return (
     <Container>
-        <SplitVertical>
+      <SplitVertical>
 
-            <SplitHorizontal>
-              <Resizable
-                ref={horizontalResizableRef}
-                defaultSize={{
-                  width: '50%',
-                  height: '100%',
-                }}
-                minHeight="64"
-                minWidth="10%"
-                enable={{ right: true }}
-                onResizeStart={() => console.log('On Resize Start')}
-                onResizeStop={() => console.log('On Resize Stop')}
-                onResize={handleResizeHorizontal as ResizeCallback}
-              >
-                <TopTile
-                  isFocused
-                  results={soResults}
-                />
-              </Resizable>
-              <TopTile
-                results={soResults}
-              />
-            </SplitHorizontal>
+        <SplitHorizontal>
+          <Resizable
+            ref={horizontalResizableRef}
+            defaultSize={{
+              width: '50%',
+              height: '100%',
+            }}
+            minHeight="64"
+            minWidth="10%"
+            enable={{ right: true }}
+            onResizeStart={() => console.log('On Resize Start')}
+            onResizeStop={() => console.log('On Resize Stop')}
+            onResize={handleResizeHorizontal as ResizeCallback}
+          >
+            <TopTile
+              isFocused
+              results={soResults}
+            />
+          </Resizable>
+          <TopTile
+            results={soResults}
+          />
+        </SplitHorizontal>
 
         <SplitHorizontal>
           <Resizable
