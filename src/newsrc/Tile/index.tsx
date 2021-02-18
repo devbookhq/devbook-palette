@@ -9,8 +9,8 @@ import Shortcut, { Modifier } from 'newsrc/Shortcut';
 import StackOverflowItem from 'Home/StackOverflow/StackOverflowItem';
 import FocusState from 'Home/SearchItemFocusState';
 
-const Container = styled.div<{ isFocused?: boolean }>` padding: 8px;
-
+const Container = styled.div<{ isFocused?: boolean }>`
+  padding: 8px;
   display: flex;
   flex-direction: column;
   align-items: flex-top;
@@ -89,14 +89,28 @@ function Tile({ className, isFocused, results }: TileProps) {
         />
       </TileHeader>
       <TileBody>
-        {results.length > 0 &&
+      {/*
+        {results.map(r => (
           <StackOverflowItem
-            soResult={results[Math.ceil(Math.random() * 10)] as any}
+            key={r.question.title}
+            soResult={r}
+            focusState={FocusState.None}
+            onHeaderClick={() => {}}
+            onTitleClick={() => {}}
+          />
+        ))}
+        */}
+        {/*
+        {results.length > 0 &&
+
+          <StackOverflowItem
+            soResult={results[Math.ceil(Math.random() * 9)] as any}
             focusState={FocusState.None}
             onHeaderClick={() => {}}
             onTitleClick={() => {}}
           />
         }
+        */}
       </TileBody>
     </Container>
   );

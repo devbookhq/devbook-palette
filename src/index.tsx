@@ -9,28 +9,34 @@ import {
 import './index.css';
 import App from './newsrc/App';
 import { RootStoreProvider } from './newsrc/App/RootStore';
+import { extensionsEmitter, ExtensionsContext } from 'Extensions';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <RootStoreProvider>
-      <Router>
-        <Switch>
-          <Route
-            path="/preferences"
-            exact
-          >
-          </Route>
-          <Route
-            path="/"
-            exact
-          >
-            <App/>
-          </Route>
-        </Switch>
-      </Router>
-    </RootStoreProvider>
-  </React.StrictMode>
-  ,
-  document.getElementById('root'),
-);
+
+extensionsEmitter.on('changed', (extensionsManager) => {
+  ReactDOM.render(
+    <React.StrictMode>
+      <ExtensionsContext.Provider value={extensionsManager}>
+        <RootStoreProvider>
+          <Router>
+            <Switch>
+              <Route
+                path="/preferences"
+                exact
+              >
+              </Route>
+              <Route
+                path="/"
+                exact
+              >
+                <App/>
+              </Route>
+            </Switch>
+          </Router>
+        </RootStoreProvider>
+      </ExtensionsContext.Provider>
+    </React.StrictMode>
+    ,
+    document.getElementById('root'),
+  );
+});
 

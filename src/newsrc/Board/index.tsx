@@ -3,38 +3,87 @@ import styled from 'styled-components';
 
 import * as Colors from 'newsrc/ui/colors';
 import Tile from 'newsrc/Tile';
+import { Resizable } from 're-resizable';
 
 
 import { ExtensionsContext } from 'Extensions';
 
 // TODO: CSS-wise, this should probably be a grid?
 const Container = styled.div`
-  flex: 1;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  // flex: 1;
+  // display: flex;
+  // flex-wrap: wrap;
+  // overflow-y: auto;
+  overflow: auto;
   background: ${Colors.Charcoal.dark};
 `;
 
 const FirstTile = styled(Tile)`
+  // margin: 8px;
+  // height: 100%;
+  // width: 50%;
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  /*
   height: 648px;
   width: 440px;
+  */
 
+  /*
   position: relative;
-  left: 16px;
+  left: 24px;
   top: 16px;
+  */
+
+  border-bottom: 1px solid purple;
+  border-right: 1px solid green;
+`;
+
+const TileInsideResizable = styled(Tile)`
+  width: 100%;
+  height: 100%;
 `;
 
 const SecondTile = styled(Tile)`
+  margin: 12px;
   height: 432px;
   width: 400px;
 
   position: relative;
+  /*
   left: 24px;
   top: 16px;
+  */
+`;
+
+const SplitHorizontal = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-start;
+  // Yellow
+  background: rgba(255, 0, 0, 0.2);
+`;
+
+const SplitVertical = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  // Green
+  background: rgba(0, 255, 0, 0.2);
 `;
 
 function Board() {
   const [soResults, setSOResults] = React.useState<any[]>([]);
-
 
   const extensionManager = React.useContext(ExtensionsContext);
   const stackoverflowExtension = extensionManager?.extensions.stackoverflow;
@@ -43,6 +92,7 @@ function Board() {
     if (stackoverflowExtension?.isReady) {
       return (await stackoverflowExtension.search({ query })).results as unknown as any[];
     }
+    console.log('Extension is not ready');
     return [];
   }, [extensionManager]);
 
@@ -53,17 +103,57 @@ function Board() {
       setSOResults(r);
     }
     search();
+  }, [
+    extensionManager.extensions['stackoverflow']?.isReady,
+  ]);
+
+  React.useEffect(() => {
+    for (let el of document.getElementsByClassName("vertical-resizable")) {
+      (el as HTMLElement).style.height = '50%';
+    }
   }, []);
 
   return (
     <Container>
-      <FirstTile
-        isFocused
-        results={soResults}
-      />
-      <SecondTile
-        results={soResults}
-      />
+        <SplitVertical>
+
+            <SplitHorizontal>
+              <Resizable
+                defaultSize={{
+                  width: '50%',
+                  height: '100%',
+                }}
+                grid={[16, 16]}
+                minHeight="64"
+                minWidth="10%"
+                enable={{ right: true }}
+              >
+
+                <FirstTile
+                  isFocused
+                  results={soResults}
+                />
+              </Resizable>
+              <FirstTile
+                results={soResults}
+              />
+            </SplitHorizontal>
+
+          <Resizable
+            className="vertical-resizable"
+            defaultSize={{
+              width: '100%',
+              height: '50px',
+            }}
+            grid={[16, 16]}
+            enable={{ top: true }}
+            minHeight="10%"
+          >
+          <FirstTile
+            results={soResults}
+          />
+          </Resizable>
+      </SplitVertical>
     </Container>
   );
 }
