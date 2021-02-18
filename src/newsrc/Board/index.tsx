@@ -1,12 +1,13 @@
 import React, {useRef} from 'react';
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 
 import * as Colors from 'newsrc/ui/colors';
 import Tile from 'newsrc/Tile';
 import { NumberSize, Resizable, ResizeCallback } from 're-resizable';
 
-
-import { ExtensionsContext } from 'Extensions';
+import { useExtensionsStore } from 'newsrc/extensions/extensions.store';
+import { ExtensionID } from 'newsrc/extensions/extensionID';
 
 // TODO: CSS-wise, this should probably be a grid?
 const Container = styled.div`
@@ -84,21 +85,21 @@ const SplitVertical = styled.div`
 `;
 
 function Board() {
-  const horizontalResizableRef = useRef<any>(null);
-  const verticalResizableRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const horizontalResizableRef = React.useRef<any>(null);
+  const verticalResizableRef = React.useRef<any>(null);
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const [soResults, setSOResults] = React.useState<any[]>([]);
 
-  const extensionManager = React.useContext(ExtensionsContext);
-  const stackoverflowExtension = extensionManager?.extensions.stackoverflow;
+  const extensionsStore = useExtensionsStore();
+  const stackoverflowExtension = extensionsStore.getExtension(ExtensionID.StackOverflow);
 
   const searchStackOverflow = React.useCallback(async (query: string) => {
     if (stackoverflowExtension?.isReady) {
-      return (await stackoverflowExtension.search({ query })).results as unknown as any[];
+      return (await stackoverflowExtension.search({ query })).results as any[];
     }
     console.log('Extension is not ready');
-    return [];
-  }, [extensionManager]);
+    return [] as any;
+  }, [stackoverflowExtension?.isReady]);
 
   React.useEffect(() => {
     async function search() {
@@ -107,9 +108,7 @@ function Board() {
       setSOResults(r);
     }
     search();
-  }, [
-    extensionManager.extensions['stackoverflow']?.isReady,
-  ]);
+  }, [searchStackOverflow]);
 
   React.useEffect(() => {
     console.log('Starting width', horizontalResizableRef?.current.resizable.offsetWidth);
@@ -151,24 +150,24 @@ function Board() {
               />
             </SplitHorizontal>
 
+        <SplitHorizontal>
           <Resizable
             ref={verticalResizableRef}
             className="vertical-resizable"
             defaultSize={{
-              width: '100%',
-              height: '50px',
+              width: '50%',
+              height: '100%',
             }}
             enable={{ top: true }}
             minHeight="10%"
-          >
+          />
           <BottomTile
             results={soResults}
           />
-          </Resizable>
+        </SplitHorizontal>
       </SplitVertical>
     </Container>
   );
 }
 
-export default Board;
-
+export default observer(Board);

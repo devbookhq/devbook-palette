@@ -10,7 +10,7 @@ const Container = styled.div`
   width: 100%;
   height: 100%;
   background: ${() => Colors.Charcoal.normal};
-  border-right: 1px solid ${() => Colors.Charcoal.lighter}
+  border-right: 1px solid ${() => Colors.Charcoal.lighter};
 `;
 
 function Toolbar() {
@@ -38,4 +38,3 @@ function Toolbar() {
 }
 
 export default observer(Toolbar);
-

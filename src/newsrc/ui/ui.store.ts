@@ -22,9 +22,8 @@ export default class UIStore {
   };
   shouldAutoSave = true; // Whether to automatically save UI state on every change.
 
-  constructor(readonly rootStore: RootStore) {
+  constructor(private readonly rootStore: RootStore) {
     makeAutoObservable(this, {
-      rootStore: false,
       autosaveHandler: false,
       shouldAutoSave: false,
       dispose: false,
@@ -74,4 +73,3 @@ export default class UIStore {
     this.autosaveHandler();
   }
 }
-
