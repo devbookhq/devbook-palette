@@ -81,7 +81,7 @@ function Account() {
         {!isLoading && authInfo.state === AuthState.UserAndMetadataLoaded &&
           <>
             <Email>
-              {authInfo.metadata.email}
+              {authInfo.user.email}
             </Email>
             <SignOutButton onClick={handleSignOutButtonClicked}>
               Sign Out

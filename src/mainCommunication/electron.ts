@@ -10,4 +10,6 @@ const isEnvSet = 'ELECTRON_IS_DEV' in electron.remote.process.env;
 const getFromEnv = parseInt(electron.remote.process.env.ELECTRON_IS_DEV || '0', 10) === 1;
 export const isDev = isEnvSet ? getFromEnv : !app.isPackaged;
 
+export const ElectronStore = electron.remote.require('electron-store') as typeof import('electron-store');
+
 export default electron;

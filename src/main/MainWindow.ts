@@ -48,7 +48,7 @@ class MainWindow {
     this.window.on('restore', () => {
       console.log('Window restored');
       if (!this.window) { return; }
-    });
+    })
 
     this.window.on('resize', () => {
       if (this.window) {
@@ -88,7 +88,12 @@ class MainWindow {
     });
 
     if (isDev) {
-      this.window.loadURL(`http://localhost:${PORT}/index.html`);
+      this.window.loadURL(`http://localhost:${PORT}/index.html`).then(() => {
+        this.window?.webContents.session.cookies.get({}).then((cookies) => {
+          console.log(cookies);
+        })
+
+      })
       // Hot Reloading
       require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
@@ -100,6 +105,7 @@ class MainWindow {
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/`);
     }
+
   }
 
   public close() {

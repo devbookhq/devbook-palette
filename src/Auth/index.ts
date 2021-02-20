@@ -6,6 +6,7 @@ import { EventEmitter } from 'events';
 import {
   crypto,
   querystring,
+  ElectronStore,
 } from 'mainCommunication/electron';
 import {
   openLink,
@@ -63,16 +64,21 @@ export enum AuthState {
   UserAndMetadataLoaded,
 }
 
+interface User {
+  userID: string;
+  email: string;
+}
+
 type FailedLookingForStoredUserAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser };
-type FailedSigningOutAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedSigningOutUser, metadata?: MagicUserMetadata };
+type FailedSigningOutAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedSigningOutUser, user?: User };
 type FailedSigningInAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedSigningInUser };
 type FailedFetchingUserMetadataAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata };
 type LookingForStoredUserAuthInfo = { state: AuthState.LookingForStoredUser }
 type NoUserAuthInfo = { state: AuthState.NoUser };
 type FetchingUserMetadataAuthInfo = { state: AuthState.FetchingUserMetadata }
 type SigningInUserAuthInfo = { state: AuthState.SigningInUser }
-type SigningOutUserAuthInfo = { state: AuthState.SigningOutUser, metadata?: MagicUserMetadata }
-type UserAndMetadataLoadedAuthInfo = { state: AuthState.UserAndMetadataLoaded, metadata: MagicUserMetadata };
+type SigningOutUserAuthInfo = { state: AuthState.SigningOutUser, user?: User }
+type UserAndMetadataLoadedAuthInfo = { state: AuthState.UserAndMetadataLoaded, user: User };
 
 export type AuthInfo = FailedSigningOutAuthInfo
   | FailedSigningInAuthInfo
@@ -92,17 +98,31 @@ export const authEmitter = new EventEmitter();
 export let auth: AuthInfo = { state: AuthState.LookingForStoredUser };
 export const AuthContext = createContext<AuthInfo>(auth);
 
-const BASE_URL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
+const BASE_URL = isDev ? 'http://localhost:3002' : 'https://api.usedevbook.com/v1';
 
 const magicAPIKey = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
 const magic = new Magic(magicAPIKey);
 
 let signInCancelHandle: (() => void) | undefined = undefined;
 
+const electronStore = new ElectronStore();
+
+function setRefreshToken(refreshToken: string) {
+  return electronStore.set('refreshToken', refreshToken);
+}
+
+function getRefreshToken() {
+  return electronStore.get('refreshToken');
+}
+
+function deleteRefreshToken() {
+  return electronStore.delete('refreshToken');
+}
+
 function changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
   if (auth.state === AuthState.UserAndMetadataLoaded) {
-    const email = auth?.metadata?.email || undefined;
-    const userID = auth?.metadata?.publicAddress || undefined;
+    const email = auth?.user?.email || undefined;
+    const userID = auth?.user?.userID || undefined;
     changeUserInMain(userID && email ? { userID, email } : undefined);
   } if (auth.state === AuthState.NoUser) {
     changeUserInMain();
@@ -125,48 +145,40 @@ export async function signOut() {
   updateAuth({ ...auth, state: AuthState.SigningOutUser });
   try {
     await magic.user.logout();
-    updateAuth({ ...auth, state: AuthState.NoUser });
+    const refreshToken = await getRefreshToken();
+    deleteRefreshToken();
+    await axios.post(`${BASE_URL}/v1/auth/signout`, {
+      refreshToken,
+    }, {
+      withCredentials: true,
+    });
   } catch (error) {
-    updateAuth(oldAuth);
-
     console.error(error.message);
   }
+  updateAuth({ ...auth, state: AuthState.NoUser });
 }
 
 export function cancelSignIn() {
   signInCancelHandle?.();
 }
 
-async function syncUserMetadata(didToken: string) {
-  updateAuth({ state: AuthState.FetchingUserMetadata });
-
-  try {
-    const metadata = await magic.user.getMetadata()
-
-    updateAuth({ state: AuthState.UserAndMetadataLoaded, metadata });
-
-    try {
-      await axios.post(`${BASE_URL}/auth/user`, {
-        didToken,
-      });
-    } catch (error) {
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
-      console.error('Failed sending user metadata to the server', error.message);
-      signOut();
-      return;
-    }
-
-  } catch (error) {
-    updateAuth({ state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata });
-
-    console.error(error.message);
-    signOut();
-  }
-}
-
 export async function signIn(email: string) {
-  cancelSignIn();
+  try {
+    const oldRefreshToken = await getRefreshToken();
+    if (oldRefreshToken) {
+      const { data } = await axios.post(`${BASE_URL}/v1/auth/refresh`, {
+        refreshToken: oldRefreshToken,
+      });
 
+      const user = data.user as User;
+      updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
+
+      const refreshToken = data.refreshToken as string;
+      return setRefreshToken(refreshToken);
+    }
+  } catch (error) { }
+
+  cancelSignIn();
   updateAuth({ state: AuthState.SigningInUser });
 
   let rejectHandle: (reason?: any) => void;
@@ -176,7 +188,6 @@ export async function signIn(email: string) {
     rejectHandle = reject;
 
     const sessionID = generateSessionID();
-
     const params = querystring.encode({
       email,
       ...isDev && { test: 'true' },
@@ -185,7 +196,6 @@ export async function signIn(email: string) {
     await openLink(`${BASE_URL}/auth/signin/${sessionID}?${params}`);
 
     let credential: string | undefined = undefined;
-
     const requestLimit = 15 * 60;
 
     for (let i = 0; i < requestLimit; i++) {
@@ -234,15 +244,24 @@ export async function signIn(email: string) {
 
     try {
       const didToken = await magic.auth.loginWithCredential(credential);
-
-      if (didToken) {
-        updateAuth({ state: AuthState.FetchingUserMetadata });
-        syncUserMetadata(didToken);
-        return resolve();
+      if (!didToken) {
+        updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
+        return reject({ message: 'Could not complete the sign in' });
       }
 
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
-      return reject({ message: 'Could not complete the sign in' });
+      const { data } = await axios.post(`${BASE_URL}/v1/auth/signin`, {}, {
+        withCredentials: true,
+        headers: {
+          'Authorization': `Bearer ${didToken}`,
+        },
+      });
+      const user = data.user as User;
+      updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
+
+      const refreshToken = data.refreshToken as string;
+      setRefreshToken(refreshToken);
+
+      return resolve();
     } catch (error) {
       updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
       return reject({ message: error.message });
@@ -259,32 +278,25 @@ export async function signIn(email: string) {
 
 export async function refreshAuth() {
   updateAuth({ state: AuthState.LookingForStoredUser });
-
   try {
-    const isUserSignedIn = await magic.user.isLoggedIn();
-
-    if (!isUserSignedIn) {
-      updateAuth({ state: AuthState.NoUser });
+    const oldRefreshToken = await getRefreshToken();
+    console.log('refresh', oldRefreshToken);
+    if (!oldRefreshToken) {
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
       return;
     }
+    const { data } = await axios.post(`${BASE_URL}/v1/auth/refresh`, {
+      refreshToken: oldRefreshToken,
+    });
 
-    updateAuth({ state: AuthState.FetchingUserMetadata });
+    const user = data.user as User;
+    updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
 
-    try {
-      const metadata = await magic.user.getMetadata();
-      updateAuth({ state: AuthState.UserAndMetadataLoaded, metadata });
-
-    } catch (error) {
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata });
-
-      console.error(error.message);
-
-      signOut();
-    }
+    const refreshToken = data.refreshToken as string;
+    setRefreshToken(refreshToken);
 
   } catch (error) {
     updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
-
     console.error(error.message);
   }
 }
