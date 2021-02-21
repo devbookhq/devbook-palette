@@ -45,8 +45,7 @@ export async function searchCode(query: string, pageSize?: number, page?: number
     await init();
   }
 
-  let url = 'https://api.usedevbook.com/search/github/code';
-  if (isDev) url = 'https://dev.usedevbook.com/search/github/code';
+  const url = isDev ? 'https://dev.usedevbook.com/search/github/code' : 'https://api.usedevbook.com/search/github/code';
 
   const result = await axios.post(url, {
     accessToken,

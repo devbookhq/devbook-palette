@@ -32,8 +32,7 @@ export interface StackOverflowResult {
 }
 
 export async function search(query: string): Promise<StackOverflowResult[]> {
-  let url = 'https://api.usedevbook.com/search/stackoverflow';
-  if (isDev) url = 'https://dev.usedevbook.com/search/stackoverflow';
+  const url = isDev ? 'https://dev.usedevbook.com/search/stackoverflow' : 'https://api.usedevbook.com/search/stackoverflow';
 
   const result = await axios.post(url, { query });
   return result.data.results;

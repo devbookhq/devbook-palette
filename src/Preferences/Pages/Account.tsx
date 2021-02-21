@@ -63,8 +63,7 @@ function Account() {
   const isLoading =
     authInfo.state === AuthState.LookingForStoredUser ||
     authInfo.state === AuthState.SigningOutUser ||
-    authInfo.state === AuthState.SigningInUser ||
-    authInfo.state === AuthState.FetchingUserMetadata;
+    authInfo.state === AuthState.SigningInUser;
 
   function handleSignOutButtonClicked() {
     signOutUser();

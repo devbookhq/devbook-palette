@@ -824,12 +824,9 @@ function Home() {
   const isUserLoading =
     authInfo.state === AuthState.LookingForStoredUser ||
     authInfo.state === AuthState.SigningOutUser ||
-    authInfo.state === AuthState.SigningInUser ||
-    authInfo.state === AuthState.FetchingUserMetadata;
+    authInfo.state === AuthState.SigningInUser;
 
-  const isUserSignedInWithOrWithoutMetadata =
-    authInfo.state === AuthState.FetchingUserMetadata ||
-    authInfo.state === AuthState.UserAndMetadataLoaded;
+  const isUserSignedInWithOrWithoutMetadata = authInfo.state === AuthState.UserAndMetadataLoaded;
 
   const docPageSearchInputRef = useRef<HTMLInputElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
@@ -1548,7 +1545,7 @@ function Home() {
             */}
 
             {activeFilter === ResultsFilter.Docs
-              && (authInfo.state === AuthState.UserAndMetadataLoaded || authInfo.state === AuthState.FetchingUserMetadata)
+              && (authInfo.state === AuthState.UserAndMetadataLoaded)
               &&
               <InfoMessage>Type your search query</InfoMessage>
             }

@@ -144,9 +144,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
 
   const isLoading = auth.state === AuthState.SigningInUser;
 
-  const isSignedIn =
-    auth.state === AuthState.FetchingUserMetadata
-    || auth.state === AuthState.UserAndMetadataLoaded;
+  const isSignedIn = auth.state === AuthState.UserAndMetadataLoaded;
 
   function handleEmailInputChange(e: any) {
     setEmail(e.target.value);
