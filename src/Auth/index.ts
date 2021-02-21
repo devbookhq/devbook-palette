@@ -263,6 +263,20 @@ export async function refreshAuth() {
   try {
     const oldRefreshToken = getRefreshToken();
     if (!oldRefreshToken) {
+      if (await magic.user.isLoggedIn()) {
+        const didToken = await magic.user.getIdToken();
+        const { data: { refreshToken, user } } = await axios.post('/auth/signIn', null, {
+          baseURL: `${baseURL}/${apiVersion}`,
+          withCredentials: true,
+          headers: {
+            'Authorization': `Bearer ${didToken}`,
+          },
+        }) as { data: { user: User, refreshToken: string } };
+        setRefreshToken(refreshToken);
+        updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
+        return;
+      }
+
       updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
       return;
     }
