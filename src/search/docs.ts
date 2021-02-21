@@ -35,7 +35,6 @@ export async function search(query: string, docSources: DocSource[]): Promise<Do
 export async function fetchDocSources(): Promise<DocSource[]> {
   const url = isDev ? 'https://dev.usedevbook.com/search/docs' : 'https://api.usedevbook.com/search/docs';
 
-
   const result = await axios.get(url);
   return result.data.docs.map((ds: DocSource) => ({ ...ds, isIncludedInSearch: true }));
 }
