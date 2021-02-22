@@ -6,6 +6,7 @@ import { EventEmitter } from 'events';
 import {
   crypto,
   querystring,
+  ElectronStore,
 } from 'mainCommunication/electron';
 import {
   openLink,
@@ -14,9 +15,6 @@ import {
   setAuthInOtherWindows,
 } from 'mainCommunication';
 import timeout from 'utils/timeout';
-
-const BASE_URL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
-const MAGIC_API_KEY = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
 
 enum AuthError {
   // The error when the looking for a valid stored user failed - probably because of the network connection.
@@ -30,10 +28,6 @@ enum AuthError {
   // The error when the user sign in failed.
   // User is not signed in and no metadata are present.
   FailedSigningInUser = 'Failed signing in user',
-
-  // The error when the fetching of user's metadata failed after the user was successfuly signed in.
-  // User was explicitly signed out and no metadata are present.
-  FailedFetchingUserMetadata = 'Failed feching user metadata',
 }
 
 export enum AuthState {
@@ -56,36 +50,32 @@ export enum AuthState {
   // User may be signed in and metadata may be present
   SigningOutUser,
 
-  // LOADING STATE
-  // The state when the user is signed in, but the app is still fetching user metadata.
-  // User is signed in, but metadata are not fetched yet. 
-  FetchingUserMetadata,
-
   // The state when the user is signed in and the metadata were successfuly fetched.
   // User is signed in and metadata are present.
   UserAndMetadataLoaded,
 }
 
+interface User {
+  userID: string;
+  email: string;
+}
+
 type FailedLookingForStoredUserAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser };
-type FailedSigningOutAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedSigningOutUser, metadata?: MagicUserMetadata };
+type FailedSigningOutAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedSigningOutUser, user?: User };
 type FailedSigningInAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedSigningInUser };
-type FailedFetchingUserMetadataAuthInfo = { state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata };
 type LookingForStoredUserAuthInfo = { state: AuthState.LookingForStoredUser }
 type NoUserAuthInfo = { state: AuthState.NoUser };
-type FetchingUserMetadataAuthInfo = { state: AuthState.FetchingUserMetadata }
 type SigningInUserAuthInfo = { state: AuthState.SigningInUser }
-type SigningOutUserAuthInfo = { state: AuthState.SigningOutUser, metadata?: MagicUserMetadata }
-type UserAndMetadataLoadedAuthInfo = { state: AuthState.UserAndMetadataLoaded, metadata: MagicUserMetadata };
+type SigningOutUserAuthInfo = { state: AuthState.SigningOutUser, user?: User }
+type UserAndMetadataLoadedAuthInfo = { state: AuthState.UserAndMetadataLoaded, user: User };
 
 export type AuthInfo = FailedSigningOutAuthInfo
   | FailedSigningInAuthInfo
   | NoUserAuthInfo
   | FailedLookingForStoredUserAuthInfo
-  | FailedFetchingUserMetadataAuthInfo
   | SigningInUserAuthInfo
   | UserAndMetadataLoadedAuthInfo
   | LookingForStoredUserAuthInfo
-  | FetchingUserMetadataAuthInfo
   | SigningOutUserAuthInfo;
 
 export const authEmitter = new EventEmitter();
@@ -93,14 +83,38 @@ export const authEmitter = new EventEmitter();
 export let auth: AuthInfo = { state: AuthState.LookingForStoredUser };
 export const AuthContext = createContext<AuthInfo>(auth);
 
-const magic = new Magic(MAGIC_API_KEY);
+const baseURL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
+
+enum APIVersion {
+  v1 = 'v1',
+}
+
+const apiVersion = APIVersion.v1;
+
+const magicAPIKey = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
+const magic = new Magic(magicAPIKey);
 
 let signInCancelHandle: (() => void) | undefined = undefined;
 
+const electronStore = new ElectronStore();
+const refreshTokenStoreName = 'refreshToken';
+
+function setRefreshToken(refreshToken: string) {
+  return electronStore.set(refreshTokenStoreName, refreshToken);
+}
+
+function getRefreshToken(): string {
+  return electronStore.get(refreshTokenStoreName);
+}
+
+function deleteRefreshToken() {
+  return electronStore.delete(refreshTokenStoreName);
+}
+
 function changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
   if (auth.state === AuthState.UserAndMetadataLoaded) {
-    const email = auth?.metadata?.email || undefined;
-    const userID = auth?.metadata?.publicAddress || undefined;
+    const email = auth?.user?.email || undefined;
+    const userID = auth?.user?.userID || undefined;
     changeUserInMain(userID && email ? { userID, email } : undefined);
   } if (auth.state === AuthState.NoUser) {
     changeUserInMain();
@@ -119,14 +133,20 @@ export function updateAuth(newAuth: AuthInfo) {
 }
 
 export async function signOut() {
-  const oldAuth = auth;
   updateAuth({ ...auth, state: AuthState.SigningOutUser });
+  const refreshToken = getRefreshToken();
+  deleteRefreshToken();
+  updateAuth({ ...auth, state: AuthState.NoUser });
   try {
     await magic.user.logout();
-    updateAuth({ ...auth, state: AuthState.NoUser });
+    await axios.post('/auth/signOut', null, {
+      baseURL: `${baseURL}/${apiVersion}`,
+      params: {
+        refreshToken,
+      },
+      withCredentials: true,
+    });
   } catch (error) {
-    updateAuth(oldAuth);
-
     console.error(error.message);
   }
 }
@@ -135,36 +155,8 @@ export function cancelSignIn() {
   signInCancelHandle?.();
 }
 
-async function syncUserMetadata(didToken: string) {
-  updateAuth({ state: AuthState.FetchingUserMetadata });
-
-  try {
-    const metadata = await magic.user.getMetadata()
-
-    updateAuth({ state: AuthState.UserAndMetadataLoaded, metadata });
-
-    try {
-      await axios.post(`${BASE_URL}/auth/user`, {
-        didToken,
-      });
-    } catch (error) {
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
-      console.error('Failed sending user metadata to the server', error.message);
-      signOut();
-      return;
-    }
-
-  } catch (error) {
-    updateAuth({ state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata });
-
-    console.error(error.message);
-    signOut();
-  }
-}
-
 export async function signIn(email: string) {
   cancelSignIn();
-
   updateAuth({ state: AuthState.SigningInUser });
 
   let rejectHandle: (reason?: any) => void;
@@ -174,16 +166,15 @@ export async function signIn(email: string) {
     rejectHandle = reject;
 
     const sessionID = generateSessionID();
-
     const params = querystring.encode({
       email,
       ...isDev && { test: 'true' },
     });
 
-    await openLink(`${BASE_URL}/auth/signin/${sessionID}?${params}`);
+    // This route should NOT be "/auth/signIn" - "/auth/signin" is correct, because it uses the old API.
+    await openLink(`${baseURL}/auth/signin/${sessionID}?${params}`);
 
     let credential: string | undefined = undefined;
-
     const requestLimit = 15 * 60;
 
     for (let i = 0; i < requestLimit; i++) {
@@ -196,7 +187,8 @@ export async function signIn(email: string) {
       }
 
       try {
-        const result = await axios.get(`${BASE_URL}/auth/credential/${sessionID}`, {
+        const result = await axios.get(`/auth/credential/${sessionID}`, {
+          baseURL: `${baseURL}/${apiVersion}`,
           params: {
             email,
           },
@@ -210,12 +202,14 @@ export async function signIn(email: string) {
           break;
         }
       }
-      await timeout(1000);
+      await timeout(800);
     }
 
     if (isCancelled) {
       try {
-        await axios.delete(`${BASE_URL}/auth/credential/${sessionID}`);
+        await axios.delete(`/auth/credential/${sessionID}`, {
+          baseURL: `${baseURL}/${apiVersion}`,
+        });
         updateAuth({ state: AuthState.NoUser });
         return reject({ message: 'Sign in was cancelled' });
       } catch (error) {
@@ -232,15 +226,22 @@ export async function signIn(email: string) {
 
     try {
       const didToken = await magic.auth.loginWithCredential(credential);
-
-      if (didToken) {
-        updateAuth({ state: AuthState.FetchingUserMetadata });
-        syncUserMetadata(didToken);
-        return resolve();
+      if (!didToken) {
+        updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
+        return reject({ message: 'Could not complete the sign in' });
       }
 
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
-      return reject({ message: 'Could not complete the sign in' });
+      const { data: { refreshToken, user } } = await axios.post('/auth/signIn', null, {
+        baseURL: `${baseURL}/${apiVersion}`,
+        withCredentials: true,
+        headers: {
+          'Authorization': `Bearer ${didToken}`,
+        },
+      }) as { data: { user: User, refreshToken: string } };
+
+      setRefreshToken(refreshToken);
+      updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
+      return resolve();
     } catch (error) {
       updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
       return reject({ message: error.message });
@@ -257,32 +258,37 @@ export async function signIn(email: string) {
 
 export async function refreshAuth() {
   updateAuth({ state: AuthState.LookingForStoredUser });
-
   try {
-    const isUserSignedIn = await magic.user.isLoggedIn();
+    const oldRefreshToken = getRefreshToken();
+    if (!oldRefreshToken) {
+      if (await magic.user.isLoggedIn()) {
+        const didToken = await magic.user.getIdToken();
+        const { data: { refreshToken, user } } = await axios.post('/auth/signIn', null, {
+          baseURL: `${baseURL}/${apiVersion}`,
+          withCredentials: true,
+          headers: {
+            'Authorization': `Bearer ${didToken}`,
+          },
+        }) as { data: { user: User, refreshToken: string } };
+        setRefreshToken(refreshToken);
+        updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
+        return;
+      }
 
-    if (!isUserSignedIn) {
-      updateAuth({ state: AuthState.NoUser });
+      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
       return;
     }
+    const { data: { user, refreshToken } } = await axios.get('/auth/accessToken', {
+      baseURL: `${baseURL}/${apiVersion}`,
+      params: {
+        refreshToken: oldRefreshToken,
+      },
+    }) as { data: { user: User, refreshToken: string } };
 
-    updateAuth({ state: AuthState.FetchingUserMetadata });
-
-    try {
-      const metadata = await magic.user.getMetadata();
-      updateAuth({ state: AuthState.UserAndMetadataLoaded, metadata });
-
-    } catch (error) {
-      updateAuth({ state: AuthState.NoUser, error: AuthError.FailedFetchingUserMetadata });
-
-      console.error(error.message);
-
-      signOut();
-    }
-
+    updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
+    setRefreshToken(refreshToken);
   } catch (error) {
     updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
-
     console.error(error.message);
   }
 }
