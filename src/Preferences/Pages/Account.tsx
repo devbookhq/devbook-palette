@@ -63,8 +63,7 @@ function Account() {
   const isLoading =
     authInfo.state === AuthState.LookingForStoredUser ||
     authInfo.state === AuthState.SigningOutUser ||
-    authInfo.state === AuthState.SigningInUser ||
-    authInfo.state === AuthState.FetchingUserMetadata;
+    authInfo.state === AuthState.SigningInUser;
 
   function handleSignOutButtonClicked() {
     signOutUser();
@@ -81,7 +80,7 @@ function Account() {
         {!isLoading && authInfo.state === AuthState.UserAndMetadataLoaded &&
           <>
             <Email>
-              {authInfo.metadata.email}
+              {authInfo.user.email}
             </Email>
             <SignOutButton onClick={handleSignOutButtonClicked}>
               Sign Out

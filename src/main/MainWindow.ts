@@ -49,7 +49,7 @@ class MainWindow {
     this.window.on('restore', () => {
       console.log('Window restored');
       if (!this.window) { return; }
-    });
+    })
 
     this.window.on('resize', () => {
       if (this.window) {
@@ -75,9 +75,7 @@ class MainWindow {
     });
 
     this.window.on('blur', () => {
-      if (!isDev) {
-        hideWindow();
-      }
+      if (!isDev) hideWindow();
     });
 
     this.window.on('closed', () => {
@@ -101,6 +99,7 @@ class MainWindow {
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/`);
     }
+
   }
 
   public close() {
