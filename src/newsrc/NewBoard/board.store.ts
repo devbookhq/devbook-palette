@@ -13,31 +13,35 @@ export default class BoardStore {
       rootStore: false,
     });
 
-    const s = new SplitNode(SplitDirection.Vertical,
+    const s1 = new SplitNode(SplitDirection.Horizontal, new TileNode(), new TileNode());
+    const s2 = new SplitNode(SplitDirection.Horizontal, s1, new TileNode());
+    /*
+    const s2 = new SplitNode(SplitDirection.Vertical,
       new TileNode(),
-      new SplitNode(SplitDirection.Horizontal, new TileNode(), new TileNode()),
-    )
+      s1,
+    );
+    const s3 = new SplitNode(SplitDirection.Horizontal, new TileNode(), s2);
+    */
+    const s3 = new SplitNode(SplitDirection.Vertical, new TileNode(), s2);
 
-    this.layout = new BoardLayout(
-      new SplitNode(SplitDirection.Horizontal, s, new TileNode()),
-    );
-    (this.layout.root as SplitNode).addChild(
-      new SplitNode(SplitDirection.Vertical, new TileNode(), new TileNode()),
-    );
+    this.layout = new BoardLayout(s3);
   }
 }
 
-type LayoutNode = TileNode | SplitNode;
+export type LayoutNode = TileNode | SplitNode;
+
+function getID() {
+  return Math.random().toString(36).substr(2, 5);
+}
 
 export class TileNode {
-  readonly key: string;
+  readonly key = 'tile_' + getID();
   parent?: SplitNode = undefined;
 
   constructor() {
     makeAutoObservable(this, {
       key: false,
     });
-    this.key = 'tile_' + Math.random().toString(36).substr(2, 5);
   }
 
   setParent(node: SplitNode) {
@@ -52,7 +56,7 @@ export enum SplitDirection {
 }
 
 export class SplitNode {
-  readonly key: string;
+  readonly key = 'split_' + getID();
   parent?: SplitNode = undefined;
   private children: LayoutNode[] = [];
 
@@ -61,7 +65,6 @@ export class SplitNode {
       key: false,
       direction: false,
     });
-    this.key = 'split_' + Math.random().toString(36).substr(2, 5);
     this.addChild(left);
     this.addChild(right);
   }
@@ -71,12 +74,37 @@ export class SplitNode {
   }
 
   addChild(node: LayoutNode) {
-    node.setParent(this);
-    this.children[this.children.length] = node;
+    // If the new child node is also SplitNode and with the same direction
+    // as this split node, then add its children directly to this node and
+    // get rid of the new child node.
+    //
+    //    SplitNode (Horizontal)                                SplitNode (Horizontal)
+    //      /                \                                 /       |        |     \
+    // TileNode         SplitNode (Horizontal)      --->  TileNode TileNode TileNode SplitNode
+    //                    /       |        \                                          /    \
+    //               TileNode  TileNode  SplitNode
+    //                                    /    \
+
+    if (node instanceof SplitNode && node.direction === this.direction) {
+      this.children = this.children.concat(node.children);
+      node.dispose();
+    } else {
+      node.setParent(this);
+      this.children[this.children.length] = node;
+    }
+    /*
+      node.setParent(this);
+      this.children[this.children.length] = node;
+      */
   }
 
   getChildren() {
     return this.children;
+  }
+
+  dispose() {
+    this.children = [];
+    this.parent = undefined;
   }
 }
 

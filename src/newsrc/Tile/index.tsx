@@ -64,6 +64,7 @@ interface TileProps {
   results: any[];
 }
 
+// TODO: Move Tile into the Board directory.
 function Tile({ className, isFocused, results }: TileProps) {
   return (
     <Container

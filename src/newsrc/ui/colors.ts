@@ -1,6 +1,7 @@
 export const Charcoal = {
   lighter: '#242327',
-  light: '#1c1b1f',
+  // light: '#1c1b1f',
+  light: '#19191B',
   normal: '#121114',
   dark: '#020203',
 };

@@ -1,10 +1,11 @@
 import React from 'react';
-import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
 import Toolbar from 'newsrc/Toolbar';
+import TabBar from 'newsrc/TabBar';
 import Board from 'newsrc/Board';
 import NewBoard from 'newsrc/NewBoard';
+
 
 // The electron window is set to be frameless.
 // Frameless window stops being draggable - this is the solution.
@@ -30,15 +31,13 @@ function App() {
   return (
     <>
       <DragHeader/>
-      <FlexContainer>
-        <Toolbar/>
-        <FlexContainer direction="column">
-          <NewBoard/>
-        </FlexContainer>
+      <FlexContainer direction="column">
+        <TabBar/>
+        <NewBoard/>
       </FlexContainer>
     </>
   );
 }
 
-export default observer(App);
+export default App;
 
