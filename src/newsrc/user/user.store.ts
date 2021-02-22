@@ -86,7 +86,7 @@ class UserStore {
     setAuthInOtherWindows(this.auth);
   }
 
-  private async signOut() {
+  async signOut() {
     this.updateAuth({ ...this.auth, state: AuthState.SigningOutUser });
     const refreshToken = getRefreshToken();
     deleteRefreshToken();
