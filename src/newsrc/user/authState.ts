@@ -18,11 +18,6 @@ export enum AuthState {
   // User may be signed in and metadata may be present
   SigningOutUser,
 
-  // LOADING STATE
-  // The state when the user is signed in, but the app is still fetching user metadata.
-  // User is signed in, but metadata are not fetched yet. 
-  FetchingUserMetadata,
-
   // The state when the user is signed in and the metadata were successfuly fetched.
   // User is signed in and metadata are present.
   UserAndMetadataLoaded,

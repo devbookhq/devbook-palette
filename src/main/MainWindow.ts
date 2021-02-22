@@ -75,9 +75,7 @@ class MainWindow {
     });
 
     this.window.on('blur', () => {
-      if (!isDev) {
-        hideWindow();
-      }
+      if (!isDev) hideWindow();
     });
 
     this.window.on('closed', () => {
@@ -89,12 +87,7 @@ class MainWindow {
     });
 
     if (isDev) {
-      this.window.loadURL(`http://localhost:${PORT}/index.html`).then(() => {
-        this.window?.webContents.session.cookies.get({}).then((cookies) => {
-          console.log(cookies);
-        })
-
-      })
+      this.window.loadURL(`http://localhost:${PORT}/index.html`);
       // Hot Reloading
       require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),

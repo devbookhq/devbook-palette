@@ -15,7 +15,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 
 import { isDev } from '../../mainCommunication/electron'
 import { ExtensionID } from './extensionID';
-import * as ipc from './extensions.ipc';
+import * as ipc from './extensions.electron';
 import type ExtensionsStore from './extensions.store';
 
 interface StatusListener<D> {

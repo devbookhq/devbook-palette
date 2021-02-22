@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import { Magic, MagicUserMetadata } from 'magic-sdk';
+import { Magic } from 'magic-sdk';
 import axios from 'axios';
 import { EventEmitter } from 'events';
 
@@ -213,7 +213,6 @@ export async function signIn(email: string) {
         updateAuth({ state: AuthState.NoUser });
         return reject({ message: 'Sign in was cancelled' });
       } catch (error) {
-        console.error(error.message);
         updateAuth({ state: AuthState.NoUser });
         return reject({ message: 'Sign in could not be cancelled' });
       }
@@ -252,7 +251,6 @@ export async function signIn(email: string) {
     rejectHandle({ message: 'Sign in was cancelled' });
     isCancelled = true;
   };
-
   return cancelableSignIn;
 }
 
@@ -289,6 +287,5 @@ export async function refreshAuth() {
     setRefreshToken(refreshToken);
   } catch (error) {
     updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
-    console.error(error.message);
   }
 }
