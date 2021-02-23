@@ -3,7 +3,7 @@ import React, {
   useContext,
 } from 'react';
 
-import TransportLayer from 'newsrc/layers/TransportLayer';
+import TransportLayer from 'newsrc/layers/transportLayer';
 import UIStore from 'newsrc/ui/ui.store';
 import UserStore from 'newsrc/user/user.store';
 import ExtensionsStore from 'newsrc/extensions/extensions.store';

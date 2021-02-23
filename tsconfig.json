@@ -25,8 +25,11 @@
   },
   "include": [
     "src",
+    "src/newsrc",
+    "src/newsrc/main/ipcMessage.ts",
   ],
   "exclude": [
-    "src/main"
+    "src/main",
+    "src/newsrc/main"
   ]
 }

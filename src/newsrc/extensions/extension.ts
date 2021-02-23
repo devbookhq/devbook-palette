@@ -15,7 +15,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 
 import { isDev } from '../../mainCommunication/electron'
 import { ExtensionID } from './extensionID';
-import * as electron from './extensions.electron';
+import { events, path, childProcess, app } from '../electronRemote';
 import type ExtensionsStore from './extensions.store';
 
 interface StatusListener<D> {
@@ -24,7 +24,7 @@ interface StatusListener<D> {
 
 class Extension {
   private extensionProcess: ChildProcess;
-  private statusEmitter = new electron.EventEmitter();
+  private statusEmitter = new events.EventEmitter();
   public isReady = false;
 
   public get isActive() {
@@ -38,11 +38,11 @@ class Extension {
       onceReady: false,
     });
 
-    const root = electron.app.getAppPath();
+    const root = app.getAppPath();
     const extensionProcessPath = require.resolve('@devbookhq/extension');
-    const extensionModulePath = electron.path.resolve(root, 'build', 'main', 'extensions', 'defaultExtensions', extensionID);
+    const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'defaultExtensions', extensionID);
 
-    this.extensionProcess = electron.fork(extensionProcessPath, undefined, {
+    this.extensionProcess = childProcess.fork(extensionProcessPath, undefined, {
       stdio: isDev ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'ignore', 'ignore', 'ipc'],
       env: {
         ...process.env,

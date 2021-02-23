@@ -1,46 +1,32 @@
 import {
   autorun,
+  toJS,
   makeAutoObservable,
 } from 'mobx';
 import { Magic } from 'magic-sdk';
 import axios from 'axios';
 
 import {
-  crypto,
-  querystring,
-} from 'mainCommunication/electron';
-import {
-  openLink,
-  isDev,
   changeUserInMain,
   setAuthInOtherWindows,
-} from 'mainCommunication';
+  handleGetAuthFromMainWindow,
+} from './user.ipc';
 import timeout from 'utils/timeout';
 import RootStore, { useRootStore } from 'newsrc/App/RootStore';
 import { AuthInfo } from './authInfo';
 import { AuthState } from './authState';
 import { AuthError } from './authError';
 import { User } from './user';
-
-import { ElectronStore } from './user.electron';
+import {
+  ElectronStore,
+  querystring,
+  openLink,
+  isDev,
+} from '../electronRemote';
+import randomKey from '../utils/randomKey';
 
 export function useUserStore() {
   return useRootStore().userStore;
-}
-
-const electronStore = new ElectronStore();
-const refreshTokenStoreName = 'refreshToken';
-
-function setRefreshToken(refreshToken: string) {
-  return electronStore.set(refreshTokenStoreName, refreshToken);
-}
-
-function getRefreshToken(): string {
-  return electronStore.get(refreshTokenStoreName);
-}
-
-function deleteRefreshToken() {
-  return electronStore.delete(refreshTokenStoreName);
 }
 
 enum APIVersion {
@@ -51,50 +37,106 @@ const apiVersion = APIVersion.v1;
 
 class UserStore {
   // private static baseURL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
-  private static baseURL = isDev ? 'http://localhost:3002' : 'https://api.usedevbook.com';
-  private static magicAPIKey = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
+  baseURL = isDev ? 'http://localhost:3002' : 'https://api.usedevbook.com';
+  magicAPIKey = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
+  refreshTokenStoreName = 'refreshToken';
 
-  private magic = new Magic(UserStore.magicAPIKey);
+  magic = new Magic(this.magicAPIKey);
+  electronStore = new ElectronStore();
 
-  auth: AuthInfo = { state: AuthState.LookingForStoredUser };
+  readonly auth: AuthInfo = { state: AuthState.NoUser, error: undefined, user: undefined };
   private signInCancelHandle: (() => void) | undefined = undefined;
 
+  get isLoading() {
+    return this.auth.state === AuthState.LookingForStoredUser ||
+      this.auth.state === AuthState.SigningInUser ||
+      this.auth.state === AuthState.SigningOutUser;
+  }
+
+  get state() {
+    return this.auth.state;
+  }
+
+  get error() {
+    return this.auth.error;
+  }
+
+  get user() {
+    return this.auth.user;
+  }
+
+  get asJSON() {
+    return toJS(this.auth);
+  }
+
   constructor(private readonly rootStore: RootStore) {
-    makeAutoObservable(this, {});
-    autorun(() => {
-      console.log(AuthState[this.auth.state]);
+    makeAutoObservable(this, {
+      baseURL: false,
+      magic: false,
+      magicAPIKey: false,
+      refreshTokenStoreName: false,
+      electronStore: false,
     });
+    autorun(() => {
+      console.log('Authentication:', this.asJSON);
+    });
+
+    handleGetAuthFromMainWindow(() => this.asJSON);
+    this.refreshAuth();
+  }
+
+  private setRefreshToken(refreshToken: string) {
+    return this.electronStore.set(this.refreshTokenStoreName, refreshToken);
+  }
+
+  private getRefreshToken(): string {
+    return this.electronStore.get(this.refreshTokenStoreName);
+  }
+
+  private deleteRefreshToken() {
+    return this.electronStore.delete(this.refreshTokenStoreName);
   }
 
   private changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
-    if (auth.state === AuthState.UserAndMetadataLoaded) {
-      const email = auth?.user?.email || undefined;
-      const userID = auth?.user?.userID || undefined;
-      changeUserInMain(userID && email ? { userID, email } : undefined);
-    } if (auth.state === AuthState.NoUser) {
-      changeUserInMain();
+    switch (auth.state) {
+      case AuthState.UserSignedIn:
+        return changeUserInMain(auth.user);
+      case AuthState.NoUser:
+        return changeUserInMain();
+      default:
+        break;
     }
   }
 
-  private generateSessionID() {
-    return encodeURIComponent(crypto.randomBytes(64).toString('base64'));
-  };
+  private updateAuthEverywhere(auth: AuthInfo) {
+    this.updateAuth(auth);
+    const clone = toJS(auth);
+    this.changeAnalyticsUserAndSaveEmail(clone);
+    setAuthInOtherWindows(clone);
+  }
 
-  updateAuth(newAuth: AuthInfo) {
-    this.auth = newAuth;
-    this.changeAnalyticsUserAndSaveEmail(this.auth);
-    setAuthInOtherWindows(this.auth);
+  updateAuth(auth: AuthInfo) {
+    this.auth.state = auth.state;
+    if (auth.user) this.auth.user = auth.user;
+    if (auth.error) this.auth.error = auth.error;
   }
 
   async signOut() {
-    this.updateAuth({ ...this.auth, state: AuthState.SigningOutUser });
-    const refreshToken = getRefreshToken();
-    deleteRefreshToken();
-    this.updateAuth({ ...this.auth, state: AuthState.NoUser });
+    if (!this.user) {
+      return;
+    }
+    this.updateAuthEverywhere({ state: AuthState.SigningOutUser, user: this.user });
+    const refreshToken = this.getRefreshToken();
+    this.deleteRefreshToken();
+    this.updateAuthEverywhere({ state: AuthState.NoUser });
     try {
       await this.magic.user.logout();
+    } catch (error) {
+      console.error(error.message);
+    }
+    try {
       await axios.post('/auth/signOut', null, {
-        baseURL: `${UserStore.baseURL}/${apiVersion}`,
+        baseURL: `${this.baseURL}/${apiVersion}`,
         params: {
           refreshToken,
         },
@@ -111,7 +153,7 @@ class UserStore {
 
   signIn(email: string) {
     this.cancelSignIn();
-    this.updateAuth({ state: AuthState.SigningInUser });
+    this.updateAuthEverywhere({ state: AuthState.SigningInUser });
 
     let rejectHandle: (reason?: any) => void;
     let isCancelled = false;
@@ -119,14 +161,14 @@ class UserStore {
     const cancelableSignIn = new Promise<void>(async (resolve, reject) => {
       rejectHandle = reject;
 
-      const sessionID = this.generateSessionID();
+      const sessionID = encodeURIComponent(randomKey());
       const params = querystring.encode({
         email,
         ...isDev && { test: 'true' },
       });
 
       // This route should NOT be "/auth/signIn" - "/auth/signin" is correct, because it uses the old API.
-      await openLink(`${UserStore.baseURL}/auth/signin/${sessionID}?${params}`);
+      await openLink(`${this.baseURL}/auth/signin/${sessionID}?${params}`);
 
       let credential: string | undefined = undefined;
       const requestLimit = 15 * 60;
@@ -137,7 +179,7 @@ class UserStore {
 
         try {
           const result = await axios.get(`/auth/credential/${sessionID}`, {
-            baseURL: `${UserStore.baseURL}/${apiVersion}`,
+            baseURL: `${this.baseURL}/${apiVersion}`,
             params: {
               email,
             },
@@ -157,42 +199,42 @@ class UserStore {
       if (isCancelled) {
         try {
           await axios.delete(`/auth/credential/${sessionID}`, {
-            baseURL: `${UserStore.baseURL}/${apiVersion}`,
+            baseURL: `${this.baseURL}/${apiVersion}`,
           });
-          this.updateAuth({ state: AuthState.NoUser });
           return reject({ message: 'Sign in was cancelled' });
         } catch (error) {
           console.error(error.message);
-          this.updateAuth({ state: AuthState.NoUser });
           return reject({ message: 'Sign in could not be cancelled' });
+        } finally {
+          this.updateAuthEverywhere({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
         }
       }
 
       if (!credential && !isCancelled) {
-        this.updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
+        this.updateAuthEverywhere({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
         return reject({ message: 'Getting credential for sign in timed out' });
       }
 
       try {
         const didToken = await this.magic.auth.loginWithCredential(credential);
         if (!didToken) {
-          this.updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
+          this.updateAuthEverywhere({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
           return reject({ message: 'Could not complete the sign in' });
         }
 
         const { data: { refreshToken, user } } = await axios.post('/auth/signIn', null, {
-          baseURL: `${UserStore.baseURL}/${apiVersion}`,
+          baseURL: `${this.baseURL}/${apiVersion}`,
           withCredentials: true,
           headers: {
             'Authorization': `Bearer ${didToken}`,
           },
         }) as { data: { user: User, refreshToken: string } };
 
-        setRefreshToken(refreshToken);
-        this.updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
+        this.setRefreshToken(refreshToken);
+        this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
         return resolve();
       } catch (error) {
-        this.updateAuth({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
+        this.updateAuthEverywhere({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
         return reject({ message: error.message });
       }
     });
@@ -205,39 +247,39 @@ class UserStore {
     return cancelableSignIn;
   }
 
-  async refreshAuth() {
-    this.updateAuth({ state: AuthState.LookingForStoredUser });
+  private async refreshAuth() {
+    this.updateAuthEverywhere({ state: AuthState.LookingForStoredUser });
     try {
-      const oldRefreshToken = getRefreshToken();
+      const oldRefreshToken = this.getRefreshToken();
       if (!oldRefreshToken) {
         if (await this.magic.user.isLoggedIn()) {
           const didToken = await this.magic.user.getIdToken();
           const { data: { refreshToken, user } } = await axios.post('/auth/signIn', null, {
-            baseURL: `${UserStore.baseURL}/${apiVersion}`,
+            baseURL: `${this.baseURL}/${apiVersion}`,
             withCredentials: true,
             headers: {
               'Authorization': `Bearer ${didToken}`,
             },
           }) as { data: { user: User, refreshToken: string } };
-          setRefreshToken(refreshToken);
-          this.updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
+          this.setRefreshToken(refreshToken);
+          this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
           return;
         }
 
-        this.updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
+        this.updateAuthEverywhere({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
         return;
       }
       const { data: { user, refreshToken } } = await axios.get('/auth/accessToken', {
-        baseURL: `${UserStore.baseURL}/${apiVersion}`,
+        baseURL: `${this.baseURL}/${apiVersion}`,
         params: {
           refreshToken: oldRefreshToken,
         },
       }) as { data: { user: User, refreshToken: string } };
 
-      this.updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
-      setRefreshToken(refreshToken);
+      this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
+      this.setRefreshToken(refreshToken);
     } catch (error) {
-      this.updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
+      this.updateAuthEverywhere({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
       console.error(error.message);
     }
   }

@@ -4,7 +4,7 @@ import {
 } from 'mobx';
 import RootStore, { useRootStore } from 'newsrc/App/RootStore';
 
-import Extension from './Extension';
+import Extension from './extension';
 import { ExtensionID } from './extensionID';
 
 export function useExtensionsStore() {
