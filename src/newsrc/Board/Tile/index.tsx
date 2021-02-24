@@ -1,13 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 
 import * as Colors from 'newsrc/ui/colors';
 import { TitleNormal } from 'newsrc/ui/Title';
 import Input from 'newsrc/ui/Input';
 import Shortcut, { Modifier } from 'newsrc/Shortcut';
+import { useBoardStore } from 'newsrc/Board/board.store';
 
 import StackOverflowItem from 'Home/StackOverflow/StackOverflowItem';
 import FocusState from 'Home/SearchItemFocusState';
+import {SplitDirection, TileNode} from 'newsrc/Board/board.store';
 
 const Container = styled.div<{ isFocused?: boolean }>`
   padding: 8px;
@@ -49,7 +52,7 @@ const TileControls = styled.div`
   align-items: center;
 `;
 
-// TODO: Move TileBode into a separate component.
+// TODO: Move TileBody into a separate component.
 const TileBody = styled.div`
   width: 100%;
   display: flex;
@@ -62,9 +65,30 @@ interface TileProps {
   className?: string;
   isFocused?: boolean;
   results: any[];
+  tileNode: TileNode;
 }
 
-function Tile({ className, isFocused, results }: TileProps) {
+// TODO: Move Tile into the Board directory.
+function Tile({
+  tileNode,
+  className,
+  isFocused,
+  results
+}: TileProps) {
+  const boardStore = useBoardStore();
+
+  function splitHorizontally() {
+    boardStore.splitTile(SplitDirection.Horizontal, tileNode);
+  }
+
+  function splitVertically() {
+    boardStore.splitTile(SplitDirection.Vertical, tileNode);
+  }
+
+  function removeTile() {
+    boardStore.removeTile(tileNode);
+  }
+
   return (
     <Container
       className={className}
@@ -77,10 +101,22 @@ function Tile({ className, isFocused, results }: TileProps) {
               accelerator={[Modifier.Command, '2']}
             />
             <TitleNormal>
-              Stack Overflow
+              {tileNode.key}
             </TitleNormal>
           </TileName>
           <TileControls>
+            {/* If the tile is the root, we can't remove it. */}
+            {tileNode.parentKey &&
+              <button onClick={removeTile}>
+                Remove
+              </button>
+            }
+            <button onClick={splitHorizontally}>
+              Split H
+            </button>
+            <button onClick={splitVertically}>
+              Split V
+            </button>
           </TileControls>
         </TileInfo>
 
@@ -123,5 +159,5 @@ function Tile({ className, isFocused, results }: TileProps) {
   );
 }
 
-export default Tile;
+export default observer(Tile);
 

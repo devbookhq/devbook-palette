@@ -7,7 +7,7 @@ import TransportLayer from 'newsrc/layers/transportLayer';
 import UIStore from 'newsrc/ui/ui.store';
 import UserStore from 'newsrc/user/user.store';
 import ExtensionsStore from 'newsrc/extensions/extensions.store';
-import BoardStore from 'newsrc/NewBoard/board.store';
+import BoardStore from 'newsrc/Board/board.store';
 
 const StoreContext = createContext<RootStore | undefined>(undefined);
 
