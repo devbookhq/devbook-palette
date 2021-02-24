@@ -146,12 +146,19 @@ const extensionProcesses: { [pid: number]: true } = {};
 
 function killAllExtensionProcesses() {
   (Object.keys(extensionProcesses) as unknown as number[]).forEach(async pid => {
+    killExtensionProcess(pid);
+  });
+}
+
+function killExtensionProcess(pid: number) {
+  if (extensionProcesses[pid]) {
     try {
       kill(pid)
     } catch {
-
+    } finally {
+      delete extensionProcesses[pid];
     }
-  });
+  }
 }
 
 const store = new Store();
@@ -365,3 +372,4 @@ ipcMain.on(IPCMessage.TrackSignOutButtonClicked, () => trackSignOutButtonClicked
 ipcMain.on(IPCMessage.RegisterExtensionProcess, (_, pid: number) => extensionProcesses[pid] = true);
 ipcMain.on(IPCMessage.UnregisterExtensionProcess, (_, pid: number) => delete extensionProcesses[pid]);
 ipcMain.on(IPCMessage.KillAllExtensionProcesses, () => killAllExtensionProcesses());
+ipcMain.on(IPCMessage.KillExtensionProcess, (_, pid: number) => killExtensionProcess(pid));

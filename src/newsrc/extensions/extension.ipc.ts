@@ -12,3 +12,7 @@ export function unregisterExtensionProcess(pid: number) {
 export function killAllExtensionProcesses() {
   electron.ipcRenderer.send(IPCMessage.KillAllExtensionProcesses);
 }
+
+export function killExtensionProcess(pid: number) {
+  electron.ipcRenderer.send(IPCMessage.KillExtensionProcess, pid);
+}

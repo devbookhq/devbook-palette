@@ -17,7 +17,7 @@ import { isDev } from '../../mainCommunication/electron'
 import { ExtensionID } from './extensionID';
 import { events, path, childProcess, app } from '../electronRemote';
 import type ExtensionsStore from './extensions.store';
-import { registerExtensionProcess, unregisterExtensionProcess } from './extension.ipc';
+import { killExtensionProcess, registerExtensionProcess, unregisterExtensionProcess } from './extension.ipc';
 
 interface StatusListener<D> {
   (message: StatusMessage<D>): void;
@@ -151,7 +151,7 @@ class Extension {
   }
 
   terminate() {
-    this._extensionProcess.kill();
+    killExtensionProcess(this._extensionProcess.pid);
   }
 
   async waitForEvent<D>(id: string) {

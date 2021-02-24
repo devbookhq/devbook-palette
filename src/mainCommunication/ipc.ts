@@ -52,4 +52,5 @@ export enum IPCMessage {
   RegisterExtensionProcess = 'RegisterExtensionProcess',
   UnregisterExtensionProcess = 'UnregisterExtensionProcess',
   KillAllExtensionProcesses = 'KillAllExtensionProcesses',
+  KillExtensionProcess = 'KillExtensionProcess',
 }
