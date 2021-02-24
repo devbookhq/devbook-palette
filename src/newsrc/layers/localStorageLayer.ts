@@ -1,22 +1,19 @@
 import { ElectronStore } from '../electronRemote';
-
-enum StoreKeys {
-  RefreshToken = 'refreshToken',
-}
+import { StoreKey } from 'main/StoreKey';
 
 export class LocalStorageLayer {
   private readonly electronStore = new ElectronStore();
 
   async saveRefreshToken(refreshToken: string) {
-    return this.electronStore.set(StoreKeys.RefreshToken, refreshToken);
+    return this.electronStore.set(StoreKey.RefreshToken, refreshToken);
   }
 
   async deleteRefreshToken() {
-    return this.electronStore.delete(StoreKeys.RefreshToken);
+    return this.electronStore.delete(StoreKey.RefreshToken);
   }
 
   async loadRefreshToken() {
-    return this.electronStore.get<string>(StoreKeys.RefreshToken);
+    return this.electronStore.get<string>(StoreKey.RefreshToken);
   }
 }
 

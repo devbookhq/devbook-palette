@@ -10,4 +10,5 @@ export enum StoreKey {
   UserID = 'userID',
   MainWinSize = 'mainWinSize',
   MainWinPosition = 'mainWinPosition',
+  RefreshToken = 'refreshToken',
 }

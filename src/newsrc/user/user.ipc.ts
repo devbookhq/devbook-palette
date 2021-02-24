@@ -1,5 +1,5 @@
 import electron from '../electronRemote';
-import { IPCMessage } from '../main/ipcMessage';
+import { IPCMessage } from '../../mainCommunication/ipc';
 
 import { AuthInfo } from './authInfo';
 import { User } from './user';
