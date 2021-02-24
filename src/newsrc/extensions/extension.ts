@@ -17,14 +17,15 @@ import { isDev } from '../../mainCommunication/electron'
 import { ExtensionID } from './extensionID';
 import { events, path, childProcess, app } from '../electronRemote';
 import type ExtensionsStore from './extensions.store';
+import { registerExtensionProcess, unregisterExtensionProcess } from './extension.ipc';
 
 interface StatusListener<D> {
   (message: StatusMessage<D>): void;
 }
 
 class Extension {
-  _extensionProcess: ChildProcess;
-  _statusEmitter = new events.EventEmitter();
+  readonly _extensionProcess: ChildProcess;
+  readonly _statusEmitter = new events.EventEmitter();
 
   isReady = false;
 
@@ -67,8 +68,9 @@ class Extension {
         EXTENSION_MODULE_PATH: extensionModulePath,
         ELECTRON_RUN_AS_NODE: '1',
       },
-      detached: (process.platform === 'win32'),
+      detached: process.platform === 'win32',
     });
+    registerExtensionProcess(this._extensionProcess.pid);
 
     this._extensionProcess.on('message', <D>(message: FromExtensionMessage<D>) => {
       if (message.type === Message.Status) this._statusEmitter.emit(message.status, message);
@@ -81,6 +83,7 @@ class Extension {
     });
 
     this.onceExit(() => {
+      unregisterExtensionProcess(this._extensionProcess.pid);
       this.terminate();
     });
   }
@@ -130,7 +133,7 @@ class Extension {
     type CurrentEventOutput = EventOutput[typeof eventType];
 
     return this.handleEvent<CurrentEventInput, CurrentEventOutput>({
-      eventType: eventType,
+      eventType,
       data: {},
     });
   }

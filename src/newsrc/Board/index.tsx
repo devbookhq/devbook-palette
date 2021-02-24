@@ -91,13 +91,13 @@ function Board() {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [soResults, setSOResults] = React.useState<any[]>([]);
 
-  const userStore = useUserStore();
-
-  useEffect(() => {
-    userStore.signIn('tomas@usedevbook.com');
-  }, [])
-
   const extensionsStore = useExtensionsStore();
+
+  // useEffect(() => {
+  //   extensionsStore.enableExtension(ExtensionID.StackOverflow);
+  //   // userStore.signIn('tomas@usedevbook.com');
+  // }, [])
+
   const stackoverflowExtension = extensionsStore.getExtension(ExtensionID.StackOverflow);
 
   const searchStackOverflow = React.useCallback(async (query: string) => {

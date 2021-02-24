@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as process from 'process';
 import * as electron from 'electron';
 import Store from 'electron-store';
+import { kill } from 'process';
 import {
   app,
   ipcMain,
@@ -141,6 +142,18 @@ let mainWindow: MainWindow | undefined = undefined;
 let onboardingWindow: OnboardingWindow | undefined = undefined;
 let preferencesWindow: PreferencesWindow | undefined = undefined;
 
+const extensionProcesses: { [pid: number]: true } = {};
+
+function killAllExtensionProcesses() {
+  (Object.keys(extensionProcesses) as unknown as number[]).forEach(async pid => {
+    try {
+      kill(pid)
+    } catch {
+
+    }
+  });
+}
+
 const store = new Store();
 
 let postponeHandler: NodeJS.Timeout | undefined;
@@ -254,6 +267,7 @@ app.once('ready', async () => {
 });
 
 app.on('window-all-closed', () => {
+  killAllExtensionProcesses();
   if (process.platform !== 'darwin') app.quit();
 });
 
@@ -348,3 +362,6 @@ ipcMain.on(IPCMessage.TrackSignInFinished, () => trackSignInFinished());
 ipcMain.on(IPCMessage.TrackSignInFailed, (_, { error }: { error: string }) => trackSignInFailed(error));
 ipcMain.on(IPCMessage.TrackContinueIntoAppButtonClicked, () => trackContinueIntoAppButtonClicked());
 ipcMain.on(IPCMessage.TrackSignOutButtonClicked, () => trackSignOutButtonClicked());
+ipcMain.on(IPCMessage.RegisterExtensionProcess, (_, pid: number) => extensionProcesses[pid] = true);
+ipcMain.on(IPCMessage.UnregisterExtensionProcess, (_, pid: number) => delete extensionProcesses[pid]);
+ipcMain.on(IPCMessage.KillAllExtensionProcesses, () => killAllExtensionProcesses());

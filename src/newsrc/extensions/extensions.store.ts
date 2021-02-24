@@ -1,4 +1,5 @@
 import {
+  autorun,
   makeAutoObservable,
   observable,
   runInAction,
@@ -6,6 +7,7 @@ import {
 import RootStore, { useRootStore } from 'newsrc/App/RootStore';
 
 import Extension from './extension';
+import { killAllExtensionProcesses } from './extension.ipc';
 import { ExtensionID } from './extensionID';
 
 export function useExtensionsStore() {
@@ -22,6 +24,12 @@ class ExtensionsStore {
       getExtension: false,
     });
 
+    autorun(() => {
+      console.log('Extensions:', [...this._extensions.keys()]);
+    });
+
+    killAllExtensionProcesses();
+
     this.enableExtension(ExtensionID.StackOverflow);
   }
 
@@ -34,7 +42,6 @@ class ExtensionsStore {
     if (extension?.isReady || extension?.isActive) return;
 
     this._extensions.set(extensionID, new Extension(this, extensionID));
-
     this._extensions.get(extensionID)?.onceExit(() => {
       runInAction(() => {
         this._extensions.delete(extensionID);

@@ -48,4 +48,8 @@ export enum IPCMessage {
   TrackModalOpened = 'TrackModalOpened',
 
   Console = 'Console',
+
+  RegisterExtensionProcess = 'RegisterExtensionProcess',
+  UnregisterExtensionProcess = 'UnregisterExtensionProcess',
+  KillAllExtensionProcesses = 'KillAllExtensionProcesses',
 }
