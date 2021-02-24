@@ -1,27 +1,28 @@
 import React  from 'react';
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 
 import ReactSplit, { SplitDirection as ReactSplitDirection } from '@devbookhq/react-split';
 
-import Tile from 'newsrc/Tile';
+import Tile from 'newsrc/Board/Tile';
 import {
   TileNode,
   SplitNode,
-  SplitDirection
-} from 'newsrc/NewBoard/board.store';
-
-const Container = styled.div`
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  // Green
-  //background: rgba(0, 255, 0, 0.2);
-`;
+  SplitDirection,
+} from 'newsrc/Board/board.store';
 
 const StyledTile = styled(Tile)`
   height: 100%;
   width: 100%;
+`;
+
+const Hidden = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0px;
+  height: 0px;
+  visibility: hidden;
 `;
 
 interface SplitProps {
@@ -34,18 +35,23 @@ function Split({ splitNode }: SplitProps) {
     : ReactSplitDirection.Vertical;
 
   return (
-    <ReactSplit direction={direction}>
-      {splitNode.getChildren().map(c => (
+    <>
+    <Hidden>{splitNode.tmp}</Hidden>
+    <ReactSplit
+      direction={direction}
+    >
+      {splitNode.children.map(c => (
         <React.Fragment key={c.key}>
           {(c instanceof TileNode)
-            ? <StyledTile key={c.key} results={[]}/>
+            ? <StyledTile key={c.key} results={[]} tileNode={c}/>
             : <Split key={c.key} splitNode={c}/>
           }
         </React.Fragment>
       ))}
     </ReactSplit>
+    </>
   );
 }
 
-export default Split;
+export default observer(Split);
 

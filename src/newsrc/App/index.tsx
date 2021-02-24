@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import Toolbar from 'newsrc/Toolbar';
 import TabBar from 'newsrc/TabBar';
 import Board from 'newsrc/Board';
-import NewBoard from 'newsrc/NewBoard';
 
 
 // The electron window is set to be frameless.
@@ -33,7 +32,7 @@ function App() {
       <DragHeader/>
       <FlexContainer direction="column">
         <TabBar/>
-        <NewBoard/>
+        <Board/>
       </FlexContainer>
     </>
   );

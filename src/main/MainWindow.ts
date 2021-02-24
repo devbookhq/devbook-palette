@@ -25,7 +25,7 @@ class MainWindow {
       minWidth: 720,
       minHeight: 400,
       show: !startHidden,
-      backgroundColor: '#1C1B26',
+      backgroundColor: '#020203',
       alwaysOnTop: true,
       frame: false,
       fullscreenable: false,
