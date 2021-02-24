@@ -15,7 +15,7 @@ import { makeAutoObservable, runInAction } from 'mobx';
 
 import { isDev } from '../../mainCommunication/electron'
 import { ExtensionID } from './extensionID';
-import * as electron from './extensions.electron';
+import { events, path, childProcess, app } from '../electronRemote';
 import type ExtensionsStore from './extensions.store';
 
 interface StatusListener<D> {
@@ -23,26 +23,43 @@ interface StatusListener<D> {
 }
 
 class Extension {
-  private extensionProcess: ChildProcess;
-  private statusEmitter = new electron.EventEmitter();
-  public isReady = false;
+  _extensionProcess: ChildProcess;
+  _statusEmitter = new events.EventEmitter();
 
-  public get isActive() {
-    return !this.extensionProcess.killed;
+  isReady = false;
+
+  get isActive() {
+    return !this._extensionProcess.killed;
   }
-  public constructor(private readonly store: ExtensionsStore, public readonly extensionID: ExtensionID) {
+
+  constructor(readonly _extensionStore: ExtensionsStore, readonly extensionID: ExtensionID) {
     makeAutoObservable(this, {
-      search: false,
-      getSources: false,
+      _extensionStore: false,
+      _extensionProcess: false,
+      _statusEmitter: false,
+
+      extensionID: false,
+
       onceExit: false,
       onceReady: false,
+
+      onStatus: false,
+      removeOnStatus: false,
+
+      getSources: false,
+      search: false,
+
+      terminate: false,
+
+      waitForEvent: false,
+      handleEvent: false,
     });
 
-    const root = electron.app.getAppPath();
+    const root = app.getAppPath();
     const extensionProcessPath = require.resolve('@devbookhq/extension');
-    const extensionModulePath = electron.path.resolve(root, 'build', 'main', 'extensions', 'defaultExtensions', extensionID);
+    const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'defaultExtensions', extensionID);
 
-    this.extensionProcess = electron.fork(extensionProcessPath, undefined, {
+    this._extensionProcess = childProcess.fork(extensionProcessPath, undefined, {
       stdio: isDev ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'ignore', 'ignore', 'ipc'],
       env: {
         ...process.env,
@@ -53,8 +70,8 @@ class Extension {
       detached: (process.platform === 'win32'),
     });
 
-    this.extensionProcess.on('message', <D>(message: FromExtensionMessage<D>) => {
-      if (message.type === Message.Status) this.statusEmitter.emit(message.status, message);
+    this._extensionProcess.on('message', <D>(message: FromExtensionMessage<D>) => {
+      if (message.type === Message.Status) this._statusEmitter.emit(message.status, message);
     });
 
     this.onceReady(() => {
@@ -68,15 +85,15 @@ class Extension {
     });
   }
 
-  private onStatus<D>(status: Status, listener: StatusListener<D>) {
-    this.statusEmitter.on(status, listener);
+  onStatus<D>(status: Status, listener: StatusListener<D>) {
+    this._statusEmitter.on(status, listener);
   }
 
-  private removeOnStatus<D>(status: Status, listener: StatusListener<D>) {
-    this.statusEmitter.off(status, listener);
+  removeOnStatus<D>(status: Status, listener: StatusListener<D>) {
+    this._statusEmitter.off(status, listener);
   }
 
-  public onceExit(listener: StatusListener<void>) {
+  onceExit(listener: StatusListener<void>) {
     if (this.isReady) {
       return listener({
         type: Message.Status,
@@ -91,7 +108,7 @@ class Extension {
     this.onStatus(Status.Exit, onceListener);
   }
 
-  public onceReady(listener: StatusListener<void>) {
+  onceReady(listener: StatusListener<void>) {
     if (this.isReady) {
       return listener({
         type: Message.Status,
@@ -106,7 +123,7 @@ class Extension {
     this.onStatus(Status.Ready, onceListener);
   }
 
-  public async getSources() {
+  async getSources() {
     const eventType = Event.getSources;
 
     type CurrentEventInput = EventInput[typeof eventType];
@@ -118,7 +135,7 @@ class Extension {
     });
   }
 
-  public async search(data: EventInput[Event.onDidQueryChange]) {
+  async search(data: EventInput[Event.onDidQueryChange]) {
     const eventType = Event.onDidQueryChange;
 
     type CurrentEventInput = EventInput[typeof eventType];
@@ -130,16 +147,16 @@ class Extension {
     });
   }
 
-  public terminate() {
-    this.extensionProcess.kill();
+  terminate() {
+    this._extensionProcess.kill();
   }
 
-  private waitForEvent<D>(id: string) {
+  async waitForEvent<D>(id: string) {
     return new Promise<EventReturnMessage<D>>((resolve, reject) => {
       const messageHandler = (message: FromExtensionMessage<D>) => {
         if (message.type !== Message.EventReturn && message.type !== Message.EventError) return;
         if (message.id === id) {
-          this.extensionProcess.off('message', messageHandler);
+          this._extensionProcess.off('message', messageHandler);
           switch (message.type) {
             case Message.EventReturn:
               return resolve(message);
@@ -150,11 +167,11 @@ class Extension {
           }
         }
       }
-      this.extensionProcess.on('message', messageHandler);
+      this._extensionProcess.on('message', messageHandler);
     });
   }
 
-  private async handleEvent<I, O>(options: Pick<EventMessage<I>, 'data' | 'eventType'>) {
+  async handleEvent<I, O>(options: Pick<EventMessage<I>, 'data' | 'eventType'>) {
     if (!this.isActive) throw new Error(`Extension "${this.extensionID}" is not running.`);
 
     const id = uuidv4();
@@ -165,7 +182,7 @@ class Extension {
       id,
     };
 
-    this.extensionProcess.send(eventMessage);
+    this._extensionProcess.send(eventMessage);
     return (await eventReturn).data;
   }
 }
