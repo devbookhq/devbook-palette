@@ -14,7 +14,7 @@ import {
 import { makeAutoObservable, runInAction } from 'mobx';
 
 import { isDev } from '../../mainCommunication/electron'
-import { ExtensionID } from './extensionID';
+import { ExtensionType } from './extensionType';
 import { events, path, childProcess, app } from '../electronRemote';
 import type ExtensionsStore from './extensions.store';
 import { killExtensionProcess, registerExtensionProcess, unregisterExtensionProcess } from './extension.ipc';
@@ -29,15 +29,21 @@ class Extension {
 
   isReady = false;
 
+  get pid() {
+    return this._extensionProcess.pid;
+  }
+
   get isActive() {
     return !this._extensionProcess.killed;
   }
 
-  constructor(readonly _extensionStore: ExtensionsStore, readonly extensionID: ExtensionID) {
+  constructor(readonly _extensionStore: ExtensionsStore, readonly extensionType: ExtensionType, readonly extensionID: string = uuidv4()) {
     makeAutoObservable(this, {
       _extensionStore: false,
       _extensionProcess: false,
       _statusEmitter: false,
+
+      extensionType: false,
 
       extensionID: false,
 
@@ -58,19 +64,20 @@ class Extension {
 
     const root = app.getAppPath();
     const extensionProcessPath = require.resolve('@devbookhq/extension');
-    const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'defaultExtensions', extensionID);
+    const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'defaultExtensions', extensionType);
 
     this._extensionProcess = childProcess.fork(extensionProcessPath, undefined, {
       stdio: isDev ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'ignore', 'ignore', 'ipc'],
       env: {
         ...process.env,
-        EXTENSION_ID: extensionID,
+        EXTENSION_ID: extensionType,
         EXTENSION_MODULE_PATH: extensionModulePath,
         ELECTRON_RUN_AS_NODE: '1',
       },
       detached: process.platform === 'win32',
     });
-    registerExtensionProcess(this._extensionProcess.pid);
+
+    registerExtensionProcess(this.pid);
 
     this._extensionProcess.on('message', <D>(message: FromExtensionMessage<D>) => {
       if (message.type === Message.Status) this._statusEmitter.emit(message.status, message);
@@ -83,8 +90,8 @@ class Extension {
     });
 
     this.onceExit(() => {
-      unregisterExtensionProcess(this._extensionProcess.pid);
       this.terminate();
+      unregisterExtensionProcess(this.pid);
     });
   }
 
@@ -109,6 +116,14 @@ class Extension {
       listener(message);
     }
     this.onStatus(Status.Exit, onceListener);
+
+    this._extensionProcess.once('exit', () => {
+      onceListener({
+        type: Message.Status,
+        status: Status.Exit,
+        data: undefined,
+      });
+    });
   }
 
   onceReady(listener: StatusListener<void>) {
@@ -151,7 +166,7 @@ class Extension {
   }
 
   terminate() {
-    killExtensionProcess(this._extensionProcess.pid);
+    killExtensionProcess(this.pid);
   }
 
   async waitForEvent<D>(id: string) {
@@ -175,7 +190,7 @@ class Extension {
   }
 
   async handleEvent<I, O>(options: Pick<EventMessage<I>, 'data' | 'eventType'>) {
-    if (!this.isActive) throw new Error(`Extension "${this.extensionID}" is not running.`);
+    if (!this.isActive) throw new Error(`Extension "${this.extensionType}" is not running.`);
 
     const id = uuidv4();
     const eventReturn = this.waitForEvent<O>(id);

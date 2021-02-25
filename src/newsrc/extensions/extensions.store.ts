@@ -8,7 +8,7 @@ import RootStore, { useRootStore } from 'newsrc/App/RootStore';
 
 import Extension from './extension';
 import { killAllExtensionProcesses } from './extension.ipc';
-import { ExtensionID } from './extensionID';
+import { ExtensionType } from './extensionType';
 
 export function useExtensionsStore() {
   const { extensionsStore } = useRootStore();
@@ -16,7 +16,7 @@ export function useExtensionsStore() {
 }
 
 class ExtensionsStore {
-  _extensions = observable.map<ExtensionID, Extension>();
+  _extensions = observable.array<Extension>();
 
   constructor(readonly _rootStore: RootStore) {
     makeAutoObservable(this, {
@@ -25,37 +25,43 @@ class ExtensionsStore {
     });
 
     autorun(() => {
-      console.log('Extensions:', [...this._extensions.keys()]);
+      console.log('Extensions:', [...this._extensions.map(e => `${e.extensionID} - ${e.extensionType}`)]);
     });
 
     killAllExtensionProcesses();
 
-    this.enableExtension(ExtensionID.StackOverflow);
+    this.createExtension(ExtensionType.StackOverflow);
   }
 
-  getExtension(extensionID: ExtensionID) {
-    return this._extensions.get(extensionID);
+  getExtension(extensionID: string) {
+    return this._extensions.find(e => e.extensionID === extensionID);
   }
 
-  async enableExtension(extensionID: ExtensionID) {
-    const extension = this._extensions.get(extensionID);
-    if (extension?.isReady || extension?.isActive) return;
+  async createExtension(extensionType: ExtensionType, extensionID?: string) {
+    const extension = new Extension(this, extensionType, extensionID);
 
-    this._extensions.set(extensionID, new Extension(this, extensionID));
-    this._extensions.get(extensionID)?.onceExit(() => {
+    this._extensions.push(extension);
+    extension.onceExit(() => {
       runInAction(() => {
-        this._extensions.delete(extensionID);
+        const index = this._extensions.indexOf(extension);
+        if (index > -1) this._extensions.splice(index, 1);
       });
     });
-
-    return new Promise<ExtensionID>((resolve) => this._extensions.get(extensionID)?.onceReady(() => {
-      resolve(extensionID);
-    }));
+    return new Promise<Extension>((resolve) => extension.onceReady(() => resolve(extension)));
   }
 
-  disableExtension(extensionID: ExtensionID) {
-    this._extensions.get(extensionID)?.terminate();
-    this._extensions.delete(extensionID);
+  async deleteExtension(extensionID: string) {
+    const extension = this.getExtension(extensionID);
+    if (!extension) return;
+
+    const extensionDeletedPromise = new Promise<void>((resolve) => extension.onceExit(() => resolve()));
+
+    extension.terminate();
+
+    const index = this._extensions.indexOf(extension);
+    if (index > -1) this._extensions.splice(index, 1);
+
+    return extensionDeletedPromise;
   }
 }
 
