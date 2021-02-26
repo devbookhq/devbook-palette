@@ -71,7 +71,6 @@ class Extension {
     const extensionProcessPath = window.process.argv.slice(-1)[0];
     const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'defaultExtensions', extensionType);
 
-    console.log('extensionProcessPath', extensionProcessPath);
     this._extensionProcess = childProcess.fork(extensionProcessPath, undefined, {
       stdio: isDev ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'ignore', 'ignore', 'ipc'],
       env: {
