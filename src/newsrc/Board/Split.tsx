@@ -29,14 +29,12 @@ interface SplitProps {
   splitNode: SplitNode;
 }
 
-function Split({ splitNode }: SplitProps) {
+const Split = observer(({ splitNode }: SplitProps) => {
   const direction = splitNode.direction === SplitDirection.Horizontal
     ? ReactSplitDirection.Horizontal
     : ReactSplitDirection.Vertical;
 
   return (
-    <>
-    <Hidden>{splitNode.tmp}</Hidden>
     <ReactSplit
       direction={direction}
     >
@@ -49,9 +47,8 @@ function Split({ splitNode }: SplitProps) {
         </React.Fragment>
       ))}
     </ReactSplit>
-    </>
   );
-}
+});
 
-export default observer(Split);
+export default Split;
 

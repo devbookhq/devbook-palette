@@ -1,5 +1,5 @@
 export const Charcoal = {
-  lighter: '#242327',
+  lighter: '#212127',
   // light: '#1c1b1f',
   light: '#19191B',
   normal: '#121114',

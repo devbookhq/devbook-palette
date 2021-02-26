@@ -1,5 +1,4 @@
 import { makeAutoObservable } from 'mobx';
-import { deepObserve } from 'mobx-utils';
 import RootStore, { useRootStore } from 'newsrc/App/RootStore';
 // TODO: Load treeify only in a dev mode.
 import treeify from 'treeify';
@@ -180,13 +179,9 @@ export class SplitNode {
   readonly key = 'split_' + getID();
   _parentKey: string = '';
   children: LayoutNode[] = [];
-  tmp = 0;
 
   constructor(public direction: SplitDirection, left: LayoutNode, right: LayoutNode) {
     makeAutoObservable(this);
-    deepObserve(this.children, () => {
-      this.tmp += 1;
-    });
     this.addChild(left);
     this.addChild(right);
   }
