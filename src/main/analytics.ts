@@ -1,10 +1,32 @@
-import Analytics from 'analytics-node';
+import Analytics, { } from 'analytics-node';
 import { v4 as uuidv4 } from 'uuid';
 import { app } from 'electron';
 import ElectronStore from 'electron-store';
 
 import isDev from './utils/isDev';
 import debounce from './utils/debounce';
+
+enum AnalyticsEvent {
+  ShowedApp = 'Showed app',
+
+  OnboardingStarted = 'Onboarding started',
+  OnboardingFinished = 'Onboarding finished',
+
+  ShortcutUsed = 'Shortcut used',
+
+  Search = 'Search',
+
+  ModalOpened = 'Modal opened',
+
+  SignInModalOpened = 'Sign in modal opened',
+  SignInModalClosed = 'Sign in modal closed',
+  SignInButtonClicked = 'Sign in button clicked',
+  SignInAgainButtonClicked = 'Sign in again button clicked',
+  SignInFinished = 'Sign in finished',
+  SignInFailed = 'Sign in failed',
+  ContinueIntoAppButtonClicked = 'Continue into app button clicked',
+  SignOutButtonClicked = 'Sign out button clicked',
+}
 
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
 const SEGMENT_FLUSH = isDev ? 1 : 5;
@@ -13,50 +35,47 @@ const client = new Analytics(SEGMENT_WRITE_KEY, { flushAt: SEGMENT_FLUSH });
 const store = new ElectronStore();
 
 let isSignedIn = false;
-let userID = store.get('userID', uuidv4());
-store.set('userID', userID);
+let userID: string | undefined = undefined;
+let anonymousID = store.get('userID', uuidv4());
+store.set('userID', anonymousID);
 
 const appVersion = app.getVersion();
 const platform = process.platform;
 
 client.identify({
-  userId: userID,
+  anonymousId: anonymousID,
   traits: {
+    anonymousID: anonymousID,
     platform,
     appVersion,
   },
 });
 
 export function changeAnalyticsUser(user?: { userID: string, email: string }) {
-  const savedUserID = store.get('userID', uuidv4());
-  store.set('userID', savedUserID);
-
   if (user) {
+    isSignedIn = true;
+    userID = user.userID;
+
     client.identify({
-      userId: savedUserID,
+      anonymousId: anonymousID,
+      userId: userID,
       traits: {
+        isSignedUp: true,
         platform,
         appVersion,
         email: user.email,
       },
     });
-
-    client.alias({
-      previousId: savedUserID,
-      userId: user.userID,
-    });
-
-    isSignedIn = true;
-    userID = user.userID;
   } else {
     isSignedIn = false;
-    userID = savedUserID;
+    userID = undefined;
   }
 }
 
 export function trackShowApp() {
   client.track({
-    event: 'Showed app',
+    event: AnalyticsEvent.ShowedApp,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -68,7 +87,8 @@ export function trackShowApp() {
 
 export function trackOnboardingStarted() {
   client.track({
-    event: 'Onboarding started',
+    event: AnalyticsEvent.OnboardingStarted,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -80,31 +100,8 @@ export function trackOnboardingStarted() {
 
 export function trackOnboardingFinished() {
   client.track({
-    event: 'Onboarding finished',
-    userId: userID,
-    properties: {
-      isSignedIn,
-      platform,
-      appVersion,
-    },
-  });
-}
-
-export function trackConnectGitHubStarted() {
-  client.track({
-    event: 'Connecting GitHub started',
-    userId: userID,
-    properties: {
-      isSignedIn,
-      platform,
-      appVersion,
-    },
-  });
-}
-
-export function trackConnectGitHubFinished() {
-  client.track({
-    event: 'Connecting GitHub finished',
+    event: AnalyticsEvent.OnboardingFinished,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -116,7 +113,8 @@ export function trackConnectGitHubFinished() {
 
 export function trackShortcut(shortcutInfo: { action: string, hotkey: string }) {
   client.track({
-    event: 'Shortcut used',
+    event: AnalyticsEvent.ShortcutUsed,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -129,7 +127,8 @@ export function trackShortcut(shortcutInfo: { action: string, hotkey: string }) 
 
 function trackSearch(searchInfo: any) {
   client.track({
-    event: 'Search',
+    event: AnalyticsEvent.Search,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -144,7 +143,8 @@ export const trackSearchDebounced = debounce(trackSearch, 3000);
 
 export function trackModalOpened(modalInfo: any) {
   client.track({
-    event: 'Modal opened',
+    event: AnalyticsEvent.ModalOpened,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -157,7 +157,8 @@ export function trackModalOpened(modalInfo: any) {
 
 export function trackSignInModalOpened() {
   client.track({
-    event: 'Sign in modal opened',
+    event: AnalyticsEvent.SignInModalOpened,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -169,7 +170,8 @@ export function trackSignInModalOpened() {
 
 export function trackSignInModalClosed() {
   client.track({
-    event: 'Sign in modal closed',
+    event: AnalyticsEvent.SignInModalClosed,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -181,7 +183,8 @@ export function trackSignInModalClosed() {
 
 export function trackSignInButtonClicked() {
   client.track({
-    event: 'Sign in button clicked',
+    event: AnalyticsEvent.SignInButtonClicked,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -193,7 +196,8 @@ export function trackSignInButtonClicked() {
 
 export function trackSignInAgainButtonClicked() {
   client.track({
-    event: 'Sign in again button clicked',
+    event: AnalyticsEvent.SignInAgainButtonClicked,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -205,7 +209,8 @@ export function trackSignInAgainButtonClicked() {
 
 export function trackSignInFinished() {
   client.track({
-    event: 'Sign in finished',
+    event: AnalyticsEvent.SignInFinished,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -217,7 +222,8 @@ export function trackSignInFinished() {
 
 export function trackSignInFailed(error: string) {
   client.track({
-    event: 'Continue into app button clicked',
+    event: AnalyticsEvent.SignInFailed,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -230,7 +236,8 @@ export function trackSignInFailed(error: string) {
 
 export function trackContinueIntoAppButtonClicked() {
   client.track({
-    event: 'Continue into app button clicked',
+    event: AnalyticsEvent.ContinueIntoAppButtonClicked,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
@@ -242,7 +249,8 @@ export function trackContinueIntoAppButtonClicked() {
 
 export function trackSignOutButtonClicked() {
   client.track({
-    event: 'Sign out button clicked',
+    event: AnalyticsEvent.SignOutButtonClicked,
+    anonymousId: anonymousID,
     userId: userID,
     properties: {
       isSignedIn,
