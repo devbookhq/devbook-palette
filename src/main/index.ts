@@ -189,7 +189,10 @@ function openPreferences(page?: PreferencesPage) {
 
 const shouldOpenAtLogin = store.get('openAtLogin', true);
 
-app.setLoginItemSettings({ openAtLogin: shouldOpenAtLogin });
+app.setLoginItemSettings({
+  openAtLogin: shouldOpenAtLogin,
+  openAsHidden: true,
+});
 
 let isFirstRun = store.get('firstRun', true);
 
@@ -258,6 +261,10 @@ app.once('ready', async () => {
     onOpenAtLoginClick: () => {
       const currentVal = store.get('openAtLogin', true);
       store.set('openAtLogin', !currentVal);
+      app.setLoginItemSettings({
+        openAtLogin: !currentVal,
+        openAsHidden: true,
+      });
       tray.setOpenAtLogin(!currentVal);
     },
     openPreferences: () => openPreferences(),
@@ -274,7 +281,7 @@ app.once('ready', async () => {
     onboardingWindow?.window?.focus();
     trackOnboardingStarted();
   } else {
-    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
+    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp(), app.getLoginItemSettings().wasOpenedAsHidden);
   }
 });
 
