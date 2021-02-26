@@ -87,7 +87,7 @@ class UserStore {
   }
 
   async signOut() {
-    if (!this.user) return;
+    if (this.isLoading) return;
     this.updateAuthEverywhere({ state: AuthState.SigningOutUser, user: this.user });
     const refreshToken = await this._localStorageLayer.loadRefreshToken();
     await this._localStorageLayer.deleteRefreshToken();
@@ -96,10 +96,12 @@ class UserStore {
   }
 
   async cancelSignIn() {
+    this.updateAuthEverywhere({ state: AuthState.NoUser });
     return this._authenticationLayer.cancelSignIn();
   }
 
   async signIn(email: string) {
+    if (this.isLoading) return;
     this.updateAuthEverywhere({ state: AuthState.SigningInUser });
     try {
       const { refreshToken, user } = await this._authenticationLayer.signIn(email);
@@ -111,6 +113,7 @@ class UserStore {
   }
 
   private async refreshAuth() {
+    if (this.isLoading) return;
     this.updateAuthEverywhere({ state: AuthState.LookingForStoredUser });
     try {
       const oldRefreshToken = await this._localStorageLayer.loadRefreshToken();
