@@ -30,7 +30,7 @@ class PreferencesWindow {
       height: 600,
       minWidth: 800,
       minHeight: 400,
-      title: 'Devbook Preferencess',
+      title: 'Devbook Preferences',
       backgroundColor: '#1C1B26',
       icon: process.platform === 'linux' || process.platform === 'win32' ? taskBarIcon : undefined,
       titleBarStyle: 'hiddenInset',
