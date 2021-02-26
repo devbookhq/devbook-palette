@@ -43,7 +43,6 @@ import {
   DocsSearchHotkeysPanel,
 } from './HotkeysPanel';
 import FocusState from './SearchItemFocusState';
-import { ExtensionsContext } from 'Extensions';
 import {
   StackOverflowModal,
   StackOverflowItem,
@@ -699,35 +698,23 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
 function Home() {
   const authInfo = useContext(AuthContext);
 
-  // Extensions
-  const extensionManager = useContext(ExtensionsContext);
-
-  const stackoverflowExtension = extensionManager?.extensions.stackoverflow;
-  const docsExtension = extensionManager?.extensions.docs;
-
   // Types of the search results and docSources are for now in the Docs and StackOverflow subcomponents, 
   // because with the change to the unified search the types will be changed and unified as well,
   // therefore we don't want to devise a system for handling extension specific search result types now.
   const searchStackOverflow = useCallback(async (query: string) => {
-    if (stackoverflowExtension?.isReady) {
-      return (await stackoverflowExtension.search({ query })).results as unknown as StackOverflowResult[];
-    }
-    return [];
-  }, [extensionManager]);
+
+    return [] as StackOverflowResult[];
+  }, []);
 
   const fetchDocSources = useCallback(async () => {
-    if (docsExtension?.isReady) {
-      return (await docsExtension.getSources()) as unknown as DocSource[];
-    }
-    return [];
-  }, [extensionManager]);
+
+    return [] as DocSource[];
+  }, []);
 
   const searchDocumentations = useCallback(async (query: string, sources: DocSource[]) => {
-    if (docsExtension?.isReady) {
-      return (await docsExtension.search({ query, sources })) as unknown as DocResult[];
-    }
-    return [];
-  }, [extensionManager]);
+
+    return [] as DocResult[];
+  }, []);
 
 
   const isUserLoading =
@@ -1189,10 +1176,7 @@ function Home() {
     loadCachedData();
     // We want to run this only during the first render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    extensionManager.extensions['stackoverflow']?.isReady,
-    extensionManager.extensions['docs']?.isReady,
-  ]);
+  }, []);
 
   // Log error messages.
   useEffect(() => {
