@@ -36,6 +36,7 @@ class MainWindow {
         enableRemoteModule: true,
         worldSafeExecuteJavaScript: true,
         contextIsolation: false,
+        additionalArguments: [require.resolve('@devbookhq/extension')],
         // devTools: isDev,
         // nodeIntegrationInSubFrames: true,
         // webSecurity: false,
@@ -99,7 +100,6 @@ class MainWindow {
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/`);
     }
-
   }
 
   public close() {

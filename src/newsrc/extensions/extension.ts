@@ -63,9 +63,15 @@ class Extension {
     });
 
     const root = app.getAppPath();
-    const extensionProcessPath = require.resolve('@devbookhq/extension');
+
+    // We are passing the package path from the main,
+    // because when we try to resolve it in the renderer,
+    // the webpack mangles the path and it does not work in the bundled app.
+    // The path is passed to the `MainWindow` renderer through the `BrowserWindow` constructor options in the property `additionalArguments` in the `webPreferences`.
+    const extensionProcessPath = window.process.argv.slice(-1)[0];
     const extensionModulePath = path.resolve(root, 'build', 'main', 'extensions', 'defaultExtensions', extensionType);
 
+    console.log('extensionProcessPath', extensionProcessPath);
     this._extensionProcess = childProcess.fork(extensionProcessPath, undefined, {
       stdio: isDev ? ['inherit', 'inherit', 'inherit', 'ipc'] : ['ignore', 'ignore', 'ignore', 'ipc'],
       env: {
