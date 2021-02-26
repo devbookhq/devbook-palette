@@ -1,4 +1,4 @@
-import Analytics from 'analytics-node';
+import Analytics, { } from 'analytics-node';
 import { v4 as uuidv4 } from 'uuid';
 import { app } from 'electron';
 import ElectronStore from 'electron-store';
@@ -37,8 +37,8 @@ const store = new ElectronStore();
 
 let isSignedIn = false;
 let userID: string | undefined = undefined;
-let anonymousID = 'a1c123ac-2220-4eae-8b9a-f256bbda6248';
-// let anonymousID = store.get(StoreKey.UserID, uuidv4());
+// let anonymousID = 'a1c123ac-2220-4eae-8b9a-f256bbda624q';
+let anonymousID = store.get(StoreKey.UserID, uuidv4());
 store.set(StoreKey.UserID, anonymousID);
 
 const appVersion = app.getVersion();
@@ -47,12 +47,14 @@ const platform = process.platform;
 client.identify({
   anonymousId: anonymousID,
   traits: {
+    anonymousID: anonymousID,
     platform,
     appVersion,
   },
 });
 
-// trackShowApp();
+
+trackShowApp();
 
 export function changeAnalyticsUser(user?: { userID: string, email: string }) {
   if (user) {
@@ -63,6 +65,7 @@ export function changeAnalyticsUser(user?: { userID: string, email: string }) {
       anonymousId: anonymousID,
       userId: userID,
       traits: {
+        isSignedUp: true,
         platform,
         appVersion,
         email: user.email,
