@@ -37,7 +37,6 @@ const store = new ElectronStore();
 
 let isSignedIn = false;
 let userID: string | undefined = undefined;
-// let anonymousID = 'a1c123ac-2220-4eae-8b9a-f256bbda624q';
 let anonymousID = store.get(StoreKey.UserID, uuidv4());
 store.set(StoreKey.UserID, anonymousID);
 
@@ -52,9 +51,6 @@ client.identify({
     appVersion,
   },
 });
-
-
-trackShowApp();
 
 export function changeAnalyticsUser(user?: { userID: string, email: string }) {
   if (user) {
