@@ -184,7 +184,10 @@ function openPreferences(page?: PreferencesPage) {
 
 const shouldOpenAtLogin = store.get(StoreKey.OpenAtLogin, true);
 
-app.setLoginItemSettings({ openAtLogin: shouldOpenAtLogin });
+app.setLoginItemSettings({
+  openAtLogin: shouldOpenAtLogin,
+  openAsHidden: true,
+});
 
 let isFirstRun = store.get(StoreKey.FirstRun, true);
 
@@ -253,6 +256,10 @@ app.once('ready', async () => {
     onOpenAtLoginClick: () => {
       const currentVal = store.get(StoreKey.OpenAtLogin, true);
       store.set(StoreKey.OpenAtLogin, !currentVal);
+      app.setLoginItemSettings({
+        openAtLogin: !currentVal,
+        openAsHidden: true,
+      });
       tray.setOpenAtLogin(!currentVal);
     },
     openPreferences: () => openPreferences(),
