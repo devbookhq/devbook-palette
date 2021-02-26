@@ -189,6 +189,7 @@ app.setLoginItemSettings({
   openAsHidden: true,
 });
 
+
 let isFirstRun = store.get(StoreKey.FirstRun, true);
 
 if (process.platform === 'darwin' && !isFirstRun) {
@@ -276,7 +277,7 @@ app.once('ready', async () => {
     onboardingWindow?.window?.focus();
     trackOnboardingStarted();
   } else {
-    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
+    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp(), app.getLoginItemSettings().wasOpenedAsHidden);
   }
 });
 
