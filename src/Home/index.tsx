@@ -1213,6 +1213,24 @@ function Home() {
     else includeDocSourceInSearch(docSource);
   }
 
+  function navigateSearchResultsUp(idx: number, filter: ResultsFilter, isModalOpened: boolean) {
+    if (isModalOpened) return; // In an active modal, arrow keys scroll the scrollbar and not navigate results.
+    if (filter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
+
+    if (idx > 0) {
+      focusResultItem(filter, idx - 1, FocusState.WithScroll);
+    }
+  }
+
+  function navigateSearchResultsDown(idx: number, filter: ResultsFilter, isModalOpened: boolean) {
+    if (isModalOpened) return;
+    if (filter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
+
+    if (idx < state.results[filter].items.length - 1) {
+      focusResultItem(filter, idx + 1, FocusState.WithScroll);
+    }
+  }
+
   /* HOTKEYS */
   // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
@@ -1253,18 +1271,25 @@ function Home() {
 
   // 'up arrow' hotkey - navigation.
   useHotkeys('up', () => {
-    if (state.modalItem || state.isDocsFilterModalOpened) return;
-    // The docs search filter uses 'cmd + arrow' for the search navigation.
-    if (activeFilter === ResultsFilter.Docs) return;
-
+    const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
-    if (idx > 0) {
-      focusResultItem(activeFilter, idx - 1, FocusState.WithScroll);
-    }
+    navigateSearchResultsUp(idx, activeFilter, isModalOpened);
+    //if (state.modalItem || state.isDocsFilterModalOpened) return;
+    //// The docs search filter uses 'cmd + arrow' for the search navigation.
+    //if (activeFilter === ResultsFilter.Docs) return;
+
+    //const idx = state.results[activeFilter].focusedIdx.idx;
+    //if (idx > 0) {
+    //  focusResultItem(activeFilter, idx - 1, FocusState.WithScroll);
+    //}
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'down arrow' hotkey - navigation.
   useHotkeys('down', () => {
+    const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
+    const idx = state.results[activeFilter].focusedIdx.idx;
+    navigateSearchResultsDown(idx, activeFilter, isModalOpened);
+    /*
     if (state.modalItem || state.isDocsFilterModalOpened) return;
     // The docs search filter uses 'cmd + arrow' for the search navigation.
     if (activeFilter === ResultsFilter.Docs) return;
@@ -1273,6 +1298,7 @@ function Home() {
     if (idx < state.results[activeFilter].items.length - 1) {
       focusResultItem(activeFilter, idx + 1, FocusState.WithScroll);
     }
+    */
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'enter' hotkey - open the focused result in a modal.
@@ -1722,6 +1748,16 @@ function Home() {
               <StackOverflowSearchHotkeysPanel
                 onOpenClick={() => openModal(activeFocusedItem)}
                 onOpenInBrowserClick={openFocusedSOItemInBrowser}
+                onNavigateUpClick={() => navigateSearchResultsUp(
+                  state.results[ResultsFilter.StackOverflow].focusedIdx.idx,
+                  ResultsFilter.StackOverflow,
+                  false,
+                )}
+                onNavigateDownClick={() => navigateSearchResultsDown(
+                  state.results[ResultsFilter.StackOverflow].focusedIdx.idx,
+                  ResultsFilter.StackOverflow,
+                  false,
+                )}
               />
             }
             {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
