@@ -35,6 +35,7 @@ import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
+import contextMenu from 'electron-context-menu';
 
 enum StoreKey {
   DocSources = 'docSources',
@@ -59,6 +60,9 @@ console.error = (...args: any) => {
   oldError(...args);
   logInRendered('error', ...args);
 }
+
+// Default right-click context menu for all Electron windows.
+contextMenu();
 
 // Disallow running multiple instances of Devbook
 const isFirstInstance = app.requestSingleInstanceLock();

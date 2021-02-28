@@ -93,6 +93,7 @@
   "dependencies": {
     "analytics-node": "^3.5.0",
     "axios": "^0.21.1",
+    "electron-context-menu": "^2.5.0",
     "electron-store": "^5.2.0",
     "electron-updater": "^4.3.5",
     "magic-sdk": "^4.0.2",
