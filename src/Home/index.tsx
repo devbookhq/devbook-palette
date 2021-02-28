@@ -1215,7 +1215,6 @@ function Home() {
 
   function navigateSearchResultsUp(idx: number, filter: ResultsFilter, isModalOpened: boolean) {
     if (isModalOpened) return; // In an active modal, arrow keys scroll the scrollbar and not navigate results.
-    if (filter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
 
     if (idx > 0) {
       focusResultItem(filter, idx - 1, FocusState.WithScroll);
@@ -1224,7 +1223,6 @@ function Home() {
 
   function navigateSearchResultsDown(idx: number, filter: ResultsFilter, isModalOpened: boolean) {
     if (isModalOpened) return;
-    if (filter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
 
     if (idx < state.results[filter].items.length - 1) {
       focusResultItem(filter, idx + 1, FocusState.WithScroll);
@@ -1256,21 +1254,19 @@ function Home() {
   // 'shift + up arrow' - navigate docs search results.
   useHotkeys('shift+up', () => {
     const idx = state.results[activeFilter].focusedIdx.idx;
-    if (idx > 0) {
-      focusResultItem(activeFilter, idx - 1, FocusState.WithScroll);
-    }
+    navigateSearchResultsUp(idx, activeFilter, false);
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'shift + down arrow' - navigate docs search results.
   useHotkeys('shift+down', () => {
     const idx = state.results[activeFilter].focusedIdx.idx;
-    if (idx < state.results[activeFilter].items.length - 1) {
-      focusResultItem(activeFilter, idx + 1, FocusState.WithScroll);
-    }
+    navigateSearchResultsDown(idx, activeFilter, false);
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'up arrow' hotkey - navigation.
   useHotkeys('up', () => {
+    if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
+
     const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
     navigateSearchResultsUp(idx, activeFilter, isModalOpened);
@@ -1278,6 +1274,8 @@ function Home() {
 
   // 'down arrow' hotkey - navigation.
   useHotkeys('down', () => {
+    if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
+
     const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
     navigateSearchResultsDown(idx, activeFilter, isModalOpened);
@@ -1787,6 +1785,16 @@ function Home() {
               && isAnyDocSourceIncluded
               &&
               <DocsSearchHotkeysPanel
+                onNavigateUpClick={() => navigateSearchResultsUp(
+                  state.results[ResultsFilter.Docs].focusedIdx.idx,
+                  ResultsFilter.Docs,
+                  false,
+                )}
+                onNavigateDownClick={() => navigateSearchResultsDown(
+                  state.results[ResultsFilter.Docs].focusedIdx.idx,
+                  ResultsFilter.Docs,
+                  false,
+                )}
                 isDocsFilterModalOpened={state.isDocsFilterModalOpened}
                 isSearchingInDocPage={state.isSearchingInDocPage}
                 onOpenFilterDocsClick={openDocsFilterModal}

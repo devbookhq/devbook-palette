@@ -7,6 +7,8 @@ import Panel from '../Panel';
 const cmdModifier = electron.remote.process.platform === 'darwin' ? Key.Command : 'Ctrl';
 
 interface SearchHotkeysPanelProps {
+  onNavigateUpClick: (e: any) => void;
+  onNavigateDownClick: (e: any) => void;
   isDocsFilterModalOpened: boolean;
   isSearchingInDocPage: boolean;
   onOpenFilterDocsClick: (e: any) => void;
@@ -16,6 +18,8 @@ interface SearchHotkeysPanelProps {
 }
 
 function SearchHotkeysPanel({
+  onNavigateUpClick,
+  onNavigateDownClick,
   isDocsFilterModalOpened,
   isSearchingInDocPage,
   onOpenFilterDocsClick,
@@ -39,9 +43,14 @@ function SearchHotkeysPanel({
         },
       ] : [
           {
-            text: 'Navigate results',
-            hotkey: [Key.Shift, VisualConcat.Plus, Key.ArrowUp, Key.ArrowDown],
-            isSeparated: true
+            text: 'Navigate up',
+            hotkey: [Key.Shift, Key.ArrowUp],
+            onClick: onNavigateUpClick,
+          },
+          {
+            text: 'Navigate down',
+            hotkey: [Key.Shift, Key.ArrowDown],
+            onClick: onNavigateDownClick,
           },
           {
             text: 'Filter docs',
@@ -57,7 +66,7 @@ function SearchHotkeysPanel({
         }
       ] : [
           {
-            text: 'Scroll page',
+            text: 'Scroll docs page',
             hotkey: [Key.ArrowUp, Key.ArrowDown],
             isSeparated: true
           },
