@@ -7,6 +7,7 @@ import isDev from './utils/isDev';
 
 class MainWindow {
   public window: electron.BrowserWindow | undefined;
+  public isPinModeEnabled = false;
 
   public get webContents() {
     return this.window?.webContents;
@@ -36,10 +37,6 @@ class MainWindow {
         worldSafeExecuteJavaScript: true,
         contextIsolation: false,
         spellcheck: false,
-        // devTools: isDev,
-        // nodeIntegrationInSubFrames: true,
-        // webSecurity: false,
-        // allowRunningInsecureContent: true,
       },
     });
 
@@ -47,7 +44,6 @@ class MainWindow {
     this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
     this.window.on('restore', () => {
-      console.log('Window restored');
       if (!this.window) { return; }
     })
 
@@ -75,7 +71,7 @@ class MainWindow {
     });
 
     this.window.on('blur', () => {
-      if (!isDev) {
+      if (!this.isPinModeEnabled) {
         hideWindow();
       }
     });
