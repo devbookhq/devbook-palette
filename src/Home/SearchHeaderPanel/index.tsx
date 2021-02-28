@@ -13,7 +13,6 @@ import electron, {
   restartAndUpdate,
   postponeUpdate,
   togglePinMode,
-  getPinModeState,
 } from 'mainCommunication';
 import Loader from 'components/Loader';
 import { PreferencesPage } from 'Preferences';
@@ -215,10 +214,9 @@ function SearchHeaderPanel({
     }
   });
 
-  useIPCRenderer(IPCMessage.GetPinModeState, (_, { isEnabled }: { isEnabled: boolean }) => {
+  useIPCRenderer(IPCMessage.OnPinModeChange, (_, { isEnabled }: { isEnabled: boolean }) => {
     setIsPinModeEnabled(isEnabled);
   });
-
 
   useEffect(() => {
     async function checkUpdateStatus() {
@@ -227,14 +225,7 @@ function SearchHeaderPanel({
         setIsUpdateAvailable(true);
       }
     }
-
-    async function getPinMode() {
-      const isEnabled = await getPinModeState();
-      setIsPinModeEnabled(isEnabled);
-    }
-
     checkUpdateStatus();
-    getPinMode();
   }, []);
 
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'cmd+shift+p' : 'control+shift+p', () => {

@@ -21,5 +21,5 @@ export enum IPCMessage {
   TrackSignOutButtonClicked = 'TrackSignOutButtonClicked',
 
   TogglePinMode = 'TogglePinMode',
-  GetPinModeState = 'GetPinModeState',
+  OnPinModeChange = 'OnPinModeChange',
 }

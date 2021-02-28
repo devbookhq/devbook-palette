@@ -1,13 +1,38 @@
 import * as electron from 'electron';
+import * as process from 'process';
 import ElectronStore from 'electron-store';
 import * as path from 'path';
 import { inspect } from 'util';
 
 import isDev from './utils/isDev';
+import { IPCMessage } from '../mainCommunication/ipc';
 
 class MainWindow {
   public window: electron.BrowserWindow | undefined;
-  public isPinModeEnabled = false;
+  private _isPinModeEnabled = false;
+  private didJustDisablePinMode = false;
+
+  public set isPinModeEnabled(value: boolean) {
+    if (!this.window) return;
+
+    this._isPinModeEnabled = value;
+    if (!value) {
+      this.didJustDisablePinMode = true;
+    }
+    if (process.platform === 'darwin') {
+      if (value) {
+        electron.app.dock.show()
+      } else {
+        electron.app.dock.hide()
+      }
+    } else {
+      if (value) {
+        this.window.setSkipTaskbar(true);
+      } else {
+        this.window.setSkipTaskbar(false);
+      }
+    }
+  }
 
   public get webContents() {
     return this.window?.webContents;
@@ -29,7 +54,7 @@ class MainWindow {
       alwaysOnTop: true,
       frame: false,
       fullscreenable: false,
-      skipTaskbar: true, // This makes sure that Devbook window isn't shown on the bottom taskbar on Windows.
+      // skipTaskbar: true, // This makes sure that Devbook window isn't shown on the bottom taskbar on Windows.
       title: 'Devbook',
       webPreferences: {
         nodeIntegration: true,
@@ -40,7 +65,7 @@ class MainWindow {
       },
     });
 
-    this.window.setSkipTaskbar(true);
+    // this.window.setSkipTaskbar(true);
     this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
     this.window.on('restore', () => {
@@ -71,13 +96,31 @@ class MainWindow {
     });
 
     this.window.on('blur', () => {
-      if (!this.isPinModeEnabled) {
+      // This is a hack so the window doesn't close when user clicks
+      // on the "Unpin Devbook" button.
+      // Normally, the window closes because we're calling app.dock.hide()
+      // as a reaction on the 'closed' event. This also triggers the 'blur'
+      // event.
+      if (this.didJustDisablePinMode) {
+        this.didJustDisablePinMode = false;
+        return;
+      }
+
+      if (!this._isPinModeEnabled) {
         hideWindow();
       }
     });
 
     this.window.on('closed', () => {
       this.window = undefined;
+      if (process.platform === 'darwin') {
+        electron.app.dock.hide();
+      }
+    });
+
+    this.window.on('ready-to-show', () => {
+      console.log('READY TO SHOW!');
+      this.window?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: this._isPinModeEnabled });
     });
 
     this.webContents?.on('crashed', (event, killed) => {
