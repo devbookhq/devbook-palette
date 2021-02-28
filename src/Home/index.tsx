@@ -59,8 +59,7 @@ import {
   StackOverflowModalHotkeysPanel,
   GitHubCodeSearchHotkeysPanel,
   GitHubCodeModalHotkeysPanel,
-  DocsSearchHotkeysPanel,
-} from './HotkeysPanel';
+  DocsSearchHotkeysPanel, } from './HotkeysPanel';
 import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';

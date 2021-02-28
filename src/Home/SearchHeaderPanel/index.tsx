@@ -18,7 +18,6 @@ import { PreferencesPage } from 'Preferences';
 import ResultsFiltersMenu, { ResultsFilter } from './ResultsFiltersMenu';
 import SearchInput from './SearchInput';
 
-import { ReactComponent as userProfileIcon } from 'img/user-profile.svg';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
 
@@ -39,24 +38,6 @@ const Menu = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-`;
-
-const UserProfileIcon = styled(userProfileIcon)`
-  height: auto;
-  width: 20px;
-`;
-
-const UserProfileButton = styled.div`
-  margin: 0 15px 0 0;
-
-  display: flex;
-
-  :hover {
-    path {
-      stroke: white;
-    }
-    cursor: pointer;
-  }
 `;
 
 const PreferencesIcon = styled(preferencesIcon)`
@@ -230,9 +211,6 @@ function SearchHeaderPanel({
           onFilterSelect={onFilterSelect}
         />
         {isDev && <Dev>[dev build]</Dev>}
-        <UserProfileButton onClick={() => openPreferences(PreferencesPage.Account)}>
-          <UserProfileIcon />
-        </UserProfileButton>
         <PreferencesButton onClick={() => openPreferences(PreferencesPage.General)}>
           <PreferencesIcon />
         </PreferencesButton>
