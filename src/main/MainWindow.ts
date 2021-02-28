@@ -27,9 +27,9 @@ class MainWindow {
       }
     } else {
       if (value) {
-        this.window.setSkipTaskbar(true);
-      } else {
         this.window.setSkipTaskbar(false);
+      } else {
+        this.window.setSkipTaskbar(true);
       }
     }
   }
@@ -54,7 +54,7 @@ class MainWindow {
       alwaysOnTop: true,
       frame: false,
       fullscreenable: false,
-      // skipTaskbar: true, // This makes sure that Devbook window isn't shown on the bottom taskbar on Windows.
+      skipTaskbar: true, // This makes sure that Devbook window isn't shown on the bottom taskbar on Windows.
       title: 'Devbook',
       webPreferences: {
         nodeIntegration: true,
@@ -65,7 +65,7 @@ class MainWindow {
       },
     });
 
-    // this.window.setSkipTaskbar(true);
+    this.window.setSkipTaskbar(true);
     this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
     this.window.on('restore', () => {
@@ -119,8 +119,13 @@ class MainWindow {
     });
 
     this.window.on('ready-to-show', () => {
-      console.log('READY TO SHOW!');
       this.window?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: this._isPinModeEnabled });
+    });
+
+    this.window.on('minimize', () => {
+      if (process.platform === 'win32' && this._isPinModeEnabled && this.window?.isMinimized()) {
+        this.window?.hide();
+      }
     });
 
     this.webContents?.on('crashed', (event, killed) => {
@@ -153,6 +158,9 @@ class MainWindow {
   }
 
   public hide() {
+    if (process.platform === 'win32' && this._isPinModeEnabled && this.window?.isMinimized()) return;
+
+    console.log('Is minimized?', this.window?.isMinimized());
     this.window?.hide();
   }
 

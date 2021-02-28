@@ -73,13 +73,13 @@
     "node": "12"
   },
   "scripts": {
-    "start": "craco start",
+    "start": "craco start", 
     "build": "craco build && tsc -p src/main",
     "postinstall": "electron-builder install-app-deps",
     "electron:dev": "concurrently \"npx cross-env BROWSER=none npm run start\" \"wait-on http://localhost:3000 && tsc -p src/main -w\" \"wait-on http://localhost:3000 && tsc -p src/main && electron --enable-logging .\"",
     "electron:build-mac-unnotarized": "npm run build && NOTARIZATION=none electron-builder build --mac --publish always",
     "electron:build-win": "npm run build && electron-builder build --win --publish always",
-    "electron:build-linux": "npm run build && electron-builder build --linux --publish always",
+    "electron:build-linux": "npm run build &&  electron-builder build --linux --publish always",
     "electron:build-mac": "npm run build && electron-builder build --mac --publish always",
     "electron:build-all": "npm run build && electron-builder -wml",
     "upload:win-bash": "bash.exe -l scripts/upload-win.sh",

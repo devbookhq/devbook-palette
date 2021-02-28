@@ -23,7 +23,7 @@ import Hotkey, { Key } from '../HotkeysPanel/Hotkey';
 
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
-import {IPCMessage} from 'mainCommunication/ipc';
+import { IPCMessage } from 'mainCommunication/ipc';
 
 const Container = styled.div`
   width: 100%;
@@ -228,7 +228,7 @@ function SearchHeaderPanel({
     checkUpdateStatus();
   }, []);
 
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'cmd+shift+p' : 'control+shift+p', () => {
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'cmd+shift+p' : 'alt+shift+p', () => {
     togglePinMode(!isPinModeEnabled);
     setIsPinModeEnabled(v => !v);
   }, { filter: () => true }, [isPinModeEnabled, setIsPinModeEnabled]);
@@ -281,7 +281,7 @@ function SearchHeaderPanel({
           <Disclaimer onClick={handleUpdate}>
             {'New version is available. Click here to update & restart.'}
           </Disclaimer>
-          <CancelButton
+          <CancelButton   
             onClick={handleCloseUpdatePanel}
           >
             <CloseIcon />
