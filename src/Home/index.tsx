@@ -1274,14 +1274,6 @@ function Home() {
     const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
     navigateSearchResultsUp(idx, activeFilter, isModalOpened);
-    //if (state.modalItem || state.isDocsFilterModalOpened) return;
-    //// The docs search filter uses 'cmd + arrow' for the search navigation.
-    //if (activeFilter === ResultsFilter.Docs) return;
-
-    //const idx = state.results[activeFilter].focusedIdx.idx;
-    //if (idx > 0) {
-    //  focusResultItem(activeFilter, idx - 1, FocusState.WithScroll);
-    //}
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'down arrow' hotkey - navigation.
@@ -1289,16 +1281,6 @@ function Home() {
     const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
     navigateSearchResultsDown(idx, activeFilter, isModalOpened);
-    /*
-    if (state.modalItem || state.isDocsFilterModalOpened) return;
-    // The docs search filter uses 'cmd + arrow' for the search navigation.
-    if (activeFilter === ResultsFilter.Docs) return;
-
-    const idx = state.results[activeFilter].focusedIdx.idx;
-    if (idx < state.results[activeFilter].items.length - 1) {
-      focusResultItem(activeFilter, idx + 1, FocusState.WithScroll);
-    }
-    */
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'enter' hotkey - open the focused result in a modal.
@@ -1777,6 +1759,16 @@ function Home() {
                 onOpenClick={() => openModal(activeFocusedItem)}
                 onOpenInVSCodeClick={openFocusedGitHubCodeItemInVSCode}
                 onOpenInBrowserClick={openFocusedGitHubCodeItemInBrowser}
+                onNavigateUpClick={() => navigateSearchResultsUp(
+                  state.results[ResultsFilter.GitHubCode].focusedIdx.idx,
+                  ResultsFilter.GitHubCode,
+                  false,
+                )}
+                onNavigateDownClick={() => navigateSearchResultsDown(
+                  state.results[ResultsFilter.GitHubCode].focusedIdx.idx,
+                  ResultsFilter.GitHubCode,
+                  false,
+                )}
               />
             }
             {state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
