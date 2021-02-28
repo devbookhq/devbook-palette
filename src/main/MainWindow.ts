@@ -42,6 +42,7 @@ class MainWindow {
       },
     });
 
+    this.window.setAlwaysOnTop(true, 'main-menu');
     this.window.setSkipTaskbar(true);
     this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
@@ -74,6 +75,7 @@ class MainWindow {
     });
 
     this.window.on('blur', () => {
+      // if (this.window?.webContents.isDevToolsOpened()) return;
       if (!isDev) {
         hideWindow();
       }
@@ -100,7 +102,6 @@ class MainWindow {
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/`);
     }
-
   }
 
   public close() {
