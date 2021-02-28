@@ -23,6 +23,7 @@ class OnboardingWindow {
       icon: process.platform === 'linux' || process.platform === 'win32' ? taskBarIcon : undefined,
       title: 'Devbook Onboarding',
       webPreferences: {
+        spellcheck: false,
         contextIsolation: false,
         nodeIntegration: true,
         enableRemoteModule: true,

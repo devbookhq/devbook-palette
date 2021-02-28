@@ -35,6 +35,7 @@ class MainWindow {
         enableRemoteModule: true,
         worldSafeExecuteJavaScript: true,
         contextIsolation: false,
+        spellcheck: false,
         // devTools: isDev,
         // nodeIntegrationInSubFrames: true,
         // webSecurity: false,
