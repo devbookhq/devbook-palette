@@ -19,7 +19,7 @@ function ModalHotkeysPanel({
     <Panel
       hotkeysLeft={[
         {
-          text: 'Navigate',
+          text: 'Scroll page',
           hotkey: [Key.ArrowUp, Key.ArrowDown],
           isSeparated: true
         },
