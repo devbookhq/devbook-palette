@@ -26,6 +26,9 @@ enum AnalyticsEvent {
   SignInFailed = 'Sign in failed',
   ContinueIntoAppButtonClicked = 'Continue into app button clicked',
   SignOutButtonClicked = 'Sign out button clicked',
+
+  ConnectingGitHubStarted = 'Connecting GitHub started',
+  ConnectingGitHubFinished = 'Connecting GitHub finished',
 }
 
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
@@ -101,6 +104,32 @@ export function trackOnboardingStarted() {
 export function trackOnboardingFinished() {
   client.track({
     event: AnalyticsEvent.OnboardingFinished,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+    },
+  });
+}
+
+export function trackConnectGitHubStarted() {
+  client.track({
+    event: AnalyticsEvent.ConnectingGitHubStarted,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+    },
+  });
+}
+
+export function trackConnectGitHubFinished() {
+  client.track({
+    event: AnalyticsEvent.ConnectingGitHubFinished,
     anonymousId: anonymousID,
     userId: userID,
     properties: {
