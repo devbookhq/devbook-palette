@@ -59,8 +59,7 @@ import {
   StackOverflowModalHotkeysPanel,
   GitHubCodeSearchHotkeysPanel,
   GitHubCodeModalHotkeysPanel,
-  DocsSearchHotkeysPanel,
-} from './HotkeysPanel';
+  DocsSearchHotkeysPanel, } from './HotkeysPanel';
 import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
@@ -1213,6 +1212,22 @@ function Home() {
     else includeDocSourceInSearch(docSource);
   }
 
+  function navigateSearchResultsUp(idx: number, filter: ResultsFilter, isModalOpened: boolean) {
+    if (isModalOpened) return; // In an active modal, arrow keys scroll the scrollbar and not navigate results.
+
+    if (idx > 0) {
+      focusResultItem(filter, idx - 1, FocusState.WithScroll);
+    }
+  }
+
+  function navigateSearchResultsDown(idx: number, filter: ResultsFilter, isModalOpened: boolean) {
+    if (isModalOpened) return;
+
+    if (idx < state.results[filter].items.length - 1) {
+      focusResultItem(filter, idx + 1, FocusState.WithScroll);
+    }
+  }
+
   /* HOTKEYS */
   // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
@@ -1238,41 +1253,31 @@ function Home() {
   // 'shift + up arrow' - navigate docs search results.
   useHotkeys('shift+up', () => {
     const idx = state.results[activeFilter].focusedIdx.idx;
-    if (idx > 0) {
-      focusResultItem(activeFilter, idx - 1, FocusState.WithScroll);
-    }
+    navigateSearchResultsUp(idx, activeFilter, false);
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'shift + down arrow' - navigate docs search results.
   useHotkeys('shift+down', () => {
     const idx = state.results[activeFilter].focusedIdx.idx;
-    if (idx < state.results[activeFilter].items.length - 1) {
-      focusResultItem(activeFilter, idx + 1, FocusState.WithScroll);
-    }
+    navigateSearchResultsDown(idx, activeFilter, false);
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'up arrow' hotkey - navigation.
   useHotkeys('up', () => {
-    if (state.modalItem || state.isDocsFilterModalOpened) return;
-    // The docs search filter uses 'cmd + arrow' for the search navigation.
-    if (activeFilter === ResultsFilter.Docs) return;
+    if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
 
+    const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
-    if (idx > 0) {
-      focusResultItem(activeFilter, idx - 1, FocusState.WithScroll);
-    }
+    navigateSearchResultsUp(idx, activeFilter, isModalOpened);
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'down arrow' hotkey - navigation.
   useHotkeys('down', () => {
-    if (state.modalItem || state.isDocsFilterModalOpened) return;
-    // The docs search filter uses 'cmd + arrow' for the search navigation.
-    if (activeFilter === ResultsFilter.Docs) return;
+    if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
 
+    const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
-    if (idx < state.results[activeFilter].items.length - 1) {
-      focusResultItem(activeFilter, idx + 1, FocusState.WithScroll);
-    }
+    navigateSearchResultsDown(idx, activeFilter, isModalOpened);
   }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
 
   // 'enter' hotkey - open the focused result in a modal.
@@ -1722,6 +1727,16 @@ function Home() {
               <StackOverflowSearchHotkeysPanel
                 onOpenClick={() => openModal(activeFocusedItem)}
                 onOpenInBrowserClick={openFocusedSOItemInBrowser}
+                onNavigateUpClick={() => navigateSearchResultsUp(
+                  state.results[ResultsFilter.StackOverflow].focusedIdx.idx,
+                  ResultsFilter.StackOverflow,
+                  false,
+                )}
+                onNavigateDownClick={() => navigateSearchResultsDown(
+                  state.results[ResultsFilter.StackOverflow].focusedIdx.idx,
+                  ResultsFilter.StackOverflow,
+                  false,
+                )}
               />
             }
             {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
@@ -1741,6 +1756,16 @@ function Home() {
                 onOpenClick={() => openModal(activeFocusedItem)}
                 onOpenInVSCodeClick={openFocusedGitHubCodeItemInVSCode}
                 onOpenInBrowserClick={openFocusedGitHubCodeItemInBrowser}
+                onNavigateUpClick={() => navigateSearchResultsUp(
+                  state.results[ResultsFilter.GitHubCode].focusedIdx.idx,
+                  ResultsFilter.GitHubCode,
+                  false,
+                )}
+                onNavigateDownClick={() => navigateSearchResultsDown(
+                  state.results[ResultsFilter.GitHubCode].focusedIdx.idx,
+                  ResultsFilter.GitHubCode,
+                  false,
+                )}
               />
             }
             {state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
@@ -1759,6 +1784,16 @@ function Home() {
               && isAnyDocSourceIncluded
               &&
               <DocsSearchHotkeysPanel
+                onNavigateUpClick={() => navigateSearchResultsUp(
+                  state.results[ResultsFilter.Docs].focusedIdx.idx,
+                  ResultsFilter.Docs,
+                  false,
+                )}
+                onNavigateDownClick={() => navigateSearchResultsDown(
+                  state.results[ResultsFilter.Docs].focusedIdx.idx,
+                  ResultsFilter.Docs,
+                  false,
+                )}
                 isDocsFilterModalOpened={state.isDocsFilterModalOpened}
                 isSearchingInDocPage={state.isSearchingInDocPage}
                 onOpenFilterDocsClick={openDocsFilterModal}

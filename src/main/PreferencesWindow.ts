@@ -35,6 +35,7 @@ class PreferencesWindow {
       icon: process.platform === 'linux' || process.platform === 'win32' ? taskBarIcon : undefined,
       titleBarStyle: 'hiddenInset',
       webPreferences: {
+        spellcheck: false,
         contextIsolation: false,
         nodeIntegration: true,
         enableRemoteModule: true,

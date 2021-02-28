@@ -19,4 +19,7 @@ export enum IPCMessage {
   TrackSignInFailed = 'TrackSignInFailed',
   TrackContinueIntoAppButtonClicked = 'TrackContinueIntoAppButtonClicked',
   TrackSignOutButtonClicked = 'TrackSignOutButtonClicked',
+
+  TogglePinMode = 'TogglePinMode',
+  GetPinModeState = 'GetPinModeState',
 }

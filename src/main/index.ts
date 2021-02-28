@@ -35,10 +35,12 @@ import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
+import contextMenu from 'electron-context-menu';
 
 enum StoreKey {
   DocSources = 'docSources',
   Email = 'email',
+  IsPinModeEnabled = 'isPinModeEnabled',
 }
 
 const PORT = 3000;
@@ -59,6 +61,9 @@ console.error = (...args: any) => {
   oldError(...args);
   logInRendered('error', ...args);
 }
+
+// Default right-click context menu for all Electron windows.
+contextMenu();
 
 // Disallow running multiple instances of Devbook
 const isFirstInstance = app.requestSingleInstanceLock();
@@ -490,4 +495,19 @@ ipcMain.on(IPCMessage.TrackContinueIntoAppButtonClicked, () => {
 
 ipcMain.on(IPCMessage.TrackSignOutButtonClicked, () => {
   trackSignOutButtonClicked()
+});
+
+ipcMain.on(IPCMessage.TogglePinMode, (_, { isEnabled }: { isEnabled: boolean }) => {
+  if (mainWindow) {
+    mainWindow.isPinModeEnabled = isEnabled;
+  }
+  return store.set(StoreKey.IsPinModeEnabled, isEnabled);
+});
+
+ipcMain.handle(IPCMessage.GetPinModeState, async () => {
+  const isEnabled = await store.get(StoreKey.IsPinModeEnabled, false);
+  if (mainWindow) {
+    mainWindow.isPinModeEnabled = isEnabled;
+  }
+  return isEnabled;
 });

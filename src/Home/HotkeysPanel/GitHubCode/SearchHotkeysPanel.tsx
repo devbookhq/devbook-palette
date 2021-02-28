@@ -5,12 +5,16 @@ import { Key } from '../Hotkey';
 import Panel from '../Panel';
 
 interface SearchHotkeysPanelProps {
+  onNavigateUpClick: (e: any) => void;
+  onNavigateDownClick: (e: any) => void;
   onOpenClick: (e: any) => void;
   onOpenInVSCodeClick: (e: any) => void;
   onOpenInBrowserClick: (e: any) => void;
 }
 
 function SearchHotkeysPanel({
+  onNavigateUpClick,
+  onNavigateDownClick,
   onOpenClick,
   onOpenInVSCodeClick,
   onOpenInBrowserClick,
@@ -18,7 +22,8 @@ function SearchHotkeysPanel({
   return (
     <Panel
       hotkeysLeft={[
-        { text: 'Navigate', hotkey: [Key.ArrowUp, Key.ArrowDown], isSeparated: true },
+        { text: 'Navigate up', hotkey: [Key.ArrowUp], onClick: onNavigateUpClick },
+        { text: 'Navigate down', hotkey: [Key.ArrowDown], onClick: onNavigateDownClick },
         { text: 'Open', hotkey: [Key.Enter], onClick: onOpenClick },
       ]}
       hotkeysRight={[
