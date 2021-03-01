@@ -59,7 +59,8 @@ import {
   StackOverflowModalHotkeysPanel,
   GitHubCodeSearchHotkeysPanel,
   GitHubCodeModalHotkeysPanel,
-  DocsSearchHotkeysPanel, } from './HotkeysPanel';
+  DocsSearchHotkeysPanel,
+} from './HotkeysPanel';
 import FocusState from './SearchItemFocusState';
 import StackOverflowModal from './StackOverflow/StackOverflowModal';
 import StackOverflowItem from './StackOverflow/StackOverflowItem';
@@ -70,6 +71,8 @@ import {
   DocPage,
   DocsFilterModal,
 } from './Docs';
+
+import SearchHistory from '../searchHistory';
 
 const Container = styled.div`
   height: 100%;
@@ -1447,6 +1450,9 @@ function Home() {
       state.gitHubAccount.isConnected,
       state.docSources,
     );
+
+    SearchHistory.debouncedSaveQuery(debouncedQuery);
+
     trackSearch({
       activeFilter: activeFilter.toString(),
     });
