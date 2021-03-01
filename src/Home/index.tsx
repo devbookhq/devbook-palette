@@ -72,8 +72,7 @@ import {
   DocsFilterModal,
 } from './Docs';
 import SearchHistory from './SearchHistory';
-
-import SearchHistory from '../searchHistory';
+import historyStore from './SearchHistory/historyStore';
 
 const Container = styled.div`
   height: 100%;
@@ -1452,7 +1451,7 @@ function Home() {
       state.docSources,
     );
 
-    SearchHistory.debouncedSaveQuery(debouncedQuery);
+    historyStore.debouncedSaveQuery(debouncedQuery);
 
     trackSearch({
       activeFilter: activeFilter.toString(),

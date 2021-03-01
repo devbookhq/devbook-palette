@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 
-import Hotkey from './HotkeysPanel/Hotkey';
+import Hotkey from 'Home/HotkeysPanel/Hotkey';
 
 const Container = styled.div`
   padding: 8px;
