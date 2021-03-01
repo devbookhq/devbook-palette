@@ -191,10 +191,6 @@ export function togglePinMode(isEnabled: boolean) {
   return electron.ipcRenderer.send(IPCMessage.TogglePinMode, { isEnabled });
 }
 
-export function getPinModeState(): Promise<boolean> {
-  return electron.ipcRenderer.invoke(IPCMessage.GetPinModeState);
-}
-
 export { isDev };
 
 export default electron;

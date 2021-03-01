@@ -9,6 +9,9 @@ import {
 } from 'electron';
 import tmp from 'tmp';
 import { autoUpdater } from 'electron-updater';
+import contextMenu from 'electron-context-menu';
+
+import { IPCMessage } from '../mainCommunication/ipc';
 import isDev from './utils/isDev';
 import {
   trackShowApp,
@@ -34,8 +37,6 @@ import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
-import { IPCMessage } from '../mainCommunication/ipc';
-import contextMenu from 'electron-context-menu';
 
 enum StoreKey {
   DocSources = 'docSources',
@@ -44,6 +45,7 @@ enum StoreKey {
 }
 
 const PORT = 3000;
+let isPinModeEnabled = false;
 
 // Set up logs so logging from the main process can be seen in the browser.
 function logInRendered(...args: any) {
@@ -83,6 +85,8 @@ if (!isFirstInstance) {
       mainWindow.window.focus();
     } else {
       mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
+      mainWindow.isPinModeEnabled = isPinModeEnabled;
+    mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
     }
   });
 }
@@ -211,6 +215,7 @@ if (process.platform === 'darwin' && !isFirstRun) {
 function toggleVisibilityOnMainWindow() {
   if (!mainWindow || !mainWindow.window) {
     mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
+    mainWindow.isPinModeEnabled = isPinModeEnabled;
     onboardingWindow?.webContents?.send('did-show-main-window');
     return;
   }
@@ -281,12 +286,18 @@ app.once('ready', async () => {
   });
 
   if (isFirstRun) {
-    onboardingWindow = new OnboardingWindow(PORT, taskBarIcon);
     mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp(), true);
+    mainWindow.isPinModeEnabled = isPinModeEnabled;
+    mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
+
+    onboardingWindow = new OnboardingWindow(PORT, taskBarIcon);
     onboardingWindow?.window?.focus();
+
     trackOnboardingStarted();
   } else {
     mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp(), app.getLoginItemSettings().wasOpenedAsHidden);
+    mainWindow.isPinModeEnabled = isPinModeEnabled;
+    mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
   }
 });
 
@@ -499,15 +510,8 @@ ipcMain.on(IPCMessage.TrackSignOutButtonClicked, () => {
 
 ipcMain.on(IPCMessage.TogglePinMode, (_, { isEnabled }: { isEnabled: boolean }) => {
   if (mainWindow) {
+    isPinModeEnabled = isEnabled;
     mainWindow.isPinModeEnabled = isEnabled;
   }
-  return store.set(StoreKey.IsPinModeEnabled, isEnabled);
 });
 
-ipcMain.handle(IPCMessage.GetPinModeState, async () => {
-  const isEnabled = await store.get(StoreKey.IsPinModeEnabled, false);
-  if (mainWindow) {
-    mainWindow.isPinModeEnabled = isEnabled;
-  }
-  return isEnabled;
-});

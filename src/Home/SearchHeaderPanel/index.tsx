@@ -13,7 +13,6 @@ import electron, {
   restartAndUpdate,
   postponeUpdate,
   togglePinMode,
-  getPinModeState,
 } from 'mainCommunication';
 import Loader from 'components/Loader';
 import { PreferencesPage } from 'Preferences';
@@ -24,7 +23,7 @@ import Hotkey, { Key } from '../HotkeysPanel/Hotkey';
 
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
-import {IPCMessage} from 'mainCommunication/ipc';
+import { IPCMessage } from 'mainCommunication/ipc';
 
 const Container = styled.div`
   width: 100%;
@@ -215,10 +214,9 @@ function SearchHeaderPanel({
     }
   });
 
-  useIPCRenderer(IPCMessage.GetPinModeState, (_, { isEnabled }: { isEnabled: boolean }) => {
+  useIPCRenderer(IPCMessage.OnPinModeChange, (_, { isEnabled }: { isEnabled: boolean }) => {
     setIsPinModeEnabled(isEnabled);
   });
-
 
   useEffect(() => {
     async function checkUpdateStatus() {
@@ -227,17 +225,10 @@ function SearchHeaderPanel({
         setIsUpdateAvailable(true);
       }
     }
-
-    async function getPinMode() {
-      const isEnabled = await getPinModeState();
-      setIsPinModeEnabled(isEnabled);
-    }
-
     checkUpdateStatus();
-    getPinMode();
   }, []);
 
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'cmd+shift+p' : 'control+shift+p', () => {
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'cmd+shift+p' : 'alt+shift+p', () => {
     togglePinMode(!isPinModeEnabled);
     setIsPinModeEnabled(v => !v);
   }, { filter: () => true }, [isPinModeEnabled, setIsPinModeEnabled]);
@@ -290,7 +281,7 @@ function SearchHeaderPanel({
           <Disclaimer onClick={handleUpdate}>
             {'New version is available. Click here to update & restart.'}
           </Disclaimer>
-          <CancelButton
+          <CancelButton   
             onClick={handleCloseUpdatePanel}
           >
             <CloseIcon />
