@@ -154,8 +154,6 @@ class MainWindow {
 
   public hide() {
     if (process.platform === 'win32' && this._isPinModeEnabled && this.window?.isMinimized()) return;
-
-    console.log('Is minimized?', this.window?.isMinimized());
     this.window?.hide();
   }
 
