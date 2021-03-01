@@ -32,12 +32,13 @@ interface SearchInputProps {
 
   initialValue: string;
 
-  setIsInputFocused: (e: any) => void;
   inputRef: React.RefObject<HTMLInputElement>;
 
   isModalOpened?: boolean;
   isSignInModalOpened?: boolean;
   isDocsFilterModalOpened?: boolean;
+
+  onInputFocusChange: (isFocused: boolean) => void;
 }
 
 function SearchInput({
@@ -48,7 +49,7 @@ function SearchInput({
   initialValue,
   isSignInModalOpened,
   isDocsFilterModalOpened,
-  setIsInputFocused,
+  onInputFocusChange,
 }: SearchInputProps) {
   const [inputState, setInputState] = useState({ value: '', isInitialized: false });
   const trimmedValue = inputState.value.trim();
@@ -99,14 +100,15 @@ function SearchInput({
     else inputRef?.current?.focus();
   }, [isDocsFilterModalOpened]);
 
+
   return (
     <Input
       ref={inputRef}
       placeholder={placeholder}
       value={inputState.value}
       onChange={handleChangeValue}
-      onFocus={() => setIsInputFocused(true)}
-      onBlur={() => setIsInputFocused(false)}
+      onFocus={() => onInputFocusChange(true)}
+      onBlur={() => onInputFocusChange(false)}
       onKeyDown={handleInputKeyDown}
     />
   );

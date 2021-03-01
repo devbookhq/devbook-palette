@@ -269,6 +269,11 @@ enum ReducerActionType {
   RemoveDocSourceFromSearch,
 
   SetIsLoadingCachedData,
+
+  ToggleSearchHistoryFocus,
+  //HideSearchHistory,
+
+  ToggleSearchInputFocus,
 }
 
 interface SetSearchQuery {
@@ -422,6 +427,16 @@ interface SetIsLoadingCachedData {
   payload: { isLoadingCachedData: boolean };
 }
 
+interface ToggleSearchHistoryFocus {
+  type: ReducerActionType.ToggleSearchHistoryFocus;
+  payload: { isFocused: boolean };
+}
+
+interface ToggleSearchInputFocus {
+  type: ReducerActionType.ToggleSearchInputFocus;
+  payload: { isFocused: boolean };
+}
+
 type ReducerAction = SetSearchQuery
   | SetSearchFilter
   | CacheScrollTopPosition
@@ -448,7 +463,9 @@ type ReducerAction = SetSearchQuery
   | FetchDocSourcesFail
   | IncludeDocSourceInSearch
   | RemoveDocSourceFromSearch
-  | SetIsLoadingCachedData;
+  | SetIsLoadingCachedData
+  | ToggleSearchHistoryFocus
+  | ToggleSearchInputFocus;
 
 interface State {
   search: {
@@ -471,6 +488,8 @@ interface State {
   docSources: DocSource[];
   isLoadingCachedData: boolean;
   isSignInModalOpened: boolean;
+  isSearchHistoryFocused: boolean;
+  isSearchInputFocused: boolean;
 }
 
 const initialState: State = {
@@ -524,6 +543,8 @@ const initialState: State = {
   docSources: [],
   isLoadingCachedData: true,
   isSignInModalOpened: false,
+  isSearchHistoryFocused: false,
+  isSearchInputFocused: true,
 }
 
 function stateReducer(state: State, reducerAction: ReducerAction): State {
@@ -815,6 +836,21 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         isLoadingCachedData,
       };
     }
+    case ReducerActionType.ToggleSearchHistoryFocus: {
+      const { isFocused } = reducerAction.payload;
+      return {
+        ...state,
+        isSearchHistoryFocused: isFocused,
+      };
+    }
+    case ReducerActionType.ToggleSearchInputFocus: {
+      const { isFocused } = reducerAction.payload;
+      return {
+        ...state,
+        isSearchHistoryFocused: isFocused ? state.isSearchHistoryFocused : false,
+        isSearchInputFocused: isFocused,
+      };
+    }
     default:
       return state;
   }
@@ -1075,6 +1111,20 @@ function Home() {
       payload: { isLoadingCachedData },
     });
   }, []);
+
+  const toggleSearchHistoryFocus = useCallback((isFocused: boolean) => {
+    dispatch({
+      type: ReducerActionType.ToggleSearchHistoryFocus,
+      payload: { isFocused },
+    });
+  }, []);
+
+  const toggleSearchInputFocus = useCallback((isFocused: boolean) => {
+    dispatch({
+      type: ReducerActionType.ToggleSearchInputFocus,
+      payload: { isFocused },
+    });
+  }, []);
   /////////
 
   const openFocusedSOItemInBrowser = useCallback(() => {
@@ -1268,33 +1318,43 @@ function Home() {
   // 'up arrow' hotkey - navigation.
   useHotkeys('up', () => {
     if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
+    if (state.isSearchHistoryFocused) return;
 
     const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
     navigateSearchResultsUp(idx, activeFilter, isModalOpened);
-  }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
+  }, { filter: () => true }, [state.results, activeFilter, state.modalItem, state.isSearchHistoryFocused]);
 
   // 'down arrow' hotkey - navigation.
   useHotkeys('down', () => {
     if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
+    if (state.isSearchHistoryFocused) return;
 
     const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
     navigateSearchResultsDown(idx, activeFilter, isModalOpened);
-  }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
+  }, { filter: () => true }, [state.results, activeFilter, state.modalItem, state.isSearchHistoryFocused]);
 
   // 'enter' hotkey - open the focused result in a modal.
   useHotkeys('enter', () => {
     if (activeFilter === ResultsFilter.Docs) return;
+    if (state.isSearchHistoryFocused) return;
+
     openModal(state.results[activeFilter].items[activeFocusedIdx.idx]);
     trackShortcut({ action: 'Open modal' });
-  }, [state.results, activeFilter, activeFocusedIdx]);
+  }, [state.results, activeFilter, activeFocusedIdx, state.isSearchHistoryFocused]);
 
   // 'esc' hotkey - close modal or hide main window.
   useHotkeys('esc', () => {
     if (state.modalItem) {
       closeModal();
       trackShortcut({ action: 'Close modal' });
+      return;
+    }
+
+    if (state.isSearchHistoryFocused) {
+      toggleSearchHistoryFocus(false)
+      trackShortcut({ action: 'Cancel search in doc page' });
       return;
     }
 
@@ -1318,6 +1378,8 @@ function Home() {
     hideMainWindow();
     trackShortcut({ action: 'Hide main window' });
   }, [
+    state.isSearchHistoryFocused,
+    toggleSearchHistoryFocus,
     state.modalItem,
     state.isSearchingInDocPage,
     state.isDocsFilterModalOpened,
@@ -1371,6 +1433,14 @@ function Home() {
     state.isDocsFilterModalOpened,
     isUserSignedInWithOrWithoutMetadata,
   ]);
+
+  // Tab to tocus search history
+  useHotkeys('tab', (event) => {
+    if (!state.isSearchHistoryFocused) {
+      toggleSearchHistoryFocus(true);
+      event.preventDefault();
+    }
+  }, { filter: () => true }, [state.isSearchHistoryFocused, toggleSearchHistoryFocus]);
   /* //////////////////// */
 
   useIPCRenderer(IPCMessage.OpenSignInModal, () => {
@@ -1530,21 +1600,26 @@ function Home() {
         />
       }
 
-      <SearchHistory
-        isFocused
-        history={[
-          'Search history from the past 1',
-          'Search history from the past 2',
-          'Search history from the past 3',
-          'Search history from the past 4',
-          'Search history from the past 5',
-          'Search history from the past 6',
-          'Search history from the past 7',
-          'Search history from the past 8',
-          'Search history from the past 9',
-        ]}
-        onSelect={() => {}}
-      />
+      {/*
+      {state.isSearchInputFocused &&
+        <SearchHistory
+          isFocused={state.isSearchHistoryFocused}
+          history={[
+            'Search history from the past 1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+            'Search history from the past 2',
+            'Search history from the past 3',
+            'Search history from the past 4',
+            'Search history from the past 5',
+            'Search history from the past 6',
+            'Search history from the past 7',
+            'Search history from the past 8',
+            'Search history from the past 9',
+          ]}
+          onSelect={console.log}
+          onFocusHotkeyClick={() => toggleSearchHistoryFocus(true)}
+        />
+      }
+      */}
 
       <Container>
         <SearchHeaderPanel
@@ -1557,6 +1632,7 @@ function Home() {
           isModalOpened={!!state.modalItem}
           isSignInModalOpened={state.isSignInModalOpened}
           isDocsFilterModalOpened={state.isDocsFilterModalOpened}
+          onInputFocusChange={toggleSearchInputFocus}
         />
 
         {!state.search.query
