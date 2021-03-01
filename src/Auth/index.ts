@@ -85,7 +85,8 @@ export const authEmitter = new EventEmitter();
 export let auth: AuthInfo = { state: AuthState.LookingForStoredUser };
 export const AuthContext = createContext<AuthInfo>(auth);
 
-const baseURL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
+const baseURL = isDev ? 'http://localhost:3002' : 'https://api.usedevbook.com';
+// const baseURL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
 
 enum APIVersion {
   v1 = 'v1',
@@ -118,7 +119,7 @@ function changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
     const email = auth?.user?.email || undefined;
     const userID = auth?.user?.userID || undefined;
     changeUserInMain(userID && email ? { userID, email } : undefined);
-  } if (auth.state === AuthState.NoUser) {
+  } else if (auth.state === AuthState.NoUser) {
     changeUserInMain();
   }
 }
@@ -129,6 +130,7 @@ function generateSessionID() {
 
 export function updateAuth(newAuth: AuthInfo) {
   auth = newAuth;
+  console.log('user', auth);
   authEmitter.emit('changed', auth);
   changeAnalyticsUserAndSaveEmail(auth);
   setAuthInOtherWindows(auth);
@@ -215,7 +217,6 @@ export async function signIn(email: string) {
         updateAuth({ state: AuthState.NoUser });
         return reject({ message: 'Sign in was cancelled' });
       } catch (error) {
-        console.error(error.message);
         updateAuth({ state: AuthState.NoUser });
         return reject({ message: 'Sign in could not be cancelled' });
       }
@@ -291,6 +292,5 @@ export async function refreshAuth() {
     setRefreshToken(refreshToken);
   } catch (error) {
     updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
-    console.error(error.message);
   }
 }

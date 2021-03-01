@@ -8,10 +8,16 @@ import {
   ipcMain,
 } from 'electron';
 import tmp from 'tmp';
-import { autoUpdater } from 'electron-updater';
+import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 
-import { IPCMessage } from '../mainCommunication/ipc';
+// Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.
+// Top-level property 'productName' in the package.json overwrites top-level property 'name' as an app identifier.
+// At the same time, the 'productName' is required to be top-level by ToDesktop - we used 'productName' in a 'build' property before.
+// It still creates a directory on the original path, but this directory only contains an empty 'Dictionaries' directory.
+// This is an open electron issue https://github.com/electron/electron/issues/26039.
+app.setPath('userData', path.resolve(app.getPath('userData'), '..', 'com.foundrylabs.devbook'));
+
 import isDev from './utils/isDev';
 import {
   trackShowApp,
@@ -37,6 +43,9 @@ import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
+import { IPCMessage } from '../mainCommunication/ipc';
+
+toDesktop.init();
 
 enum StoreKey {
   DocSources = 'docSources',
@@ -95,16 +104,7 @@ if (!isFirstInstance) {
 let isUpdateAvailable = false;
 
 if (!isDev) {
-  autoUpdater.requestHeaders = null;
-
-  app.on('ready', () => {
-    // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron.
-    setInterval(() => {
-      autoUpdater.checkForUpdates();
-    }, 10 * 60 * 1000);
-  });
-
-  autoUpdater.on('update-downloaded', () => {
+  toDesktop.autoUpdater.on('update-downloaded', () => {
     isUpdateAvailable = true;
 
     mainWindow?.webContents?.send('update-available', {});
@@ -112,18 +112,13 @@ if (!isDev) {
 
     tray?.setIsUpdateAvailable(true);
   });
-
-  autoUpdater.on('error', (message) => {
-    console.error('There was a problem updating the application');
-    console.error(message);
-  });
 }
 
 async function restartAndUpdate() {
   if (isUpdateAvailable) {
     setImmediate(() => {
       try {
-        autoUpdater.quitAndInstall();
+        toDesktop.autoUpdater.restartAndInstall();
       } catch (error) {
         console.error(error.message);
       }
@@ -244,10 +239,6 @@ function trySetGlobalShortcut(shortcut: string) {
 
 /////////// App Events ///////////
 app.once('ready', async () => {
-  if (!isDev) {
-    autoUpdater.checkForUpdates();
-  }
-
   if (isDev) {
     // Load react dev tools.
     await electron.session.defaultSession.loadExtension(
@@ -514,4 +505,3 @@ ipcMain.on(IPCMessage.TogglePinMode, (_, { isEnabled }: { isEnabled: boolean }) 
     mainWindow.isPinModeEnabled = isEnabled;
   }
 });
-
