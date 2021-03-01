@@ -65,6 +65,7 @@ class MainWindow {
       },
     });
 
+    this.window.setAlwaysOnTop(true, 'main-menu');
     this.window.setSkipTaskbar(true);
     this.window.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
@@ -133,12 +134,7 @@ class MainWindow {
     });
 
     if (isDev) {
-      this.window.loadURL(`http://localhost:${PORT}/index.html`).then(() => {
-        this.window?.webContents.session.cookies.get({}).then((cookies) => {
-          console.log(cookies);
-        })
-
-      })
+      this.window.loadURL(`http://localhost:${PORT}/index.html`);
       // Hot Reloading
       require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
@@ -150,7 +146,6 @@ class MainWindow {
     } else {
       this.window.loadURL(`file://${__dirname}/../index.html#/`);
     }
-
   }
 
   public close() {

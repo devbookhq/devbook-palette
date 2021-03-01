@@ -4,7 +4,7 @@ import { app } from 'electron';
 import ElectronStore from 'electron-store';
 
 import isDev from './utils/isDev';
-import debounce from './utils/debounce';
+import debounce from '../utils/debounce';
 
 enum AnalyticsEvent {
   ShowedApp = 'Showed app',
