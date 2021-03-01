@@ -11,8 +11,10 @@ class SearchHistory {
     name: 'history',
   });
 
+  private static readonly searchHistoryEntriesStoreName = 'searchHistoryEntries';
+
   private static readonly maxHistorySize = 200;
-  private static entries = SearchHistory.store.get('searchHistoryEntries1', []) as HistoryEntry[];
+  private static entries = SearchHistory.store.get(SearchHistory.searchHistoryEntriesStoreName, []) as HistoryEntry[];
   static readonly debouncedSaveQuery = debounce(SearchHistory.saveQuery, 5000);
 
   static get queries() {
@@ -39,7 +41,7 @@ class SearchHistory {
       ...SearchHistory.entries.slice(-4),
     ];
 
-    SearchHistory.store.set('searchHistoryEntries1', SearchHistory.entries);
+    SearchHistory.store.set(SearchHistory.searchHistoryEntriesStoreName, SearchHistory.entries);
     return SearchHistory.queries;
   }
 
