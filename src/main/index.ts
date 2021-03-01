@@ -44,6 +44,7 @@ import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
+import { platform } from 'os';
 
 toDesktop.init();
 
@@ -176,7 +177,7 @@ gitHubOAuth.emitter.on('error', ({ message }: { message: string }) => {
 
 function hideMainWindow() {
   mainWindow?.hide();
-
+  
   if (!onboardingWindow?.window?.isVisible() && !preferencesWindow?.window?.isVisible() && process.platform === 'darwin') {
     // This action would hide the onboarding and preferences window too, but it is necessary for restoring focus when hiding mainWindow.
     electron.Menu.sendActionToFirstResponder('hide:');
