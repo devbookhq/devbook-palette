@@ -27,7 +27,6 @@ import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
 
 const Container = styled.div`
-  margin-bottom: 28px;
   width: 100%;
   padding-top: 10px;
   display: flex;
@@ -198,14 +197,27 @@ const InputLoaderContainer = styled.div`
 `;
 
 const HotkeyWrapper = styled.div`
+  padding: 5px;
   display: flex;
   align-items: center;
+
+  border-radius: 5px;
+  user-select: none;
+  :hover {
+    transition: background 170ms ease-in;
+    cursor: pointer;
+    background: #434252;
+    > div {
+      color: #fff;
+    }
+  }
 `;
 
 const HotkeyText = styled.div`
   margin-left: 8px;
   font-size: 12px;
   color: #616171;
+  transition: color 170ms ease-in;
 `;
 
 interface SearchHeaderPanelProps {
@@ -215,6 +227,7 @@ interface SearchHeaderPanelProps {
 
   activeFilter: ResultsFilter;
   onFilterSelect: (f: ResultsFilter) => void;
+  onInputFocusChange: (isFocused: boolean) => void;
 
   isLoading?: boolean;
   isModalOpened?: boolean;
@@ -232,6 +245,7 @@ function SearchHeaderPanel({
   isModalOpened,
   isSignInModalOpened,
   isDocsFilterModalOpened,
+  onInputFocusChange,
 }: SearchHeaderPanelProps) {
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [isUpdatePanelOpened, setIsUpdatePanelOpened] = useState(true);
@@ -293,6 +307,11 @@ function SearchHeaderPanel({
     return resultsFilter;
   }
 
+  function handleInputFocusChange(isFocused: boolean) {
+    setIsInputFocused(isFocused);
+    onInputFocusChange(isFocused);
+  }
+
   return (
     <Container
       onMouseDown={handleContentMouseDown}
@@ -303,7 +322,7 @@ function SearchHeaderPanel({
         <InputLoaderContainer>
           <SearchInput
             inputRef={inputRef}
-            setIsInputFocused={setIsInputFocused}
+            onInputFocusChange={handleInputFocusChange}
             initialValue={value}
             placeholder={placeholder}
             onDebouncedChange={onDebouncedChange}
@@ -312,6 +331,21 @@ function SearchHeaderPanel({
             isDocsFilterModalOpened={isDocsFilterModalOpened}
           />
           {isLoading && <StyledLoader />}
+          {/*
+          <HotkeyWrapper
+            onClick={() => {}}
+          >
+            <Hotkey
+              hotkey={electron.remote.process.platform === 'darwin'
+                ? [Key.Command, 'S']
+                : ['Ctrl', 'S']
+              }
+            />
+            <HotkeyText>
+              for search history
+            </HotkeyText>
+          </HotkeyWrapper>
+          */}
         </InputLoaderContainer>
         <InputSection>
           {Object.values(ResultsFilter).map((f, idx) => (
@@ -339,11 +373,8 @@ function SearchHeaderPanel({
       </SearchInputContainer>
 
       <Menu>
-        <PreferencesButton onClick={() => openPreferences(PreferencesPage.General)}>
-          <PreferencesIcon />
-        </PreferencesButton>
+        {isDev && <Dev>[dev build]</Dev>}
         <MenuSection>
-          {isDev && <Dev>[dev build]</Dev>}
           <PinWrapper>
             <Hotkey
               hotkey={electron.remote.process.platform === 'darwin'
@@ -352,11 +383,15 @@ function SearchHeaderPanel({
               }
             />
             <PinButton
+              isActive={isPinModeEnabled}
               onClick={handlePinButtonClick}
             >
               to {isPinModeEnabled ? 'unpin' : 'pin'} Devbook
             </PinButton>
           </PinWrapper>
+          <PreferencesButton onClick={() => openPreferences(PreferencesPage.General)}>
+            <PreferencesIcon />
+          </PreferencesButton>
         </MenuSection>
       </Menu>
 

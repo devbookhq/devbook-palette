@@ -4,7 +4,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 
 import Hotkey from 'Home/HotkeysPanel/Hotkey';
 
-const Container = styled.div`
+const Container = styled.div<{ isFocused?: boolean }>`
   padding: 8px;
   z-index: 1;
   position: absolute;
@@ -18,7 +18,7 @@ const Container = styled.div`
 
   background: rgba(37, 37, 46, 0.65);
   border-radius: 8px;
-  border: 1px solid #3B3A4A;
+  border: 1px solid ${props => props.isFocused ? '#3A41AF' : '#3B3A4A'};
   box-shadow: 0px 4px 6px 2px rgba(0, 0, 0, 0.5);
 
   backdrop-filter: blur(20px);
@@ -33,7 +33,7 @@ const Heading = styled.div`
 `;
 
 const Content = styled.div`
-  margin: 4px 0 0;
+  margin: 8px 0 0;
   flex: 1;
   width: 100%;
   display: flex;
@@ -41,9 +41,8 @@ const Content = styled.div`
   align-items: flex-start;
 `;
 
-const Query = styled.div<{ isFocused?: boolean }>`
-  width: 100%;
-  //width: calc(100% - 270px);
+const Query = styled.div<{ isFocused?: boolean, isFullWidth?: boolean }>`
+  width: ${props => props.isFullWidth ? '100%' : 'calc(100% - 155px)'};
   padding: 8px;
 
   overflow: hidden;
@@ -77,8 +76,20 @@ const Hotkeys = styled.div`
 `;
 
 const HotkeyWrapper = styled.div`
+  padding: 5px;
   display: flex;
   align-items: center;
+
+  border-radius: 5px;
+  user-select: none;
+  :hover {
+    transition: background 170ms ease-in;
+    cursor: pointer;
+    background: #434252;
+    > div {
+      color: #fff;
+    }
+  }
 
   :not(:last-child) {
     margin-right: 16px;
@@ -89,24 +100,35 @@ const HotkeyText = styled.div`
   margin-left: 8px;
   font-size: 12px;
   color: #616171;
+  transition: color 170ms ease-in;
 `;
 
 const MoreQueries = styled.div`
-  margin-top: 8px;
+  // margin-top: 8px;
+  font-family: 'Roboto Mono';
   font-size: 12px;
   color: #616171;
+`;
+
+const UnfocusedStateWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 interface SearchHistoryProps {
   history: string[];
   isFocused?: boolean;
   onSelect: (val: string) => void;
+  onFocusHotkeyClick: (e: any) => void;
 }
 
 function SearchHistory({
   history,
   isFocused,
   onSelect,
+  onFocusHotkeyClick,
 }: SearchHistoryProps) {
   const [historyIdx, setHistoryIdx] = useState(0);
 
@@ -130,40 +152,52 @@ function SearchHistory({
   }, { filter: () => true }, [historyIdx, isFocused, history, setHistoryIdx]);
 
   return (
-    <Container>
+    <Container
+      isFocused={isFocused}
+    >
       <TopBar>
         <Heading>Past queries</Heading>
         <Hotkeys>
-          <HotkeyWrapper>
-            <Hotkey
-              hotkey={['Tab']}
-            />
-            <HotkeyText>
-              to focus & see more
-            </HotkeyText>
-          </HotkeyWrapper>
+          {!isFocused &&
+            <HotkeyWrapper
+              onClick={onFocusHotkeyClick}
+            >
+              <Hotkey
+                hotkey={['Tab']}
+              />
+              <HotkeyText>
+                to focus & see more
+              </HotkeyText>
+            </HotkeyWrapper>
+          }
 
-          <HotkeyWrapper>
-            <Hotkey
-              hotkey={['Esc']}
-            />
-            <HotkeyText>
-              to hide
-            </HotkeyText>
-          </HotkeyWrapper>
+          {isFocused &&
+            <HotkeyWrapper>
+              <Hotkey
+                hotkey={['Esc']}
+              />
+              <HotkeyText>
+                to hide
+              </HotkeyText>
+            </HotkeyWrapper>
+          }
         </Hotkeys>
       </TopBar>
 
       <Content>
         {!isFocused &&
-          <Query
-            onClick={() => selectHistory(0)}
-          >
-            {history[0]}
-          </Query>
+          <UnfocusedStateWrapper>
+            <Query
+              onClick={() => selectHistory(0)}
+            >
+              {history[0]}
+            </Query>
+            <MoreQueries>...and 9 more queries</MoreQueries>
+          </UnfocusedStateWrapper>
         }
         {isFocused && history.map((h, idx) => (
           <Query
+            isFullWidth
             key={h}
             isFocused={isFocused && historyIdx === idx}
             onClick={() => selectHistory(idx)}
@@ -172,10 +206,6 @@ function SearchHistory({
           </Query>
         ))}
       </Content>
-
-      {!isFocused &&
-        <MoreQueries>...and 9 more queries</MoreQueries>
-      }
     </Container>
   );
 }
