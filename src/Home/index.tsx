@@ -70,6 +70,7 @@ import {
   DocPage,
   DocsFilterModal,
 } from './Docs';
+import SearchHistory from './SearchHistory';
 
 const Container = styled.div`
   height: 100%;
@@ -1523,6 +1524,22 @@ function Home() {
           onCloseRequest={closeSignInModal}
         />
       }
+
+      <SearchHistory
+        isFocused
+        history={[
+          'Search history from the past 1',
+          'Search history from the past 2',
+          'Search history from the past 3',
+          'Search history from the past 4',
+          'Search history from the past 5',
+          'Search history from the past 6',
+          'Search history from the past 7',
+          'Search history from the past 8',
+          'Search history from the past 9',
+        ]}
+        onSelect={() => {}}
+      />
 
       <Container>
         <SearchHeaderPanel

@@ -5,9 +5,8 @@ import electron from 'mainCommunication';
 import Hotkey, { Key } from '../HotkeysPanel/Hotkey';
 
 const Container = styled.div`
-  flex: 1;
   display: flex;
-  width: 100%;
+  align-items: center;
 `;
 
 const Filter = styled.div`

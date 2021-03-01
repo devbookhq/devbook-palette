@@ -16,6 +16,8 @@ import electron, {
 } from 'mainCommunication';
 import Loader from 'components/Loader';
 import { PreferencesPage } from 'Preferences';
+import { IPCMessage } from 'mainCommunication/ipc';
+
 import ResultsFiltersMenu, { ResultsFilter } from './ResultsFiltersMenu';
 import SearchInput from './SearchInput';
 
@@ -23,9 +25,9 @@ import Hotkey, { Key } from '../HotkeysPanel/Hotkey';
 
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
-import { IPCMessage } from 'mainCommunication/ipc';
 
 const Container = styled.div`
+  margin-bottom: 28px;
   width: 100%;
   padding-top: 10px;
   display: flex;
@@ -35,13 +37,24 @@ const Container = styled.div`
   background: #25252E;
 `;
 
+const InputSection = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const Menu = styled.div`
   width: 100%;
-  padding: 10px;
+  padding: 12px 15px;
 
   display: flex;
   justify-content: space-between;
   align-items: center;
+`;
+
+const MenuSection = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 `;
 
 const PreferencesIcon = styled(preferencesIcon)`
@@ -71,7 +84,7 @@ const Dev = styled.span`
   margin: 0 10px;
   color: #00FF41;
   font-family: 'Roboto Mono';
-  font-weight: 600;
+  font-weight: 400;
 `;
 
 const UpdatePanel = styled.div`
@@ -122,7 +135,7 @@ const StyledLoader = styled(Loader)`
 const SearchInputContainer = styled.div<{ isFocused?: boolean }>`
   min-height: 46px;
   width: 100%;
-  padding-bottom: 5px;
+  padding-bottom: 8px;
 
   display: flex;
   justify-content: space-between;
@@ -139,10 +152,9 @@ const PinWrapper = styled.div`
 
 
 const PinButton = styled.button<{ isActive?: boolean }>`
-  color: ${props => props.isActive ? 'white' : '#5A5A6F'};
+  color: ${props => props.isActive ? 'white' : '#616171'};
   font-family: 'Poppins';
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 12px;
 
   background: none;
   border: none;
@@ -152,6 +164,48 @@ const PinButton = styled.button<{ isActive?: boolean }>`
     cursor: pointer;
     color: white;
   }
+`;
+
+const Filter = styled.div`
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+`;
+
+const FilterButton = styled.button<{ selected?: boolean }>`
+  color: ${props => props.selected ? 'white' : '#616171'};
+  font-family: 'Poppins';
+  font-size: 13px;
+  font-weight: 400;
+
+  background: none;
+  border: none;
+
+  :hover {
+    transition: background 170ms ease-in;
+    cursor: pointer; color: white;
+  }
+`;
+
+
+const InputLoaderContainer = styled.div`
+  padding-right: 4px;
+  margin-right: 8px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid #3B3A4A;
+`;
+
+const HotkeyWrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const HotkeyText = styled.div`
+  margin-left: 8px;
+  font-size: 12px;
+  color: #616171;
 `;
 
 interface SearchHeaderPanelProps {
@@ -233,6 +287,12 @@ function SearchHeaderPanel({
     setIsPinModeEnabled(v => !v);
   }, { filter: () => true }, [isPinModeEnabled, setIsPinModeEnabled]);
 
+  function getResultsFilterDisplayName(resultsFilter: ResultsFilter) {
+    if (resultsFilter === ResultsFilter.GitHubCode) { return 'GitHub'; }
+    else if (resultsFilter === ResultsFilter.StackOverflow) { return 'Stack Overflow'; }
+    return resultsFilter;
+  }
+
   return (
     <Container
       onMouseDown={handleContentMouseDown}
@@ -240,48 +300,72 @@ function SearchHeaderPanel({
       <SearchInputContainer
         isFocused={isInputFocused}
       >
-        <SearchInput
-          inputRef={inputRef}
-          setIsInputFocused={setIsInputFocused}
-          initialValue={value}
-          placeholder={placeholder}
-          onDebouncedChange={onDebouncedChange}
-          isModalOpened={isModalOpened}
-          isSignInModalOpened={isSignInModalOpened}
-          isDocsFilterModalOpened={isDocsFilterModalOpened}
-        />
-        {isLoading && <StyledLoader />}
-      </SearchInputContainer>
-      <Menu>
-        <ResultsFiltersMenu
-          activeFilter={activeFilter}
-          onFilterSelect={onFilterSelect}
-        />
-        {isDev && <Dev>[dev build]</Dev>}
-        <PinWrapper>
-          <PinButton
-            isActive={isPinModeEnabled}
-            onClick={handlePinButtonClick}
-          >
-            {isPinModeEnabled ? 'Unpin' : 'Pin'} Devbook
-          </PinButton>
-          <Hotkey
-            hotkey={electron.remote.process.platform === 'darwin'
-              ? [Key.Command, Key.Shift, 'P']
-              : ['Alt', Key.Shift, 'P']
-            }
+        <InputLoaderContainer>
+          <SearchInput
+            inputRef={inputRef}
+            setIsInputFocused={setIsInputFocused}
+            initialValue={value}
+            placeholder={placeholder}
+            onDebouncedChange={onDebouncedChange}
+            isModalOpened={isModalOpened}
+            isSignInModalOpened={isSignInModalOpened}
+            isDocsFilterModalOpened={isDocsFilterModalOpened}
           />
-        </PinWrapper>
+          {isLoading && <StyledLoader />}
+        </InputLoaderContainer>
+        <InputSection>
+          {Object.values(ResultsFilter).map((f, idx) => (
+            <Filter
+              key={f}
+            >
+              <FilterButton
+                selected={activeFilter === f}
+                onClick={() => onFilterSelect(f)}
+              >{getResultsFilterDisplayName(f)}
+              </FilterButton>
+              {electron.remote.process.platform === 'darwin' &&
+                <Hotkey
+                  hotkey={[Key.Command, `${idx + 1}`]}
+                />
+              }
+              {electron.remote.process.platform !== 'darwin' &&
+                <Hotkey
+                  hotkey={['Alt + ', `${idx + 1}`]}
+                />
+              }
+            </Filter>
+          ))}
+        </InputSection>
+      </SearchInputContainer>
+
+      <Menu>
         <PreferencesButton onClick={() => openPreferences(PreferencesPage.General)}>
           <PreferencesIcon />
         </PreferencesButton>
+        <MenuSection>
+          {isDev && <Dev>[dev build]</Dev>}
+          <PinWrapper>
+            <Hotkey
+              hotkey={electron.remote.process.platform === 'darwin'
+                ? [Key.Command, Key.Shift, 'P']
+                : ['Alt', Key.Shift, 'P']
+              }
+            />
+            <PinButton
+              onClick={handlePinButtonClick}
+            >
+              to {isPinModeEnabled ? 'unpin' : 'pin'} Devbook
+            </PinButton>
+          </PinWrapper>
+        </MenuSection>
       </Menu>
+
       {isUpdateAvailable && isUpdatePanelOpened &&
         <UpdatePanel>
           <Disclaimer onClick={handleUpdate}>
             {'New version is available. Click here to update & restart.'}
           </Disclaimer>
-          <CancelButton   
+          <CancelButton
             onClick={handleCloseUpdatePanel}
           >
             <CloseIcon />
@@ -290,6 +374,71 @@ function SearchHeaderPanel({
       }
     </Container>
   );
+
+  /*
+  return (
+    <>
+      <Container
+        onMouseDown={handleContentMouseDown}
+      >
+        <SearchInputContainer
+          isFocused={isInputFocused}
+        >
+          <SearchInput
+            inputRef={inputRef}
+            setIsInputFocused={setIsInputFocused}
+            initialValue={value}
+            placeholder={placeholder}
+            onDebouncedChange={onDebouncedChange}
+            isModalOpened={isModalOpened}
+            isSignInModalOpened={isSignInModalOpened}
+            isDocsFilterModalOpened={isDocsFilterModalOpened}
+          />
+          {isLoading && <StyledLoader />}
+        </SearchInputContainer>
+        <Menu>
+          <ResultsFiltersMenu
+            activeFilter={activeFilter}
+            onFilterSelect={onFilterSelect}
+          />
+          <MenuSection>
+            {isDev && <Dev>[dev build]</Dev>}
+            <PinWrapper>
+              <PinButton
+                isActive={isPinModeEnabled}
+                onClick={handlePinButtonClick}
+              >
+                {isPinModeEnabled ? 'Unpin' : 'Pin'} Devbook
+              </PinButton>
+              <Hotkey
+                hotkey={electron.remote.process.platform === 'darwin'
+                  ? [Key.Command, Key.Shift, 'P']
+                  : ['Alt', Key.Shift, 'P']
+                }
+              />
+            </PinWrapper>
+            <PreferencesButton onClick={() => openPreferences(PreferencesPage.General)}>
+              <PreferencesIcon />
+            </PreferencesButton>
+          </MenuSection>
+        </Menu>
+        {isUpdateAvailable && isUpdatePanelOpened &&
+          <UpdatePanel>
+            <Disclaimer onClick={handleUpdate}>
+              {'New version is available. Click here to update & restart.'}
+            </Disclaimer>
+            <CancelButton
+              onClick={handleCloseUpdatePanel}
+            >
+              <CloseIcon />
+            </CancelButton>
+          </UpdatePanel>
+        }
+      </Container>
+      <SearchHistory/>
+    </>
+  );
+  */
 }
 
 export { ResultsFilter };

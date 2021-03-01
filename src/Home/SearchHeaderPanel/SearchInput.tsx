@@ -25,6 +25,7 @@ const Input = styled.input`
   }
 `;
 
+
 interface SearchInputProps {
   placeholder?: string;
   onDebouncedChange: (value: string) => void;
@@ -49,11 +50,8 @@ function SearchInput({
   isDocsFilterModalOpened,
   setIsInputFocused,
 }: SearchInputProps) {
-
   const [inputState, setInputState] = useState({ value: '', isInitialized: false });
-
   const trimmedValue = inputState.value.trim();
-
   const debouncedValue = useDebounce(trimmedValue, 400);
 
   useEffect(() => {

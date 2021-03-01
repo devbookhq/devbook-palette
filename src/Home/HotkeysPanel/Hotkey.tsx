@@ -9,8 +9,8 @@ import { ReactComponent as arrowUpKeyImg } from 'img/arrow-up-key.svg';
 import { ReactComponent as arrowDownKeyImg } from 'img/arrow-down-key.svg';
 
 const Container = styled.div`
-  min-height: 30px;
-  padding: 3px 7px;
+  min-height: 20px;
+  padding: 2px 6px;
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -57,7 +57,7 @@ const EnterKeyImg = styled(enterKeyImg)`
 
 const CommandKeyImg = styled(cmdKeyImg)`
   width: auto;
-  height: 13px;
+  height: 11px;
   :not(:last-child) {
     margin-right: 5px;
   }
@@ -69,7 +69,7 @@ const CommandKeyImg = styled(cmdKeyImg)`
 
 const ShiftKeyImg = styled(shiftKeyImg)`
   width: auto;
-  height: 12px;
+  height: 11px;
   :not(:last-child) {
     margin-right: 7px;
   }
@@ -93,7 +93,7 @@ const AltKeyImg = styled(altKeyImg)`
 
 const TextKey = styled.div`
   font-weight: 500;
-  font-size: 15px;
+  font-size: 12px;
 
   :not(:last-child) {
     margin-right: 7px;
