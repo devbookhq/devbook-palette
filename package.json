@@ -94,7 +94,7 @@
     "electron-store": "^5.2.0",
     "magic-sdk": "^4.0.2",
     "prism-react-renderer": "^1.1.1",
-    "prismjs": "^1.22.0",
+    "prismjs": "^1.23.0",
     "re-resizable": "^6.9.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
