@@ -85,8 +85,7 @@ export const authEmitter = new EventEmitter();
 export let auth: AuthInfo = { state: AuthState.LookingForStoredUser };
 export const AuthContext = createContext<AuthInfo>(auth);
 
-const baseURL = isDev ? 'http://localhost:3002' : 'https://api.usedevbook.com';
-// const baseURL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
+const baseURL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
 
 enum APIVersion {
   v1 = 'v1',
@@ -130,7 +129,6 @@ function generateSessionID() {
 
 export function updateAuth(newAuth: AuthInfo) {
   auth = newAuth;
-  console.log('user', auth);
   authEmitter.emit('changed', auth);
   changeAnalyticsUserAndSaveEmail(auth);
   setAuthInOtherWindows(auth);
