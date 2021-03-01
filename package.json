@@ -47,50 +47,6 @@
     ]
   },
   "productName": "Devbook",
-  "build": {
-    "productName": "Devbook",
-    "appId": "devbook.foundrylabs.com",
-    "artifactName": "${productName}-${version}.${ext}",
-    "publish": {
-      "provider": "generic",
-      "url": "https://storage.googleapis.com/devbook-publish/"
-    },
-    "protocols": [
-      {
-        "name": "devbook",
-        "schemes": [
-          "devbook"
-        ]
-      }
-    ],
-    "afterSign": "scripts/notarize.js",
-    "icon": "./build/icon.png",
-    "mac": {
-      "hardenedRuntime": true,
-      "entitlements": "./build/entitlements.mac.inherit.plist"
-    },
-    "win": {
-      "target": "nsis"
-    },
-    "linux": {
-      "icon": "./build/icon.png",
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        }
-      ]
-    },
-    "extends": null,
-    "files": [
-      "build/**/*"
-    ],
-    "extraResources": [
-      "resources"
-    ]
-  },
   "eslintConfig": {
     "extends": "react-app"
   },
