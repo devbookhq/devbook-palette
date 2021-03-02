@@ -1,6 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
-import { useHotkeys } from 'react-hotkeys-hook';
 
 import Hotkey from 'Home/HotkeysPanel/Hotkey';
 
@@ -11,6 +10,7 @@ const Container = styled.div<{ isFocused?: boolean }>`
   left: 10px;
   top: 40px;
   width: calc(100% - 10px - 355px);
+  max-height: 300px;
 
   display: flex;
   flex-direction: column;
@@ -34,8 +34,11 @@ const Heading = styled.div`
 
 const Content = styled.div`
   margin: 8px 0 0;
-  flex: 1;
+  padding: 8px 0;
   width: 100%;
+  max-height: 300px;
+  overflow: auto;
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -44,6 +47,7 @@ const Content = styled.div`
 const Query = styled.div<{ isFocused?: boolean, isFullWidth?: boolean }>`
   width: ${props => props.isFullWidth ? '100%' : 'calc(100% - 155px)'};
   padding: 8px;
+  min-height: 32px;
 
   overflow: hidden;
   text-overflow: ellipsis;
@@ -132,6 +136,12 @@ function SearchHistory({
   onQueryClick,
   onHideHotkeyClick,
 }: SearchHistoryProps) {
+  const queryRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    queryRef?.current?.scrollIntoView({ block: 'end' });
+  }, [historyIdx]);
+
   return (
     <Container
       isFocused={isFocused}
@@ -164,6 +174,7 @@ function SearchHistory({
         {isFocused && history.map((h, idx) => (
           <Query
             isFullWidth
+            ref={historyIdx === idx ? queryRef : null}
             key={h}
             isFocused={isFocused && historyIdx === idx}
             onClick={() => onQueryClick(history[idx])}
