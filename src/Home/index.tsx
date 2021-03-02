@@ -1325,6 +1325,11 @@ function Home() {
     }
   }
 
+  function handleSearchHistoryQueryClick(query: string) {
+    setSearchQuery(query);
+    toggleSearchHistoryPreview(false);
+  }
+
   /* HOTKEYS */
   // 'cmd+1' hotkey - change search filter to SO questions.
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+1' : 'alt+1', () => {
@@ -1413,7 +1418,6 @@ function Home() {
   useHotkeys('enter', () => {
     if (activeFilter === ResultsFilter.Docs) return;
     if (state.isSearchHistoryPreviewVisible) {
-      console.log('TODO IMPLEMENT selected query:', state.history[state.historyIndex]);
       setSearchQuery(state.history[state.historyIndex]);
       toggleSearchHistoryPreview(false);
       return;
@@ -1430,6 +1434,7 @@ function Home() {
     state.historyIndex,
     toggleSearchHistoryPreview,
   ]);
+
 
   // 'esc' hotkey - close modal or hide main window.
   useHotkeys('esc', () => {
@@ -1684,7 +1689,7 @@ function Home() {
           isFocused
           historyIdx={state.historyIndex}
           history={state.history}
-          onQueryClick={() => console.log('TODO')}
+          onQueryClick={handleSearchHistoryQueryClick}
           onHideHotkeyClick={() => toggleSearchHistoryPreview(false)}
         />
       }
