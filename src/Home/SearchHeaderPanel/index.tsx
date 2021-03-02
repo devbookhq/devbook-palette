@@ -228,6 +228,7 @@ interface SearchHeaderPanelProps {
   activeFilter: ResultsFilter;
   onFilterSelect: (f: ResultsFilter) => void;
   onInputFocusChange: (isFocused: boolean) => void;
+  onToggleSearchHistoryClick: (e: any) => void;
 
   isLoading?: boolean;
   isModalOpened?: boolean;
@@ -246,6 +247,7 @@ function SearchHeaderPanel({
   isSignInModalOpened,
   isDocsFilterModalOpened,
   onInputFocusChange,
+  onToggleSearchHistoryClick,
 }: SearchHeaderPanelProps) {
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [isUpdatePanelOpened, setIsUpdatePanelOpened] = useState(true);
@@ -324,6 +326,7 @@ function SearchHeaderPanel({
             inputRef={inputRef}
             onInputFocusChange={handleInputFocusChange}
             initialValue={value}
+            value={value}
             placeholder={placeholder}
             onDebouncedChange={onDebouncedChange}
             isModalOpened={isModalOpened}
@@ -331,21 +334,16 @@ function SearchHeaderPanel({
             isDocsFilterModalOpened={isDocsFilterModalOpened}
           />
           {isLoading && <StyledLoader />}
-          {/*
           <HotkeyWrapper
-            onClick={() => {}}
+            onClick={onToggleSearchHistoryClick}
           >
             <Hotkey
-              hotkey={electron.remote.process.platform === 'darwin'
-                ? [Key.Command, 'S']
-                : ['Ctrl', 'S']
-              }
+              hotkey={['Tab']}
             />
             <HotkeyText>
-              for search history
+              to show search history
             </HotkeyText>
           </HotkeyWrapper>
-          */}
         </InputLoaderContainer>
         <InputSection>
           {Object.values(ResultsFilter).map((f, idx) => (

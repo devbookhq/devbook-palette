@@ -39,6 +39,8 @@ interface SearchInputProps {
   isDocsFilterModalOpened?: boolean;
 
   onInputFocusChange: (isFocused: boolean) => void;
+
+  value: string;
 }
 
 function SearchInput({
@@ -50,10 +52,22 @@ function SearchInput({
   isSignInModalOpened,
   isDocsFilterModalOpened,
   onInputFocusChange,
+
+
+  value,
 }: SearchInputProps) {
   const [inputState, setInputState] = useState({ value: '', isInitialized: false });
   const trimmedValue = inputState.value.trim();
+  // const debouncedValue = useDebounce(trimmedValue, 400);
+
+
   const debouncedValue = useDebounce(trimmedValue, 400);
+
+  useEffect(() => {
+    if (inputState.isInitialized) {
+      setInputState({ value: initialValue, isInitialized: true });
+    }
+  }, [value]);
 
   useEffect(() => {
     if (!inputState.value) {
