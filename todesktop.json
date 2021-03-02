@@ -1,0 +1,16 @@
+{
+  "id": "2102273jsy18baz",
+  "icon": "./public/icon.png",
+  "appPath": ".",
+  "schemaVersion": 1,
+  "appId": "devbook.foundrylabs.com",
+  "appFiles": [
+    "build/**/*"
+  ],
+  "extraResources": [
+    {
+      "from": "./resources",
+      "to": "resources"
+    }
+  ]
+}
