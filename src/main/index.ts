@@ -8,7 +8,7 @@ import {
   ipcMain,
 } from 'electron';
 import tmp from 'tmp';
-import toDesktop from '@todesktop/runtime';
+import { autoUpdater } from 'electron-updater';
 import contextMenu from 'electron-context-menu';
 
 // Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.
@@ -42,6 +42,8 @@ import {
   trackShowSearchHistory,
   trackHideSearchHistory,
   trackSelectHistoryQuery,
+  trackUpdateClicked,
+  trackUpdateCancelClicked,
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
@@ -49,9 +51,6 @@ import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
-import { platform } from 'os';
-
-toDesktop.init();
 
 enum StoreKey {
   DocSources = 'docSources',
@@ -101,7 +100,7 @@ if (!isFirstInstance) {
     } else {
       mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
       mainWindow.isPinModeEnabled = isPinModeEnabled;
-    mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
+      mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
     }
   });
 }
@@ -110,7 +109,16 @@ if (!isFirstInstance) {
 let isUpdateAvailable = false;
 
 if (!isDev) {
-  toDesktop.autoUpdater.on('update-downloaded', () => {
+  autoUpdater.requestHeaders = null;
+
+  app.on('ready', () => {
+    // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron.
+    setInterval(() => {
+      autoUpdater.checkForUpdates();
+    }, 10 * 60 * 1000);
+  });
+
+  autoUpdater.on('update-downloaded', () => {
     isUpdateAvailable = true;
 
     mainWindow?.webContents?.send('update-available', {});
@@ -118,13 +126,21 @@ if (!isDev) {
 
     tray?.setIsUpdateAvailable(true);
   });
+
+  autoUpdater.on('error', (message) => {
+    console.error('There was a problem updating the application');
+    console.error(message);
+  });
 }
 
-async function restartAndUpdate() {
+async function restartAndUpdate(location: 'banner' | 'tray' | 'preferences') {
+  try {
+    await trackUpdateClicked(location);
+  } catch (error) { }
   if (isUpdateAvailable) {
     setImmediate(() => {
       try {
-        toDesktop.autoUpdater.restartAndInstall();
+        autoUpdater.quitAndInstall();
       } catch (error) {
         console.error(error.message);
       }
@@ -245,6 +261,10 @@ function trySetGlobalShortcut(shortcut: string) {
 
 /////////// App Events ///////////
 app.once('ready', async () => {
+  if (!isDev) {
+    autoUpdater.checkForUpdates();
+  }
+
   if (isDev) {
     // Load react dev tools.
     await electron.session.defaultSession.loadExtension(
@@ -278,7 +298,7 @@ app.once('ready', async () => {
     onQuitClick: () => app.quit(),
     shouldOpenAtLogin: store.get('openAtLogin', true),
     version: app.getVersion(),
-    restartAndUpdate,
+    restartAndUpdate: () => restartAndUpdate('tray'),
     isUpdateAvailable,
   });
 
@@ -347,8 +367,8 @@ ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => {
   openPreferences(page);
 });
 
-ipcMain.on('restart-and-update', () => {
-  restartAndUpdate();
+ipcMain.on('restart-and-update', (_, location) => {
+  restartAndUpdate(location);
 });
 
 ipcMain.on(IPCMessage.ChangeUserInMain, async (_, user: { userID: string, email: string } | undefined) => {
@@ -399,6 +419,8 @@ let postponeHandler: NodeJS.Timeout | undefined;
 
 ipcMain.on('postpone-update', () => {
   if (isUpdateAvailable) {
+    trackUpdateCancelClicked('banner');
+
     if (postponeHandler) {
       clearTimeout(postponeHandler);
     }
@@ -528,4 +550,3 @@ ipcMain.on(IPCMessage.TrackHideSearchHistory, () => {
 ipcMain.on(IPCMessage.TrackSelectHistoryQuery, () => {
   trackSelectHistoryQuery();
 });
-
