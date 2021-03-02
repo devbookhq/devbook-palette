@@ -199,6 +199,10 @@ export function trackHideSearchHistory() {
   return electron.ipcRenderer.send(IPCMessage.TrackHideSearchHistory);
 }
 
+export function trackSelectHistoryQuery() {
+  return electron.ipcRenderer.send(IPCMessage.TrackSelectHistoryQuery);
+}
+
 export { isDev };
 
 export default electron;

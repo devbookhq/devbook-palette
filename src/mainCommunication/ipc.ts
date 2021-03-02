@@ -25,4 +25,5 @@ export enum IPCMessage {
 
   TrackShowSearchHistory = 'TrackShowSearchHistory',
   TrackHideSearchHistory = 'TrackHideSearchHistory',
+  TrackSelectHistoryQuery = 'TrackSelectHistoryQuery',
 }

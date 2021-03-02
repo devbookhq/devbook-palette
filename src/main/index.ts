@@ -41,6 +41,7 @@ import {
   trackDisablePinMode,
   trackShowSearchHistory,
   trackHideSearchHistory,
+  trackSelectHistoryQuery,
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
@@ -520,8 +521,11 @@ ipcMain.on(IPCMessage.TrackShowSearchHistory, () => {
   trackShowSearchHistory();
 });
 
-
 ipcMain.on(IPCMessage.TrackHideSearchHistory, () => {
   trackHideSearchHistory();
+});
+
+ipcMain.on(IPCMessage.TrackSelectHistoryQuery, () => {
+  trackSelectHistoryQuery();
 });
 

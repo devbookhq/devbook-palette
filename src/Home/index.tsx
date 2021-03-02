@@ -31,6 +31,7 @@ import electron, {
   trackSignInModalClosed,
   trackShowSearchHistory,
   trackHideSearchHistory,
+  trackSelectHistoryQuery,
 } from 'mainCommunication';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -1335,6 +1336,7 @@ function Home() {
   function handleSearchHistoryQueryClick(query: string) {
     setSearchQuery(query);
     toggleSearchHistoryPreview(false);
+    trackSelectHistoryQuery();
   }
 
   /* HOTKEYS */
@@ -1427,6 +1429,7 @@ function Home() {
     if (state.isSearchHistoryPreviewVisible) {
       setSearchQuery(state.history[state.historyIndex]);
       toggleSearchHistoryPreview(false);
+      trackSelectHistoryQuery();
       return;
     }
 
