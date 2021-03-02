@@ -142,7 +142,7 @@ function Preferences() {
   });
 
   function handleUpdate() {
-    restartAndUpdate();
+    restartAndUpdate('preferences');
   }
 
   return (

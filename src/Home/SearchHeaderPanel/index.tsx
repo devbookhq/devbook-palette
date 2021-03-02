@@ -264,7 +264,7 @@ function SearchHeaderPanel({
   };
 
   function handleUpdate() {
-    restartAndUpdate();
+    restartAndUpdate('banner');
   }
 
   function handleCloseUpdatePanel() {

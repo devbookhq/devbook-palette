@@ -1,7 +1,7 @@
 {
   "name": "com.foundrylabs.devbook",
   "description": "Search engine for developers",
-  "version": "0.1.8",
+  "version": "0.1.6",
   "private": true,
   "author": {
     "name": "FoundryLabs, Inc.",
@@ -16,7 +16,7 @@
     "artifactName": "${productName}-${version}.${ext}",
     "publish": {
       "provider": "generic",
-      "url": "https://storage.googleapis.com/devbook-publish/"
+      "url": "https://todesktop-builds-prod.s3.amazonaws.com/2102273jsy18baz/"
     },
     "afterSign": "scripts/notarize.js",
     "icon": "./build/icon.png",
@@ -43,11 +43,9 @@
       "build/**/*"
     ],
     "extraResources": [
-      "resources",
-      "todesktop-runtime-config.json"
+      "resources"
     ]
   },
-  "productName": "Devbook",
   "eslintConfig": {
     "extends": "react-app"
   },
@@ -88,11 +86,11 @@
     "release:linux": "npx rimraf dist && npm run electron:build-linux && npm run upload:linux"
   },
   "dependencies": {
-    "@todesktop/runtime": "^0.4.0",
     "analytics-node": "^3.5.0",
     "axios": "^0.21.1",
     "electron-context-menu": "^2.5.0",
     "electron-store": "^5.2.0",
+    "electron-updater": "^4.3.8",
     "magic-sdk": "^4.0.2",
     "prism-react-renderer": "^1.1.1",
     "prismjs": "^1.23.0",

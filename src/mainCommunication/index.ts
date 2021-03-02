@@ -123,8 +123,8 @@ export function finishOnboarding() {
   electron.ipcRenderer.send('finish-onboarding');
 }
 
-export function restartAndUpdate() {
-  electron.ipcRenderer.send('restart-and-update');
+export function restartAndUpdate(location: 'banner' | 'preferences') {
+  electron.ipcRenderer.send('restart-and-update', location);
 }
 
 export function getUpdateStatus(): Promise<boolean> {
