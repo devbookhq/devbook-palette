@@ -29,6 +29,8 @@ import electron, {
   getCachedDocSources,
   trackSignInModalOpened,
   trackSignInModalClosed,
+  trackShowSearchHistory,
+  trackHideSearchHistory,
 } from 'mainCommunication';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -1143,6 +1145,11 @@ function Home() {
   }, []);
 
   const toggleSearchHistoryPreview = useCallback((isVisible: boolean) => {
+    if (isVisible) {
+      trackShowSearchHistory();
+    } else {
+      trackHideSearchHistory();
+    }
     dispatch({
       type: ReducerActionType.ToggleSearchHistoryPreview,
       payload: { isVisible },
