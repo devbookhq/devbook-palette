@@ -3,14 +3,18 @@ import * as process from 'process';
 import ElectronStore from 'electron-store';
 import * as path from 'path';
 import { inspect } from 'util';
+import { debounce } from 'debounce';
 
 import isDev from './utils/isDev';
 import { IPCMessage } from '../mainCommunication/ipc';
+
 
 class MainWindow {
   public window: electron.BrowserWindow | undefined;
   private _isPinModeEnabled = false;
   private didJustDisablePinMode = false;
+
+  private debounceClear?: any;
 
   public set isPinModeEnabled(value: boolean) {
     if (!this.window) return;
@@ -38,7 +42,13 @@ class MainWindow {
     return this.window?.webContents;
   }
 
-  public constructor(PORT: number, store: ElectronStore, hideWindow: () => void, private trackShowApp: () => void, startHidden?: boolean) {
+  public constructor(
+    PORT: number, 
+    private store: ElectronStore, 
+    hideWindow: (window?: electron.BrowserWindow) => void, 
+    private trackShowApp: (window?: electron.BrowserWindow) => void, 
+    private identifyUser: (window?: electron.BrowserWindow) => void,
+    startHidden?: boolean) {
     const [mainWinWidth, mainWinHeight] = store.get('mainWinSize', [900, 500]);
     const [mainWinPosX, mainWinPosY] = store.get('mainWinPosition', [undefined, undefined]);
 
@@ -74,12 +84,7 @@ class MainWindow {
       if (!this.window) { return; }
     })
 
-    this.window.on('resize', () => {
-      if (this.window) {
-        const [width, height] = this.window.getSize();
-        store.set('mainWinSize', [width, height]);
-      }
-    });
+    this.window.on('resize', debounce(() => this.resizeHandler(), 5000));
 
     this.window.on('moved', () => {
       if (this.window) {
@@ -111,12 +116,13 @@ class MainWindow {
       }
 
       if (!this._isPinModeEnabled) {
-        hideWindow();
+        hideWindow(this.window);
       }
     });
 
     this.window.on('closed', () => {
       this.window = undefined;
+      this.debounceClear?.clear();
       if (process.platform === 'darwin') {
         electron.app.dock.hide();
       }
@@ -151,6 +157,15 @@ class MainWindow {
     }
   }
 
+  private resizeHandler() {
+    if (this.window) {      
+      const [width, height] = this.window.getSize();
+      this.store.set('mainWinSize', [width, height]);
+      this.identifyUser(this.window);
+      console.log('DEBOUNCED!!!!!!!!');        
+    }      
+  }
+
   public close() {
     this.window?.close();
   }
@@ -162,7 +177,7 @@ class MainWindow {
 
   public show() {
     this.window?.show();
-    this.trackShowApp();
+    this.trackShowApp(this.window);
   }
 
   public isVisible() {

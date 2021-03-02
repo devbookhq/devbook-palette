@@ -20,6 +20,7 @@ app.setPath('userData', path.resolve(app.getPath('userData'), '..', 'com.foundry
 
 import isDev from './utils/isDev';
 import {
+  identifyUser,
   trackShowApp,
   trackOnboardingFinished,
   trackOnboardingStarted,
@@ -98,7 +99,7 @@ if (!isFirstInstance) {
       mainWindow.window.restore();
       mainWindow.window.focus();
     } else {
-      mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
+      mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser);
       mainWindow.isPinModeEnabled = isPinModeEnabled;
       mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
     }
@@ -182,6 +183,8 @@ const store = new Store();
 
 const gitHubOAuth = new GitHubOAuth();
 
+identifyUser();
+
 gitHubOAuth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
   mainWindow?.webContents?.send('github-access-token', { accessToken });
   mainWindow?.show();
@@ -231,7 +234,7 @@ if (process.platform === 'darwin' && !isFirstRun) {
 // or just calls .show() or .hide() on an existing instance.
 function toggleVisibilityOnMainWindow() {
   if (!mainWindow || !mainWindow.window) {
-    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp());
+    mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser);
     mainWindow.isPinModeEnabled = isPinModeEnabled;
     onboardingWindow?.webContents?.send('did-show-main-window');
     return;
@@ -303,16 +306,16 @@ app.once('ready', async () => {
   });
 
   if (isFirstRun) {
-    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp(), true);
+    mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser, true);
     mainWindow.isPinModeEnabled = isPinModeEnabled;
     mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
 
     onboardingWindow = new OnboardingWindow(PORT, taskBarIcon);
     onboardingWindow?.window?.focus();
 
-    trackOnboardingStarted();
+    trackOnboardingStarted(mainWindow?.window);
   } else {
-    mainWindow = new MainWindow(PORT, store, () => hideMainWindow(), () => trackShowApp(), app.getLoginItemSettings().wasOpenedAsHidden);
+    mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser, app.getLoginItemSettings().wasOpenedAsHidden);
     mainWindow.isPinModeEnabled = isPinModeEnabled;
     mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
   }
@@ -346,7 +349,7 @@ ipcMain.on('finish-onboarding', () => {
   if (!preferencesWindow?.window?.isVisible() && process.platform === 'darwin') {
     app.dock.hide();
   }
-  trackOnboardingFinished();
+  trackOnboardingFinished(mainWindow?.window);
 });
 
 ipcMain.on('track-shortcut', (_, shortcutInfo: { hotkey: string, action: string }) => {
@@ -360,7 +363,7 @@ ipcMain.handle('get-global-shortcut', () => {
 ipcMain.on('connect-github', () => {
   gitHubOAuth.requestOAuth();
   hideMainWindow();
-  trackConnectGitHubStarted();
+  trackConnectGitHubStarted(mainWindow?.window);
 });
 
 ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => {
@@ -373,10 +376,10 @@ ipcMain.on('restart-and-update', (_, location) => {
 
 ipcMain.on(IPCMessage.ChangeUserInMain, async (_, user: { userID: string, email: string } | undefined) => {
   if (user) {
-    changeAnalyticsUser(user);
+    changeAnalyticsUser(mainWindow?.window, user);
     store.set(StoreKey.Email, user.email);
   } else {
-    changeAnalyticsUser();
+    changeAnalyticsUser(mainWindow?.window);
   }
 });
 
@@ -419,7 +422,7 @@ let postponeHandler: NodeJS.Timeout | undefined;
 
 ipcMain.on('postpone-update', () => {
   if (isUpdateAvailable) {
-    trackUpdateCancelClicked('banner');
+    trackUpdateCancelClicked('banner', mainWindow?.window);
 
     if (postponeHandler) {
       clearTimeout(postponeHandler);
@@ -493,38 +496,38 @@ ipcMain.on(IPCMessage.SaveDocSources, (_, { docSources }) => {
   store.set(StoreKey.DocSources, docSources);
 });
 
-ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo));
+ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo, mainWindow?.window));
 
 ipcMain.on(IPCMessage.TrackSignInModalOpened, () => {
-  trackSignInModalOpened();
+  trackSignInModalOpened(mainWindow?.window);
 });
 
 ipcMain.on(IPCMessage.TrackSignInModalClosed, () => {
-  trackSignInModalClosed();
+  trackSignInModalClosed(mainWindow?.window);
 });
 
 ipcMain.on(IPCMessage.TrackSignInButtonClicked, () => {
-  trackSignInButtonClicked();
+  trackSignInButtonClicked(mainWindow?.window);
 });
 
 ipcMain.on(IPCMessage.TrackSignInAgainButtonClicked, () => {
-  trackSignInAgainButtonClicked();
+  trackSignInAgainButtonClicked(mainWindow?.window);
 });
 
 ipcMain.on(IPCMessage.TrackSignInFinished, () => {
-  trackSignInFinished();
+  trackSignInFinished(mainWindow?.window);
 });
 
 ipcMain.on(IPCMessage.TrackSignInFailed, (_, { error }: { error: string }) => {
-  trackSignInFailed(error);
+  trackSignInFailed(error, mainWindow?.window);
 });
 
 ipcMain.on(IPCMessage.TrackContinueIntoAppButtonClicked, () => {
-  trackContinueIntoAppButtonClicked();
+  trackContinueIntoAppButtonClicked(mainWindow?.window);
 });
 
 ipcMain.on(IPCMessage.TrackSignOutButtonClicked, () => {
-  trackSignOutButtonClicked();
+  trackSignOutButtonClicked(mainWindow?.window);
 });
 
 ipcMain.on(IPCMessage.TogglePinMode, (_, { isEnabled }: { isEnabled: boolean }) => {
@@ -532,21 +535,21 @@ ipcMain.on(IPCMessage.TogglePinMode, (_, { isEnabled }: { isEnabled: boolean }) 
     isPinModeEnabled = isEnabled;
     mainWindow.isPinModeEnabled = isEnabled;
     if (isEnabled) {
-      trackEnablePinMode();
+      trackEnablePinMode(mainWindow?.window);
     } else {
-      trackDisablePinMode();
+      trackDisablePinMode(mainWindow?.window);
     }
   }
 });
 
 ipcMain.on(IPCMessage.TrackShowSearchHistory, () => {
-  trackShowSearchHistory();
+  trackShowSearchHistory(mainWindow?.window);
 });
 
 ipcMain.on(IPCMessage.TrackHideSearchHistory, () => {
-  trackHideSearchHistory();
+  trackHideSearchHistory(mainWindow?.window);
 });
 
 ipcMain.on(IPCMessage.TrackSelectHistoryQuery, () => {
-  trackSelectHistoryQuery();
+  trackSelectHistoryQuery(mainWindow?.window);
 });

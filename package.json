@@ -88,6 +88,7 @@
   "dependencies": {
     "analytics-node": "^3.5.0",
     "axios": "^0.21.1",
+    "debounce": "^1.2.0",
     "electron-context-menu": "^2.5.0",
     "electron-store": "^5.2.0",
     "electron-updater": "^4.3.8",
@@ -105,6 +106,7 @@
   },
   "devDependencies": {
     "@types/analytics-node": "^3.1.4",
+    "@types/debounce": "^1.2.0",
     "@types/node": "^12.12.6",
     "@types/prismjs": "^1.16.2",
     "@types/react": "^16.9.35",
@@ -118,8 +120,8 @@
     "craco": "0.0.3",
     "cross-env": "^7.0.3",
     "electron": "11.1.1",
-    "electron-notarize": "^1.0.0",
     "electron-builder": "^22.9.1",
+    "electron-notarize": "^1.0.0",
     "electron-rebuild": "^2.3.5",
     "electron-reload": "^1.5.0",
     "react-scripts": "^4.0.1",
