@@ -46,7 +46,7 @@ const Menu = styled.div`
   padding: 12px 15px;
 
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
 `;
 
@@ -374,25 +374,23 @@ function SearchHeaderPanel({
 
       <Menu>
         {isDev && <Dev>[dev build]</Dev>}
-        <MenuSection>
-          <PinWrapper>
-            <Hotkey
-              hotkey={electron.remote.process.platform === 'darwin'
-                ? [Key.Command, Key.Shift, 'P']
-                : ['Alt', Key.Shift, 'P']
-              }
-            />
-            <PinButton
-              isActive={isPinModeEnabled}
-              onClick={handlePinButtonClick}
-            >
-              to {isPinModeEnabled ? 'unpin' : 'pin'} Devbook
-            </PinButton>
-          </PinWrapper>
-          <PreferencesButton onClick={() => openPreferences(PreferencesPage.General)}>
-            <PreferencesIcon />
-          </PreferencesButton>
-        </MenuSection>
+        <PinWrapper>
+          <Hotkey
+            hotkey={electron.remote.process.platform === 'darwin'
+              ? [Key.Command, Key.Shift, 'P']
+              : ['Alt', Key.Shift, 'P']
+            }
+          />
+          <PinButton
+            isActive={isPinModeEnabled}
+            onClick={handlePinButtonClick}
+          >
+            to {isPinModeEnabled ? 'unpin' : 'pin'} Devbook
+          </PinButton>
+        </PinWrapper>
+        <PreferencesButton onClick={() => openPreferences(PreferencesPage.General)}>
+          <PreferencesIcon />
+        </PreferencesButton>
       </Menu>
 
       {isUpdateAvailable && isUpdatePanelOpened &&
