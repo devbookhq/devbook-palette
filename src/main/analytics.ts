@@ -1,4 +1,5 @@
-import Analytics, { } from 'analytics-node';
+import * as electron from 'electron';
+import Analytics from 'analytics-node';
 import { v4 as uuidv4 } from 'uuid';
 import { app } from 'electron';
 import ElectronStore from 'electron-store';
@@ -36,7 +37,7 @@ enum AnalyticsEvent {
   ShowSearchHistory = 'Show search history',
   HideSearchHistory = 'Hide search history',
   SelectHistoryQuery = 'Selected query from search history',
-  
+
   UpdateClicked = 'Update clicked',
   UpdateCancelClicked = 'Update cancel clicked',
 }
@@ -55,16 +56,35 @@ store.set('userID', anonymousID);
 const appVersion = app.getVersion();
 const platform = process.platform;
 
-client.identify({
-  anonymousId: anonymousID,
-  traits: {
-    anonymousID: anonymousID,
-    platform,
-    appVersion,
-  },
-});
+export function identifyUser(searchWindow?: electron.BrowserWindow) {
+  if (userID) {
+    client.identify({
+      anonymousId: anonymousID,
+      userId: userID,
+      traits: {
+        anonymousID: anonymousID,
+        platform,
+        appVersion,
+        currentSearchWindowWidth: searchWindow?.getSize()[0],
+        currentSearchWindowHeight: searchWindow?.getSize()[1],
+      },
+    });
+  } else {
+    client.identify({
+      anonymousId: anonymousID,
+      traits: {
+        isSignedIn: true,
+        anonymousID: anonymousID,
+        platform,
+        appVersion,
+        currentSearchWindowWidth: searchWindow?.getSize()[0],
+        currentSearchWindowHeight: searchWindow?.getSize()[1],
+      },
+    });
+  } 
+}
 
-export function changeAnalyticsUser(user?: { userID: string, email: string }) {
+export function changeAnalyticsUser(searchWindow?: electron.BrowserWindow, user?: { userID: string, email: string }) {
   if (user) {
     isSignedIn = true;
     userID = user.userID;
@@ -77,6 +97,8 @@ export function changeAnalyticsUser(user?: { userID: string, email: string }) {
         platform,
         appVersion,
         email: user.email,
+        currentSearchWindowWidth: searchWindow?.getSize()[0],
+        currentSearchWindowHeight: searchWindow?.getSize()[1],
       },
     });
   } else {
@@ -85,7 +107,7 @@ export function changeAnalyticsUser(user?: { userID: string, email: string }) {
   }
 }
 
-export function trackShowApp() {
+export function trackShowApp(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.ShowedApp,
     anonymousId: anonymousID,
@@ -94,11 +116,13 @@ export function trackShowApp() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackOnboardingStarted() {
+export function trackOnboardingStarted(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.OnboardingStarted,
     anonymousId: anonymousID,
@@ -107,11 +131,13 @@ export function trackOnboardingStarted() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackOnboardingFinished() {
+export function trackOnboardingFinished(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.OnboardingFinished,
     anonymousId: anonymousID,
@@ -120,11 +146,13 @@ export function trackOnboardingFinished() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackConnectGitHubStarted() {
+export function trackConnectGitHubStarted(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.ConnectingGitHubStarted,
     anonymousId: anonymousID,
@@ -133,11 +161,13 @@ export function trackConnectGitHubStarted() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackConnectGitHubFinished() {
+export function trackConnectGitHubFinished(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.ConnectingGitHubFinished,
     anonymousId: anonymousID,
@@ -146,11 +176,13 @@ export function trackConnectGitHubFinished() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackShortcut(shortcutInfo: { action: string, hotkey: string }) {
+export function trackShortcut(shortcutInfo: { action: string, hotkey: string }, searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.ShortcutUsed,
     anonymousId: anonymousID,
@@ -160,11 +192,13 @@ export function trackShortcut(shortcutInfo: { action: string, hotkey: string }) 
       platform,
       appVersion,
       ...shortcutInfo,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-function trackSearch(searchInfo: any) {
+function trackSearch(searchInfo: any, searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.Search,
     anonymousId: anonymousID,
@@ -174,13 +208,15 @@ function trackSearch(searchInfo: any) {
       platform,
       appVersion,
       ...searchInfo,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
 export const trackSearchDebounced = debounce(trackSearch, 3000);
 
-export function trackModalOpened(modalInfo: any) {
+export function trackModalOpened(modalInfo: any, searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.ModalOpened,
     anonymousId: anonymousID,
@@ -190,11 +226,13 @@ export function trackModalOpened(modalInfo: any) {
       platform,
       appVersion,
       ...modalInfo,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackSignInModalOpened() {
+export function trackSignInModalOpened(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.SignInModalOpened,
     anonymousId: anonymousID,
@@ -203,11 +241,13 @@ export function trackSignInModalOpened() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackSignInModalClosed() {
+export function trackSignInModalClosed(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.SignInModalClosed,
     anonymousId: anonymousID,
@@ -220,7 +260,7 @@ export function trackSignInModalClosed() {
   });
 }
 
-export function trackSignInButtonClicked() {
+export function trackSignInButtonClicked(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.SignInButtonClicked,
     anonymousId: anonymousID,
@@ -229,11 +269,13 @@ export function trackSignInButtonClicked() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackSignInAgainButtonClicked() {
+export function trackSignInAgainButtonClicked(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.SignInAgainButtonClicked,
     anonymousId: anonymousID,
@@ -242,11 +284,13 @@ export function trackSignInAgainButtonClicked() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackSignInFinished() {
+export function trackSignInFinished(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.SignInFinished,
     anonymousId: anonymousID,
@@ -255,11 +299,13 @@ export function trackSignInFinished() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackSignInFailed(error: string) {
+export function trackSignInFailed(error: string, searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.SignInFailed,
     anonymousId: anonymousID,
@@ -269,11 +315,13 @@ export function trackSignInFailed(error: string) {
       platform,
       appVersion,
       error,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackContinueIntoAppButtonClicked() {
+export function trackContinueIntoAppButtonClicked(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.ContinueIntoAppButtonClicked,
     anonymousId: anonymousID,
@@ -282,11 +330,13 @@ export function trackContinueIntoAppButtonClicked() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackSignOutButtonClicked() {
+export function trackSignOutButtonClicked(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.SignOutButtonClicked,
     anonymousId: anonymousID,
@@ -295,11 +345,13 @@ export function trackSignOutButtonClicked() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackEnablePinMode() {
+export function trackEnablePinMode(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.EnablePinMode,
     anonymousId: anonymousID,
@@ -308,11 +360,13 @@ export function trackEnablePinMode() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackDisablePinMode() {
+export function trackDisablePinMode(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.DisablePinMode,
     anonymousId: anonymousID,
@@ -321,11 +375,13 @@ export function trackDisablePinMode() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackShowSearchHistory() {
+export function trackShowSearchHistory(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.ShowSearchHistory,
     anonymousId: anonymousID,
@@ -334,11 +390,13 @@ export function trackShowSearchHistory() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackHideSearchHistory() {
+export function trackHideSearchHistory(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.HideSearchHistory,
     anonymousId: anonymousID,
@@ -347,11 +405,13 @@ export function trackHideSearchHistory() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export function trackSelectHistoryQuery() {
+export function trackSelectHistoryQuery(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.SelectHistoryQuery,
     anonymousId: anonymousID,
@@ -360,11 +420,13 @@ export function trackSelectHistoryQuery() {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
 
-export async function trackUpdateClicked(location: 'tray' | 'banner' | 'preferences') {
+export async function trackUpdateClicked(location: 'tray' | 'banner' | 'preferences', searchWindow?: electron.BrowserWindow) {
   return new Promise<void>((resolve, reject) => {
     client.track({
       event: AnalyticsEvent.UpdateClicked,
@@ -375,6 +437,8 @@ export async function trackUpdateClicked(location: 'tray' | 'banner' | 'preferen
         platform,
         appVersion,
         location,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
       },
     }).flush((error, data) => {
       if (error !== null) {
@@ -385,7 +449,7 @@ export async function trackUpdateClicked(location: 'tray' | 'banner' | 'preferen
     });
   });
 }
-export function trackUpdateCancelClicked(location: 'banner') {
+export function trackUpdateCancelClicked(location: 'banner', searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.UpdateCancelClicked,
     anonymousId: anonymousID,
@@ -395,6 +459,8 @@ export function trackUpdateCancelClicked(location: 'banner') {
       platform,
       appVersion,
       location,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
