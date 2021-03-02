@@ -56,7 +56,6 @@ class MainWindow {
       fullscreenable: false,
       skipTaskbar: true, // This makes sure that Devbook window isn't shown on the bottom taskbar on Windows.
       title: 'Devbook',
-      closable: false,
       minimizable: false,
       webPreferences: {
         nodeIntegration: true,
