@@ -46,6 +46,7 @@ const Content = styled.div`
 
 const Query = styled.div<{ isFocused?: boolean, isFullWidth?: boolean }>`
   width: ${props => props.isFullWidth ? '100%' : 'calc(100% - 155px)'};
+  margin: 2px 0;
   padding: 8px;
   min-height: 32px;
 
