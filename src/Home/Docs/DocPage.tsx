@@ -610,6 +610,7 @@ interface DocPageProps {
   pageURL: string;
   html: string;
   searchInputRef: any;
+  isSearchHistoryOpened: boolean;
 }
 
 function DocPage({
@@ -619,6 +620,7 @@ function DocPage({
   hasHTMLExtension,
   html,
   searchInputRef,
+  isSearchHistoryOpened,
 }: DocPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -728,20 +730,20 @@ function DocPage({
   }
 
   useHotkeys('up', () => {
-    if (isSearchingInDocPage || isDocsFilterModalOpened) return;
+    if (isSearchHistoryOpened || isSearchingInDocPage || isDocsFilterModalOpened) return;
 
     if (containerRef?.current) {
       containerRef.current.scrollBy(0, -15);
     }
-  }, { filter: () => true }, [isSearchingInDocPage, isDocsFilterModalOpened]);
+  }, { filter: () => true }, [isSearchHistoryOpened, isSearchingInDocPage, isDocsFilterModalOpened]);
 
   useHotkeys('down', () => {
-    if (isSearchingInDocPage || isDocsFilterModalOpened) return;
+    if (isSearchHistoryOpened || isSearchingInDocPage || isDocsFilterModalOpened) return;
 
     if (containerRef?.current) {
       containerRef.current.scrollBy(0, 15);
     }
-  }, { filter: () => true }, [isSearchingInDocPage, isDocsFilterModalOpened]);
+  }, { filter: () => true }, [isSearchHistoryOpened, isSearchingInDocPage, isDocsFilterModalOpened]);
 
   useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+up' : 'ctrl+up', () => {
     if (isSearchingInDocPage || isDocsFilterModalOpened) return;
