@@ -1,7 +1,7 @@
 {
   "name": "com.foundrylabs.devbook",
   "description": "Search engine for developers",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "author": {
     "name": "FoundryLabs, Inc.",
@@ -10,6 +10,43 @@
   },
   "homepage": ".",
   "main": "build/main",
+  "build": {
+    "productName": "Devbook",
+    "appId": "devbook.foundrylabs.com",
+    "artifactName": "${productName}-${version}.${ext}",
+    "publish": {
+      "provider": "generic",
+      "url": "https://storage.googleapis.com/devbook-publish/"
+    },
+    "afterSign": "scripts/notarize.js",
+    "icon": "./build/icon.png",
+    "mac": {
+      "hardenedRuntime": true,
+      "entitlements": "./build/entitlements.mac.inherit.plist"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "icon": "./build/icon.png",
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "extends": null,
+    "files": [
+      "build/**/*"
+    ],
+    "extraResources": [
+      "resources",
+      "todesktop-runtime-config.json"
+    ]
+  },
   "productName": "Devbook",
   "eslintConfig": {
     "extends": "react-app"

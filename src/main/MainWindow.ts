@@ -155,16 +155,10 @@ class MainWindow {
   public hide() {
     if (process.platform === 'win32' && this._isPinModeEnabled && this.window?.isMinimized()) return;
     this.window?.hide();
-    if (process.platform === 'win32') {
-      this.window?.minimize();
-    }
   }
 
   public show() {
     this.window?.show();
-    if (process.platform === 'win32') {
-      this.window?.restore();
-    }
     this.trackShowApp();
   }
 
