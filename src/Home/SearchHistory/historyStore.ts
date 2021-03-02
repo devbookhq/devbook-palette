@@ -14,7 +14,7 @@ class HistoryStore {
 
   private static readonly maxHistorySize = 20;
   private static entries = HistoryStore.store.get(HistoryStore.searchHistoryEntriesStoreName, []) as HistoryEntry[];
-  static readonly saveDebouncedQuery = debounce(HistoryStore.saveQuery, 5000);
+  static readonly saveDebouncedQuery = debounce(HistoryStore.saveQuery, 1000);
 
   static get queries() {
     return HistoryStore.entries
