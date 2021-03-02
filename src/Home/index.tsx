@@ -1375,17 +1375,17 @@ function Home() {
 
   // 'up arrow' hotkey - navigation.
   useHotkeys('up', (event) => {
-    if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
-
-    event.preventDefault(); // This prevents natural scrolling using arrow keys.
-
     if (state.isSearchHistoryPreviewVisible) {
+      event.preventDefault(); // This prevents natural scrolling using arrow keys.
       if (state.historyIndex > 0) {
         setHistoryIndex(state.historyIndex - 1);
       }
       return;
     }
 
+    if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
+
+    event.preventDefault(); // This prevents natural scrolling using arrow keys.
     const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
     navigateSearchResultsUp(idx, activeFilter, isModalOpened);
@@ -1400,10 +1400,6 @@ function Home() {
 
   // 'down arrow' hotkey - navigation.
   useHotkeys('down', (event) => {
-    if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
-
-    event.preventDefault(); // This prevents natural scrolling using arrow keys.
-
     if (state.isSearchHistoryPreviewVisible) {
       if (state.historyIndex < state.history.length - 1) {
         setHistoryIndex(state.historyIndex + 1);
@@ -1411,6 +1407,9 @@ function Home() {
       return;
     }
 
+    if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
+
+    event.preventDefault(); // This prevents natural scrolling using arrow keys.
     const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
     const idx = state.results[activeFilter].focusedIdx.idx;
     navigateSearchResultsDown(idx, activeFilter, isModalOpened);
@@ -1900,6 +1899,7 @@ function Home() {
                   html={(activeFocusedItem as DocResult).page.html}
                   hasHTMLExtension={(activeFocusedItem as DocResult).page.hasHTMLExtension}
                   searchInputRef={docPageSearchInputRef}
+                  isSearchHistoryOpened={state.isSearchHistoryPreviewVisible}
                 />
               </DocsWrapper>
             }
