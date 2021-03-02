@@ -1401,6 +1401,7 @@ function Home() {
   // 'down arrow' hotkey - navigation.
   useHotkeys('down', (event) => {
     if (state.isSearchHistoryPreviewVisible) {
+      event.preventDefault(); // This prevents natural scrolling using arrow keys.
       if (state.historyIndex < state.history.length - 1) {
         setHistoryIndex(state.historyIndex + 1);
       }
@@ -1424,13 +1425,14 @@ function Home() {
 
   // 'enter' hotkey - open the focused result in a modal.
   useHotkeys('enter', () => {
-    if (activeFilter === ResultsFilter.Docs) return;
     if (state.isSearchHistoryPreviewVisible) {
       setSearchQuery(state.history[state.historyIndex]);
       toggleSearchHistoryPreview(false);
       trackSelectHistoryQuery();
       return;
     }
+
+    if (activeFilter === ResultsFilter.Docs) return;
 
     openModal(state.results[activeFilter].items[activeFocusedIdx.idx]);
     trackShortcut({ action: 'Open modal' });
