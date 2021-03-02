@@ -162,7 +162,6 @@ class MainWindow {
       const [width, height] = this.window.getSize();
       this.store.set('mainWinSize', [width, height]);
       this.identifyUser(this.window);
-      console.log('DEBOUNCED!!!!!!!!');        
     }      
   }
 
