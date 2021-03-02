@@ -16,7 +16,7 @@
     "artifactName": "${productName}-${version}.${ext}",
     "publish": {
       "provider": "generic",
-      "url": "https://todesktop-builds-prod.s3.amazonaws.com/210302snhwmjx78/"
+      "url": "https://todesktop-builds-prod.s3.amazonaws.com/2102273jsy18baz/"
     },
     "afterSign": "scripts/notarize.js",
     "icon": "./build/icon.png",
@@ -76,7 +76,7 @@
     "electron:build-all": "npm run compile && NOTARIZATION=none electron-builder -wml",
     "upload:win-bash": "bash.exe -l scripts/upload-win.sh",
     "upload:win": "BUCKET=devbook-publish-test && gsutil cp gs://$BUCKET/latest.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest.yml && echo Devbook-*.exe latest.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
-    "upload:mac": "BUCKET=devbook-publish-test && gsutil cp gs://$BUCKET/latest-mac.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-mac.yml echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
+    "upload:mac": "BUCKET=devbook-publish-test && gsutil cp gs://$BUCKET/latest-mac.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-mac.yml && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
     "upload:linux": "BUCKET=devbook-publish-test && gsutil cp gs://$BUCKET/latest-linux.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest-linux.yml && echo Devbook-*.AppImage latest-linux.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
     "release:win": "npx rimraf dist && npm run electron:build-win && npm run upload:win",
     "release:mac": "npx rimraf dist && npm run electron:build-mac && npm run upload:mac",
