@@ -106,7 +106,6 @@ class MainWindow {
       // and don't close the window.
       // TODO: There's a problem though, that the window looses its focus
       // and we haven't been able to find a way to re-focus the window again.
-      console.log('BLUR WILL HAPPEN didJustDisablePinMode?', this.didJustDisablePinMode);
       if (this.didJustDisablePinMode) {
         this.didJustDisablePinMode = false;
         return;
