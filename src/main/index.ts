@@ -37,6 +37,8 @@ import {
   trackSignInFailed,
   trackContinueIntoAppButtonClicked,
   trackSignOutButtonClicked,
+  trackEnablePinMode,
+  trackDisablePinMode,
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
@@ -503,5 +505,10 @@ ipcMain.on(IPCMessage.TogglePinMode, (_, { isEnabled }: { isEnabled: boolean }) 
   if (mainWindow) {
     isPinModeEnabled = isEnabled;
     mainWindow.isPinModeEnabled = isEnabled;
+    if (isEnabled) {
+      trackEnablePinMode();
+    } else {
+      trackDisablePinMode();
+    }
   }
 });

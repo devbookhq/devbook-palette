@@ -29,6 +29,9 @@ enum AnalyticsEvent {
 
   ConnectingGitHubStarted = 'Connecting GitHub started',
   ConnectingGitHubFinished = 'Connecting GitHub finished',
+
+  EnablePinMode = 'Enable pin mode',
+  DisablePinMode = 'Disable pin mode',
 }
 
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
@@ -288,3 +291,30 @@ export function trackSignOutButtonClicked() {
     },
   });
 }
+
+export function trackEnablePinMode() {
+  client.track({
+    event: AnalyticsEvent.EnablePinMode,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+    },
+  })
+}
+
+export function trackDisablePinMode() {
+  client.track({
+    event: AnalyticsEvent.DisablePinMode,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+    },
+  })
+}
+
