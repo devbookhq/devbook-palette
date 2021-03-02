@@ -35,6 +35,7 @@ enum AnalyticsEvent {
 
   ShowSearchHistory = 'Show search history',
   HideSearchHistory = 'Hide search history',
+  SelectHistoryQuery = 'Selected query from search history',
 }
 
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
@@ -305,7 +306,7 @@ export function trackEnablePinMode() {
       platform,
       appVersion,
     },
-  })
+  });
 }
 
 export function trackDisablePinMode() {
@@ -318,7 +319,7 @@ export function trackDisablePinMode() {
       platform,
       appVersion,
     },
-  })
+  });
 }
 
 export function trackShowSearchHistory() {
@@ -331,7 +332,7 @@ export function trackShowSearchHistory() {
       platform,
       appVersion,
     },
-  })
+  });
 }
 
 export function trackHideSearchHistory() {
@@ -344,5 +345,19 @@ export function trackHideSearchHistory() {
       platform,
       appVersion,
     },
-  })
+  });
 }
+
+export function trackSelectHistoryQuery() {
+  client.track({
+    event: AnalyticsEvent.SelectHistoryQuery,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+    },
+  });
+}
+
