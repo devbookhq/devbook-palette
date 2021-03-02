@@ -8,7 +8,7 @@ import {
   ipcMain,
 } from 'electron';
 import tmp from 'tmp';
-import { autoUpdater } from 'electron-updater';
+import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 
 // Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.
@@ -52,6 +52,8 @@ import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
+
+toDesktop.init();
 
 enum StoreKey {
   DocSources = 'docSources',
@@ -109,43 +111,21 @@ if (!isFirstInstance) {
 // Auto-updating
 let isUpdateAvailable = false;
 
-if (!isDev) {
-  autoUpdater.requestHeaders = null;
+toDesktop.autoUpdater.on('update-downloaded', () => {
+  isUpdateAvailable = true;
 
-  app.on('ready', () => {
-    // TODO: Switch setInterval for a cron job - https://github.com/kelektiv/node-cron.
-    setInterval(() => {
-      autoUpdater.checkForUpdates();
-    }, 10 * 60 * 1000);
-  });
+  mainWindow?.webContents?.send('update-available', {});
+  preferencesWindow?.webContents?.send('update-available', {});
 
-  autoUpdater.on('update-downloaded', () => {
-    isUpdateAvailable = true;
-
-    mainWindow?.webContents?.send('update-available', {});
-    preferencesWindow?.webContents?.send('update-available', {});
-
-    tray?.setIsUpdateAvailable(true);
-  });
-
-  autoUpdater.on('error', (message) => {
-    console.error('There was a problem updating the application');
-    console.error(message);
-  });
-}
+  tray?.setIsUpdateAvailable(true);
+});
 
 async function restartAndUpdate(location: 'banner' | 'tray' | 'preferences') {
   try {
     await trackUpdateClicked(location);
   } catch (error) { }
   if (isUpdateAvailable) {
-    setImmediate(() => {
-      try {
-        autoUpdater.quitAndInstall();
-      } catch (error) {
-        console.error(error.message);
-      }
-    });
+    toDesktop.autoUpdater.restartAndInstall();
   }
 }
 
@@ -264,10 +244,6 @@ function trySetGlobalShortcut(shortcut: string) {
 
 /////////// App Events ///////////
 app.once('ready', async () => {
-  if (!isDev) {
-    autoUpdater.checkForUpdates();
-  }
-
   if (isDev) {
     // Load react dev tools.
     await electron.session.defaultSession.loadExtension(
