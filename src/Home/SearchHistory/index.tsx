@@ -16,7 +16,7 @@ const Container = styled.div<{ isFocused?: boolean }>`
   flex-direction: column;
   align-items: flex-start;
 
-  background: rgba(37, 37, 46, 0.65);
+  background: rgba(37, 37, 46, 0.75);
   border-radius: 8px;
   border: 1px solid ${props => props.isFocused ? '#3A41AF' : '#3B3A4A'};
   box-shadow: 0px 4px 6px 2px rgba(0, 0, 0, 0.5);
@@ -25,7 +25,7 @@ const Container = styled.div<{ isFocused?: boolean }>`
 `;
 
 const Heading = styled.div`
-  flex: 1;
+  margin-right: 8px;
   color: #616171;
   font-size: 11px;
   font-weight: 500;
@@ -120,75 +120,41 @@ const UnfocusedStateWrapper = styled.div`
 interface SearchHistoryProps {
   history: string[];
   isFocused?: boolean;
-  onSelect: (val: string) => void;
-  onFocusHotkeyClick: (e: any) => void;
+  historyIdx: number;
+  onQueryClick: (q: string) => void;
+  onHideHotkeyClick: (e: any) => void;
 }
 
 function SearchHistory({
   history,
   isFocused,
-  onSelect,
-  onFocusHotkeyClick,
+  historyIdx,
+  onQueryClick,
+  onHideHotkeyClick,
 }: SearchHistoryProps) {
-  const [historyIdx, setHistoryIdx] = useState(0);
-
-  function selectHistory(idx: number) {
-    onSelect(history[idx]);
-  }
-
-  useHotkeys('enter', () => {
-    if (!isFocused) return;
-    selectHistory(historyIdx);
-  }, { filter: () => true }, [historyIdx, isFocused]);
-
-  useHotkeys('down', () => {
-    if (!isFocused) return;
-    if (historyIdx < history.length - 1) setHistoryIdx(v => v+1);
-  }, { filter: () => true }, [historyIdx, isFocused, history, setHistoryIdx]);
-
-  useHotkeys('up', () => {
-    if (!isFocused) return;
-    if (historyIdx > 0) setHistoryIdx(v => v-1);
-  }, { filter: () => true }, [historyIdx, isFocused, history, setHistoryIdx]);
-
   return (
     <Container
       isFocused={isFocused}
     >
       <TopBar>
         <Heading>Past queries</Heading>
-        <Hotkeys>
-          {!isFocused &&
-            <HotkeyWrapper
-              onClick={onFocusHotkeyClick}
-            >
-              <Hotkey
-                hotkey={['Tab']}
-              />
-              <HotkeyText>
-                to focus & see more
-              </HotkeyText>
-            </HotkeyWrapper>
-          }
-
-          {isFocused &&
-            <HotkeyWrapper>
-              <Hotkey
-                hotkey={['Esc']}
-              />
-              <HotkeyText>
-                to hide
-              </HotkeyText>
-            </HotkeyWrapper>
-          }
-        </Hotkeys>
+        <HotkeyWrapper
+          onClick={onHideHotkeyClick}
+        >
+          <Hotkey
+            hotkey={['Tab']}
+          />
+          <HotkeyText>
+            to hide
+          </HotkeyText>
+        </HotkeyWrapper>
       </TopBar>
 
       <Content>
         {!isFocused &&
           <UnfocusedStateWrapper>
             <Query
-              onClick={() => selectHistory(0)}
+              onClick={() => onQueryClick(history[0])}
             >
               {history[0]}
             </Query>
@@ -200,7 +166,7 @@ function SearchHistory({
             isFullWidth
             key={h}
             isFocused={isFocused && historyIdx === idx}
-            onClick={() => selectHistory(idx)}
+            onClick={() => onQueryClick(history[idx])}
           >
             {h}
           </Query>

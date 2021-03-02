@@ -1,5 +1,5 @@
-import { ElectronStore } from '../../mainCommunication/electron';
-import debounce from '../../utils/debounce';
+import { ElectronStore } from 'mainCommunication/electron';
+import debounce from 'utils/debounce';
 
 interface HistoryEntry {
   query: string;
@@ -15,12 +15,13 @@ class HistoryStore {
 
   private static readonly maxHistorySize = 200;
   private static entries = HistoryStore.store.get(HistoryStore.searchHistoryEntriesStoreName, []) as HistoryEntry[];
-  static readonly debouncedSaveQuery = debounce(HistoryStore.saveQuery, 5000);
+  static readonly saveDebouncedQuery = debounce(HistoryStore.saveQuery, 5000);
 
   static get queries() {
     return HistoryStore.entries
       .map(e => e.query)
-      .slice(-20);
+      .slice(-10)
+      .reverse();
   }
 
   private static saveQuery(query: string) {

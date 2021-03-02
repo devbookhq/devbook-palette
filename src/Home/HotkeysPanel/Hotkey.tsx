@@ -9,7 +9,7 @@ import { ReactComponent as arrowUpKeyImg } from 'img/arrow-up-key.svg';
 import { ReactComponent as arrowDownKeyImg } from 'img/arrow-down-key.svg';
 
 const Container = styled.div`
-  min-height: 20px;
+  min-height: 24px;
   padding: 2px 6px;
   display: flex;
   align-items: center;
