@@ -1589,6 +1589,7 @@ function Home() {
 
   // Search when the debounced query changes.
   useEffect(() => {
+    setHistory(historyStore.queries);
     if (!debouncedQuery || debouncedQuery === debouncedLastSearchedQuery) return;
 
     searchAll(
@@ -1599,8 +1600,6 @@ function Home() {
     );
 
     historyStore.saveDebouncedQuery(debouncedQuery);
-    console.log('!!!!!!!! >>>>>> History Store:', historyStore.queries);
-    setHistory(historyStore.queries);
 
     trackSearch({
       activeFilter: activeFilter.toString(),
