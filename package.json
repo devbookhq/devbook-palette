@@ -1,7 +1,7 @@
 {
   "name": "com.foundrylabs.devbook",
   "description": "Search engine for developers",
-  "version": "0.1.6",
+  "version": "0.1.8",
   "private": true,
   "author": {
     "name": "FoundryLabs, Inc.",
@@ -43,7 +43,8 @@
       "build/**/*"
     ],
     "extraResources": [
-      "resources"
+      "resources",
+      "todesktop-runtime-config.json"
     ]
   },
   "productName": "Devbook",
@@ -77,7 +78,7 @@
     "electron:build-win": "npm run compile && electron-builder build --win --publish always",
     "electron:build-linux": "npm run compile && electron-builder build --linux --publish always",
     "electron:build-mac": "npm run compile && electron-builder build --mac --publish always",
-    "electron:build-all": "npm run compile && electron-builder -wml",
+    "electron:build-all": "npm run compile && NOTARIZATION=none electron-builder -wml",
     "upload:win-bash": "bash.exe -l scripts/upload-win.sh",
     "upload:win": "BUCKET=devbook-publish && gsutil cp gs://$BUCKET/latest.yml gs://$BUCKET/archive/$(date +%Y-%M-%d-%H%M)-latest.yml && echo Devbook-*.exe latest.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
     "upload:mac": "BUCKET=devbook-publish && echo Devbook-*.dmg Devbook-*.zip latest-mac.yml | tr ' ' '\n' | xargs -n 1 -I{} gsutil -h \"Cache-Control:no-cache, max-age=0\" cp dist/{} gs://$BUCKET",
