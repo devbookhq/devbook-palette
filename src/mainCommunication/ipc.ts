@@ -22,4 +22,7 @@ export enum IPCMessage {
 
   TogglePinMode = 'TogglePinMode',
   OnPinModeChange = 'OnPinModeChange',
+
+  TrackShowSearchHistory = 'TrackShowSearchHistory',
+  TrackHideSearchHistory = 'TrackHideSearchHistory',
 }

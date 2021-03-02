@@ -191,6 +191,14 @@ export function togglePinMode(isEnabled: boolean) {
   return electron.ipcRenderer.send(IPCMessage.TogglePinMode, { isEnabled });
 }
 
+export function trackShowSearchHistory() {
+  return electron.ipcRenderer.send(IPCMessage.TrackShowSearchHistory);
+}
+
+export function trackHideSearchHistory() {
+  return electron.ipcRenderer.send(IPCMessage.TrackHideSearchHistory);
+}
+
 export { isDev };
 
 export default electron;

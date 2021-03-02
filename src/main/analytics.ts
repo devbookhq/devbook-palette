@@ -32,6 +32,9 @@ enum AnalyticsEvent {
 
   EnablePinMode = 'Enable pin mode',
   DisablePinMode = 'Disable pin mode',
+
+  ShowSearchHistory = 'Show search history',
+  HideSearchHistory = 'Hide search history',
 }
 
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
@@ -318,3 +321,28 @@ export function trackDisablePinMode() {
   })
 }
 
+export function trackShowSearchHistory() {
+  client.track({
+    event: AnalyticsEvent.ShowSearchHistory,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+    },
+  })
+}
+
+export function trackHideSearchHistory() {
+  client.track({
+    event: AnalyticsEvent.HideSearchHistory,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+    },
+  })
+}

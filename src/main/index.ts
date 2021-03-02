@@ -39,6 +39,8 @@ import {
   trackSignOutButtonClicked,
   trackEnablePinMode,
   trackDisablePinMode,
+  trackShowSearchHistory,
+  trackHideSearchHistory,
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
@@ -179,7 +181,7 @@ gitHubOAuth.emitter.on('error', ({ message }: { message: string }) => {
 
 function hideMainWindow() {
   mainWindow?.hide();
-  
+
   if (!onboardingWindow?.window?.isVisible() && !preferencesWindow?.window?.isVisible() && process.platform === 'darwin') {
     // This action would hide the onboarding and preferences window too, but it is necessary for restoring focus when hiding mainWindow.
     electron.Menu.sendActionToFirstResponder('hide:');
@@ -471,35 +473,35 @@ ipcMain.on(IPCMessage.SaveDocSources, (_, { docSources }) => {
 ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo));
 
 ipcMain.on(IPCMessage.TrackSignInModalOpened, () => {
-  trackSignInModalOpened()
+  trackSignInModalOpened();
 });
 
 ipcMain.on(IPCMessage.TrackSignInModalClosed, () => {
-  trackSignInModalClosed()
+  trackSignInModalClosed();
 });
 
 ipcMain.on(IPCMessage.TrackSignInButtonClicked, () => {
-  trackSignInButtonClicked()
+  trackSignInButtonClicked();
 });
 
 ipcMain.on(IPCMessage.TrackSignInAgainButtonClicked, () => {
-  trackSignInAgainButtonClicked()
+  trackSignInAgainButtonClicked();
 });
 
 ipcMain.on(IPCMessage.TrackSignInFinished, () => {
-  trackSignInFinished()
+  trackSignInFinished();
 });
 
 ipcMain.on(IPCMessage.TrackSignInFailed, (_, { error }: { error: string }) => {
-  trackSignInFailed(error)
+  trackSignInFailed(error);
 });
 
 ipcMain.on(IPCMessage.TrackContinueIntoAppButtonClicked, () => {
-  trackContinueIntoAppButtonClicked()
+  trackContinueIntoAppButtonClicked();
 });
 
 ipcMain.on(IPCMessage.TrackSignOutButtonClicked, () => {
-  trackSignOutButtonClicked()
+  trackSignOutButtonClicked();
 });
 
 ipcMain.on(IPCMessage.TogglePinMode, (_, { isEnabled }: { isEnabled: boolean }) => {
@@ -513,3 +515,13 @@ ipcMain.on(IPCMessage.TogglePinMode, (_, { isEnabled }: { isEnabled: boolean }) 
     }
   }
 });
+
+ipcMain.on(IPCMessage.TrackShowSearchHistory, () => {
+  trackShowSearchHistory();
+});
+
+
+ipcMain.on(IPCMessage.TrackHideSearchHistory, () => {
+  trackHideSearchHistory();
+});
+
