@@ -56,6 +56,8 @@ class MainWindow {
       fullscreenable: false,
       skipTaskbar: true, // This makes sure that Devbook window isn't shown on the bottom taskbar on Windows.
       title: 'Devbook',
+      closable: false,
+      minimizable: false,
       webPreferences: {
         nodeIntegration: true,
         enableRemoteModule: true,
@@ -97,11 +99,14 @@ class MainWindow {
     });
 
     this.window.on('blur', () => {
-      // This is a hack so the window doesn't close when user clicks
-      // on the "Unpin Devbook" button.
-      // Normally, the window closes because we're calling app.dock.hide()
-      // as a reaction on the 'closed' event. This also triggers the 'blur'
-      // event.
+      // Calling 'app.doc.hide()' triggers the 'blur' event.
+      // This is a hack so the window doesn't close when a user disables
+      // the pin mode.
+      // We want to ignore this particular instance of the 'blur' event
+      // and don't close the window.
+      // TODO: There's a problem though, that the window looses its focus
+      // and we haven't been able to find a way to re-focus the window again.
+      console.log('BLUR WILL HAPPEN didJustDisablePinMode?', this.didJustDisablePinMode);
       if (this.didJustDisablePinMode) {
         this.didJustDisablePinMode = false;
         return;
