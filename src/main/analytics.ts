@@ -36,6 +36,9 @@ enum AnalyticsEvent {
   ShowSearchHistory = 'Show search history',
   HideSearchHistory = 'Hide search history',
   SelectHistoryQuery = 'Selected query from search history',
+  
+  UpdateClicked = 'Update clicked',
+  UpdateCancelClicked = 'Update cancel clicked',
 }
 
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
@@ -361,3 +364,37 @@ export function trackSelectHistoryQuery() {
   });
 }
 
+export async function trackUpdateClicked(location: 'tray' | 'banner' | 'preferences') {
+  return new Promise<void>((resolve, reject) => {
+    client.track({
+      event: AnalyticsEvent.UpdateClicked,
+      anonymousId: anonymousID,
+      userId: userID,
+      properties: {
+        isSignedIn,
+        platform,
+        appVersion,
+        location,
+      },
+    }).flush((error, data) => {
+      if (error !== null) {
+        return reject(error);
+      } else {
+        return resolve();
+      }
+    });
+  });
+}
+export function trackUpdateCancelClicked(location: 'banner') {
+  client.track({
+    event: AnalyticsEvent.UpdateCancelClicked,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+      location,
+    },
+  });
+}
