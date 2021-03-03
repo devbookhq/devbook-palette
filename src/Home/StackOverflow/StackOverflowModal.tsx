@@ -170,6 +170,7 @@ function StackOverflowModal({
   onCloseRequest,
 }: StackOverflowModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+
   const [sortedAnswers, setSortedAnswers] = useState<StackOverflowAnswer[]>([]);
   const [mostUpvotedIdx, setMostUpvotedIdx] = useState(-1);
   useOnClickOutside(modalRef, onCloseRequest);
@@ -188,6 +189,7 @@ function StackOverflowModal({
       minute: '2-digit',
     });
     const [dayMonth, year, time] = date.split(', ');
+    if (dayMonth === undefined || year === undefined || time === undefined) return '';
     return `${dayMonth} '${year} at ${time}`;
   }
 

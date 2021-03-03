@@ -67,7 +67,7 @@ const Body = styled.div`
     }
   }
 
-  .snippet {
+  .snippet, .snippet-code {
     width: 100%;
     display: flex;
     flex-direction: column;

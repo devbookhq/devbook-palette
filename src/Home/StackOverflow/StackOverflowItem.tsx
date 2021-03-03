@@ -254,7 +254,6 @@ function StackOverflowItem ({
         const target = event.target as HTMLDivElement | undefined;
         if (!target) return;
         const snippet = target.getAttribute('data-snippet');
-        console.log('Coppy snippet with click!', snippet);
         if (snippet) {
           electron.clipboard.writeText(snippet);
         }
@@ -290,7 +289,10 @@ function StackOverflowItem ({
     if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
   }, [focusState]);
 
-  useHotkeys('alt+shift+1,alt+shift+2,alt+shift+3,alt+shift+4', (event, handler) => {
+  useHotkeys(
+    'alt+shift+1,alt+shift+2,alt+shift+3,alt+shift+4,alt+shift+5,alt+shift+6,alt+shift+7,alt+shift+8,alt+shift+9',
+    (event, handler) =>
+  {
     event.preventDefault();
     if (focusState === FocusState.None) return;
     const num = parseInt(handler.shortcut.split('+').slice(-1)[0], 10); // 'shortcut' is a string 'ctrl+<num>'.
