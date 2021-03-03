@@ -5,7 +5,7 @@
   "private": true,
   "author": {
     "name": "FoundryLabs, Inc.",
-    "email": "vasek@usedevbook.com",
+    "email": "hello@usedevbook.com",
     "url": "https://usedevbook.com"
   },
   "homepage": ".",
@@ -30,18 +30,11 @@
     "node": "12"
   },
   "scripts": {
-    "start": "craco start",
-    "postinstall": "electron-rebuild",
-    "electron:dev": "concurrently \"npx cross-env BROWSER=none npm run start\" \"wait-on http://localhost:3000 && tsc -p src/main -w\" \"wait-on http://localhost:3000 && tsc -p src/main && electron --enable-logging .\"",
     "compile": "craco build && tsc -p src/main",
-    "build": "npm run compile && todesktop build",
-    "build-no-code-sign": "npm run compile && todesktop build --code-sign=false",
-    "release": "npm run build && todesktop release --latest --force",
-    "electron:build-mac-unnotarized": "npm run compile && NOTARIZATION=none electron-builder build --mac --publish always",
-    "electron:build-win": "npm run compile && electron-builder build --win --publish always",
-    "electron:build-linux": "npm run compile && electron-builder build --linux --publish always",
-    "electron:build-mac": "npm run compile && electron-builder build --mac --publish always",
-    "electron:build-all": "npm run compile && NOTARIZATION=none electron-builder -wml"
+    "postinstall": "electron-rebuild",
+    "start:dev": "concurrently \"npx cross-env BROWSER=none craco start\" \"wait-on http://localhost:3000 && tsc -p src/main -w\" \"wait-on http://localhost:3000 && tsc -p src/main && electron --enable-logging .\"",
+    "build:prod": "npm run compile && todesktop build",
+    "build:dev": "npm run compile && todesktop build --code-sign=false"
   },
   "dependencies": {
     "@todesktop/runtime": "^0.4.0",
@@ -78,12 +71,9 @@
     "craco": "0.0.3",
     "cross-env": "^7.0.3",
     "electron": "11.1.1",
-    "electron-builder": "^22.9.1",
-    "electron-notarize": "^1.0.0",
     "electron-rebuild": "^2.3.5",
     "electron-reload": "^1.5.0",
     "react-scripts": "^4.0.1",
-    "rimraf": "^3.0.2",
     "typescript": "^4.0.2",
     "wait-on": "^5.2.1"
   }
