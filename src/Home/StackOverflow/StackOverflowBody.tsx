@@ -1,10 +1,14 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import styled from 'styled-components';
 import Prism from 'prismjs';
 
 import { openLink } from 'mainCommunication';
 
 const Body = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
   /*
   * {
     font-size: 14px;
@@ -63,8 +67,58 @@ const Body = styled.div`
     }
   }
 
+  .snippet {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   /* Code block */
+  .code-copy {
+    margin-top: 24px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+
+    border-radius: 5px;
+    user-select: none;
+  }
+  .code-copy:first-child {
+    margin-top: 8px;
+  }
+  .code-copy:hover {
+    transition: background 170ms ease-in;
+    cursor: pointer;
+    background: #434252;
+  }
+  .code-copy:hover > .code-copy-hotkey-text {
+    color: #fff;
+  }
+  .code-copy-hotkey {
+    min-height: 24px;
+    padding: 2px 6px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    color: white;
+    border-radius: 5px;
+    background: #434252;
+
+    font-weight: 500;
+    font-family: 'Poppins';
+    font-size: 13px;
+  }
+  .code-copy-hotkey-text {
+    margin-left: 8px;
+    font-size: 13px;
+    color: #616171;
+    transition: color 170ms ease-in;
+  }
   pre {
+    width: 100%;
+    margin: 4px 0;
     padding: 10px;
     overflow-y: auto;
 
@@ -127,6 +181,13 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
   html,
   tabIndex,
 }, ref) => {
+//function StackOverflowBody({
+//  className,
+//  html,
+//  tabIndex,
+//}: StackOverflowBodyProps) {
+  //const bodyRef = React.useRef<HTMLDivElement>(null);
+
   // Open all links in the browser.
   function handleBodyClick(e: any) {
     const target = e.target || e.srcElement;
@@ -162,15 +223,25 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
     return el.outerHTML || '<html></html>';
   }
 
+  /*
+  React.useEffect(() => {
+    if (!bodyRef?.current) return;
+    const codeSnippets = bodyRef.current.getElementsByTagName('pre');
+    console.log('snippets', codeSnippets);
+  }, []);
+  */
+
   return (
     <Body
       ref={ref}
+      //ref={bodyRef}
       tabIndex={tabIndex}
       className={className}
       dangerouslySetInnerHTML={{__html: highlightCode(html)}}
       onClick={handleBodyClick}
     />
   );
+//}
 });
 
 export default StackOverflowBody;

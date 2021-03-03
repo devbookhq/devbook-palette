@@ -4,6 +4,7 @@ import React, {
   useState,
 } from 'react';
 import styled from 'styled-components';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { openLink } from 'mainCommunication';
 import useOnClickOutside from 'hooks/useOnClickOutside';
@@ -190,12 +191,6 @@ function StackOverflowModal({
     return `${dayMonth} '${year} at ${time}`;
   }
 
-  // We focus the modal so user can use arrows for scrolling.
-  useEffect(() => {
-    if (soResult.answers.length === 0) return;
-    modalRef?.current?.focus();
-  }, [soResult.answers]);
-
   useEffect(() => {
     const acceptedIdx = soResult.answers.findIndex(a => a.isAccepted);
 
@@ -216,6 +211,18 @@ function StackOverflowModal({
       setSortedAnswers(soResult.answers);
     }
   }, [soResult.answers]);
+
+  useHotkeys('up', () => {
+    if (modalRef?.current) {
+      modalRef.current.scrollBy(0, -15);
+    }
+  }, { filter: () => true }, [soResult.answers]);
+
+  useHotkeys('down', () => {
+    if (modalRef?.current) {
+      modalRef.current.scrollBy(0, 15);
+    }
+  }, { filter: () => true }, [soResult.answers]);
 
   return (
     <StyledModal

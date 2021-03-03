@@ -4,13 +4,15 @@ import React, {
   useState,
 } from 'react';
 import styled from 'styled-components';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import {
   StackOverflowResult,
   StackOverflowAnswer,
   AnswerType,
 } from 'search/stackOverflow';
-import { openLink } from 'mainCommunication';
+import electron, { openLink } from 'mainCommunication';
+
 import FocusState from '../SearchItemFocusState';
 import StackOverflowBody from './StackOverflowBody';
 
@@ -185,8 +187,13 @@ function StackOverflowItem ({
   onTitleClick,
 }: StackOverflowItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
   const [activeAnswer, setActiveAnswer] = useState<StackOverflowAnswer | undefined>();
   const [answerTypes, setAnswerTypes] = useState<AnswerType[]>([]);
+
+  const [codeSnippets, setCodeSnippets] = useState<string[]>([]);
+  const [copySnippetEls, setCopySnippetEls] = useState<HTMLElement[]>([]);
 
   function handleQuestionTitleClick(e: any) {
     onTitleClick(e);
@@ -216,6 +223,53 @@ function StackOverflowItem ({
   }
 
   useEffect(() => {
+    if (!bodyRef?.current) return;
+    copySnippetEls.forEach(el => el.remove());
+    const codeSnippets = bodyRef.current.getElementsByTagName('pre');
+
+    const snippets: string[] = [];
+    const copyEls: HTMLElement[] = [];
+
+    let idx = 0;
+    for (let el of codeSnippets) {
+      if (idx >= 9) return;
+
+      const codeCopyEl = document.createElement('div');
+      codeCopyEl.classList.add('code-copy');
+      codeCopyEl.setAttribute('data-snippet', el.innerText);
+
+      const codeCopyHotkeyEl = document.createElement('div');
+      codeCopyHotkeyEl.classList.add('code-copy-hotkey');
+      codeCopyHotkeyEl.innerHTML = `Alt + Shift + ${idx+1}`;
+      codeCopyHotkeyEl.setAttribute('data-snippet', el.innerText);
+      codeCopyEl.appendChild(codeCopyHotkeyEl);
+
+      const codeCopyHotkeyTextEl = document.createElement('div');
+      codeCopyHotkeyTextEl.classList.add('code-copy-hotkey-text');
+      codeCopyHotkeyTextEl.innerHTML = 'to copy code snippet'
+      codeCopyHotkeyTextEl.setAttribute('data-snippet', el.innerText);
+      codeCopyEl.appendChild(codeCopyHotkeyTextEl);
+
+      codeCopyEl.onclick = (event: MouseEvent) => {
+        const target = event.target as HTMLDivElement | undefined;
+        if (!target) return;
+        const snippet = target.getAttribute('data-snippet');
+        console.log('Coppy snippet with click!', snippet);
+        if (snippet) {
+          electron.clipboard.writeText(snippet);
+        }
+      };
+
+      el.parentNode?.insertBefore(codeCopyEl, el);
+      copyEls.push(codeCopyEl);
+      snippets.push(el.innerText);
+      idx += 1;
+    }
+    setCopySnippetEls(copyEls);
+    setCodeSnippets(snippets);
+  }, [bodyRef, bodyRef.current]);
+
+  useEffect(() => {
     const accepted = soResult.answers.filter(a => a.isAccepted === true);
     const mostUpvoted = soResult.answers.reduce((acc, val) => {
       if (!acc) return val;
@@ -235,6 +289,15 @@ function StackOverflowItem ({
   useEffect(() => {
     if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
   }, [focusState]);
+
+  useHotkeys('alt+shift+1,alt+shift+2,alt+shift+3,alt+shift+4', (event, handler) => {
+    event.preventDefault();
+    if (focusState === FocusState.None) return;
+    const num = parseInt(handler.shortcut.split('+').slice(-1)[0], 10); // 'shortcut' is a string 'ctrl+<num>'.
+    if (num-1 < codeSnippets.length) {
+        electron.clipboard.writeText(codeSnippets[num-1]);
+    }
+  }, { filter: () => true }, [focusState, codeSnippets]);
 
   return (
     <Container
@@ -279,6 +342,7 @@ function StackOverflowItem ({
           </AnswerMetadata>
 
           <StackOverflowBody
+            ref={bodyRef}
             html={activeAnswer.html}
           />
         </Answer>
