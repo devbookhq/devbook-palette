@@ -32,7 +32,7 @@
   "scripts": {
     "compile": "craco build && tsc -p src/main",
     "postinstall": "electron-rebuild",
-    "start:dev": "concurrently \"npx cross-env BROWSER=none craco start\" \"wait-on http://localhost:3000 && tsc -p src/main -w\" \"wait-on http://localhost:3000 && tsc -p src/main && electron --enable-logging .\"",
+    "electron:dev": "concurrently \"npx cross-env BROWSER=none craco start\" \"wait-on http://localhost:3000 && tsc -p src/main -w\" \"wait-on http://localhost:3000 && tsc -p src/main && electron --enable-logging .\"",
     "build:prod": "npm run compile && todesktop build",
     "build:dev": "npm run compile && todesktop build --code-sign=false"
   },
