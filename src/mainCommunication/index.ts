@@ -203,6 +203,14 @@ export function trackSelectHistoryQuery() {
   return electron.ipcRenderer.send(IPCMessage.TrackSelectHistoryQuery);
 }
 
+export function trackCopyCodeSnippetStackOverflow() {
+  return electron.ipcRenderer.send(IPCMessage.TrackCopyCodeSnippetStackOverflow);
+}
+
+export function trackCopyCodeSnippetDocs() {
+  return electron.ipcRenderer.send(IPCMessage.TrackCopyCodeSnippetDocs);
+}
+
 export { isDev };
 
 export default electron;

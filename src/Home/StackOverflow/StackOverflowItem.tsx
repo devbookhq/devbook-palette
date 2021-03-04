@@ -11,7 +11,10 @@ import {
   StackOverflowAnswer,
   AnswerType,
 } from 'search/stackOverflow';
-import electron, { openLink } from 'mainCommunication';
+import electron, {
+  openLink,
+  trackCopyCodeSnippetStackOverflow,
+} from 'mainCommunication';
 
 import FocusState from '../SearchItemFocusState';
 import StackOverflowBody from './StackOverflowBody';
@@ -193,6 +196,7 @@ function StackOverflowItem ({
   const [answerTypes, setAnswerTypes] = useState<AnswerType[]>([]);
 
   const [codeSnippets, setCodeSnippets] = useState<string[]>([]);
+  const [codeSnippetEls, setCodeSnippetEls] = useState<HTMLElement[]>([]);
   const [copySnippetEls, setCopySnippetEls] = useState<HTMLElement[]>([]);
 
   function handleQuestionTitleClick(e: any) {
@@ -223,16 +227,32 @@ function StackOverflowItem ({
   }
 
   useEffect(() => {
+    if (focusState === FocusState.None) {
+      copySnippetEls.forEach(el => {
+        el.onclick = null;
+        el.remove();
+      });
+      setCodeSnippetEls([]);
+      return;
+    }
+
     if (!bodyRef?.current) return;
-    copySnippetEls.forEach(el => el.remove());
+    copySnippetEls.forEach(el => {
+      el.onclick = null;
+      el.remove();
+    });
+    setCodeSnippetEls([]);
     const codeSnippets = bodyRef.current.getElementsByTagName('pre');
 
     const snippets: string[] = [];
     const copyEls: HTMLElement[] = [];
+    const snippetEls: HTMLElement[] = [];
 
     let idx = 0;
     for (let el of codeSnippets) {
       if (idx >= 9) return;
+
+      el.classList.add(`code-snippet-${idx}`);
 
       const codeCopyEl = document.createElement('div');
       codeCopyEl.classList.add('code-copy');
@@ -242,31 +262,50 @@ function StackOverflowItem ({
       codeCopyHotkeyEl.classList.add('code-copy-hotkey');
       codeCopyHotkeyEl.innerHTML = `Alt + Shift + ${idx+1}`;
       codeCopyHotkeyEl.setAttribute('data-snippet', el.innerText);
+      codeCopyHotkeyEl.setAttribute('data-snippet-idx', `${idx}`);
       codeCopyEl.appendChild(codeCopyHotkeyEl);
 
       const codeCopyHotkeyTextEl = document.createElement('div');
       codeCopyHotkeyTextEl.classList.add('code-copy-hotkey-text');
       codeCopyHotkeyTextEl.innerHTML = 'to copy code snippet'
       codeCopyHotkeyTextEl.setAttribute('data-snippet', el.innerText);
+      codeCopyHotkeyTextEl.setAttribute('data-snippet-idx', `${idx}`);
       codeCopyEl.appendChild(codeCopyHotkeyTextEl);
 
       codeCopyEl.onclick = (event: MouseEvent) => {
         const target = event.target as HTMLDivElement | undefined;
         if (!target) return;
         const snippet = target.getAttribute('data-snippet');
-        if (snippet) {
+        const idxString = target.getAttribute('data-snippet-idx');
+        if (!idxString) {
+          console.error(`Could not get snippet element\'s idx`);
+          return;
+        }
+        const idx = parseInt(idxString, 10);
+        const snippetEl = bodyRef.current?.getElementsByClassName(`code-snippet-${idx}`)[0];
+        if (snippet && snippetEl) {
           electron.clipboard.writeText(snippet);
+
+          snippetEl.classList.add('highlight');
+          setTimeout(() => {
+            snippetEl.classList.remove('highlight');
+          }, 180);
+
+          trackCopyCodeSnippetStackOverflow();
         }
       };
 
       el.parentNode?.insertBefore(codeCopyEl, el);
       copyEls.push(codeCopyEl);
       snippets.push(el.innerText);
+      snippetEls.push(el);
       idx += 1;
     }
+
+    setCodeSnippetEls(snippetEls);
     setCopySnippetEls(copyEls);
     setCodeSnippets(snippets);
-  }, [bodyRef, bodyRef.current]);
+  }, [focusState, bodyRef, bodyRef.current]);
 
   useEffect(() => {
     const accepted = soResult.answers.filter(a => a.isAccepted === true);
@@ -298,6 +337,12 @@ function StackOverflowItem ({
     const num = parseInt(handler.shortcut.split('+').slice(-1)[0], 10); // 'shortcut' is a string 'ctrl+<num>'.
     if (num-1 < codeSnippets.length) {
         electron.clipboard.writeText(codeSnippets[num-1]);
+        const snippetEl = codeSnippetEls[num-1];
+        snippetEl.classList.add('highlight');
+        setTimeout(() => {
+          snippetEl.classList.remove('highlight');
+        }, 180);
+        trackCopyCodeSnippetStackOverflow();
     }
   }, { filter: () => true }, [focusState, codeSnippets]);
 

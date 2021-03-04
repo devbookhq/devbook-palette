@@ -44,7 +44,7 @@ const CloseImg = styled(closeImg)`
   height: 18px;
 
   path {
-    stroke: #5A5A6F;
+    stroke: #fff;
   }
 `;
 

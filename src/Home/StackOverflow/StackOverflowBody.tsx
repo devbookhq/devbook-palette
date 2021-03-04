@@ -136,6 +136,10 @@ const Body = styled.div`
     }
   }
 
+  pre.highlight {
+    background: #5861d6;
+  }
+
   a {
     color: #4CACD6;
     text-decoration: underline;

@@ -43,13 +43,13 @@ function SearchHotkeysPanel({
         },
       ] : [
           {
-            text: 'Navigate up',
-            hotkey: [Key.Shift, Key.ArrowUp],
+            text: 'Previous result',
+            hotkey: [Key.ArrowUp],
             onClick: onNavigateUpClick,
           },
           {
-            text: 'Navigate down',
-            hotkey: [Key.Shift, Key.ArrowDown],
+            text: 'Next result',
+            hotkey: [Key.ArrowDown],
             onClick: onNavigateDownClick,
           },
           {
@@ -67,8 +67,7 @@ function SearchHotkeysPanel({
       ] : [
           {
             text: 'Scroll docs page',
-            hotkey: [Key.ArrowUp, Key.ArrowDown],
-            isSeparated: true
+            hotkey: [Key.Shift, Key.ArrowUp, Key.ArrowDown],
           },
           {
             text: isSearchingInDocPage ? 'Cancel search in page' : 'Search in page',

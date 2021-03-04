@@ -20,11 +20,12 @@ function SearchHotkeysPanel({
   return (
     <Panel
       hotkeysLeft={[
-        { text: 'Navigate up', hotkey: [Key.ArrowUp], onClick: onNavigateUpClick },
-        { text: 'Navigate down', hotkey: [Key.ArrowDown], onClick: onNavigateDownClick },
+        { text: 'Next result', hotkey: [Key.ArrowDown], onClick: onNavigateDownClick },
+        { text: 'Previous result', hotkey: [Key.ArrowUp], onClick: onNavigateUpClick },
         { text: 'Open', hotkey: [Key.Enter], onClick: onOpenClick},
       ]}
       hotkeysRight={[
+        { text: 'Scroll page', hotkey: [Key.Shift, Key.ArrowUp, Key.ArrowDown] },
         {
           text: 'Open in browser',
           hotkey: electron.remote.process.platform === 'darwin' ? [Key.Command, 'O'] : ['Alt +', 'O'],

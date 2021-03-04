@@ -6,7 +6,7 @@ import Hotkey, { HotkeyType } from './Hotkey';
 const Container = styled.div`
   width: 100%;
   padding: 4px 15px;
-  z-index: 1;
+  z-index: 10;
 
   display: flex;
   align-items: center;
