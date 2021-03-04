@@ -156,7 +156,7 @@ async function setOpenAtLogin(openAtLogin?: boolean) {
       // This adds the '--hidden' paramters when starting the app executable.
       isHidden: true,
       // Path to the AppImage cannot be retrieved from the app.getPath('exe'), so we are using a workaround.
-      path: process.env.APPIMAGE,
+      path: process.env.APPIMAGE || app.getPath('exe'),
     });
     return openAtLogin ? autoLauncher.enable() : autoLauncher.disable();
   }
