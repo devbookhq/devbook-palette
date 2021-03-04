@@ -143,6 +143,18 @@ export function trackOnboardingStarted(searchWindow?: electron.BrowserWindow) {
 }
 
 export function trackOnboardingFinished(searchWindow?: electron.BrowserWindow) {
+  client.identify({
+    anonymousId: anonymousID,
+    traits: {
+      anonymousID: anonymousID,
+      finishedOnboardingAt: new Date(),
+      platform,
+      appVersion,
+      currentSearchWindowWidth: searchWindow?.getSize()[0],
+      currentSearchWindowHeight: searchWindow?.getSize()[1],
+    },
+  });
+
   client.track({
     event: AnalyticsEvent.OnboardingFinished,
     anonymousId: anonymousID,
@@ -156,12 +168,6 @@ export function trackOnboardingFinished(searchWindow?: electron.BrowserWindow) {
     },
   });
 
-  client.identify({
-    anonymousId: anonymousID,
-    traits: {
-      finishedOnboardingAt: new Date(),
-    },
-  });
 }
 
 export function trackConnectGitHubStarted(searchWindow?: electron.BrowserWindow) {
@@ -509,4 +515,3 @@ export function trackCopyCodeSnippetDocs(searchWindow?: electron.BrowserWindow) 
     },
   });
 }
-
