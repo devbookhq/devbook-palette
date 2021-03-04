@@ -62,8 +62,9 @@ export function identifyUser(searchWindow?: electron.BrowserWindow) {
       anonymousId: anonymousID,
       userId: userID,
       traits: {
-        anonymousID: anonymousID,
+        isSignedUp: true,
         platform,
+        anonymousID: anonymousID,
         appVersion,
         currentSearchWindowWidth: searchWindow?.getSize()[0],
         currentSearchWindowHeight: searchWindow?.getSize()[1],
@@ -73,7 +74,6 @@ export function identifyUser(searchWindow?: electron.BrowserWindow) {
     client.identify({
       anonymousId: anonymousID,
       traits: {
-        isSignedIn: true,
         anonymousID: anonymousID,
         platform,
         appVersion,
@@ -81,7 +81,7 @@ export function identifyUser(searchWindow?: electron.BrowserWindow) {
         currentSearchWindowHeight: searchWindow?.getSize()[1],
       },
     });
-  } 
+  }
 }
 
 export function changeAnalyticsUser(searchWindow?: electron.BrowserWindow, user?: { userID: string, email: string }) {
@@ -148,6 +148,13 @@ export function trackOnboardingFinished(searchWindow?: electron.BrowserWindow) {
       appVersion,
       searchWindowWidth: searchWindow?.getSize()[0],
       searchWindowHeight: searchWindow?.getSize()[1],
+    },
+  });
+
+  client.identify({
+    anonymousId: anonymousID,
+    traits: {
+      finishedOnboardingAt: new Date(),
     },
   });
 }
@@ -256,6 +263,8 @@ export function trackSignInModalClosed(searchWindow?: electron.BrowserWindow) {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
@@ -437,8 +446,8 @@ export async function trackUpdateClicked(location: 'tray' | 'banner' | 'preferen
         platform,
         appVersion,
         location,
-      searchWindowWidth: searchWindow?.getSize()[0],
-      searchWindowHeight: searchWindow?.getSize()[1],
+        searchWindowWidth: searchWindow?.getSize()[0],
+        searchWindowHeight: searchWindow?.getSize()[1],
       },
     }).flush((error, data) => {
       if (error !== null) {
