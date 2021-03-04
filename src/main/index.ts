@@ -11,14 +11,18 @@ import tmp from 'tmp';
 import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 
+import isDev from './utils/isDev';
 // Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.
 // Top-level property 'productName' in the package.json overwrites top-level property 'name' as an app identifier.
 // At the same time, the 'productName' is required to be top-level by ToDesktop - we used 'productName' in a 'build' property before.
 // It still creates a directory on the original path, but this directory only contains an empty 'Dictionaries' directory.
 // This is an open electron issue https://github.com/electron/electron/issues/26039.
-app.setPath('userData', path.resolve(app.getPath('userData'), '..', 'com.foundrylabs.devbook'));
+if (isDev) {
+  app.setPath('userData', path.resolve(app.getPath('userData'), '..', 'com.foundrylabs.devbook.dev'));
+} else {
+  app.setPath('userData', path.resolve(app.getPath('userData'), '..', 'com.foundrylabs.devbook'));
+}
 
-import isDev from './utils/isDev';
 import {
   identifyUser,
   trackShowApp,
