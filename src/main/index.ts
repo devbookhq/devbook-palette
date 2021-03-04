@@ -133,6 +133,19 @@ async function restartAndUpdate(location: 'banner' | 'tray' | 'preferences') {
   }
 }
 
+function setOpenAtLogin(openAtLogin?: boolean) {
+  if (isDev) {
+    app.setLoginItemSettings({
+      openAtLogin: false,
+    });
+  } else {
+    app.setLoginItemSettings({
+      openAtLogin,
+      openAsHidden: true,
+    });
+  }
+}
+
 // Automatically delete temporary files after the application exit.
 tmp.setGracefulCleanup();
 
@@ -202,10 +215,7 @@ function openPreferences(page?: PreferencesPage) {
 
 const shouldOpenAtLogin = store.get('openAtLogin', true);
 
-app.setLoginItemSettings({
-  openAtLogin: shouldOpenAtLogin,
-  openAsHidden: true,
-});
+setOpenAtLogin(shouldOpenAtLogin);
 
 let isFirstRun = store.get('firstRun', true);
 
@@ -271,10 +281,7 @@ app.once('ready', async () => {
     onOpenAtLoginClick: () => {
       const currentVal = store.get('openAtLogin', true);
       store.set('openAtLogin', !currentVal);
-      app.setLoginItemSettings({
-        openAtLogin: !currentVal,
-        openAsHidden: true,
-      });
+      setOpenAtLogin(!currentVal);
       tray.setOpenAtLogin(!currentVal);
     },
     openPreferences: () => openPreferences(),
