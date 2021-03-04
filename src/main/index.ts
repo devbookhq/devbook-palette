@@ -10,6 +10,7 @@ import {
 import tmp from 'tmp';
 import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
+import AutoLaunch from 'auto-launch';
 
 import isDev from './utils/isDev';
 // Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.
@@ -58,6 +59,7 @@ import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
+import { platform } from 'os';
 
 toDesktop.init();
 
@@ -135,29 +137,42 @@ async function restartAndUpdate(location: 'banner' | 'tray' | 'preferences') {
   }
 }
 
+// Opening at system login
 const hiddenFlagName = '--hidden';
 
-function setOpenAtLogin(openAtLogin?: boolean) {
+async function setOpenAtLogin(openAtLogin?: boolean) {
   if (isDev) {
     app.setLoginItemSettings({
       openAtLogin: false,
     });
-  } else {
+  } else if (process.platform === 'win32' || process.platform === 'darwin') {
     app.setLoginItemSettings({
       openAtLogin,
       openAsHidden: true,
       args: [hiddenFlagName],
     });
+  } else if (process.platform === 'linux') {
+    const autoLauncher = new AutoLaunch({
+      name: 'com.foundrylabs.devbook',
+      // This adds the '--hidden' paramters when starting the app executable.
+      isHidden: true,
+      // Path to the AppImage cannot be retrieved from the app.getPath('exe'), so we are using a workaround.
+      path: process.env.APPIMAGE,
+    });
+    return openAtLogin ? autoLauncher.enable() : autoLauncher.disable();
   }
 }
 
-function getIsOpeningAtLogin() {
+function getIsOpeningHidden() {
   if (isDev) return false;
 
-  const shouldDarwinOpenHidden = app.getLoginItemSettings().wasOpenedAsHidden;
-  const shouldWin32OpenHidden = process.argv.includes(hiddenFlagName);
+  if (process.platform === 'darwin') {
+    return app.getLoginItemSettings().wasOpenedAsHidden;
+  }
 
-  return shouldDarwinOpenHidden || shouldWin32OpenHidden;
+  if (process.platform === 'win32' || process.platform === 'linux') {
+    return process.argv.includes(hiddenFlagName);
+  }
 }
 
 // Automatically delete temporary files after the application exit.
@@ -316,7 +331,7 @@ app.once('ready', async () => {
 
     trackOnboardingStarted(mainWindow?.window);
   } else {
-    mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser, getIsOpeningAtLogin());
+    mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser, getIsOpeningHidden());
     mainWindow.isPinModeEnabled = isPinModeEnabled;
     mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
   }
@@ -562,4 +577,3 @@ ipcMain.on(IPCMessage.TrackCopyCodeSnippetStackOverflow, () => {
 ipcMain.on(IPCMessage.TrackCopyCodeSnippetDocs, () => {
   trackCopyCodeSnippetDocs(mainWindow?.window);
 });
-
