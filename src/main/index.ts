@@ -152,8 +152,8 @@ async function setOpenAtLogin(openAtLogin?: boolean) {
     });
   } else if (process.platform === 'linux') {
     const autoLauncher = new AutoLaunch({
-      name: 'com.foundrylabs.devbook',
-      // This adds the '--hidden' paramters when starting the app executable.
+      name: 'Devbook',
+      // This adds the '--hidden' parameter when starting the app executable on system login.
       isHidden: true,
       // Path to the AppImage cannot be retrieved from the app.getPath('exe'), so we are using a workaround.
       path: process.env.APPIMAGE || app.getPath('exe'),
