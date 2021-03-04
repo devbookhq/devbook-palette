@@ -15,10 +15,10 @@ import Home from 'Home';
 // Frameless window stops being draggable - this is the solution.
 const DragHeader = styled.div`
   position: absolute;
-  left: 0;
-  top: 0;
+  left: 5px;
+  top: 2px;
   height: 25px;
-  width: 100%;
+  width: calc(100% - 10px);
   background: transparent;
   -webkit-app-region: drag;
   -webkit-user-select: none;
