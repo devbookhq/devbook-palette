@@ -183,7 +183,7 @@ interface StackOverflowItemProps {
   onTitleClick: (e: any) => void;
 }
 
-function StackOverflowItem ({
+function StackOverflowItem({
   soResult,
   focusState,
   onHeaderClick,
@@ -260,7 +260,7 @@ function StackOverflowItem ({
 
       const codeCopyHotkeyEl = document.createElement('div');
       codeCopyHotkeyEl.classList.add('code-copy-hotkey');
-      codeCopyHotkeyEl.innerHTML = `Alt + Shift + ${idx+1}`;
+      codeCopyHotkeyEl.innerHTML = `Alt + Shift + ${idx + 1}`;
       codeCopyHotkeyEl.setAttribute('data-snippet', el.innerText);
       codeCopyHotkeyEl.setAttribute('data-snippet-idx', `${idx}`);
       codeCopyEl.appendChild(codeCopyHotkeyEl);
@@ -278,7 +278,7 @@ function StackOverflowItem ({
         const snippet = target.getAttribute('data-snippet');
         const idxString = target.getAttribute('data-snippet-idx');
         if (!idxString) {
-          console.error(`Could not get snippet element\'s idx`);
+          console.error(`Could not get snippet element's idx`);
           return;
         }
         const idx = parseInt(idxString, 10);
@@ -330,21 +330,20 @@ function StackOverflowItem ({
 
   useHotkeys(
     'alt+shift+1,alt+shift+2,alt+shift+3,alt+shift+4,alt+shift+5,alt+shift+6,alt+shift+7,alt+shift+8,alt+shift+9',
-    (event, handler) =>
-  {
-    event.preventDefault();
-    if (focusState === FocusState.None) return;
-    const num = parseInt(handler.shortcut.split('+').slice(-1)[0], 10); // 'shortcut' is a string 'ctrl+<num>'.
-    if (num-1 < codeSnippets.length) {
-        electron.clipboard.writeText(codeSnippets[num-1]);
-        const snippetEl = codeSnippetEls[num-1];
+    (event, handler) => {
+      event.preventDefault();
+      if (focusState === FocusState.None) return;
+      const num = parseInt(handler.shortcut.split('+').slice(-1)[0], 10); // 'shortcut' is a string 'ctrl+<num>'.
+      if (num - 1 < codeSnippets.length) {
+        electron.clipboard.writeText(codeSnippets[num - 1]);
+        const snippetEl = codeSnippetEls[num - 1];
         snippetEl.classList.add('highlight');
         setTimeout(() => {
           snippetEl.classList.remove('highlight');
         }, 180);
         trackCopyCodeSnippetStackOverflow();
-    }
-  }, { filter: () => true }, [focusState, codeSnippets]);
+      }
+    }, { filter: () => true }, [focusState, codeSnippets]);
 
   return (
     <Container
@@ -364,7 +363,7 @@ function StackOverflowItem ({
             }}
           />
           <ExternalLinkButton onClick={handleOpenExternalLinkButton}>
-            <ExternalLinkImg/>
+            <ExternalLinkImg />
           </ExternalLinkButton>
         </QuestionTitleWrapper>
 
