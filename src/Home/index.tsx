@@ -900,6 +900,7 @@ function Home() {
   const isUserSignedInWithOrWithoutMetadata = authInfo.state === AuthState.UserAndMetadataLoaded;
 
   const docPageSearchInputRef = useRef<HTMLInputElement>(null);
+  const searchResultsWrapperRef = useRef<HTMLDivElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
   const debouncedQuery = useDebounce(state.search.query.trim(), 400);
@@ -1363,15 +1364,33 @@ function Home() {
 
   // 'shift + up arrow' - navigate docs search results.
   useHotkeys('shift+up', () => {
-    const idx = state.results[activeFilter].focusedIdx.idx;
-    navigateSearchResultsUp(idx, activeFilter, false);
-  }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
+    // Emulate natural scrolling.
+    if (activeFilter === ResultsFilter.StackOverflow ||
+        activeFilter === ResultsFilter.GitHubCode
+        // Natural scrolling for docs is handled inside the DocPage component.
+    ) {
+      if (!searchResultsWrapperRef?.current) return;
+      const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
+      if (isModalOpened) return;
+
+      searchResultsWrapperRef.current.scrollBy(0, -15);
+    }
+  }, { filter: () => true }, [state.results, activeFilter, state.modalItem, state.isDocsFilterModalOpened]);
 
   // 'shift + down arrow' - navigate docs search results.
   useHotkeys('shift+down', () => {
-    const idx = state.results[activeFilter].focusedIdx.idx;
-    navigateSearchResultsDown(idx, activeFilter, false);
-  }, { filter: () => true }, [state.results, activeFilter, state.modalItem]);
+    // Emulate natural scrolling.
+    if (activeFilter === ResultsFilter.StackOverflow ||
+        activeFilter === ResultsFilter.GitHubCode
+        // Natural scrolling for docs is handled inside the DocPage component.
+    ) {
+      if (!searchResultsWrapperRef?.current) return;
+      const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
+      if (isModalOpened) return;
+
+      searchResultsWrapperRef.current.scrollBy(0, 15);
+    }
+  }, { filter: () => true }, [state.results, activeFilter, state.modalItem, state.isDocsFilterModalOpened]);
 
   // 'up arrow' hotkey - navigation.
   useHotkeys('up', (event) => {
@@ -1383,10 +1402,10 @@ function Home() {
       return;
     }
 
-    if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
-
-    event.preventDefault(); // This prevents natural scrolling using arrow keys.
     const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
+    if (!isModalOpened) {
+      event.preventDefault(); // This prevents natural scrolling using arrow keys.
+    }
     const idx = state.results[activeFilter].focusedIdx.idx;
     navigateSearchResultsUp(idx, activeFilter, isModalOpened);
   }, { filter: () => true }, [
@@ -1408,10 +1427,10 @@ function Home() {
       return;
     }
 
-    if (activeFilter === ResultsFilter.Docs) return; // The docs search filter uses 'cmd + arrow' for the search navigation.
-
-    event.preventDefault(); // This prevents natural scrolling using arrow keys.
     const isModalOpened = !!state.modalItem || state.isDocsFilterModalOpened;
+    if (!isModalOpened) {
+      event.preventDefault(); // This prevents natural scrolling using arrow keys.
+    }
     const idx = state.results[activeFilter].focusedIdx.idx;
     navigateSearchResultsDown(idx, activeFilter, isModalOpened);
   }, { filter: () => true }, [
@@ -1709,7 +1728,7 @@ function Home() {
         <SearchHeaderPanel
           value={state.search.query}
           placeholder="Search StackOverflow, code on GitHub, and docs"
-          onDebouncedChange={handleSearchInputChange}
+          onChange={handleSearchInputChange}
           activeFilter={activeFilter}
           onFilterSelect={f => setSearchFilter(f)}
           isLoading={isActiveFilterLoading}
@@ -1832,7 +1851,9 @@ function Home() {
           &&
           <>
             {(activeFilter === ResultsFilter.StackOverflow || activeFilter === ResultsFilter.GitHubCode) &&
-              <SearchResultsWrapper>
+              <SearchResultsWrapper
+                ref={searchResultsWrapperRef}
+              >
                 {activeFilter === ResultsFilter.StackOverflow
                   && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
                     <StackOverflowItem

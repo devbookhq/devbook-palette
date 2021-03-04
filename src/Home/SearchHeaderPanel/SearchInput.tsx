@@ -25,12 +25,12 @@ const Input = styled.input`
   }
 `;
 
-
 interface SearchInputProps {
   placeholder?: string;
-  onDebouncedChange: (value: string) => void;
+  onChange: (value: string) => void;
 
   initialValue: string;
+  value: string;
 
   inputRef: React.RefObject<HTMLInputElement>;
 
@@ -39,29 +39,21 @@ interface SearchInputProps {
   isDocsFilterModalOpened?: boolean;
 
   onInputFocusChange: (isFocused: boolean) => void;
-
-  value: string;
 }
 
 function SearchInput({
   placeholder,
   inputRef,
-  onDebouncedChange,
+  onChange,
   isModalOpened,
   initialValue,
   isSignInModalOpened,
   isDocsFilterModalOpened,
   onInputFocusChange,
-
-
   value,
 }: SearchInputProps) {
   const [inputState, setInputState] = useState({ value: '', isInitialized: false });
-  const trimmedValue = inputState.value.trim();
-  // const debouncedValue = useDebounce(trimmedValue, 400);
-
-
-  const debouncedValue = useDebounce(trimmedValue, 400);
+  const debouncedValue = useDebounce(inputState.value, 400);
 
   useEffect(() => {
     if (inputState.isInitialized) {
@@ -77,7 +69,7 @@ function SearchInput({
 
   useEffect(() => {
     if (inputState.isInitialized) {
-      onDebouncedChange(debouncedValue);
+      onChange(debouncedValue);
     }
   }, [debouncedValue]);
 
@@ -92,11 +84,17 @@ function SearchInput({
     // The default behavior is that cursor moves either to the start or to the end.
     // 38 - up arrow
     // 40 - down arrow
-    if (e.keyCode === 38 || e.keyCode === 40) e.preventDefault();
+    if (e.keyCode === 38 || e.keyCode === 40) {
+      e.preventDefault();
+      return;
+    }
   }
 
   useIPCRenderer('did-show-main-window', () => {
-    if (!isModalOpened) inputRef?.current?.focus();
+    if (!isModalOpened && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.setSelectionRange(0, 999999);
+    }
   });
 
   useEffect(() => {

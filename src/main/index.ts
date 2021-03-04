@@ -45,6 +45,8 @@ import {
   trackSelectHistoryQuery,
   trackUpdateClicked,
   trackUpdateCancelClicked,
+  trackCopyCodeSnippetStackOverflow,
+  trackCopyCodeSnippetDocs,
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
@@ -529,3 +531,12 @@ ipcMain.on(IPCMessage.TrackHideSearchHistory, () => {
 ipcMain.on(IPCMessage.TrackSelectHistoryQuery, () => {
   trackSelectHistoryQuery(mainWindow?.window);
 });
+
+ipcMain.on(IPCMessage.TrackCopyCodeSnippetStackOverflow, () => {
+  trackCopyCodeSnippetStackOverflow(mainWindow?.window);
+});
+
+ipcMain.on(IPCMessage.TrackCopyCodeSnippetDocs, () => {
+  trackCopyCodeSnippetDocs(mainWindow?.window);
+});
+

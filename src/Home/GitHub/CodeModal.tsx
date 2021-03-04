@@ -3,6 +3,7 @@ import React, {
   useRef,
 } from 'react';
 import styled from 'styled-components';
+import { useHotkeys } from 'react-hotkeys-hook';
 
 import { openLink } from 'mainCommunication';
 import useOnClickOutside from 'hooks/useOnClickOutside';
@@ -129,6 +130,18 @@ function CodeModal({
     const gitHubFileURL = firstPreview ? `${codeResult.fileURL}#L${firstPreview.startLine + 3}` : codeResult.fileURL;
     return openLink(gitHubFileURL);
   }
+
+  useHotkeys('up', () => {
+    if (modalRef?.current) {
+      modalRef.current.scrollBy(0, -15);
+    }
+  }, { filter: () => true }, [codeResult]);
+
+  useHotkeys('down', () => {
+    if (modalRef?.current) {
+      modalRef.current.scrollBy(0, 15);
+    }
+  }, { filter: () => true }, [codeResult]);
 
   return (
     <StyledModal

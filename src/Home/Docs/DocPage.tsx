@@ -729,7 +729,7 @@ function DocPage({
     }
   }
 
-  useHotkeys('up', () => {
+  useHotkeys('shift+up', () => {
     if (isSearchHistoryOpened || isSearchingInDocPage || isDocsFilterModalOpened) return;
 
     if (containerRef?.current) {
@@ -737,7 +737,7 @@ function DocPage({
     }
   }, { filter: () => true }, [isSearchHistoryOpened, isSearchingInDocPage, isDocsFilterModalOpened]);
 
-  useHotkeys('down', () => {
+  useHotkeys('shift+down', () => {
     if (isSearchHistoryOpened || isSearchingInDocPage || isDocsFilterModalOpened) return;
 
     if (containerRef?.current) {

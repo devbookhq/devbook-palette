@@ -21,7 +21,7 @@ const marginTop = 110;
 
 const StyledModal = styled(Modal)`
   position: relative;
-  bottom: 50px;
+  bottom: 43px;
   width: 100%;
   height: calc(100vh - ${marginTop}px);
   margin-top: ${marginTop}px;

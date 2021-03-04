@@ -18,7 +18,7 @@ import Loader from 'components/Loader';
 import { PreferencesPage } from 'Preferences';
 import { IPCMessage } from 'mainCommunication/ipc';
 
-import ResultsFiltersMenu, { ResultsFilter } from './ResultsFiltersMenu';
+import { ResultsFilter } from './ResultsFiltersMenu';
 import SearchInput from './SearchInput';
 
 import Hotkey, { Key } from '../HotkeysPanel/Hotkey';
@@ -48,12 +48,6 @@ const Menu = styled.div`
   display: flex;
   justify-content: flex-end;
   align-items: center;
-`;
-
-const MenuSection = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
 `;
 
 const PreferencesIcon = styled(preferencesIcon)`
@@ -128,8 +122,7 @@ const CloseIcon = styled(closeIcon)`
 
 const StyledLoader = styled(Loader)`
   position: relative;
-  right: 2px;
-`;
+  right: 2px; `;
 
 const SearchInputContainer = styled.div<{ isFocused?: boolean }>`
   min-height: 46px;
@@ -223,7 +216,8 @@ const HotkeyText = styled.div`
 interface SearchHeaderPanelProps {
   placeholder?: string;
   value: string;
-  onDebouncedChange: (value: string) => void;
+  //onDebouncedChange: (value: string) => void;
+  onChange: (value: string) => void;
 
   activeFilter: ResultsFilter;
   onFilterSelect: (f: ResultsFilter) => void;
@@ -239,7 +233,8 @@ interface SearchHeaderPanelProps {
 function SearchHeaderPanel({
   value,
   placeholder,
-  onDebouncedChange,
+  //onDebouncedChange,
+  onChange,
   activeFilter,
   onFilterSelect,
   isLoading,
@@ -328,7 +323,7 @@ function SearchHeaderPanel({
             initialValue={value}
             value={value}
             placeholder={placeholder}
-            onDebouncedChange={onDebouncedChange}
+            onChange={onChange}
             isModalOpened={isModalOpened}
             isSignInModalOpened={isSignInModalOpened}
             isDocsFilterModalOpened={isDocsFilterModalOpened}
@@ -405,71 +400,6 @@ function SearchHeaderPanel({
       }
     </Container>
   );
-
-  /*
-  return (
-    <>
-      <Container
-        onMouseDown={handleContentMouseDown}
-      >
-        <SearchInputContainer
-          isFocused={isInputFocused}
-        >
-          <SearchInput
-            inputRef={inputRef}
-            setIsInputFocused={setIsInputFocused}
-            initialValue={value}
-            placeholder={placeholder}
-            onDebouncedChange={onDebouncedChange}
-            isModalOpened={isModalOpened}
-            isSignInModalOpened={isSignInModalOpened}
-            isDocsFilterModalOpened={isDocsFilterModalOpened}
-          />
-          {isLoading && <StyledLoader />}
-        </SearchInputContainer>
-        <Menu>
-          <ResultsFiltersMenu
-            activeFilter={activeFilter}
-            onFilterSelect={onFilterSelect}
-          />
-          <MenuSection>
-            {isDev && <Dev>[dev build]</Dev>}
-            <PinWrapper>
-              <PinButton
-                isActive={isPinModeEnabled}
-                onClick={handlePinButtonClick}
-              >
-                {isPinModeEnabled ? 'Unpin' : 'Pin'} Devbook
-              </PinButton>
-              <Hotkey
-                hotkey={electron.remote.process.platform === 'darwin'
-                  ? [Key.Command, Key.Shift, 'P']
-                  : ['Alt', Key.Shift, 'P']
-                }
-              />
-            </PinWrapper>
-            <PreferencesButton onClick={() => openPreferences(PreferencesPage.General)}>
-              <PreferencesIcon />
-            </PreferencesButton>
-          </MenuSection>
-        </Menu>
-        {isUpdateAvailable && isUpdatePanelOpened &&
-          <UpdatePanel>
-            <Disclaimer onClick={handleUpdate}>
-              {'New version is available. Click here to update & restart.'}
-            </Disclaimer>
-            <CancelButton
-              onClick={handleCloseUpdatePanel}
-            >
-              <CloseIcon />
-            </CancelButton>
-          </UpdatePanel>
-        }
-      </Container>
-      <SearchHistory/>
-    </>
-  );
-  */
 }
 
 export { ResultsFilter };

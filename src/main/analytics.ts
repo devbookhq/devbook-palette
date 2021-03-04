@@ -40,6 +40,11 @@ enum AnalyticsEvent {
 
   UpdateClicked = 'Update clicked',
   UpdateCancelClicked = 'Update cancel clicked',
+
+  CopyCodeSnippetStackOverflow = 'Copy code snippet from Stack Overflow answer',
+  CopyCodeSnippetDocs = 'Copy code snippet from docs',
+
+  OpenDocsFilter = 'Open documentation filter',
 }
 
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
@@ -81,7 +86,7 @@ export function identifyUser(searchWindow?: electron.BrowserWindow) {
         currentSearchWindowHeight: searchWindow?.getSize()[1],
       },
     });
-  } 
+  }
 }
 
 export function changeAnalyticsUser(searchWindow?: electron.BrowserWindow, user?: { userID: string, email: string }) {
@@ -256,6 +261,8 @@ export function trackSignInModalClosed(searchWindow?: electron.BrowserWindow) {
       isSignedIn,
       platform,
       appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
     },
   });
 }
@@ -440,7 +447,7 @@ export async function trackUpdateClicked(location: 'tray' | 'banner' | 'preferen
       searchWindowWidth: searchWindow?.getSize()[0],
       searchWindowHeight: searchWindow?.getSize()[1],
       },
-    }).flush((error, data) => {
+    }).flush((error) => {
       if (error !== null) {
         return reject(error);
       } else {
@@ -449,6 +456,7 @@ export async function trackUpdateClicked(location: 'tray' | 'banner' | 'preferen
     });
   });
 }
+
 export function trackUpdateCancelClicked(location: 'banner', searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.UpdateCancelClicked,
@@ -464,3 +472,34 @@ export function trackUpdateCancelClicked(location: 'banner', searchWindow?: elec
     },
   });
 }
+
+export function trackCopyCodeSnippetStackOverflow(searchWindow?: electron.BrowserWindow) {
+  client.track({
+    event: AnalyticsEvent.CopyCodeSnippetStackOverflow,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
+    },
+  });
+}
+
+export function trackCopyCodeSnippetDocs(searchWindow?: electron.BrowserWindow) {
+  client.track({
+    event: AnalyticsEvent.CopyCodeSnippetDocs,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
+    },
+  });
+}
+
