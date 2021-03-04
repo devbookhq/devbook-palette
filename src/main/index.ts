@@ -133,6 +133,8 @@ async function restartAndUpdate(location: 'banner' | 'tray' | 'preferences') {
   }
 }
 
+const hiddenFlagName = '--hidden';
+
 function setOpenAtLogin(openAtLogin?: boolean) {
   if (isDev) {
     app.setLoginItemSettings({
@@ -142,8 +144,18 @@ function setOpenAtLogin(openAtLogin?: boolean) {
     app.setLoginItemSettings({
       openAtLogin,
       openAsHidden: true,
+      args: [hiddenFlagName],
     });
   }
+}
+
+function getIsOpeningAtLogin() {
+  if (isDev) return false;
+
+  const shouldDarwinOpenHidden = app.getLoginItemSettings().wasOpenedAsHidden;
+  const shouldWin32OpenHidden = process.argv.includes(hiddenFlagName);
+
+  return shouldDarwinOpenHidden || shouldWin32OpenHidden;
 }
 
 // Automatically delete temporary files after the application exit.
@@ -302,7 +314,7 @@ app.once('ready', async () => {
 
     trackOnboardingStarted(mainWindow?.window);
   } else {
-    mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser, app.getLoginItemSettings().wasOpenedAsHidden);
+    mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser, getIsOpeningAtLogin());
     mainWindow.isPinModeEnabled = isPinModeEnabled;
     mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
   }
