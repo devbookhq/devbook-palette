@@ -1,14 +1,14 @@
 {
-  "name": "com.foundrylabs.devbook",
+  "name": "devbook",
   "description": "Search engine for developers",
   "version": "0.1.11",
   "private": true,
+  "homepage": ".",
   "author": {
     "name": "FoundryLabs, Inc.",
     "email": "hello@usedevbook.com",
     "url": "https://usedevbook.com"
   },
-  "homepage": ".",
   "main": "build/main",
   "productName": "Devbook",
   "eslintConfig": {
