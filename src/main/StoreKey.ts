@@ -11,4 +11,5 @@ export enum StoreKey {
   MainWinSize = 'mainWinSize',
   MainWinPosition = 'mainWinPosition',
   RefreshToken = 'refreshToken',
+  BoardLayout = 'boardLayout',
 }

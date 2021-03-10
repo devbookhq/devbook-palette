@@ -1,7 +1,30 @@
-import { makeAutoObservable } from 'mobx';
-import RootStore, { useRootStore } from 'newsrc/App/RootStore';
+import { IReactionDisposer, makeAutoObservable, reaction } from 'mobx';
 // TODO: Load treeify only in a dev mode.
 import treeify from 'treeify';
+
+import RootStore, { useRootStore } from 'newsrc/App/RootStore';
+import LocalCacheLayer from 'newsrc/layers/cache/localCacheLayer';
+
+export enum SplitDirection {
+  Vertical = 'Vertical',
+  Horizontal = 'Horizontal',
+}
+
+export interface TileNodeJSON {
+  key: string;
+  parentKey: string;
+  size: number | undefined;
+}
+
+export interface SplitNodeJSON {
+  key: string;
+  parentKey: string;
+  direction: SplitDirection;
+  size: number | undefined;
+  children: (TileNodeJSON | SplitNodeJSON)[];
+}
+
+export type BoardLayoutJSON = TileNodeJSON | SplitNodeJSON;
 
 export function useBoardStore() {
   const { boardStore } = useRootStore();
@@ -10,16 +33,37 @@ export function useBoardStore() {
 
 export default class BoardStore {
   layoutRoot: LayoutNode;
+  layoutAutosaveHandler: IReactionDisposer;
+  localCacheLayer = new LocalCacheLayer();
+
+  get asJSON() {
+    return {
+      layout: this.layoutRoot.asJSON,
+    };
+  }
 
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
       rootStore: false,
+      layoutAutosaveHandler: false,
+      localCacheLayer: false,
+      dispose: false,
     });
 
-    const s1 = new SplitNode(SplitDirection.Vertical, new TileNode(), new TileNode());
-    this.layoutRoot = s1;
+    const layoutJSON = this.localCacheLayer.loadBoardLayout();
+    if (layoutJSON) {
+      if (layoutJSON.key.startsWith('tile_')) {
+        this.layoutRoot = TileNode.loadFromJSON(layoutJSON as TileNodeJSON);
+      } else {
+        this.layoutRoot = SplitNode.loadFromJSON(layoutJSON as SplitNodeJSON);
+      }
+    } else {
+      this.layoutRoot = new TileNode();
+    }
 
-    this.printLayout();
+    this.layoutAutosaveHandler = reaction(() => this.layoutRoot.asJSON, serializedLayout => {
+      this.localCacheLayer.saveBoardLayout(serializedLayout);
+    });
   }
 
   splitTile(dir: SplitDirection, tileNode: TileNode) {
@@ -27,7 +71,7 @@ export default class BoardStore {
     // If the tile node is the root node it doesn't have a parent.
     // Just set the new split is the new root.
     if (!tileNode.parentKey) {
-      const split = new SplitNode(dir, tileNode, new TileNode());
+      const split = new SplitNode(dir, [tileNode, new TileNode()]);
       this.layoutRoot = split;
     } else {
       // If 'tileNode' isn't the root, replace it in the tree with a new split node.
@@ -38,7 +82,11 @@ export default class BoardStore {
       if (!(parent instanceof SplitNode))
         throw new Error(`Cannot split tile - tile's parent isn't an instance of 'SplitNode'.`);
 
-      const split = new SplitNode(dir, tileNode, new TileNode());
+      // By resetting tile's size we prevent that the wrong initial size is passed to
+      // the splitter.
+      tileNode.size = undefined;
+
+      const split = new SplitNode(dir, [tileNode, new TileNode()]);
       parent.swap(tileNode, split);
     }
 
@@ -49,6 +97,7 @@ export default class BoardStore {
     // Splits with a single child aren't allowed!
     this.printLayout(`Tree before removing '${tile.key}' tile:\n`);
 
+    console.log('tile.parentKey', tile.parentKey);
     const parent = this.getNode(tile.parentKey);
     if (!parent)
       throw new Error(`Cannot remove tile - tile's parent is undefined.`);
@@ -74,6 +123,10 @@ export default class BoardStore {
             ? []
             : parent.children.slice(tileIdx+1)
         );
+
+      // By resetting tile's size we prevent that the wrong initial size is passed to
+      // the splitter.
+      parent.children.forEach(c => c.size = undefined);
     } else {
       // The parent has exactly 2 children.
       //
@@ -93,8 +146,13 @@ export default class BoardStore {
         //
         //
         const sibling = parent.children.filter(c => c.key !== tile.key)[0]; // This is the 'N_2' in the example above.
+
+        // Reset the size so the wrong value isn't passed to splitter.
+        sibling.size = undefined;
+
         this.layoutRoot = sibling;
         sibling.parentKey = '';
+
         parent.dispose();
       } else {
         // The parent has its own parent (a grandparent from the tile's point of view).
@@ -120,6 +178,10 @@ export default class BoardStore {
 
         grandparent.swap(parent, sibling);
         parent.dispose();
+
+        // By resetting tile's size we prevent that the wrong initial size is passed to
+        // the splitter.
+        grandparent.children.forEach(c => c.size = undefined);
       }
     }
     this.printLayout(`Tree after removing tile '${tile.key}':\n`);
@@ -144,26 +206,30 @@ export default class BoardStore {
     if (msg) console.log(msg);
     console.log(treeify.asTree(this.layoutRoot as any, true, true));
   }
+
+  dispose() {
+    this.layoutAutosaveHandler();
+  }
 }
 
 export type LayoutNode = TileNode | SplitNode;
 
-// String values are there for better debugging.
-export enum SplitDirection {
-  Vertical = 'Vertical',
-  Horizontal = 'Horizontal',
-}
 
 function getID() {
   return Math.random().toString(36).substr(2, 5);
 }
 
-export class TileNode {
-  readonly key = 'tile_' + getID();
-  _parentKey  = '';
 
-  constructor() {
-    makeAutoObservable(this);
+export class TileNode {
+  key: string;
+  _parentKey = '';
+  size: number | undefined = undefined;
+
+  constructor(key?: string) {
+    makeAutoObservable(this, {
+      key: false,
+    });
+    this.key = key ?? 'tile_' + getID();
   }
 
   set parentKey(key: string) {
@@ -172,18 +238,37 @@ export class TileNode {
 
   get parentKey() {
      return this._parentKey;
+  }
+
+  get asJSON() {
+    return {
+      key: this.key,
+      parentKey: this._parentKey,
+      size: this.size,
+    } as TileNodeJSON;
+  }
+
+  static loadFromJSON(json: TileNodeJSON) {
+    const t = new TileNode(json.key);
+    t._parentKey = json.parentKey;
+    t.size = json.size;
+    return t;
   }
 }
 
 export class SplitNode {
-  readonly key = 'split_' + getID();
+  key: string;
   _parentKey: string = '';
   children: LayoutNode[] = [];
+  size: number | undefined = undefined;
 
-  constructor(public direction: SplitDirection, left: LayoutNode, right: LayoutNode) {
-    makeAutoObservable(this);
-    this.addChild(left);
-    this.addChild(right);
+  constructor(public direction: SplitDirection, children: LayoutNode[], key?: string) {
+    makeAutoObservable(this, {
+      key: false,
+      dispose: false,
+    });
+    this.key = key ?? 'split_' + getID();
+    children.forEach(c => this.addChild(c));
   }
 
   set parentKey(key: string) {
@@ -192,6 +277,33 @@ export class SplitNode {
 
   get parentKey() {
      return this._parentKey;
+  }
+
+  get asJSON() {
+    const serializedChildren: any = this.children.map(c => {
+      return c.asJSON;
+    });
+    return {
+      key: this.key,
+      parentKey: this._parentKey,
+      direction: this.direction,
+      size: this.size,
+      children: serializedChildren,
+    } as SplitNodeJSON;
+  }
+
+  static loadFromJSON(json: SplitNodeJSON) {
+    const children: LayoutNode[] = json.children.map(c => {
+      if (c.key.startsWith('tile_')) {
+        return TileNode.loadFromJSON(c as TileNodeJSON);
+      }
+      return SplitNode.loadFromJSON(c as SplitNodeJSON);
+    });
+
+    const s = new SplitNode(json.direction, children, json.key);
+    s._parentKey = json.parentKey;
+    s.size = json.size;
+    return s;
   }
 
   getChildren() {
@@ -250,7 +362,6 @@ export class SplitNode {
       this.children[swapIdx] = newNode;
     }
   }
-
 
   dispose() {
     this.children = [];

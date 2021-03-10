@@ -10,11 +10,12 @@ import {
   handleGetAuthFromMainWindow,
 } from './user.ipc';
 import RootStore, { useRootStore } from 'newsrc/App/RootStore';
+import LocalCacheLayer from 'newsrc/layers/cache/localCacheLayer';
+import AuthenticationLayer from 'newsrc/layers/authenticationLayer';
+
 import { AuthInfo } from './authInfo';
 import { AuthState } from './authState';
 import { AuthError } from './authError';
-import LocalStorageLayer from '../layers/localStorageLayer';
-import AuthenticationLayer from '../layers/authenticationLayer';
 
 export function useUserStore() {
   return useRootStore().userStore;
@@ -22,7 +23,7 @@ export function useUserStore() {
 
 class UserStore {
   readonly _authenticationLayer = new AuthenticationLayer();
-  readonly _localStorageLayer = new LocalStorageLayer();
+  readonly _localCacheLayer = new LocalCacheLayer();
   readonly _auth: AuthInfo = { state: AuthState.NoUser, error: undefined, user: undefined };
 
   get isLoading() {
@@ -51,8 +52,8 @@ class UserStore {
     makeAutoObservable(this, {
       _rootStore: false,
       _authenticationLayer: false,
-      _localStorageLayer: false,
-    });
+      _localCacheLayer: false,
+    });    
 
     autorun(() => {
       console.log('Authentication:', this.auth);
@@ -89,8 +90,8 @@ class UserStore {
   async signOut() {
     if (this.isLoading) return;
     this.updateAuthEverywhere({ state: AuthState.SigningOutUser, user: this.user });
-    const refreshToken = await this._localStorageLayer.loadRefreshToken();
-    await this._localStorageLayer.deleteRefreshToken();
+    const refreshToken = await this._localCacheLayer.loadRefreshToken();
+    await this._localCacheLayer.deleteRefreshToken();
     this.updateAuthEverywhere({ state: AuthState.NoUser });
     return this._authenticationLayer.signOut(refreshToken);
   }
@@ -105,7 +106,7 @@ class UserStore {
     this.updateAuthEverywhere({ state: AuthState.SigningInUser });
     try {
       const { refreshToken, user } = await this._authenticationLayer.signIn(email);
-      await this._localStorageLayer.saveRefreshToken(refreshToken);
+      await this._localCacheLayer.saveRefreshToken(refreshToken);
       this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
     } catch (error) {
       this.updateAuthEverywhere({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
@@ -116,17 +117,17 @@ class UserStore {
     if (this.isLoading) return;
     this.updateAuthEverywhere({ state: AuthState.LookingForStoredUser });
     try {
-      const oldRefreshToken = await this._localStorageLayer.loadRefreshToken();
+      const oldRefreshToken = await this._localCacheLayer.loadRefreshToken();
 
       if (!oldRefreshToken) {
         const { refreshToken, user } = await this._authenticationLayer.restoreUserSession();
-        await this._localStorageLayer.saveRefreshToken(refreshToken);
+        await this._localCacheLayer.saveRefreshToken(refreshToken);
         this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
         return;
       }
 
       const { refreshToken, user } = await this._authenticationLayer.refreshAccessToken(oldRefreshToken);
-      await this._localStorageLayer.saveRefreshToken(refreshToken);
+      await this._localCacheLayer.saveRefreshToken(refreshToken);
       this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
     } catch (error) {
       this.updateAuthEverywhere({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
