@@ -32,8 +32,7 @@ const Split = observer(({ splitNode }: SplitProps) => {
     setTileSizes(sizes);
   }, [splitNode.children]);
 
-  const handleDidResizeSplit = useCallback((pairIdx, newSizes) => {
-    console.log('Pair idx, new sizes', pairIdx, newSizes);
+  const handleDidResizeSplit = useCallback((_, newSizes) => {
     setTileSizes(newSizes);
     splitNode.children.forEach((c, idx) => c.size = newSizes[idx]);
   }, [splitNode.children]);
@@ -41,7 +40,6 @@ const Split = observer(({ splitNode }: SplitProps) => {
   return (
     <ReactSplit
       direction={direction}
-      //initialSizes={splitNode.children.flatMap(c => [c.size])}
       onDidResize={handleDidResizeSplit}
       initialSizes={tileSizes}
     >
