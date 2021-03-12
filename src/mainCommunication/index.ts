@@ -88,6 +88,8 @@ export function saveSearchFilter(filter: ResultsFilter) {
 
 export function trackSearch(searchInfo: {
   activeFilter: string,
+  query: string,
+  activeDocSource?: DocSource,
 }) {
   electron.ipcRenderer.send('track-search', searchInfo);
 }

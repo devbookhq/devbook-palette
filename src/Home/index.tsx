@@ -1697,6 +1697,8 @@ function Home() {
 
     trackSearch({
       activeFilter: activeFilter.toString(),
+      query: debouncedQuery,
+      activeDocSource: state.activeDocSource,
     });
     // TODO WARNING - Don't include 'searchAll' in the deps array
     // otherwise an infinite cycle will start. Why?
