@@ -14,17 +14,9 @@ import {
   AnswerType,
 } from 'search/stackOverflow';
 import Modal from 'components/Modal';
-
-import StackOverflowBody from './StackOverflowBody';
-
 import StackOverflowModalHotkeysPanel from 'Home/HotkeysPanel/StackOverflow/ModalHotkeysPanel';
 
-const HotkeysPanel = styled(StackOverflowModalHotkeysPanel)`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  left: 0;
-`;
+import StackOverflowBody from './StackOverflowBody';
 
 const marginTop = 67;
 
@@ -246,7 +238,6 @@ function StackOverflowModal({
   }, { filter: () => true }, [soResult.answers]);
 
   return (
-    <>
     <StyledModal
       onCloseRequest={onCloseRequest}
       ref={modalRef}
@@ -300,12 +291,12 @@ function StackOverflowModal({
           ))}
         </Answers>
       </ScrollingContent>
-      <HotkeysPanel
+
+      <StackOverflowModalHotkeysPanel
         onOpenInBrowserClick={onOpenInBrowserClick}
         onCloseClick={onCloseRequest}
       />
     </StyledModal>
-    </>
   );
 }
 export default StackOverflowModal;

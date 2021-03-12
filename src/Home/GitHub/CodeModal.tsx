@@ -12,16 +12,17 @@ import {
   FilePreview,
 } from 'search/gitHub';
 import Modal from 'components/Modal';
+import GitHubCodeModalHotkeysPanel from 'Home/HotkeysPanel/GitHubCode/ModalHotkeysPanel';
 import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 
 import Code from './Code';
 
-const marginTop = 110;
+const marginTop = 100;
 const headerHeight = 63;
 
 const StyledModal = styled(Modal)`
   position: relative;
-  bottom: 50px;
+  bottom: 38px;
   width: 100%;
   height: calc(100vh - ${marginTop}px);
   margin-top: ${marginTop}px;
@@ -111,11 +112,15 @@ const ExternalLinkImg = styled(externalLinkImg)`
 interface CodeModalProps {
   codeResult: CodeResult;
   onCloseRequest: () => void;
+  onOpenInVSCodeClick: (e: any) => void,
+  onOpenInBrowserClick: (e: any) => void,
 }
 
 function CodeModal({
   codeResult,
   onCloseRequest,
+  onOpenInVSCodeClick,
+  onOpenInBrowserClick,
 }: CodeModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const [filePreview] = useState<FilePreview>({
@@ -166,6 +171,12 @@ function CodeModal({
       <StyledCode
         filePreview={filePreview}
         isInModal
+      />
+
+      <GitHubCodeModalHotkeysPanel
+        onOpenInVSCodeClick={onOpenInVSCodeClick}
+        onOpenInBrowserClick={onOpenInBrowserClick}
+        onCloseClick={onCloseRequest}
       />
     </StyledModal>
   );

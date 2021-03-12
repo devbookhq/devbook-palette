@@ -63,13 +63,11 @@ export interface HotkeyWithText {
 interface HotkeysPanelProps {
   hotkeysLeft: HotkeyWithText[];
   hotkeysRight: HotkeyWithText[];
-  className?: string;
 }
 
 function HotkeysPanel({
   hotkeysLeft,
   hotkeysRight,
-  className,
 }: HotkeysPanelProps) {
   function renderHotkey(h: HotkeyWithText) {
     function handleOnClick() {
@@ -103,9 +101,7 @@ function HotkeysPanel({
   }
 
   return (
-    <Container
-      className={className}
-    >
+    <Container>
       <Section>
         {hotkeysLeft.map(h => renderHotkey(h))}
       </Section>

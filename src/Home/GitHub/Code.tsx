@@ -10,6 +10,7 @@ import theme from 'prism-react-renderer/themes/nightOwl';
 import { FilePreview } from 'search/gitHub';
 
 theme.plain.backgroundColor = '#1C1B26';
+theme.plain.margin = '0';
 
 const Container = styled.div`
   width: 100%;

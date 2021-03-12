@@ -1699,6 +1699,8 @@ function Home() {
         <CodeModal
           codeResult={state.modalItem as CodeResult}
           onCloseRequest={closeModal}
+          onOpenInBrowserClick={openFocusedGitHubCodeItemInBrowser}
+          onOpenInVSCodeClick={openFocusedGitHubCodeItemInVSCode}
         />
       }
 
@@ -1929,7 +1931,7 @@ function Home() {
               </DocsWrapper>
             }
 
-            {/* StackOverflow search results + StackOverflow modal hotkeys */}
+            {/* StackOverflow search results hotkeys */}
             {!state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
               <StackOverflowSearchHotkeysPanel
                 onOpenClick={() => openModal(activeFocusedItem)}
@@ -1948,7 +1950,7 @@ function Home() {
             }
             {/*-------------------------------------------------------------*/}
 
-            {/* GitHub search results + GitHub modal hotkeys */}
+            {/* GitHub search results hotkeys */}
             {!state.modalItem
               && activeFilter === ResultsFilter.GitHubCode
               && state.gitHubAccount.isConnected
@@ -1967,13 +1969,6 @@ function Home() {
                   ResultsFilter.GitHubCode,
                   false,
                 )}
-              />
-            }
-            {state.modalItem && activeFilter === ResultsFilter.GitHubCode &&
-              <GitHubCodeModalHotkeysPanel
-                onOpenInVSCodeClick={openFocusedGitHubCodeItemInVSCode}
-                onOpenInBrowserClick={openFocusedGitHubCodeItemInBrowser}
-                onCloseClick={closeModal}
               />
             }
             {/*-------------------------------------------------------------*/}
