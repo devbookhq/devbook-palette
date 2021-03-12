@@ -1183,6 +1183,7 @@ function Home() {
   const openFocusedSOItemInBrowser = useCallback(() => {
     const idx = state.results[ResultsFilter.StackOverflow].focusedIdx.idx;
     const item = state.results[ResultsFilter.StackOverflow].items[idx] as StackOverflowResult;
+    console.log('OPEN IN BROWSER', item);
     if (item) openLink(item.question.link);
   }, [state.results]);
 
@@ -1689,6 +1690,7 @@ function Home() {
       {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
         <StackOverflowModal
           soResult={state.modalItem as StackOverflowResult}
+          onOpenInBrowserClick={openFocusedSOItemInBrowser}
           onCloseRequest={closeModal}
         />
       }
@@ -1942,12 +1944,6 @@ function Home() {
                   ResultsFilter.StackOverflow,
                   false,
                 )}
-              />
-            }
-            {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
-              <StackOverflowModalHotkeysPanel
-                onOpenInBrowserClick={openFocusedSOItemInBrowser}
-                onCloseClick={closeModal}
               />
             }
             {/*-------------------------------------------------------------*/}

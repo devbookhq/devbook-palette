@@ -63,9 +63,14 @@ export interface HotkeyWithText {
 interface HotkeysPanelProps {
   hotkeysLeft: HotkeyWithText[];
   hotkeysRight: HotkeyWithText[];
+  className?: string;
 }
 
-function HotkeysPanel({ hotkeysLeft, hotkeysRight }: HotkeysPanelProps) {
+function HotkeysPanel({
+  hotkeysLeft,
+  hotkeysRight,
+  className,
+}: HotkeysPanelProps) {
   function renderHotkey(h: HotkeyWithText) {
     function handleOnClick() {
       (h as any).onClick?.();
@@ -98,7 +103,9 @@ function HotkeysPanel({ hotkeysLeft, hotkeysRight }: HotkeysPanelProps) {
   }
 
   return (
-    <Container>
+    <Container
+      className={className}
+    >
       <Section>
         {hotkeysLeft.map(h => renderHotkey(h))}
       </Section>

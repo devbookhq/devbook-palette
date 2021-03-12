@@ -17,22 +17,38 @@ import Modal from 'components/Modal';
 
 import StackOverflowBody from './StackOverflowBody';
 
-const marginTop = 110;
+import StackOverflowModalHotkeysPanel from 'Home/HotkeysPanel/StackOverflow/ModalHotkeysPanel';
+
+const HotkeysPanel = styled(StackOverflowModalHotkeysPanel)`
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+`;
+
+const marginTop = 67;
 
 const StyledModal = styled(Modal)`
   position: relative;
-  bottom: 43px;
+  bottom: 0px;
   width: 100%;
   height: calc(100vh - ${marginTop}px);
   margin-top: ${marginTop}px;
-  padding: 10px;
 
   display: flex;
   flex-direction: column;
 
-  overflow-y: auto;
+  overflow: hidden;
   background: #1C1B26;
   border-radius: 5px 5px 0 0;
+`;
+
+const ScrollingContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+
+  overflow-y: auto;
 `;
 
 const Question = styled.div`
@@ -163,13 +179,16 @@ const AnswersHeading = styled.span`
 interface StackOverflowModalProps {
   soResult: StackOverflowResult;
   onCloseRequest: () => void;
+  onOpenInBrowserClick: (e: any) => void,
 }
 
 function StackOverflowModal({
   soResult,
   onCloseRequest,
+  onOpenInBrowserClick,
 }: StackOverflowModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const [sortedAnswers, setSortedAnswers] = useState<StackOverflowAnswer[]>([]);
   const [mostUpvotedIdx, setMostUpvotedIdx] = useState(-1);
@@ -215,68 +234,78 @@ function StackOverflowModal({
   }, [soResult.answers]);
 
   useHotkeys('up', () => {
-    if (modalRef?.current) {
-      modalRef.current.scrollBy(0, -15);
+    if (contentRef?.current) {
+      contentRef.current.scrollBy(0, -15);
     }
   }, { filter: () => true }, [soResult.answers]);
 
   useHotkeys('down', () => {
-    if (modalRef?.current) {
-      modalRef.current.scrollBy(0, 15);
+    if (contentRef?.current) {
+      contentRef.current.scrollBy(0, 15);
     }
   }, { filter: () => true }, [soResult.answers]);
 
   return (
+    <>
     <StyledModal
       onCloseRequest={onCloseRequest}
       ref={modalRef}
       tabIndex={0}
     >
-      <Question>
-        <Header>
-          <QuestionTitle
-            href={soResult.question.link}
-            onClick={handleQuestionTitleClick}
-            dangerouslySetInnerHTML={{
-              __html: soResult.question.title,
-            }}
-          />
-          <QuestionMetadata>
-            <QuestionVotes>{soResult.question.votes} Upvotes</QuestionVotes>
-            <QuestionDate>{getDateString(soResult.question.timestamp * 1000)}</QuestionDate>
-          </QuestionMetadata>
-        </Header>
-
-        <QuestionBody
-          html={soResult.question.html}
-        />
-      </Question>
-
-      <AnswersHeading>Answers</AnswersHeading>
-      <Answers>
-        {sortedAnswers.map((a, idx) => (
-          <Answer
-            key={idx}
-          >
-            <AnswerMetadata>
-              {a.isAccepted &&
-                <AnswerTag>{AnswerType.Accepted}</AnswerTag>
-              }
-              {mostUpvotedIdx === idx &&
-                <AnswerTag>{AnswerType.MostUpvoted}</AnswerTag>
-              }
-              <AnswerVotes>{a.votes} {a.votes === 1 || a.votes === -1 ? 'Upvote' : 'Upvotes'}</AnswerVotes>
-              <AnswerDate>{getDateString(a.timestamp * 1000)}</AnswerDate>
-            </AnswerMetadata>
-
-            <AnswerBody
-              // tabIndex={0}
-              html={a.html}
+      <ScrollingContent
+        ref={contentRef}
+      >
+        <Question>
+          <Header>
+            <QuestionTitle
+              href={soResult.question.link}
+              onClick={handleQuestionTitleClick}
+              dangerouslySetInnerHTML={{
+                __html: soResult.question.title,
+              }}
             />
-          </Answer>
-        ))}
-      </Answers>
+            <QuestionMetadata>
+              <QuestionVotes>{soResult.question.votes} Upvotes</QuestionVotes>
+              <QuestionDate>{getDateString(soResult.question.timestamp * 1000)}</QuestionDate>
+            </QuestionMetadata>
+          </Header>
+
+          <QuestionBody
+            html={soResult.question.html}
+          />
+        </Question>
+
+        <AnswersHeading>Answers</AnswersHeading>
+        <Answers>
+          {sortedAnswers.map((a, idx) => (
+            <Answer
+              key={idx}
+            >
+              <AnswerMetadata>
+                {a.isAccepted &&
+                  <AnswerTag>{AnswerType.Accepted}</AnswerTag>
+                }
+                {mostUpvotedIdx === idx &&
+                  <AnswerTag>{AnswerType.MostUpvoted}</AnswerTag>
+                }
+                <AnswerVotes>{a.votes} {a.votes === 1 || a.votes === -1 ? 'Upvote' : 'Upvotes'}</AnswerVotes>
+                <AnswerDate>{getDateString(a.timestamp * 1000)}</AnswerDate>
+              </AnswerMetadata>
+
+              <AnswerBody
+                // tabIndex={0}
+                html={a.html}
+              />
+            </Answer>
+          ))}
+        </Answers>
+      </ScrollingContent>
+      <HotkeysPanel
+        onOpenInBrowserClick={onOpenInBrowserClick}
+        onCloseClick={onCloseRequest}
+      />
     </StyledModal>
+    </>
   );
 }
 export default StackOverflowModal;
