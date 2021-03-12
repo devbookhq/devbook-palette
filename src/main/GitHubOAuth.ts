@@ -27,7 +27,7 @@ class GitHubOAuth {
     let resolveHandle: (reason?: any) => void;
     let isCancelled = false;
 
-    const cancelableGetAccessToken = new Promise<void>(async (resolve, reject) => {
+    const cancelableGetAccessToken = new Promise<void>(async (resolve) => {
       resolveHandle = resolve;
 
       let accessToken: string | undefined = undefined;
@@ -50,7 +50,6 @@ class GitHubOAuth {
 
         } catch (error) {
           if (error.response?.status !== 503) {
-            console.error(error.message);
             this.emitter.emit('error', { error: 'Could not connect GitHub' });
             return;
           }
@@ -62,7 +61,7 @@ class GitHubOAuth {
         try {
           return axios.delete(`${BASE_URL}/github/oauth/accessToken/${sessionID}`);
         } catch (error) {
-          console.error(error.message);
+          this.emitter.emit('error', { error: error.message });
         }
       }
 

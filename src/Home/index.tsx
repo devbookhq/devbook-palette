@@ -119,6 +119,11 @@ const GitHubConnectTitle = styled(InfoMessage)`
   margin: 0;
 `;
 
+const GitHubError = styled.div`
+  margin: 16px 0;
+  color: #F44444;
+`;
+
 const SignInButton = styled(Button)`
   margin-top: 30px;
   padding: 10px 20px;
@@ -250,6 +255,7 @@ enum ReducerActionType {
   ConnectingGitHubSuccess,
   ConnectingGitHubFail,
   DisconnectGitHubAccount,
+  SetGitHubError,
 
   SetDocSearchResultsDefaultWidth,
   CacheDocSearchResultsWidth,
@@ -362,6 +368,11 @@ interface ConnectingGitHubFail {
   };
 }
 
+interface SetGitHubError {
+  type: ReducerActionType.SetGitHubError;
+  payload: { message: string };
+}
+
 interface DisconnectGitHubAccount {
   type: ReducerActionType.DisconnectGitHubAccount;
 }
@@ -462,6 +473,7 @@ type ReducerAction = SetSearchQuery
   | StartConnectingGitHub
   | ConnectingGitHubSuccess
   | ConnectingGitHubFail
+  | SetGitHubError
   | DisconnectGitHubAccount
   | SetDocSearchResultsDefaultWidth
   | CacheDocSearchResultsWidth
@@ -492,6 +504,7 @@ interface State {
   gitHubAccount: {
     isLoading: boolean;
     isConnected: boolean;
+    error: string;
   },
   errorMessage: string;
   layout: {
@@ -549,6 +562,7 @@ const initialState: State = {
   gitHubAccount: {
     isLoading: false,
     isConnected: false,
+    error: '',
   },
   errorMessage: '',
   layout: {
@@ -730,6 +744,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
           ...state.gitHubAccount,
           isLoading: true,
           isConnected: false,
+          error: '',
         },
       };
     }
@@ -740,6 +755,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
           ...state.gitHubAccount,
           isLoading: false,
           isConnected: true,
+          error: '',
         },
       };
     }
@@ -747,11 +763,11 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
       const { errorMessage } = reducerAction.payload;
       return {
         ...state,
-        errorMessage,
         gitHubAccount: {
           ...state.gitHubAccount,
           isLoading: false,
           isConnected: false,
+          error: errorMessage,
         },
       };
     }
@@ -762,6 +778,17 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
           ...state.gitHubAccount,
           isLoading: false,
           isConnected: false,
+          error: '',
+        },
+      };
+    }
+    case ReducerActionType.SetGitHubError: {
+      const { message } = reducerAction.payload;
+      return {
+        ...state,
+        gitHubAccount: {
+          ...state.gitHubAccount,
+          error: message,
         },
       };
     }
@@ -1057,6 +1084,13 @@ function Home() {
     });
   }, []);
 
+  const setGitHubError = useCallback((message: string) => {
+    dispatch({
+      type: ReducerActionType.SetGitHubError,
+      payload: { message },
+    });
+  }, []);
+
   const setDocSearchResultsDefaultWidth = useCallback((width: number) => {
     dispatch({
       type: ReducerActionType.SetDocSearchResultsDefaultWidth,
@@ -1295,7 +1329,9 @@ function Home() {
       await initGitHub();
       connectingGitHubSuccess();
     } catch (error) {
-      connectingGitHubFail(`GitHub account either isn't connected or there was an error loading credentials. ${error.message}`);
+      if (error.message !== 'No access token found') {
+        connectingGitHubFail(error.message);
+      }
     }
   }
 
@@ -1558,7 +1594,7 @@ function Home() {
     openSignInModal();
   });
 
-  useIPCRenderer('github-access-token', async (_, { accessToken }: { accessToken: string | null }) => {
+  useIPCRenderer('github-access-token', (_, { accessToken }: { accessToken: string | null }) => {
     if (accessToken === null) {
       disconnectGitHub();
       disconnectGitHubAccount(); // The state reducer's action.
@@ -1567,6 +1603,10 @@ function Home() {
     tryToLoadGitHubAccount();
     if (debouncedQuery) searchGHCode(debouncedQuery);
   }, [debouncedQuery]);
+
+  useIPCRenderer('github-error', (_, { message }: { message: string }) => {
+    setGitHubError(message);
+  });
 
   // Run only on the initial render.
   // Get the cached search query and search filter.
@@ -1789,6 +1829,9 @@ function Home() {
             <ConnectGitHubButton onClick={connectGitHub}>
               Connect my GitHub account
             </ConnectGitHubButton>
+            {state.gitHubAccount.error &&
+              <GitHubError>{state.gitHubAccount.error}</GitHubError>
+            }
             {/* <GitHubPrivacyLink onClick={openPrivacyTerms}>
               Read more about privacy and what access Devbook needs
             </GitHubPrivacyLink> */}

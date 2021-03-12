@@ -219,6 +219,7 @@ gitHubOAuth.emitter.on('access-token', async ({ accessToken }: { accessToken: st
 });
 
 gitHubOAuth.emitter.on('error', ({ message }: { message: string }) => {
+  console.error(message);
   mainWindow?.webContents?.send('github-error', { message });
   mainWindow?.show();
   preferencesWindow?.webContents?.send('github-error', { message });
