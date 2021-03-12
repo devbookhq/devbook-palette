@@ -59,9 +59,7 @@ import SignInModal from 'Auth/SignInModal';
 import SearchHeaderPanel, { ResultsFilter } from './SearchHeaderPanel';
 import {
   StackOverflowSearchHotkeysPanel,
-  StackOverflowModalHotkeysPanel,
   GitHubCodeSearchHotkeysPanel,
-  GitHubCodeModalHotkeysPanel,
   DocsSearchHotkeysPanel,
 } from './HotkeysPanel';
 import FocusState from './SearchItemFocusState';
