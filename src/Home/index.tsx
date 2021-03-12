@@ -25,8 +25,8 @@ import electron, {
   getSavedSearchFilter,
   saveDocSearchResultsDefaultWidth,
   getDocSearchResultsDefaultWidth,
-  saveDocSources,
-  getCachedDocSources,
+  getActiveDocSource,
+  saveActiveDocSource,
   trackSignInModalOpened,
   trackSignInModalClosed,
   trackShowSearchHistory,
@@ -55,6 +55,7 @@ import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
 import Loader from 'components/Loader';
 import SignInModal from 'Auth/SignInModal';
+import jsLogo from 'img/js-logo.png';
 
 import SearchHeaderPanel, { ResultsFilter } from './SearchHeaderPanel';
 import {
@@ -74,6 +75,7 @@ import {
 } from './Docs';
 import SearchHistory from './SearchHistory';
 import historyStore from './SearchHistory/historyStore';
+import Hotkey, { Key } from './HotkeysPanel/Hotkey';
 
 const Container = styled.div`
   height: 100%;
@@ -181,23 +183,40 @@ const DocsResultsWrapper = styled.div`
   align-items: flex-start;
 `;
 
-const EnabledDocsText = styled.span`
+const ActiveDocset = styled.div`
+  padding: 6px 10px;
   width: 100%;
-  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
-  font-size: 14px;
-  color: #6787ff;
-  font-weight: 500;
+  font-size: 12px;
 
-  background: #262736;
-  border-right: 2px solid #3b3a4a;
-  border-bottom: 2px solid #3b3a4a;
-
-  :hover {
-    cursor: pointer;
-    text-decoration: underline;
-  }
+  background: #25252E;
+  border-bottom: 1px solid #3B3A4A;
+  border-right: 2px solid #3B3A4A;
 `;
+
+const DocsetNameLogo = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const DocsetLogo = styled.img`
+  margin-right: 8px;
+  height: 16px;
+  width: 16px;
+`;
+
+const ActiveDocsetName = styled.div`
+  position: relative;
+  top: 1px;
+  margin-right: 8px;
+  font-size: 12px;
+  color: #fff;
+  font-weight: 400;
+`;
+
 
 const DocSearchResults = styled.div`
   width: 100%;
@@ -219,6 +238,31 @@ const DocSearchResults = styled.div`
 const DocsLoader = styled(Loader)`
   margin-top: 50px;
 `;
+
+const HotkeyWrapper = styled.div`
+  padding: 5px;
+  display: flex;
+  align-items: center;
+
+  border-radius: 5px;
+  user-select: none;
+  :hover {
+    transition: background 170ms ease-in;
+    cursor: pointer;
+    background: #434252;
+    > div {
+      color: #fff;
+    }
+  }
+`;
+
+const HotkeyText = styled.div`
+  margin-left: 8px;
+  font-size: 12px;
+  color: #78788c;
+  transition: color 170ms ease-in;
+`;
+
 
 type SearchResultItem = StackOverflowResult | CodeResult | DocResult;
 type SearchResultItems = StackOverflowResult[] | CodeResult[] | DocResult[];
@@ -271,9 +315,7 @@ enum ReducerActionType {
 
   FetchDocSourcesSuccess,
   FetchDocSourcesFail,
-
-  IncludeDocSourceInSearch,
-  RemoveDocSourceFromSearch,
+  SetActiveDocSource,
 
   SetIsLoadingCachedData,
 
@@ -417,7 +459,10 @@ interface CloseSignInModal {
 
 interface FetchDocSourcesSuccess {
   type: ReducerActionType.FetchDocSourcesSuccess;
-  payload: { docSources: DocSource[] };
+  payload: {
+    docSources: DocSource[];
+    activeDocSource: DocSource;
+  };
 }
 
 interface FetchDocSourcesFail {
@@ -425,14 +470,9 @@ interface FetchDocSourcesFail {
   payload: { errorMessage: string };
 }
 
-interface IncludeDocSourceInSearch {
-  type: ReducerActionType.IncludeDocSourceInSearch;
-  payload: { docSource: DocSource };
-}
-
-interface RemoveDocSourceFromSearch {
-  type: ReducerActionType.RemoveDocSourceFromSearch;
-  payload: { docSource: DocSource };
+interface SetActiveDocSource {
+  type: ReducerActionType.SetActiveDocSource;
+  payload: { activeDocSource: DocSource };
 }
 
 interface SetIsLoadingCachedData {
@@ -485,8 +525,7 @@ type ReducerAction = SetSearchQuery
   | CloseSignInModal
   | FetchDocSourcesSuccess
   | FetchDocSourcesFail
-  | IncludeDocSourceInSearch
-  | RemoveDocSourceFromSearch
+  | SetActiveDocSource
   | SetIsLoadingCachedData
   | ToggleSearchHistoryPreview
   | SetHistory
@@ -513,6 +552,7 @@ interface State {
   isSearchingInDocPage: boolean;
   isDocsFilterModalOpened: boolean;
   docSources: DocSource[];
+  activeDocSource?: DocSource;
   isLoadingCachedData: boolean;
   isSignInModalOpened: boolean;
   isSearchHistoryPreviewVisible: boolean;
@@ -571,6 +611,7 @@ const initialState: State = {
   isSearchingInDocPage: false,
   isDocsFilterModalOpened: false,
   docSources: [],
+  activeDocSource: undefined,
   isLoadingCachedData: true,
   isSignInModalOpened: false,
   history: [],
@@ -847,10 +888,11 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
       };
     }
     case ReducerActionType.FetchDocSourcesSuccess: {
-      const { docSources } = reducerAction.payload;
+      const { docSources, activeDocSource } = reducerAction.payload;
       return {
         ...state,
         docSources,
+        activeDocSource,
       };
     }
     case ReducerActionType.FetchDocSourcesFail: {
@@ -860,18 +902,11 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         errorMessage,
       };
     }
-    case ReducerActionType.IncludeDocSourceInSearch: {
-      const { docSource } = reducerAction.payload;
+    case ReducerActionType.SetActiveDocSource: {
+      const { activeDocSource } = reducerAction.payload;
       return {
         ...state,
-        docSources: state.docSources.map(ds => ds.slug === docSource.slug ? { ...ds, isIncludedInSearch: true } : ds),
-      };
-    }
-    case ReducerActionType.RemoveDocSourceFromSearch: {
-      const { docSource } = reducerAction.payload;
-      return {
-        ...state,
-        docSources: state.docSources.map(ds => ds.slug === docSource.slug ? { ...ds, isIncludedInSearch: false } : ds),
+        activeDocSource,
       };
     }
     case ReducerActionType.SetIsLoadingCachedData: {
@@ -948,10 +983,6 @@ function Home() {
   const isActiveFilterLoading = useMemo(() => {
     return state.results[activeFilter].isLoading;
   }, [state.results, activeFilter]);
-
-  const isAnyDocSourceIncluded = useMemo(() => {
-    return state.docSources.findIndex(ds => ds.isIncludedInSearch) !== -1;
-  }, [state.docSources]);
 
   // Dispatch helpers
   const setSearchQuery = useCallback((query: string) => {
@@ -1143,10 +1174,10 @@ function Home() {
     });
   }, []);
 
-  const fetchDocSourcesSuccess = useCallback((docSources: DocSource[]) => {
+  const fetchDocSourcesSuccess = useCallback((docSources: DocSource[], activeDocSource: DocSource) => {
     dispatch({
       type: ReducerActionType.FetchDocSourcesSuccess,
-      payload: { docSources },
+      payload: { docSources, activeDocSource },
     });
   }, []);
 
@@ -1157,17 +1188,10 @@ function Home() {
     });
   }, []);
 
-  const includeDocSourceInSearch = useCallback((docSource: DocSource) => {
+  const setActiveDocSource = useCallback((activeDocSource: DocSource) => {
     dispatch({
-      type: ReducerActionType.IncludeDocSourceInSearch,
-      payload: { docSource },
-    });
-  }, []);
-
-  const removeDocSourceFromSearch = useCallback((docSource: DocSource) => {
-    dispatch({
-      type: ReducerActionType.RemoveDocSourceFromSearch,
-      payload: { docSource },
+      type: ReducerActionType.SetActiveDocSource,
+      payload: { activeDocSource },
     });
   }, []);
 
@@ -1272,14 +1296,14 @@ function Home() {
 
   async function searchDocs(query: string, docSources: DocSource[]) {
     // User has all doc sources unincluded.
-    if (docSources.findIndex(ds => ds.isIncludedInSearch) === -1) {
+    if (!state.activeDocSource) {
       searchingSuccess(ResultsFilter.Docs, []);
       return;
     }
 
     try {
       startSearching(ResultsFilter.Docs);
-      const results = await searchDocumentations(query, docSources.filter(ds => ds.isIncludedInSearch));
+      const results = await searchDocumentations(query, docSources);
       searchingSuccess(ResultsFilter.Docs, results);
     } catch (error) {
       searchingFail(ResultsFilter.Docs, error.message);
@@ -1348,9 +1372,8 @@ function Home() {
     cacheDocSearchResultsWidth(elRef.clientWidth);
   }
 
-  function handleDocSourceClick(docSource: DocSource) {
-    if (docSource.isIncludedInSearch) removeDocSourceFromSearch(docSource);
-    else includeDocSourceInSearch(docSource);
+  function handleDocSourceSelect(docSource: DocSource) {
+    setActiveDocSource(docSource);
   }
 
   function navigateSearchResultsUp(idx: number, filter: ResultsFilter, isModalOpened: boolean) {
@@ -1567,8 +1590,10 @@ function Home() {
     trackShortcut({ action: 'Search in doc page' });
   }, [activeFilter, searchInDocPage, state.isDocsFilterModalOpened]);
 
-  // 'cmd+shift+f' hotkey - open docs filter modal.
-  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+shift+f' : 'ctrl+shift+f', () => {
+  // 'cmd+d' hotkey - open docs filter modal.
+  useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+d' : 'ctrl+d', (e) => {
+    e.preventDefault();
+
     // A search filter different from Docs is active.
     if (activeFilter !== ResultsFilter.Docs) return;
     // Docs search filter is active but user isn't signed in.
@@ -1632,17 +1657,12 @@ function Home() {
       }
 
       try {
-        // We merge the cached doc sources and the fetched ones
-        // so we always have the most up to date doc sources
-        // and at the same time we respect user's selection.
-        const cachedDocSources = await getCachedDocSources();
         const allDocSources = await fetchDocSources();
-        const mergedDocSources = allDocSources.map(ds => {
-          const cached = cachedDocSources.find(cds => cds.slug === ds.slug);
-          if (cached) return { ...ds, isIncludedInSearch: cached.isIncludedInSearch };
-          return ds;
-        });
-        fetchDocSourcesSuccess(mergedDocSources);
+        let activeDocSource = await getActiveDocSource();
+        if (!activeDocSource || !allDocSources.map(ds => ds.slug).includes(activeDocSource.slug)) {
+          activeDocSource = allDocSources[0];
+        }
+        fetchDocSourcesSuccess(allDocSources, activeDocSource);
       } catch (err) {
         fetchDocSourcesFail(err);
       }
@@ -1670,7 +1690,7 @@ function Home() {
       debouncedQuery,
       activeFilter,
       state.gitHubAccount.isConnected,
-      state.docSources,
+      [state.activeDocSource ?? state.docSources[0]],
     );
 
     historyStore.saveDebouncedQuery(debouncedQuery);
@@ -1687,6 +1707,7 @@ function Home() {
     debouncedLastSearchedQuery,
     activeFilter,
     state.gitHubAccount.isConnected,
+    state.activeDocSource,
     state.docSources,
     setHistory,
   ]);
@@ -1704,20 +1725,21 @@ function Home() {
     saveSearchFilter(activeFilter);
   }, [activeFilter, state.isLoadingCachedData]);
 
-  // Cache the doc sources.
+  // Cache the doc sources and search again when user selects new doc source.
   useEffect(() => {
-    if (state.docSources.length === 0) return;
-    saveDocSources(state.docSources);
+    if (!state.activeDocSource) return;
+    saveActiveDocSource(state.activeDocSource);
 
     if (debouncedQuery) {
-      searchDocs(debouncedQuery, state.docSources);
+      searchDocs(debouncedQuery, [state.activeDocSource]);
     }
+
     // NOTE: We don't want to run this useEffect every time
     // the search query changes. We just want to refresh
     // the docs results when user changes what doc sources
     // they want to have active.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.docSources]);
+  }, [state.activeDocSource]);
 
   useEffect(() => {
     refreshAuth();
@@ -1745,7 +1767,7 @@ function Home() {
       {state.isDocsFilterModalOpened && activeFilter === ResultsFilter.Docs &&
         <DocsFilterModal
           docSources={state.docSources}
-          onDocSourceClick={handleDocSourceClick}
+          onDocSourceSelect={handleDocSourceSelect}
           onCloseRequest={closeDocsFilterModal}
         />
       }
@@ -1814,7 +1836,7 @@ function Home() {
           && !isActiveFilterLoading
           // Don't show "Nothing found" when user is searching docs but disabled
           // all doc sources.
-          && !(activeFilter === ResultsFilter.Docs && (!isAnyDocSourceIncluded || !isUserSignedInWithOrWithoutMetadata))
+          && !(activeFilter === ResultsFilter.Docs && (!state.activeDocSource || !isUserSignedInWithOrWithoutMetadata))
           &&
           <InfoMessage>Nothing found</InfoMessage>
         }
@@ -1877,7 +1899,7 @@ function Home() {
         {state.search.query
           && activeFilter === ResultsFilter.Docs
           && isUserSignedInWithOrWithoutMetadata
-          && !isAnyDocSourceIncluded
+          && !state.activeDocSource
           && !isActiveFilterLoading
           &&
           <>
@@ -1925,7 +1947,7 @@ function Home() {
             }
 
             {activeFilter === ResultsFilter.Docs
-              && isAnyDocSourceIncluded
+              && state.activeDocSource
               && isUserSignedInWithOrWithoutMetadata
               &&
               <DocsWrapper>
@@ -1935,19 +1957,32 @@ function Home() {
                     height: "100%"
                   }}
                   maxWidth="50%"
-                  minWidth="200"
+                  minWidth="265"
                   enable={{ right: true }}
                   onResizeStop={(e, dir, ref) => handleDocSearchResultsResizeStop(e, dir, ref)}
                 >
                   <DocsResultsWrapper>
-                    <EnabledDocsText
-                      onClick={openDocsFilterModal}
-                    >
-                      {state.docSources.filter(ds => ds.isIncludedInSearch).length === state.docSources.length
-                        ? 'Searching in all documentations'
-                        : `Searching in ${state.docSources.filter(ds => ds.isIncludedInSearch).length} out of ${state.docSources.length} documentations`
-                      }
-                    </EnabledDocsText>
+                    <ActiveDocset>
+                      <DocsetNameLogo>
+                        <DocsetLogo src={jsLogo}/>
+                        <ActiveDocsetName>
+                          {state.activeDocSource.name}
+                        </ActiveDocsetName>
+                      </DocsetNameLogo>
+                      <HotkeyWrapper
+                        onClick={openDocsFilterModal}
+                      >
+                        <Hotkey
+                          hotkey={electron.remote.process.platform === 'darwin'
+                            ? [Key.Command, 'D']
+                            : ['CTRL', 'D']
+                          }
+                        />
+                        <HotkeyText>
+                          to change
+                        </HotkeyText>
+                      </HotkeyWrapper>
+                    </ActiveDocset>
                     <DocSearchResults>
                       {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
                         <DocSearchResultItem
@@ -2014,11 +2049,11 @@ function Home() {
             }
             {/*-------------------------------------------------------------*/}
 
-            {/* Docs search results */}
+            {/* Docs search results hotkeys */}
             {!state.modalItem
               && activeFilter === ResultsFilter.Docs
               && isUserSignedInWithOrWithoutMetadata
-              && isAnyDocSourceIncluded
+              && state.activeDocSource
               &&
               <DocsSearchHotkeysPanel
                 onNavigateUpClick={() => navigateSearchResultsUp(
@@ -2033,7 +2068,6 @@ function Home() {
                 )}
                 isDocsFilterModalOpened={state.isDocsFilterModalOpened}
                 isSearchingInDocPage={state.isSearchingInDocPage}
-                onOpenFilterDocsClick={openDocsFilterModal}
                 onCloseFilterDocsClick={closeDocsFilterModal}
                 onSearchInDocPageClick={searchInDocPage}
                 onCancelSearchInDocPageClick={cancelSearchInDocPage}

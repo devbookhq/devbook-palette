@@ -22,7 +22,6 @@ export interface DocResult {
 export interface DocSource {
   slug: string;
   name: string;
-  isIncludedInSearch: boolean;
 }
 
 export async function search(query: string, docSources: DocSource[]): Promise<DocResult[]> {
@@ -36,5 +35,5 @@ export async function fetchDocSources(): Promise<DocSource[]> {
   const url = isDev ? 'https://dev.usedevbook.com/search/docs' : 'https://api.usedevbook.com/search/docs';
 
   const result = await axios.get(url);
-  return result.data.docs.map((ds: DocSource) => ({ ...ds, isIncludedInSearch: true }));
+  return result.data.docs.map((ds: DocSource) => ({ ...ds }));
 }

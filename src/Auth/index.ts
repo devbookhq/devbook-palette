@@ -180,13 +180,7 @@ export async function signIn(email: string) {
     const requestLimit = 15 * 60;
 
     for (let i = 0; i < requestLimit; i++) {
-      if (isCancelled) {
-        break;
-      }
-
-      if (credential) {
-        break;
-      }
+      if (isCancelled || credential) break;
 
       try {
         const result = await axios.get(`/auth/credential/${sessionID}`, {
@@ -195,10 +189,8 @@ export async function signIn(email: string) {
             email,
           },
         });
-
         credential = result.data.credential;
         break;
-
       } catch (error) {
         if (error.response?.status !== 404) {
           break;

@@ -11,7 +11,6 @@ interface SearchHotkeysPanelProps {
   onNavigateDownClick: (e: any) => void;
   isDocsFilterModalOpened: boolean;
   isSearchingInDocPage: boolean;
-  onOpenFilterDocsClick: (e: any) => void;
   onCloseFilterDocsClick: (e: any) => void;
   onSearchInDocPageClick: (e: any) => void;
   onCancelSearchInDocPageClick: (e: any) => void;
@@ -22,7 +21,6 @@ function SearchHotkeysPanel({
   onNavigateDownClick,
   isDocsFilterModalOpened,
   isSearchingInDocPage,
-  onOpenFilterDocsClick,
   onCloseFilterDocsClick,
   onSearchInDocPageClick,
   onCancelSearchInDocPageClick,
@@ -31,14 +29,14 @@ function SearchHotkeysPanel({
     <Panel
       hotkeysLeft={isDocsFilterModalOpened ? [
         {
-          text: 'Select documentation',
+          text: 'Navigate',
           hotkey: [Key.ArrowUp, Key.ArrowDown],
           isSeparated: true
         },
         // TODO: Change functionality based on whether the currently select
         // documentation is included or removed from the search.
         {
-          text: 'Include in search',
+          text: 'Select',
           hotkey: [Key.Enter],
         },
       ] : [
@@ -51,11 +49,6 @@ function SearchHotkeysPanel({
             text: 'Next result',
             hotkey: [Key.ArrowDown],
             onClick: onNavigateDownClick,
-          },
-          {
-            text: 'Filter docs',
-            hotkey: [cmdModifier, Key.Shift, 'F'],
-            onClick: onOpenFilterDocsClick,
           },
         ]}
       hotkeysRight={isDocsFilterModalOpened ? [

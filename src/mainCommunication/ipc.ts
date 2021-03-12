@@ -1,6 +1,6 @@
 export enum IPCMessage {
-  GetCachedDocSources = 'GetCachedDocSources',
-  SaveDocSources = 'SaveDocSources',
+  GetActiveDocSource = 'GetActiveDocSource',
+  SaveActiveDocSource = 'SaveActiveDocSource',
 
   GetAuthFromMainWindow = 'GetAuthFromMainWindow',
   SetAuthInOtherWindows = 'SetAuthInOtherWindows',

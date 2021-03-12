@@ -63,9 +63,9 @@ import { IPCMessage } from '../mainCommunication/ipc';
 toDesktop.init();
 
 enum StoreKey {
-  DocSources = 'docSources',
   Email = 'email',
   IsPinModeEnabled = 'isPinModeEnabled',
+  ActiveDocSource = 'activeDocSource',
 }
 
 const PORT = 3000;
@@ -504,12 +504,12 @@ ipcMain.handle('get-doc-search-results-default-width', () => {
   return store.get('docSearchResultsDefaultWidth', 200);
 });
 
-ipcMain.handle(IPCMessage.GetCachedDocSources, async () => {
-  return store.get(StoreKey.DocSources, []);
+ipcMain.handle(IPCMessage.GetActiveDocSource, async () => {
+  return store.get(StoreKey.ActiveDocSource, undefined);
 });
 
-ipcMain.on(IPCMessage.SaveDocSources, (_, { docSources }) => {
-  store.set(StoreKey.DocSources, docSources);
+ipcMain.on(IPCMessage.SaveActiveDocSource, (_, { docSource }) => {
+  store.set(StoreKey.ActiveDocSource, docSource);
 });
 
 ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo, mainWindow?.window));

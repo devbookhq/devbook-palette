@@ -147,12 +147,11 @@ export function getDocSearchResultsDefaultWidth(): Promise<number> {
   return electron.ipcRenderer.invoke('get-doc-search-results-default-width');
 }
 
-export function getCachedDocSources(): Promise<DocSource[]> {
-  return electron.ipcRenderer.invoke(IPCMessage.GetCachedDocSources);
+export function getActiveDocSource(): Promise<DocSource | undefined> {
+  return electron.ipcRenderer.invoke(IPCMessage.GetActiveDocSource);
 }
-
-export function saveDocSources(docSources: DocSource[]) {
-  return electron.ipcRenderer.send(IPCMessage.SaveDocSources, { docSources });
+export function saveActiveDocSource(docSource: DocSource) {
+  return electron.ipcRenderer.send(IPCMessage.SaveActiveDocSource, { docSource });
 }
 
 export function trackSignInModalOpened() {

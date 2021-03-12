@@ -78,45 +78,23 @@ const Content = styled.div`
   flex-direction: column;
 `;
 
-const DocsListHeader = styled.div`
-  width: 100%;
-  padding: 0 10px;
-  margin-bottom: 10px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
 const HeaderText = styled.span`
-  color: #5A5A6F;
-  font-size: 14px;
+  margin: 8px 0;
+  width: 100%;
+  text-align: center;
+
+  color: #fff;
+  font-size: 16px;
   font-weight: 500;
 `;
 
-const DocsListsWrapper = styled.div`
+const DocsList = styled.div`
   height: 100%;
   width: 100%;
 
   display: flex;
   flex-direction: column;
-
   overflow: overlay;
-`;
-
-const DocsListIncluded = styled.div`
-  width: 100%;
-  margin-bottom: 20px;
-
-  display: flex;
-  flex-direction: column;
-`;
-
-const DocsListNotIncluded = styled.div`
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
 `;
 
 const DocRow = styled.div<{ isFocused?: boolean, lastUsedNavigation: Navigation }>`
@@ -142,11 +120,9 @@ const DocName = styled.span`
   font-weight: 500;
 `;
 
-const DocToggle = styled.input``;
-
 const FeedbackButton = styled.button`
   margin: 10px 0;
-  color: #4CACD6;
+  color: #5A5A6F;
   font-size: 14px;
   font-weight: 600;
   background: none;
@@ -162,13 +138,13 @@ const FeedbackButton = styled.button`
 
 interface DocsFilterModalProps {
   docSources: DocSource[];
-  onDocSourceClick: (ds: DocSource) => void;
-  onCloseRequest?: () => void;
+  onDocSourceSelect: (ds: DocSource) => void;
+  onCloseRequest: () => void;
 }
 
 function DocsFilterModal({
   docSources,
-  onDocSourceClick,
+  onDocSourceSelect,
   onCloseRequest,
 }: DocsFilterModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -180,42 +156,19 @@ function DocsFilterModal({
 
   const [selectedIdx, setSelectedIdx] = useState(0);
 
-  const [includedSources, setIncludedSources] = useState<DocSource[]>([]);
-  const [notIncludedSources, setNotIncludedSources] = useState<DocSource[]>([]);
-
   const [lastUsedNavigation, setLastUseNavigation] = useState<Navigation>(Navigation.Keys);
 
-  const includedVisibleSources = useCallback(() => {
-    return includedSources.filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))));
-  }, [includedSources, searchQuery]);
-  const notIncludedVisibleSources = useCallback(() => {
-    return notIncludedSources.filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery))));
-  }, [notIncludedSources, searchQuery]);
+  const filteredSources = useCallback(() => {
+    return docSources.filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery.toLowerCase()))));
+  }, [docSources, searchQuery]);
 
 
   function escapeRegex(s: string) {
     return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
   }
 
-  function toggleDocSource(docSource: DocSource, includedSlice: boolean) {
-    if (includedSlice) {
-      setIncludedSources(c =>
-        c.map(ds => ds.slug === docSource.slug ? {...ds, isIncludedInSearch: !ds.isIncludedInSearch} : ds)
-      );
-    } else {
-      setNotIncludedSources(c =>
-        c.map(ds => ds.slug === docSource.slug ? {...ds, isIncludedInSearch: !ds.isIncludedInSearch} : ds)
-      );
-    }
-    onDocSourceClick(docSource);
-  }
-
-  function handleDocRowMouseOver(idx: number, isInIncludedSlice: boolean) {
-    if (isInIncludedSlice) {
-      setSelectedIdx(idx);
-    } else {
-      setSelectedIdx(idx + includedVisibleSources().length);
-    }
+  function handleDocRowMouseOver(idx: number) {
+    setSelectedIdx(idx);
     setLastUseNavigation(Navigation.Mouse);
   }
 
@@ -227,6 +180,11 @@ function DocsFilterModal({
     openLink('https://docs.google.com/forms/d/e/1FAIpQLSddf3HliA9uU0SZS-EGofU_gvnDcQX_BykzCxri9nsdoQusBw/viewform?usp=sf_link');
   }
 
+  function handleDocRowMouseClick(ds: DocSource) {
+    onDocSourceSelect(ds)
+    onCloseRequest();
+  }
+
   useHotkeys('up', () => {
     if (selectedIdx > 0) {
       setSelectedIdx(c => c -= 1);
@@ -236,47 +194,21 @@ function DocsFilterModal({
   }, { filter: () => true }, [selectedIdx]);
 
   useHotkeys('down', () => {
-    if (selectedIdx < includedVisibleSources().length + notIncludedVisibleSources().length - 1) {
+    if (selectedIdx < filteredSources().length - 1) {
       setSelectedIdx(c => c += 1);
     }
     setLastUseNavigation(Navigation.Keys);
     selectedDocRow?.current?.scrollIntoView({ block: 'end' });
-  }, { filter: () => true }, [selectedIdx, notIncludedVisibleSources, includedVisibleSources]);
+  }, { filter: () => true }, [selectedIdx, filteredSources]);
 
   useHotkeys('enter', () => {
-    if (selectedIdx >= includedVisibleSources().length) {
-      const idx = selectedIdx - includedVisibleSources().length;
-      toggleDocSource(notIncludedVisibleSources()[idx], false);
-    } else {
-      toggleDocSource(includedVisibleSources()[selectedIdx], true);
-    }
-  }, { filter: () => true }, [selectedIdx, notIncludedVisibleSources, includedVisibleSources]);
+    onDocSourceSelect(filteredSources()[selectedIdx]);
+    onCloseRequest();
+  }, { filter: () => true }, [selectedIdx, filteredSources]);
 
   useEffect(() => {
     setSelectedIdx(0);
   }, [searchQuery]);
-
-  useEffect(() => {
-    // Split doc sources into two arrays - included doc sources and not included ones.
-    const sorted = docSources
-      .sort((a, b) => (a.isIncludedInSearch === b.isIncludedInSearch) ? 0 : a.isIncludedInSearch ? -1 : 1);
-    const firstNotIncluded = sorted.findIndex(ds => !ds.isIncludedInSearch);
-    if (firstNotIncluded === -1) {
-      setNotIncludedSources(sorted.sort((a, b) => a.name.localeCompare(b.name)));
-    } else {
-      let includedSlice = sorted.slice(0, firstNotIncluded);
-      includedSlice = includedSlice
-        .sort((a, b) => a.name.localeCompare(b.name));
-      setIncludedSources(includedSlice);
-
-      let notIncludedSlice = sorted.slice(firstNotIncluded);
-      notIncludedSlice = notIncludedSlice
-        .sort((a, b) => a.name.localeCompare(b.name));
-      setNotIncludedSources(notIncludedSlice);
-    }
-    // We want to run this only during the first render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <StyledModal
@@ -294,66 +226,29 @@ function DocsFilterModal({
         />
       </SearchWrapper>
       <Content>
+        <HeaderText>
+          Select active documentation
+        </HeaderText>
         <FeedbackButton
           onClick={handleFeedbackButtonClick}
         >
           Missing some docs?
         </FeedbackButton>
 
-        <DocsListHeader>
-          <HeaderText>
-            NAME
-          </HeaderText>
-          <HeaderText>
-            INCLUDE IN SEARCH
-          </HeaderText>
-        </DocsListHeader>
-
-        <DocsListsWrapper>
-          {includedVisibleSources().length > 0 &&
-            <DocsListIncluded>
-              {includedVisibleSources().map((ds, idx) => (
-                <DocRow
-                  ref={selectedIdx === idx ? selectedDocRow : null}
-                  key={idx}
-                  onMouseOver={() => handleDocRowMouseOver(idx, true)}
-                  onClick={() => toggleDocSource(ds, true)}
-                  isFocused={idx === selectedIdx}
-                  lastUsedNavigation={lastUsedNavigation}
-                >
-                  <DocName>{ds.name}</DocName>
-                  <DocToggle
-                    type="checkbox"
-                    checked={ds.isIncludedInSearch}
-                    onChange={() => {}}
-                  />
-                </DocRow>
-              ))}
-            </DocsListIncluded>
-          }
-
-          {notIncludedVisibleSources().length > 0 &&
-            <DocsListNotIncluded>
-              {notIncludedVisibleSources().map((ds, idx) => (
-                <DocRow
-                  ref={selectedIdx === idx ? selectedDocRow : null}
-                  key={idx}
-                  onMouseOver={() => handleDocRowMouseOver(idx, false)}
-                  onClick={() => toggleDocSource(ds, false)}
-                  isFocused={idx === selectedIdx - includedVisibleSources().length}
-                  lastUsedNavigation={lastUsedNavigation}
-                >
-                  <DocName>{ds.name}</DocName>
-                  <DocToggle
-                    type="checkbox"
-                    checked={ds.isIncludedInSearch}
-                    onChange={() => {}}
-                  />
-                </DocRow>
-              ))}
-            </DocsListNotIncluded>
-          }
-        </DocsListsWrapper>
+        <DocsList>
+          {filteredSources().map((ds, idx) => (
+            <DocRow
+              ref={selectedIdx === idx ? selectedDocRow : null}
+              key={idx}
+              onMouseOver={() => handleDocRowMouseOver(idx)}
+              isFocused={idx === selectedIdx}
+              onClick={() => handleDocRowMouseClick(ds)}
+              lastUsedNavigation={lastUsedNavigation}
+            >
+              <DocName>{ds.name}</DocName>
+            </DocRow>
+          ))}
+        </DocsList>
       </Content>
     </StyledModal>
   );
