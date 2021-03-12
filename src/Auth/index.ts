@@ -204,7 +204,7 @@ export async function signIn(email: string) {
           break;
         }
       }
-      await timeout(800);
+      await timeout(100);
     }
 
     if (isCancelled) {
