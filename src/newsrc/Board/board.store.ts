@@ -219,7 +219,6 @@ function getID() {
   return Math.random().toString(36).substr(2, 5);
 }
 
-
 export class TileNode {
   key: string;
   _parentKey = '';

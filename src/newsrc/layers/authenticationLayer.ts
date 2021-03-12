@@ -14,6 +14,8 @@ enum APIVersion {
   v1 = 'v1',
 }
 
+const CredentialPingPeriod = 100; // In ms. We ping server every N ms.
+
 class AuthenticationLayer {
   private static readonly baseURL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
   private static readonly apiVersion = APIVersion.v1;
@@ -38,7 +40,7 @@ class AuthenticationLayer {
         ...isDev && { test: 'true' },
       });
 
-      // This route should NOT be "/auth/signIn" - "/auth/signin" is correct, because it uses the old API.
+      // This route should NOT be "/auth/signIn" - "/auth/signin" is correct because it uses the old API.
       await openLink(`${AuthenticationLayer.baseURL}/auth/signin/${sessionID}?${params}`);
 
       let credential: string | undefined = undefined;
@@ -64,7 +66,7 @@ class AuthenticationLayer {
             break;
           }
         }
-        await timeout(800);
+        await timeout(CredentialPingPeriod);
       }
 
       if (isCancelled) {
@@ -85,7 +87,7 @@ class AuthenticationLayer {
       try {
         const didToken = await this.magic.auth.loginWithCredential(credential);
         if (!didToken) {
-          return reject({ message: 'Could not complete the sign in.' });
+          return reject({ message: 'Could not complete the sign in. Returned token was undefined.' });
         }
 
         const { data } = await axios.post('/auth/signIn', null, {
@@ -97,7 +99,7 @@ class AuthenticationLayer {
         });
         return resolve(data);
       } catch (error) {
-        return reject({ message: error.message });
+        return reject({ message: error.response.data.error.message });
       }
     });
 
@@ -125,7 +127,7 @@ class AuthenticationLayer {
         withCredentials: true,
       });
     } catch (error) {
-      console.error(error.message);
+      console.error(error.response.data.error.message);
     }
   }
 
@@ -134,13 +136,17 @@ class AuthenticationLayer {
   }
 
   async refreshAccessToken(oldRefreshToken: string): Promise<{ user: User, refreshToken: string, accessToken: string }> {
-    const { data } = await axios.get('/auth/accessToken', {
-      baseURL: AuthenticationLayer.baseURLWithVersion,
-      params: {
-        refreshToken: oldRefreshToken,
-      },
-    });
-    return data;
+    try {
+      const { data } = await axios.get('/auth/accessToken', {
+        baseURL: AuthenticationLayer.baseURLWithVersion,
+        params: {
+          refreshToken: oldRefreshToken,
+        },
+      });
+      return data;
+    } catch (error) {
+      throw new Error(error.response.data.error.message);
+    }
   }
 
   async restoreUserSession(): Promise<{ user: User, refreshToken: string, accessToken: string }> {
@@ -155,7 +161,7 @@ class AuthenticationLayer {
       });
       return data;
     }
-    throw new Error('No user session found.');
+    throw new Error(`Couldn't restore a previous user session. No user session found.`);
   }
 }
 

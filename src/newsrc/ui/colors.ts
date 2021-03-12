@@ -12,6 +12,7 @@ export const Ink = {
 };
 
 export const Orange = {
+  light: '#E2923B',
   normal: '#e0892b',
   dark: '#794d1f',
 };
@@ -23,6 +24,10 @@ export const Lavender = {
 
 export const Blue = {
   normal: '#2c59f8',
+};
+
+export const Red = {
+  normal: '#E24444',
 };
 
 export function toRGBA(hex: string, alpha: number) {

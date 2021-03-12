@@ -15,3 +15,9 @@ export const TitleNormal = styled.span`
   font-weight: ${Typography.Title.normal.fontWeight};
 `;
 
+export const TitleLarge = styled.span`
+  color: ${Colors.Ink.normal};
+  font-size: ${Typography.Title.large.fontSize};
+  font-weight: ${Typography.Title.large.fontWeight};
+`;
+

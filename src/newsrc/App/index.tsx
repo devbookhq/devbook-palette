@@ -1,9 +1,14 @@
 import React from 'react';
+import {
+  Switch,
+  Route,
+  useRouteMatch,
+} from 'react-router-dom';
 import styled from 'styled-components';
 
-import Toolbar from 'newsrc/Toolbar';
 import TabBar from 'newsrc/TabBar';
 import Board from 'newsrc/Board';
+import SignIn from 'newsrc/SignIn';
 
 
 // The electron window is set to be frameless.
@@ -27,14 +32,28 @@ const FlexContainer = styled.div<{ direction?: 'row' | 'column' }>`
 `;
 
 function App() {
+  const { path } = useRouteMatch();
+
   return (
     <>
       <DragHeader/>
-      <FlexContainer direction="column">
-        <TabBar/>
-        <Board/>
-      </FlexContainer>
-    </>
+      <Switch>
+        <Route
+          path={path}
+          exact
+        >
+          <FlexContainer direction="column">
+            <TabBar/>
+            <Board/>
+          </FlexContainer>
+        </Route>
+        <Route
+          path={`${path}/sign-in`}
+        >
+          <SignIn/>
+        </Route>
+      </Switch>
+   </>
   );
 }
 

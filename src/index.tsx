@@ -4,6 +4,7 @@ import {
   HashRouter as Router,
   Switch,
   Route,
+  Redirect,
 } from 'react-router-dom';
 
 import './index.css';
@@ -16,15 +17,19 @@ ReactDOM.render(
       <Router>
         <Switch>
           <Route
-            path="/preferences"
-            exact
-          >
-          </Route>
-          <Route
             path="/"
             exact
           >
+            <Redirect to="/app"/>
+          </Route>
+          <Route
+            path="/app"
+          >
             <App />
+          </Route>
+          <Route
+            path="/preferences"
+          >
           </Route>
         </Switch>
       </Router>

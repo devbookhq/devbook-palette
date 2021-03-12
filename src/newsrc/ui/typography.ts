@@ -5,7 +5,11 @@ export const Title = {
   },
   normal: {
     fontSize: '15px',
-    fontWeight: '400',
+    fontWeight: '500',
+  },
+  large: {
+    fontSize: '20px',
+    fontWeight: '500',
   },
 }
 
@@ -31,6 +35,18 @@ export const Body = {
     large: {
       fontSize: '14px',
       fontWeight: '400',
+      lineHeight: '17px',
+    },
+  },
+  semibold: {
+    normal: {
+      fontSize: '13px',
+      fontWeight: '600',
+      lineHeight: '17px',
+    },
+    large: {
+      fontSize: '14px',
+      fontWeight: '600',
       lineHeight: '17px',
     },
   },

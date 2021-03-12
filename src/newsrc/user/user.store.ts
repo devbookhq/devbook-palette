@@ -15,7 +15,7 @@ import AuthenticationLayer from 'newsrc/layers/authenticationLayer';
 
 import { AuthInfo } from './authInfo';
 import { AuthState } from './authState';
-import { AuthError } from './authError';
+import { AuthErrorType } from './authError';
 
 export function useUserStore() {
   return useRootStore().userStore;
@@ -48,12 +48,16 @@ class UserStore {
     return toJS(this._auth);
   }
 
+  get isSignedIn() {
+    return this._auth.state === AuthState.UserSignedIn;
+  }
+
   constructor(readonly _rootStore: RootStore) {
     makeAutoObservable(this, {
       _rootStore: false,
       _authenticationLayer: false,
       _localCacheLayer: false,
-    });    
+    });
 
     autorun(() => {
       console.log('Authentication:', this.auth);
@@ -84,19 +88,23 @@ class UserStore {
   updateAuth(auth: AuthInfo) {
     this._auth.state = auth.state;
     if (auth.user) this._auth.user = auth.user;
+    else this._auth.user = undefined;
     if (auth.error) this._auth.error = auth.error;
+    else this._auth.user = undefined;
   }
 
-  async signOut() {
+  signOut() {
     if (this.isLoading) return;
     this.updateAuthEverywhere({ state: AuthState.SigningOutUser, user: this.user });
-    const refreshToken = await this._localCacheLayer.loadRefreshToken();
-    await this._localCacheLayer.deleteRefreshToken();
+
+    const refreshToken = this._localCacheLayer.loadRefreshToken();
+    this._localCacheLayer.deleteRefreshToken();
     this.updateAuthEverywhere({ state: AuthState.NoUser });
+
     return this._authenticationLayer.signOut(refreshToken);
   }
 
-  async cancelSignIn() {
+  cancelSignIn() {
     this.updateAuthEverywhere({ state: AuthState.NoUser });
     return this._authenticationLayer.cancelSignIn();
   }
@@ -106,31 +114,44 @@ class UserStore {
     this.updateAuthEverywhere({ state: AuthState.SigningInUser });
     try {
       const { refreshToken, user } = await this._authenticationLayer.signIn(email);
-      await this._localCacheLayer.saveRefreshToken(refreshToken);
+      this._localCacheLayer.saveRefreshToken(refreshToken);
       this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
     } catch (error) {
-      this.updateAuthEverywhere({ state: AuthState.NoUser, error: AuthError.FailedSigningInUser });
+      this.updateAuthEverywhere({
+        state: AuthState.NoUser,
+        error: {
+          type: AuthErrorType.FailedSigningInUser,
+          message: error.message,
+        },
+      });
     }
   }
 
   private async refreshAuth() {
     if (this.isLoading) return;
     this.updateAuthEverywhere({ state: AuthState.LookingForStoredUser });
+
     try {
-      const oldRefreshToken = await this._localCacheLayer.loadRefreshToken();
+      const oldRefreshToken = this._localCacheLayer.loadRefreshToken();
 
       if (!oldRefreshToken) {
         const { refreshToken, user } = await this._authenticationLayer.restoreUserSession();
-        await this._localCacheLayer.saveRefreshToken(refreshToken);
+        this._localCacheLayer.saveRefreshToken(refreshToken);
         this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
         return;
       }
 
       const { refreshToken, user } = await this._authenticationLayer.refreshAccessToken(oldRefreshToken);
-      await this._localCacheLayer.saveRefreshToken(refreshToken);
+      this._localCacheLayer.saveRefreshToken(refreshToken);
       this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
     } catch (error) {
-      this.updateAuthEverywhere({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
+      this.updateAuthEverywhere({
+        state: AuthState.NoUser,
+        error: {
+          type: AuthErrorType.FailedLookingForStoredUser,
+          message: error.message,
+        },
+      });
     }
   }
 }

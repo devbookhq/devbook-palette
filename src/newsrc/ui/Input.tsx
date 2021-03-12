@@ -1,14 +1,12 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 
 import * as Colors from 'newsrc/ui/colors';
 import * as Typography from 'newsrc/ui/typography';
 
-import { ReactComponent as searchIcon } from 'newsrc/img/search.svg';
-
 const Container = styled.div`
   width: 100%;
-  padding: 6px 4px;
+  padding: 12px 8px;
 
   display: flex;
   justify-content: space-between;
@@ -17,6 +15,10 @@ const Container = styled.div`
   background: ${Colors.Charcoal.light};
   border-radius: 4px;
   border: 1px solid ${Colors.Charcoal.lighter};
+
+  :focus-within {
+    border-color: ${Colors.Orange.normal};
+  }
 `;
 
 const StyledInput = styled.input`
@@ -26,44 +28,45 @@ const StyledInput = styled.input`
   font-size: ${Typography.Body.regular.large.fontSize};
   font-weight: ${Typography.Body.regular.large.fontWeight};
 
-
   background: transparent;
   border: none;
 
-  border-radius: 5px;
+  border-radius: 4px;
 
   ::placeholder {
     color: ${Colors.Ink.dark};
   }
 `;
 
-const SearchIcon = styled(searchIcon)`
-  height: auto;
-  width: 18px;
-`;
-
 interface InputProps {
   value?: string;
   placeholder?: string;
   onChange?: (e: any) => void;
+  onKeyDown?: (e: any) => void;
+  type?: string;
+  autoComplete?: string;
 }
 
-function Input({
+const Input = forwardRef<HTMLInputElement, InputProps>(({
   value,
   placeholder,
   onChange,
-}: InputProps) {
+  onKeyDown,
+  type,
+}, ref) => {
   return (
     <Container>
       <StyledInput
+        ref={ref}
         value={value}
         placeholder={placeholder}
         onChange={onChange}
+        onKeyDown={onKeyDown}
+        type={type}
       />
-      <SearchIcon/>
    </Container>
   );
-}
+});
 
 export default Input;
 
