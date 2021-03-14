@@ -15,6 +15,11 @@ interface Page {
 }
 */
 
+enum DocSourceVersion {
+  V0 = 'v0',
+  V1 = 'v1',
+}
+
 interface Page {
   html: string;
   documentation: string; // Name of the documentation.
@@ -34,18 +39,26 @@ export interface DocResult {
 export interface DocSource {
   slug: string;
   name: string;
+  version: DocSourceVersion;
+  iconURL: string;
 }
 
-export async function search(query: string, docSources: DocSource[]): Promise<DocResult[]> {
-  const url = isDev ? 'https://dev.usedevbook.com/search/docs' : 'https://api.usedevbook.com/search/docs';
+export async function search(query: string, docSource: DocSource): Promise<DocResult[]> {
+  const version = docSource.version === DocSourceVersion.V0 ? '' : `/${docSource.version}`;
+  const url = isDev ? `https://dev.usedevbook.com${version}/search/docs` : `https://api.usedevbook.com${version}/search/docs`;
 
-  const result = await axios.post(url, { query, filter: docSources.length > 0 ? docSources.map(ds => ds.slug) : undefined });
+  const body = {
+    query,
+    filter: docSource.version === DocSourceVersion.V0 ? [docSource.slug] : docSource.slug,
+  }
+
+  const result = await axios.post(url, body);
   return result.data.results;
 }
 
 export async function fetchDocSources(): Promise<DocSource[]> {
-  const url = isDev ? 'https://dev.usedevbook.com/search/docs' : 'https://api.usedevbook.com/search/docs';
+  const url = isDev ? 'https://dev.usedevbook.com/v1/search/docs' : 'https://api.usedevbook.com/v1/search/docs';
 
   const result = await axios.get(url);
-  return result.data.docs.map((ds: DocSource) => ({ ...ds }));
+  return result.data.docs;
 }

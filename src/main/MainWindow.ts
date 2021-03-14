@@ -8,7 +8,6 @@ import { debounce } from 'debounce';
 import isDev from './utils/isDev';
 import { IPCMessage } from '../mainCommunication/ipc';
 
-
 class MainWindow {
   public window: electron.BrowserWindow | undefined;
   private _isPinModeEnabled = false;
@@ -52,6 +51,7 @@ class MainWindow {
     const [mainWinWidth, mainWinHeight] = store.get('mainWinSize', [900, 500]);
     const [mainWinPosX, mainWinPosY] = store.get('mainWinPosition', [undefined, undefined]);
 
+
     this.window = new electron.BrowserWindow({
       x: mainWinPosX,
       y: mainWinPosY,
@@ -84,7 +84,7 @@ class MainWindow {
       if (!this.window) { return; }
     })
 
-    this.window.on('resize', debounce(() => this.resizeHandler(), 1000 * 30));
+    this.window.on('resize', debounce(() => this.resizeHandler(), 1000));
 
     this.window.on('moved', () => {
       if (this.window) {
@@ -159,6 +159,8 @@ class MainWindow {
 
   private resizeHandler() {
     if (this.window) {
+      this.window.webContents.send('console', __dirname);
+
       const [width, height] = this.window.getSize();
       this.store.set('mainWinSize', [width, height]);
       this.identifyUser(this.window);

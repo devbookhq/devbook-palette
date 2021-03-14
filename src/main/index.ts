@@ -11,6 +11,8 @@ import tmp from 'tmp';
 import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 import AutoLaunch from 'auto-launch';
+import * as Sentry from '@sentry/electron';
+Sentry.init({ dsn: 'https://221c1ac06401489f805ea5e7ae41ac3e@o551516.ingest.sentry.io/5675033' });
 
 import isDev from './utils/isDev';
 // Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.

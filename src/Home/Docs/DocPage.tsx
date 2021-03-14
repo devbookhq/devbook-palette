@@ -806,8 +806,7 @@ function DocPage({
   useEffect(() => {
     if (!containerRef?.current) return;
     const anchorEl = containerRef?.current?.querySelector(`#${anchor}`);
-    anchorEl?.scrollTo();
-    //containerRef?.current?.scrollTo(0, 0);
+    anchorEl?.scrollIntoView();
   }, [html, anchor]);
 
   return (
@@ -862,4 +861,4 @@ function DocPage({
   );
 }
 
-export default DocPage;
+export default React.memo(DocPage);

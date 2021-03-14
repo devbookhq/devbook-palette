@@ -46,7 +46,7 @@ import {
   FilePreview,
 } from 'search/gitHub';
 import {
-  search as searchDocumentations,
+  search as searchDocumentation,
   fetchDocSources,
   DocResult,
   DocSource,
@@ -198,12 +198,15 @@ const ActiveDocset = styled.div`
 `;
 
 const DocsetNameLogo = styled.div`
+  max-width: calc(100% - 136px);
   display: flex;
   align-items: center;
 `;
 
 const DocsetLogo = styled.img`
   margin-right: 8px;
+  min-height: 16px;
+  min-width: 16px;
   height: 16px;
   width: 16px;
 `;
@@ -211,12 +214,15 @@ const DocsetLogo = styled.img`
 const ActiveDocsetName = styled.div`
   position: relative;
   top: 1px;
-  margin-right: 8px;
-  font-size: 12px;
-  color: #fff;
-  font-weight: 400;
-`;
+  font-size: 13px;
 
+  color: #fff;
+  font-weight: 500;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
 
 const DocSearchResults = styled.div`
   width: 100%;
@@ -1294,7 +1300,7 @@ function Home() {
     }
   }
 
-  async function searchDocs(query: string, docSources: DocSource[]) {
+  async function searchDocs(query: string, docSource: DocSource) {
     // User has all doc sources unincluded.
     if (!state.activeDocSource) {
       searchingSuccess(ResultsFilter.Docs, []);
@@ -1303,18 +1309,18 @@ function Home() {
 
     try {
       startSearching(ResultsFilter.Docs);
-      const results = await searchDocumentations(query, docSources);
+      const results = await searchDocumentation(query, docSource);
       searchingSuccess(ResultsFilter.Docs, results);
     } catch (error) {
       searchingFail(ResultsFilter.Docs, error.message);
     }
   }
 
-  async function searchAll(query: string, filter: ResultsFilter, isGitHubConnected: boolean, docSources: DocSource[]) {
+  async function searchAll(query: string, filter: ResultsFilter, isGitHubConnected: boolean, docSource: DocSource) {
     switch (filter) {
       case ResultsFilter.StackOverflow:
         await searchSO(query);
-        await searchDocs(query, docSources);
+        await searchDocs(query, docSource);
         if (isGitHubConnected) {
           await searchGHCode(query);
         } else {
@@ -1331,11 +1337,11 @@ function Home() {
           searchingSuccess(ResultsFilter.GitHubCode, []);
         }
         await searchSO(query);
-        await searchDocs(query, docSources);
+        await searchDocs(query, docSource);
         break;
 
       case ResultsFilter.Docs:
-        await searchDocs(query, docSources);
+        await searchDocs(query, docSource);
         await searchSO(query);
         if (isGitHubConnected) {
           await searchGHCode(query);
@@ -1659,7 +1665,10 @@ function Home() {
       try {
         const allDocSources = await fetchDocSources();
         let activeDocSource = await getActiveDocSource();
-        if (!activeDocSource || !allDocSources.map(ds => ds.slug).includes(activeDocSource.slug)) {
+        // This makes sure that the last saved DocSource object is always up-to-date with the
+        // version the server returns. As long as there's still the 'slug' field.
+        activeDocSource = allDocSources.find(ds => activeDocSource ? ds.slug === activeDocSource.slug : undefined);
+        if (!activeDocSource) {
           activeDocSource = allDocSources[0];
         }
         fetchDocSourcesSuccess(allDocSources, activeDocSource);
@@ -1690,7 +1699,7 @@ function Home() {
       debouncedQuery,
       activeFilter,
       state.gitHubAccount.isConnected,
-      [state.activeDocSource ?? state.docSources[0]],
+      state.activeDocSource ?? state.docSources[0],
     );
 
     historyStore.saveDebouncedQuery(debouncedQuery);
@@ -1733,7 +1742,7 @@ function Home() {
     saveActiveDocSource(state.activeDocSource);
 
     if (debouncedQuery) {
-      searchDocs(debouncedQuery, [state.activeDocSource]);
+      searchDocs(debouncedQuery, state.activeDocSource);
     }
 
     // NOTE: We don't want to run this useEffect every time
@@ -1966,6 +1975,7 @@ function Home() {
                   <DocsResultsWrapper>
                     <ActiveDocset>
                       <DocsetNameLogo>
+                        {/*<DocsetLogo src={state.activeDocSource.iconURL}/>*/}
                         <DocsetLogo src={jsLogo}/>
                         <ActiveDocsetName>
                           {state.activeDocSource.name}
@@ -2002,14 +2012,7 @@ function Home() {
                   isDocsFilterModalOpened={state.isDocsFilterModalOpened}
                   isSearchingInDocPage={state.isSearchingInDocPage}
                   isSearchHistoryOpened={state.isSearchHistoryPreviewVisible}
-
                   docResult={activeFocusedItem as DocResult}
-
-                  /*
-                  pageURL={(activeFocusedItem as DocResult).page.pageURL}
-                  html={(activeFocusedItem as DocResult).page.html}
-                  hasHTMLExtension={(activeFocusedItem as DocResult).page.hasHTMLExtension}
-                  */
                 />
               </DocsWrapper>
             }
