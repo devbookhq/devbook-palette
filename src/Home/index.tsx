@@ -197,9 +197,22 @@ const ActiveDocset = styled.div`
 `;
 
 const DocsetNameLogo = styled.div`
+  padding: 5px;
   max-width: calc(100% - 130px);
   display: flex;
   align-items: center;
+
+  border-radius: 5px;
+  user-select: none;
+
+  :hover {
+    transition: background 170ms ease-in;
+    cursor: pointer;
+    background: #434252;
+    > div {
+      color: #fff;
+    }
+  }
 `;
 
 const DocsetIcon = styled.img`
@@ -1973,7 +1986,9 @@ function Home() {
                 >
                   <DocsResultsWrapper>
                     <ActiveDocset>
-                      <DocsetNameLogo>
+                      <DocsetNameLogo
+                        onClick={openDocsFilterModal}
+                      >
                         <DocsetIcon src={state.activeDocSource.iconURL}/>
                         <ActiveDocsetName>
                           {state.activeDocSource.name}
