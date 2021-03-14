@@ -203,12 +203,12 @@ const DocsetNameLogo = styled.div`
   align-items: center;
 `;
 
-const DocsetLogo = styled.img`
+const DocsetIcon = styled.img`
   margin-right: 8px;
-  min-height: 32px;
-  min-width: 32px;
-  height: 32px;
-  width: 32px;
+  min-height: 26px;
+  min-width: 26px;
+  height: 26px;
+  width: 26px;
 `;
 
 const ActiveDocsetName = styled.div`
@@ -1975,7 +1975,7 @@ function Home() {
                   <DocsResultsWrapper>
                     <ActiveDocset>
                       <DocsetNameLogo>
-                        <DocsetLogo src={state.activeDocSource.iconURL}/>
+                        <DocsetIcon src={state.activeDocSource.iconURL}/>
                         <ActiveDocsetName>
                           {state.activeDocSource.name}
                         </ActiveDocsetName>

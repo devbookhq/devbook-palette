@@ -97,21 +97,29 @@ const DocsList = styled.div`
   overflow: overlay;
 `;
 
-const DocRow = styled.div<{ isFocused?: boolean, lastUsedNavigation: Navigation }>`
+const DocRow = styled.div<{ isFocused?: boolean }>`
   width: 100%;
   padding: 5px 10px;
 
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
 
   border-bottom: 1px solid #262736;
-  background: ${props => props.isFocused && props.lastUsedNavigation === Navigation.Keys ? '#2C2F5A' : 'transparent'};
+  background: ${props => props.isFocused ? '#2C2F5A' : 'transparent'};
 
   :hover {
-    ${props => props.lastUsedNavigation === Navigation.Mouse ? 'background: #2C2F5A' : ''};
+    background: #2C2F5A;
     cursor: pointer;
   }
+`;
+
+const DocsetIcon = styled.img`
+  margin-right: 8px;
+  min-height: 26px;
+  min-width: 26px;
+  height: 26px;
+  width: 26px;
 `;
 
 const DocName = styled.span`
@@ -156,20 +164,12 @@ function DocsFilterModal({
 
   const [selectedIdx, setSelectedIdx] = useState(0);
 
-  const [lastUsedNavigation, setLastUseNavigation] = useState<Navigation>(Navigation.Keys);
-
   const filteredSources = useCallback(() => {
     return docSources.filter(ds => ds.name.toLowerCase().match(new RegExp(escapeRegex(searchQuery.toLowerCase()))));
   }, [docSources, searchQuery]);
 
-
   function escapeRegex(s: string) {
     return s.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-  }
-
-  function handleDocRowMouseOver(idx: number) {
-    setSelectedIdx(idx);
-    setLastUseNavigation(Navigation.Mouse);
   }
 
   function handleInputKeyDown(e: any) {
@@ -189,7 +189,6 @@ function DocsFilterModal({
     if (selectedIdx > 0) {
       setSelectedIdx(c => c -= 1);
     }
-    setLastUseNavigation(Navigation.Keys);
     selectedDocRow?.current?.scrollIntoView({ block: 'end' });
   }, { filter: () => true }, [selectedIdx]);
 
@@ -197,7 +196,6 @@ function DocsFilterModal({
     if (selectedIdx < filteredSources().length - 1) {
       setSelectedIdx(c => c += 1);
     }
-    setLastUseNavigation(Navigation.Keys);
     selectedDocRow?.current?.scrollIntoView({ block: 'end' });
   }, { filter: () => true }, [selectedIdx, filteredSources]);
 
@@ -240,11 +238,10 @@ function DocsFilterModal({
             <DocRow
               ref={selectedIdx === idx ? selectedDocRow : null}
               key={idx}
-              onMouseOver={() => handleDocRowMouseOver(idx)}
               isFocused={idx === selectedIdx}
               onClick={() => handleDocRowMouseClick(ds)}
-              lastUsedNavigation={lastUsedNavigation}
             >
+              <DocsetIcon src={ds.iconURL}/>
               <DocName>{ds.name}</DocName>
             </DocRow>
           ))}
