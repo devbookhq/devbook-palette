@@ -55,7 +55,6 @@ import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
 import Loader from 'components/Loader';
 import SignInModal from 'Auth/SignInModal';
-import jsLogo from 'img/js-logo.png';
 
 import SearchHeaderPanel, { ResultsFilter } from './SearchHeaderPanel';
 import {
@@ -1986,7 +1985,7 @@ function Home() {
                         <Hotkey
                           hotkey={electron.remote.process.platform === 'darwin'
                             ? [Key.Command, 'D']
-                            : ['CTRL', 'D']
+                            : ['Ctrl', 'D']
                           }
                         />
                         <HotkeyText>
