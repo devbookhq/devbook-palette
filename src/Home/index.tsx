@@ -198,17 +198,17 @@ const ActiveDocset = styled.div`
 `;
 
 const DocsetNameLogo = styled.div`
-  max-width: calc(100% - 136px);
+  max-width: calc(100% - 130px);
   display: flex;
   align-items: center;
 `;
 
 const DocsetLogo = styled.img`
   margin-right: 8px;
-  min-height: 16px;
-  min-width: 16px;
-  height: 16px;
-  width: 16px;
+  min-height: 32px;
+  min-width: 32px;
+  height: 32px;
+  width: 32px;
 `;
 
 const ActiveDocsetName = styled.div`
@@ -1975,8 +1975,7 @@ function Home() {
                   <DocsResultsWrapper>
                     <ActiveDocset>
                       <DocsetNameLogo>
-                        {/*<DocsetLogo src={state.activeDocSource.iconURL}/>*/}
-                        <DocsetLogo src={jsLogo}/>
+                        <DocsetLogo src={state.activeDocSource.iconURL}/>
                         <ActiveDocsetName>
                           {state.activeDocSource.name}
                         </ActiveDocsetName>
