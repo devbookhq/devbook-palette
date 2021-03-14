@@ -1489,6 +1489,7 @@ function Home() {
     activeFilter,
     state.modalItem,
     state.isSearchHistoryPreviewVisible,
+    state.isDocsFilterModalOpened,
     state.historyIndex,
     setHistoryIndex,
   ]);
@@ -1514,6 +1515,7 @@ function Home() {
     activeFilter,
     state.modalItem,
     state.isSearchHistoryPreviewVisible,
+    state.isDocsFilterModalOpened,
     state.historyIndex,
     state.history,
   ]);
@@ -1857,11 +1859,8 @@ function Home() {
           && (state.gitHubAccount.isConnected || activeFilter !== ResultsFilter.GitHubCode)
           && hasActiveFilterEmptyResults
           && !isActiveFilterLoading
-          // Don't show "Nothing found" when user is searching docs but disabled
-          // all doc sources.
-          && !(activeFilter === ResultsFilter.Docs && (!state.activeDocSource || !isUserSignedInWithOrWithoutMetadata))
           &&
-          <InfoMessage>Nothing found</InfoMessage>
+          <InfoMessage>Nothing found. Try something else.</InfoMessage>
         }
 
         {activeFilter === ResultsFilter.GitHubCode

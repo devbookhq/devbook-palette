@@ -73,6 +73,7 @@ class MainWindow {
         worldSafeExecuteJavaScript: true,
         contextIsolation: false,
         spellcheck: false,
+        preload: isDev ? undefined : path.join(__dirname, 'sentryRendererSetup.js'),
       },
     });
 

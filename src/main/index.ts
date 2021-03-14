@@ -12,9 +12,13 @@ import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 import AutoLaunch from 'auto-launch';
 import * as Sentry from '@sentry/electron';
-Sentry.init({ dsn: 'https://221c1ac06401489f805ea5e7ae41ac3e@o551516.ingest.sentry.io/5675033' });
 
 import isDev from './utils/isDev';
+
+Sentry.init({ dsn: 'https://221c1ac06401489f805ea5e7ae41ac3e@o551516.ingest.sentry.io/5675033' });
+
+app.disableHardwareAcceleration();
+
 // Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.
 // Top-level property 'productName' in the package.json overwrites top-level property 'name' as an app identifier.
 // At the same time, the 'productName' is required to be top-level by ToDesktop - we used 'productName' in a 'build' property before.

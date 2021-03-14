@@ -28,6 +28,7 @@ class OnboardingWindow {
         nodeIntegration: true,
         enableRemoteModule: true,
         worldSafeExecuteJavaScript: true,
+        preload: isDev ? undefined : path.join(__dirname, 'sentryRendererSetup.js'),
       },
     });
 
