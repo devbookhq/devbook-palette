@@ -2,6 +2,7 @@ import axios from 'axios';
 
 import { isDev } from 'mainCommunication';
 
+/*
 interface Page {
   route: string[];
   breadcrumbs: string[];
@@ -10,6 +11,17 @@ interface Page {
   name: string;
   summary: string;
   hasHTMLExtension: boolean;
+  pageURL: string;
+}
+*/
+
+interface Page {
+  html: string;
+  documentation: string; // Name of the documentation.
+  name: string; // Title of the found section.
+  breadcrumbs: string[];
+  summary: string;
+  anchor: string; // ID of the element where the found section starts.
   pageURL: string;
 }
 

@@ -43,10 +43,10 @@ class MainWindow {
   }
 
   public constructor(
-    PORT: number, 
-    private store: ElectronStore, 
-    hideWindow: (window?: electron.BrowserWindow) => void, 
-    private trackShowApp: (window?: electron.BrowserWindow) => void, 
+    PORT: number,
+    private store: ElectronStore,
+    hideWindow: (window?: electron.BrowserWindow) => void,
+    private trackShowApp: (window?: electron.BrowserWindow) => void,
     private identifyUser: (window?: electron.BrowserWindow) => void,
     startHidden?: boolean) {
     const [mainWinWidth, mainWinHeight] = store.get('mainWinSize', [900, 500]);
@@ -84,7 +84,7 @@ class MainWindow {
       if (!this.window) { return; }
     })
 
-    this.window.on('resize', debounce(() => this.resizeHandler(), 5000));
+    this.window.on('resize', debounce(() => this.resizeHandler(), 1000 * 30));
 
     this.window.on('moved', () => {
       if (this.window) {
@@ -158,11 +158,11 @@ class MainWindow {
   }
 
   private resizeHandler() {
-    if (this.window) {      
+    if (this.window) {
       const [width, height] = this.window.getSize();
       this.store.set('mainWinSize', [width, height]);
       this.identifyUser(this.window);
-    }      
+    }
   }
 
   public close() {

@@ -10,6 +10,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 
 import electron, { openLink } from 'mainCommunication';
 import useDebounce from 'hooks/useDebounce';
+import { DocResult } from 'search/docs';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
 
 // Leave this here until we have separate CSS file for all docs (some are still not finished).
@@ -160,8 +161,7 @@ const DocPageContainer = styled.div`
     background: #e46804;
   }
 
-  .badge {
-    font-family: 'Roboto Mono';
+  .badge { font-family: 'Roboto Mono';
     font-weight: 600;
     text-transform: lowercase;
     font-size: 13px;
@@ -604,24 +604,37 @@ interface Highlight {
 }
 
 interface DocPageProps {
+  searchInputRef: any;
   isDocsFilterModalOpened: boolean;
   isSearchingInDocPage: boolean;
+  isSearchHistoryOpened: boolean;
+
+  docResult: DocResult;
+
+  /*
   hasHTMLExtension: boolean;
   pageURL: string;
   html: string;
-  searchInputRef: any;
-  isSearchHistoryOpened: boolean;
+  */
 }
 
 function DocPage({
+  searchInputRef,
   isDocsFilterModalOpened,
   isSearchingInDocPage,
+  isSearchHistoryOpened,
+
+  docResult,
+
+
+  /*
   pageURL,
   hasHTMLExtension,
   html,
-  searchInputRef,
-  isSearchHistoryOpened,
+  */
 }: DocPageProps) {
+  const { pageURL, html, anchor } = docResult.page;
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedSearchQuery = useDebounce(searchQuery, 0);
@@ -704,12 +717,7 @@ function DocPage({
     if (target.tagName === 'A' || target.parentNode.tagName === 'A') {
       let link = target.getAttribute('href') || target.parentNode.getAttribute('href');
       if (!link.startsWith('http://') && !link.startsWith('https://')) {
-
-        const urlWithoutExtension = new URL(link, pageURL);
-        const hash = urlWithoutExtension.hash;
-        const urlWithoutExtensionAndHash = new URL('', urlWithoutExtension);
-
-        link = urlWithoutExtensionAndHash.href + (hasHTMLExtension ? '.html' : '') + hash;
+        link = new URL(link, pageURL).href; // Convert relative links to absolute.
       }
       openLink(link);
       e.preventDefault();
@@ -718,11 +726,7 @@ function DocPage({
     if (target.tagName === 'IMG') {
       let link = target.getAttribute('src');
       if (!link.startsWith('http://') && !link.startsWith('https://')) {
-        const urlWithoutExtension = new URL(link, pageURL);
-        const hash = urlWithoutExtension.hash;
-        const urlWithoutExtensionAndHash = new URL('', urlWithoutExtension);
-
-        link = urlWithoutExtensionAndHash.href + (hasHTMLExtension ? '.html' : '') + hash;
+        link = new URL(link, pageURL).href; // Convert relative links to absolute.
       }
       openLink(link);
       e.preventDefault();
@@ -800,8 +804,11 @@ function DocPage({
   }, [setHighlights, debouncedSearchQuery]);
 
   useEffect(() => {
-    containerRef?.current?.scrollTo(0, 0);
-  }, [html]);
+    if (!containerRef?.current) return;
+    const anchorEl = containerRef?.current?.querySelector(`#${anchor}`);
+    anchorEl?.scrollTo();
+    //containerRef?.current?.scrollTo(0, 0);
+  }, [html, anchor]);
 
   return (
     <>

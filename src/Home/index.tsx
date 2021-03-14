@@ -1998,13 +1998,18 @@ function Home() {
                   </DocsResultsWrapper>
                 </Resizable>
                 <DocPage
+                  searchInputRef={docPageSearchInputRef}
                   isDocsFilterModalOpened={state.isDocsFilterModalOpened}
                   isSearchingInDocPage={state.isSearchingInDocPage}
+                  isSearchHistoryOpened={state.isSearchHistoryPreviewVisible}
+
+                  docResult={activeFocusedItem as DocResult}
+
+                  /*
                   pageURL={(activeFocusedItem as DocResult).page.pageURL}
                   html={(activeFocusedItem as DocResult).page.html}
                   hasHTMLExtension={(activeFocusedItem as DocResult).page.hasHTMLExtension}
-                  searchInputRef={docPageSearchInputRef}
-                  isSearchHistoryOpened={state.isSearchHistoryPreviewVisible}
+                  */
                 />
               </DocsWrapper>
             }
