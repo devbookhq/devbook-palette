@@ -114,6 +114,8 @@ function TrayPage(props: TrayPageProps) {
     if (electron.remote.process.platform === 'darwin') {
       if (selectedShortcut === 'Alt+Space') return 'Option+Space';
       else if (selectedShortcut === 'Command+Alt+Space') return 'Command+Option+Space';
+      else if (selectedShortcut === 'Control+Alt+Space') return 'Control+Option+Space';
+      else if (selectedShortcut === 'Shift+Alt+Space') return 'Shift+Option+Space';
       else return selectedShortcut;
     }
     return selectedShortcut;
@@ -143,6 +145,8 @@ function TrayPage(props: TrayPageProps) {
                 <option value="Command+Space">Command+Space</option>
                 <option value="Command+Shift+Space">Command+Shift+Space</option>
                 <option value="Command+Alt+Space">Command+Option+Space</option>
+                <option value="Control+Alt+Space">Control+Option+Space</option>
+                <option value="Shift+Alt+Space">Shift+Option+Space</option>
               </>
             }
             {electron.remote.process.platform !== 'darwin' &&
@@ -150,6 +154,7 @@ function TrayPage(props: TrayPageProps) {
                 <option value="Alt+Space">Alt+Space</option>
                 <option value="Control+Shift+Space">Control+Shift+Space</option>
                 <option value="Control+Alt+Space">Control+Alt+Space</option>
+                <option value="Shift+Alt+Space">Shift+Alt+Space</option>
               </>
             }
           </Select>
