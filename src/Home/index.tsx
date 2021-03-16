@@ -1085,10 +1085,10 @@ function Home() {
     let url = '';
     // TODO: This isn't a very good differentiation.
     // Can we do it better in a more TypeScript way?
-    if ((item as StackOverflowResult).question) {
+    if ((item as StackOverflowResult)?.question) {
       // Item is StackOverflowResult.
       url = (item as StackOverflowResult).question.link;
-    } else if ((item as CodeResult).fileURL) {
+    } else if ((item as CodeResult)?.fileURL) {
       // Item is CodeResult.
       url = (item as CodeResult).fileURL;
     }
@@ -1257,7 +1257,6 @@ function Home() {
   const openFocusedSOItemInBrowser = useCallback(() => {
     const idx = state.results[ResultsFilter.StackOverflow].focusedIdx.idx;
     const item = state.results[ResultsFilter.StackOverflow].items[idx] as StackOverflowResult;
-    console.log('OPEN IN BROWSER', item);
     if (item) openLink(item.question.link);
   }, [state.results]);
 

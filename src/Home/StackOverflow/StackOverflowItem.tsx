@@ -205,7 +205,7 @@ function StackOverflowItem({
   }
 
   function handleOpenExternalLinkButton() {
-    openLink(soResult.question.link);
+    openLink(soResult?.question.link);
   }
 
   function getDateString(timestamp: number) {
@@ -359,7 +359,7 @@ function StackOverflowItem({
           <QuestionTitle
             onClick={handleQuestionTitleClick}
             dangerouslySetInnerHTML={{
-              __html: soResult.question.title,
+              __html: soResult?.question.title ?? '',
             }}
           />
           <ExternalLinkButton onClick={handleOpenExternalLinkButton}>
@@ -369,9 +369,9 @@ function StackOverflowItem({
 
         <QuestionMetadata>
           <QuestionVotes>
-            {soResult.question.votes} {soResult.question.votes === 1 || soResult.question.votes === -1 ? 'Upvote' : 'Upvotes'}
+            {soResult?.question.votes ?? ''} {soResult?.question.votes === 1 || soResult?.question.votes === -1 ? 'Upvote' : 'Upvotes'}
           </QuestionVotes>
-          <QuestionDate>{getDateString(soResult.question.timestamp * 1000)}</QuestionDate>
+          <QuestionDate>{soResult ? getDateString(soResult.question.timestamp * 1000) : ''}</QuestionDate>
         </QuestionMetadata>
       </Header>
 
