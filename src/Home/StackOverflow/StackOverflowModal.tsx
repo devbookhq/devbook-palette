@@ -187,7 +187,7 @@ function StackOverflowModal({
   useOnClickOutside(modalRef, onCloseRequest);
 
   function handleQuestionTitleClick(e: any) {
-    openLink(soResult.question.link);
+    openLink(soResult?.question.link);
     e.preventDefault();
   }
 
@@ -246,26 +246,27 @@ function StackOverflowModal({
       <ScrollingContent
         ref={contentRef}
       >
-        <Question>
-          <Header>
-            <QuestionTitle
-              href={soResult.question.link}
-              onClick={handleQuestionTitleClick}
-              dangerouslySetInnerHTML={{
-                __html: soResult.question.title,
-              }}
+        
+        {soResult &&
+          <Question>
+            <Header>            
+              <QuestionTitle
+                href={soResult.question.link}
+                onClick={handleQuestionTitleClick}
+                dangerouslySetInnerHTML={{
+                  __html: soResult.question.title,
+                }}
+              />
+              <QuestionMetadata>
+                <QuestionVotes>{soResult.question.votes} Upvotes</QuestionVotes>
+                <QuestionDate>{getDateString(soResult.question.timestamp * 1000)}</QuestionDate>
+              </QuestionMetadata>
+            </Header>
+            <QuestionBody
+              html={soResult.question.html}
             />
-            <QuestionMetadata>
-              <QuestionVotes>{soResult.question.votes} Upvotes</QuestionVotes>
-              <QuestionDate>{getDateString(soResult.question.timestamp * 1000)}</QuestionDate>
-            </QuestionMetadata>
-          </Header>
-
-          <QuestionBody
-            html={soResult.question.html}
-          />
-        </Question>
-
+          </Question>
+        }                                  
         <AnswersHeading>Answers</AnswersHeading>
         <Answers>
           {sortedAnswers.map((a, idx) => (
