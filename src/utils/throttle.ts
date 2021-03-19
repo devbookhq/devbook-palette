@@ -16,7 +16,6 @@ export default function throttle(func: any, wait: number, options?: any) {
     if (!timeout) context = args = null;
   };
 
-
   return function() {
     var now = Date.now();
     if (!previous && options.leading === false) previous = now;
