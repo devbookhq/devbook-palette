@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, { useRef } from 'react';
 import styled from 'styled-components';
 import Prism from 'prismjs';
 
@@ -185,13 +185,6 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
   html,
   tabIndex,
 }, ref) => {
-//function StackOverflowBody({
-//  className,
-//  html,
-//  tabIndex,
-//}: StackOverflowBodyProps) {
-  //const bodyRef = React.useRef<HTMLDivElement>(null);
-
   // Open all links in the browser.
   function handleBodyClick(e: any) {
     const target = e.target || e.srcElement;
@@ -227,25 +220,15 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
     return el.outerHTML || '<html></html>';
   }
 
-  /*
-  React.useEffect(() => {
-    if (!bodyRef?.current) return;
-    const codeSnippets = bodyRef.current.getElementsByTagName('pre');
-    console.log('snippets', codeSnippets);
-  }, []);
-  */
-
   return (
     <Body
       ref={ref}
-      //ref={bodyRef}
       tabIndex={tabIndex}
       className={className}
       dangerouslySetInnerHTML={{__html: highlightCode(html)}}
       onClick={handleBodyClick}
     />
   );
-//}
 });
 
 export default StackOverflowBody;

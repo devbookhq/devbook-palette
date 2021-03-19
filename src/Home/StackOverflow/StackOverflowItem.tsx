@@ -343,7 +343,7 @@ function StackOverflowItem({
         }, 180);
         trackCopyCodeSnippetStackOverflow();
       }
-    }, { filter: () => true }, [focusState, codeSnippets]);
+  }, { filter: () => true }, [focusState, codeSnippets]);
 
   return (
     <Container
