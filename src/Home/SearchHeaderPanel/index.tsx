@@ -125,7 +125,7 @@ const StyledLoader = styled(Loader)`
   right: 2px; `;
 
 const SearchInputContainer = styled.div<{ isFocused?: boolean }>`
-  min-height: 46px;
+  min-height: 58px;
   width: 100%;
   padding-bottom: 8px;
 
@@ -216,7 +216,6 @@ const HotkeyText = styled.div`
 interface SearchHeaderPanelProps {
   placeholder?: string;
   value: string;
-  //onDebouncedChange: (value: string) => void;
   onChange: (value: string) => void;
 
   activeFilter: ResultsFilter;
@@ -233,7 +232,6 @@ interface SearchHeaderPanelProps {
 function SearchHeaderPanel({
   value,
   placeholder,
-  //onDebouncedChange,
   onChange,
   activeFilter,
   onFilterSelect,
