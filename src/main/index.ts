@@ -2,12 +2,10 @@ import * as path from 'path';
 import * as process from 'process';
 import * as electron from 'electron';
 import Store from 'electron-store';
-import fs from 'fs';
 import {
   app,
   ipcMain,
 } from 'electron';
-import tmp from 'tmp';
 import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 import AutoLaunch from 'auto-launch';
@@ -36,8 +34,6 @@ import {
   trackOnboardingFinished,
   trackOnboardingStarted,
   trackSearchDebounced,
-  trackConnectGitHubFinished,
-  trackConnectGitHubStarted,
   trackModalOpened,
   trackShortcut,
   changeAnalyticsUser,
@@ -62,7 +58,6 @@ import {
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
-import GitHubOAuth from './GitHubOAuth';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
 
@@ -180,9 +175,6 @@ function getIsOpeningHidden() {
   }
 }
 
-// Automatically delete temporary files after the application exit.
-tmp.setGracefulCleanup();
-
 // https://stackoverflow.com/questions/41664208/electron-tray-icon-change-depending-on-dark-theme
 let trayIcon: electron.NativeImage;
 let taskBarIcon: electron.NativeImage;
@@ -212,24 +204,7 @@ let preferencesWindow: PreferencesWindow | undefined = undefined;
 
 const store = new Store();
 
-const gitHubOAuth = new GitHubOAuth();
-
 identifyUser();
-
-gitHubOAuth.emitter.on('access-token', async ({ accessToken }: { accessToken: string }) => {
-  mainWindow?.webContents?.send('github-access-token', { accessToken });
-  mainWindow?.show();
-  preferencesWindow?.webContents?.send('github-access-token', { accessToken });
-  store.set('github', accessToken);
-  trackConnectGitHubFinished();
-});
-
-gitHubOAuth.emitter.on('error', ({ message }: { message: string }) => {
-  console.error(message);
-  mainWindow?.webContents?.send('github-error', { message });
-  mainWindow?.show();
-  preferencesWindow?.webContents?.send('github-error', { message });
-});
 
 function hideMainWindow() {
   mainWindow?.hide();
@@ -382,12 +357,6 @@ ipcMain.handle('get-global-shortcut', () => {
   return store.get('globalShortcut', 'Alt+Space');
 });
 
-ipcMain.on('connect-github', () => {
-  gitHubOAuth.requestOAuth();
-  hideMainWindow();
-  trackConnectGitHubStarted(mainWindow?.window);
-});
-
 ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => {
   openPreferences(page);
 });
@@ -438,8 +407,6 @@ ipcMain.on('save-search-filter', (_, { filter }: { filter: string }) => {
   store.set('searchFilter', filter);
 });
 
-ipcMain.handle('github-access-token', () => store.get('github', null));
-
 let postponeHandler: NodeJS.Timeout | undefined;
 
 ipcMain.on('postpone-update', () => {
@@ -452,37 +419,6 @@ ipcMain.on('postpone-update', () => {
     postponeHandler = setTimeout(() => {
       mainWindow?.webContents?.send('update-available', { isReminder: true });
     }, 19 * 60 * 60 * 1000) as unknown as NodeJS.Timeout;
-  }
-});
-
-ipcMain.handle('remove-github', async () => {
-  store.delete('github');
-  mainWindow?.webContents?.send('github-access-token', { accessToken: null });
-  preferencesWindow?.webContents?.send('github-access-token', { accessToken: null });
-});
-
-ipcMain.handle('create-tmp-file', async (_, { filePath, fileContent }: { filePath: string, fileContent: string }) => {
-  const basename = path.basename(filePath);
-  try {
-    const { name } = await new Promise<{ name: string, fd: number }>((resolve, reject) => {
-      tmp.file({
-        template: `tmp-XXXXXX-${basename}`,
-      }, (error, name, fd) => {
-        if (error) {
-          return reject(error);
-        }
-
-        fs.write(fd, fileContent, (error) => {
-          if (error) {
-            return reject(error);
-          }
-          return resolve({ name, fd });
-        });
-      });
-    });
-    return name;
-  } catch (error) {
-    console.error(error.message);
   }
 });
 

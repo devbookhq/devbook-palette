@@ -45,16 +45,8 @@ export function openLink(url: string) {
   return electron.shell.openExternal(url);
 }
 
-export function connectGitHub() {
-  electron.ipcRenderer.send('connect-github');
-}
-
 export function changeUserInMain(user?: { userID: string, email: string }) {
   electron.ipcRenderer.send(IPCMessage.ChangeUserInMain, user);
-}
-
-export function removeGitHub() {
-  return electron.ipcRenderer.invoke('remove-github');
 }
 
 export function getSavedSearchQuery(): Promise<string> {
@@ -131,14 +123,6 @@ export function restartAndUpdate(location: 'banner' | 'preferences') {
 
 export function getUpdateStatus(): Promise<boolean> {
   return electron.ipcRenderer.invoke('update-status');
-}
-
-export function getGithubAccessToken(): Promise<string | null> {
-  return electron.ipcRenderer.invoke('github-access-token');
-}
-
-export function createTmpFile(options: { fileContent: string, filePath: string }): Promise<string | undefined> {
-  return electron.ipcRenderer.invoke('create-tmp-file', options);
 }
 
 export function saveDocSearchResultsDefaultWidth(width: number) {

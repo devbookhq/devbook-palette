@@ -28,9 +28,6 @@ enum AnalyticsEvent {
   ContinueIntoAppButtonClicked = 'Continue into app button clicked',
   SignOutButtonClicked = 'Sign out button clicked',
 
-  ConnectingGitHubStarted = 'Connecting GitHub started',
-  ConnectingGitHubFinished = 'Connecting GitHub finished',
-
   EnablePinMode = 'Enable pin mode',
   DisablePinMode = 'Disable pin mode',
 
@@ -157,37 +154,6 @@ export function trackOnboardingFinished(searchWindow?: electron.BrowserWindow) {
 
   client.track({
     event: AnalyticsEvent.OnboardingFinished,
-    anonymousId: anonymousID,
-    userId: userID,
-    properties: {
-      isSignedIn,
-      platform,
-      appVersion,
-      searchWindowWidth: searchWindow?.getSize()[0],
-      searchWindowHeight: searchWindow?.getSize()[1],
-    },
-  });
-
-}
-
-export function trackConnectGitHubStarted(searchWindow?: electron.BrowserWindow) {
-  client.track({
-    event: AnalyticsEvent.ConnectingGitHubStarted,
-    anonymousId: anonymousID,
-    userId: userID,
-    properties: {
-      isSignedIn,
-      platform,
-      appVersion,
-      searchWindowWidth: searchWindow?.getSize()[0],
-      searchWindowHeight: searchWindow?.getSize()[1],
-    },
-  });
-}
-
-export function trackConnectGitHubFinished(searchWindow?: electron.BrowserWindow) {
-  client.track({
-    event: AnalyticsEvent.ConnectingGitHubFinished,
     anonymousId: anonymousID,
     userId: userID,
     properties: {

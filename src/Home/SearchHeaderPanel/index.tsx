@@ -299,8 +299,7 @@ function SearchHeaderPanel({
   }, { filter: () => true }, [isPinModeEnabled, setIsPinModeEnabled]);
 
   function getResultsFilterDisplayName(resultsFilter: ResultsFilter) {
-    if (resultsFilter === ResultsFilter.GitHubCode) { return 'GitHub'; }
-    else if (resultsFilter === ResultsFilter.StackOverflow) { return 'Stack Overflow'; }
+    if (resultsFilter === ResultsFilter.StackOverflow) { return 'Stack Overflow'; }
     return resultsFilter;
   }
 

@@ -33,7 +33,6 @@ const FilterButton = styled.button<{ selected?: boolean }>`
 
 export enum ResultsFilter {
   StackOverflow = 'StackOverflow',
-  GitHubCode = 'GitHubCode',
   Docs = 'Docs',
 }
 
@@ -48,9 +47,6 @@ function ResultsFiltersMenu({
 }: ResultsFiltersMenuProps) {
 
   function getResultsFilterDisplayName(resultsFilter: ResultsFilter) {
-    if (resultsFilter === ResultsFilter.GitHubCode) {
-      return 'GitHub';
-    }
     return resultsFilter;
   }
 
