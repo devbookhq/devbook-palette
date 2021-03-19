@@ -149,7 +149,6 @@ const EnableDocSourcesButton = styled(Button)`
   border-radius: 5px;
 `;
 
-
 const DocsWrapper = styled.div`
   width: 100%;
   height: 100%;
@@ -1350,26 +1349,26 @@ function Home() {
     setHistory,
   ])
 
-  // 'enter' hotkey - search.
-  useHotkeys('enter', (event) => {
-    if (state.isSearchHistoryPreviewVisible && state.history.length > 0) {
-      setSearchQuery(state.history[state.historyIndex]);
-      toggleSearchHistoryPreview(false);
-      trackSelectHistoryQuery();
-      invokeSearch(state.history[state.historyIndex]);
-      return;
-    }
+  // // 'enter' hotkey - search.
+  // useHotkeys('enter', (event) => {
+  //   if (state.isSearchHistoryPreviewVisible && state.history.length > 0) {
+  //     setSearchQuery(state.history[state.historyIndex]);
+  //     toggleSearchHistoryPreview(false);
+  //     trackSelectHistoryQuery();
+  //     invokeSearch(state.history[state.historyIndex]);
+  //     return;
+  //   }
 
-    if (state.searchMode !== SearchMode['On enter press']) return;
-    invokeSearch(state.search.query);
-  }, { filter: () => true }, [
-    state.search.query,
-    state.searchMode,
-    state.isSearchHistoryPreviewVisible,
-    state.history,
-    state.historyIndex,
-    invokeSearch,
-  ]);
+  //   if (state.searchMode !== SearchMode['On enter press']) return;
+  //   invokeSearch(state.search.query);
+  // }, { filter: () => true }, [
+  //   state.search.query,
+  //   state.searchMode,
+  //   state.isSearchHistoryPreviewVisible,
+  //   state.history,
+  //   state.historyIndex,
+  //   invokeSearch,
+  // ]);
 
   // 'shift+enter' hotkey - open the focused result in a modal.
   useHotkeys('shift+enter', () => {
@@ -1637,9 +1636,10 @@ function Home() {
 
       <Container>
         <SearchHeaderPanel
-          value={state.search.query}
           placeholder={activeFilter === ResultsFilter.StackOverflow ? 'Search StackOverflow' : 'Search documentation'}
-          onChange={handleSearchInputChange}
+          //onChange={handleSearchInputChange}
+          onChange={() => { }}
+          invokeSearch={invokeSearch}
           activeFilter={activeFilter}
           onFilterSelect={f => setSearchFilter(f)}
           isLoading={isActiveFilterLoading}

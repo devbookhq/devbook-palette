@@ -4,6 +4,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
+import { useHotkeys } from 'react-hotkeys-hook';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 
 const Input = styled.input`
@@ -27,9 +28,7 @@ const Input = styled.input`
 interface SearchInputProps {
   placeholder?: string;
   onChange: (value: string) => void;
-
-  initialValue: string;
-  value: string;
+  invokeSearch: (query: string) => void;
 
   inputRef: React.RefObject<HTMLInputElement>;
 
@@ -45,26 +44,41 @@ function SearchInput({
   inputRef,
   onChange,
   isModalOpened,
+  invokeSearch,
   isSignInModalOpened,
   isDocsFilterModalOpened,
   onInputFocusChange,
-  value,
 }: SearchInputProps) {
+  const [value, setValue] = useState('');
+  const [lastValue, setLastValue] = useState('');
 
   function handleChangeValue(e: any) {
-    onChange(e.target.value);
+    setValue(e.target.value);
   }
 
   function handleInputKeyDown(e: any) {
     // We want to prevent cursor from moving when the up or down arrow is pressed.
     // The default behavior is that cursor moves either to the start or to the end.
-    // 38 - up arrow
+    // 38 - up arrow 
     // 40 - down arrow
     if (e.keyCode === 38 || e.keyCode === 40) {
       e.preventDefault();
       return;
     }
   }
+
+  // 'enter' hotkey - search.
+  useHotkeys('enter', (event) => {
+    if (lastValue === value) return;
+
+    invokeSearch(value);
+    setLastValue(value);
+  }, { filter: () => true }, [
+    invokeSearch,
+    value,
+    lastValue,
+  ]);
+
 
   useIPCRenderer('did-show-main-window', () => {
     if (!isModalOpened && inputRef.current) {

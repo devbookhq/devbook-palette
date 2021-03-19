@@ -216,7 +216,6 @@ const HotkeyText = styled.div`
 
 interface SearchHeaderPanelProps {
   placeholder?: string;
-  value: string;
   onChange: (value: string) => void;
 
   activeFilter: ResultsFilter;
@@ -224,6 +223,7 @@ interface SearchHeaderPanelProps {
   onInputFocusChange: (isFocused: boolean) => void;
   onToggleSearchHistoryClick: (e: any) => void;
   onToggleSearchClick: (e: any) => void;
+  invokeSearch: (query: string) => void;
 
   isLoading?: boolean;
   isModalOpened?: boolean;
@@ -234,9 +234,9 @@ interface SearchHeaderPanelProps {
 }
 
 function SearchHeaderPanel({
-  value,
   placeholder,
   onChange,
+  invokeSearch,
   activeFilter,
   onFilterSelect,
   searchMode,
@@ -321,11 +321,9 @@ function SearchHeaderPanel({
       >
         <InputLoaderContainer>
           <SearchInput
-            value={value}
             inputRef={inputRef}
             onInputFocusChange={handleInputFocusChange}
-            initialValue={value}
-            // value={value}
+            invokeSearch={invokeSearch}
             placeholder={placeholder}
             onChange={onChange}
             isModalOpened={isModalOpened}
