@@ -14,7 +14,7 @@ class HistoryStore {
 
   private static readonly maxHistorySize = 20;
   private static entries = HistoryStore.store.get(HistoryStore.searchHistoryEntriesStoreName, []) as HistoryEntry[];
-  static readonly saveDebouncedQuery = debounce(HistoryStore.saveQuery, 4000);
+  static readonly saveDebouncedQuery = debounce(HistoryStore.saveQuery, 200);
 
   static get queries() {
     console.log(HistoryStore.entries);

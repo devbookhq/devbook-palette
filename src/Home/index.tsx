@@ -903,7 +903,6 @@ function Home() {
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
   const debouncedQuery = useDebounce(state.search.query.trim(), 400);
-  // const debouncedQuery = useDebounce(state.search.query.trim(), 400);
   const debouncedLastSearchedQuery = state.search.lastSearchedQuery;
 
   const activeFilter = useMemo(() => state.search.filter, [state.search.filter]);
@@ -1472,6 +1471,7 @@ function Home() {
     setSearchMode(mode);
   });
 
+  // Starts the initial search after the app loads.
   useEffect(() => {
     if (state.searchMode === undefined
       && state.search.query !== state.search.lastSearchedQuery
@@ -1640,7 +1640,7 @@ function Home() {
       <Container>
         <SearchHeaderPanel
           value={state.search.query}
-          placeholder={activeFilter === ResultsFilter.StackOverflow ? "Search StackOverflow" : "Search documentation"}
+          placeholder={activeFilter === ResultsFilter.StackOverflow ? 'Search StackOverflow' : 'Search documentation'}
           onChange={handleSearchInputChange}
           activeFilter={activeFilter}
           onFilterSelect={f => setSearchFilter(f)}
@@ -1665,7 +1665,7 @@ function Home() {
             */}
             {activeFilter !== ResultsFilter.Docs
               &&
-              <InfoMessage>Type your search query</InfoMessage>
+              <InfoMessage>Type your search query.</InfoMessage>
             }
           </>
         }
@@ -1673,7 +1673,7 @@ function Home() {
         {!state.search.query
           && state.searchMode !== SearchMode['As you type']
           && !isActiveFilterLoading
-          // && (state.results.Docs.items.length === 0 && activeFilter === ResultsFilter.Docs) || (state.results.StackOverflow.items.length === 0 && activeFilter === ResultsFilter.StackOverflow)
+          && hasActiveFilterEmptyResults
           &&
           <>
             {/* 
@@ -1698,9 +1698,44 @@ function Home() {
         {state.search.query
           && hasActiveFilterEmptyResults
           && !isActiveFilterLoading
+          && state.searchMode === SearchMode['As you type']
           && activeFilter !== ResultsFilter.Docs
           &&
-          <InfoMessage>Nothing found. Try something else.</InfoMessage>
+          <InfoMessage>Nothing found. Try a different query.</InfoMessage>
+        }
+
+        {(state.search.query && state.search.query === state.search.lastSearchedQuery)
+          && hasActiveFilterEmptyResults
+          && !isActiveFilterLoading
+          && state.searchMode !== SearchMode['As you type']
+          && activeFilter !== ResultsFilter.Docs
+          &&
+          <InfoWrapper>
+            <InfoMessageLeft>
+              Nothing found. Try a different query and then press
+                </InfoMessageLeft>
+            <TextHotkey hotkey={['Enter']} />
+            <InfoMessageRight>
+              .
+            </InfoMessageRight>
+          </InfoWrapper>
+        }
+
+        {(state.search.query && state.search.query !== state.search.lastSearchedQuery)
+          && hasActiveFilterEmptyResults
+          && !isActiveFilterLoading
+          && state.searchMode !== SearchMode['As you type']
+          && activeFilter !== ResultsFilter.Docs
+          &&
+          <InfoWrapper>
+            <InfoMessageLeft>
+              Type your search query and press
+          </InfoMessageLeft>
+            <TextHotkey hotkey={['Enter']} />
+            <InfoMessageRight>
+              to search.
+          </InfoMessageRight>
+          </InfoWrapper>
         }
 
         {activeFilter === ResultsFilter.Docs
@@ -1820,9 +1855,63 @@ function Home() {
               <EmptyDocPage>
                 {!isActiveFilterLoading &&
                   <>
+                    {(state.search.query && state.search.query === state.search.lastSearchedQuery)
+                      && state.searchMode !== SearchMode['As you type']
+                      &&
+                      <InfoWrapper>
+                        <InfoMessageLeft>
+                          Nothing found. Try a different query and then press
+                          </InfoMessageLeft>
+                        <TextHotkey hotkey={['Enter']} />
+                        <InfoMessageRight>
+                          .
+                      </InfoMessageRight>
+                      </InfoWrapper>
+                    }
+
+                    {(state.search.query && state.search.query !== state.search.lastSearchedQuery)
+                      && state.searchMode !== SearchMode['As you type']
+                      &&
+                      <InfoWrapper>
+                        <InfoMessageLeft>
+                          Type your search query and press
+                        </InfoMessageLeft>
+                        <TextHotkey hotkey={['Enter']} />
+                        <InfoMessageRight>
+                          to search.
+                    </InfoMessageRight>
+                      </InfoWrapper>
+                    }
+
+
+                    {!state.search.query
+                      && state.searchMode !== SearchMode['As you type']
+                      &&
+                      <InfoWrapper>
+                        <InfoMessageLeft>
+                          Type your search query and press
+                          </InfoMessageLeft>
+                        <TextHotkey hotkey={['Enter']} />
+                        <InfoMessageRight>
+                          to search.
+                      </InfoMessageRight>
+                      </InfoWrapper>
+                    }
+
                     {state.search.query
-                      ? <>Nothing found. Try different query.</>
-                      : <>Type your search query</>
+                      && state.searchMode === SearchMode['As you type']
+                      &&
+                      <InfoMessage>
+                        Nothing found. Try a different query.
+                      </InfoMessage>
+                    }
+
+                    {!state.search.query
+                      && state.searchMode === SearchMode['As you type']
+                      &&
+                      <InfoMessage>
+                        Type your search query.
+                      </InfoMessage>
                     }
                   </>
                 }
