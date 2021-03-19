@@ -201,12 +201,6 @@ interface DocPageProps {
   isSearchHistoryOpened: boolean;
 
   docResult: DocResult;
-
-  /*
-  hasHTMLExtension: boolean;
-  pageURL: string;
-  html: string;
-  */
 }
 
 function DocPage({
@@ -214,15 +208,7 @@ function DocPage({
   isDocsFilterModalOpened,
   isSearchingInDocPage,
   isSearchHistoryOpened,
-
   docResult,
-
-
-  /*
-  pageURL,
-  hasHTMLExtension,
-  html,
-  */
 }: DocPageProps) {
   const { pageURL, html, anchor } = docResult.page;
 
@@ -232,6 +218,19 @@ function DocPage({
 
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [selectedIdx, setSelectedIdx] = useState(0);
+
+  function handleLinkClick(e: MouseEvent, link: string) {
+    if (!link) {
+      console.warn('Clicked link had empty href.');
+      e.preventDefault();
+      return;
+    }
+    if (!link.startsWith('http://') && !link.startsWith('https://')) {
+      link = new URL(link, pageURL).href; // Convert relative links to absolute.
+    }
+    openLink(link);
+    e.preventDefault();
+  }
 
   function highlightCode(html: string) {
     const el = document.createElement('html');
@@ -296,31 +295,6 @@ function DocPage({
       } else {
         selectNextHighlight();
       }
-    }
-  }
-
-  // Open all links in the browser.
-  function handleDocPageClick(e: any) {
-    const target = e.target || e.srcElement;
-    // The 'target.parentNode' handles a case when <a> element contains a <code> element.
-    // If <code> element is inside the <a> element the event's target is actually the
-    // <code> element and not the <a> element. So we have to check if its parent is <a>.
-    if (target.tagName === 'A' || target.parentNode.tagName === 'A') {
-      let link = target.getAttribute('href') || target.parentNode.getAttribute('href');
-      if (!link.startsWith('http://') && !link.startsWith('https://')) {
-        link = new URL(link, pageURL).href; // Convert relative links to absolute.
-      }
-      openLink(link);
-      e.preventDefault();
-    }
-
-    if (target.tagName === 'IMG') {
-      let link = target.getAttribute('src');
-      if (!link.startsWith('http://') && !link.startsWith('https://')) {
-        link = new URL(link, pageURL).href; // Convert relative links to absolute.
-      }
-      openLink(link);
-      e.preventDefault();
     }
   }
 
@@ -396,7 +370,14 @@ function DocPage({
 
   useEffect(() => {
     if (!containerRef?.current) return;
-    const anchorEl = containerRef?.current?.querySelector(`#${anchor}`);
+
+    const links = containerRef.current.getElementsByTagName('a');
+    for (const link of links) {
+      const href = link.getAttribute('href');
+      link.onclick = e => handleLinkClick(e, href ?? '');
+    }
+
+    const anchorEl = containerRef.current.querySelector(`#${anchor}`);
     anchorEl?.scrollIntoView();
   }, [html, anchor]);
 
@@ -444,7 +425,6 @@ function DocPage({
       }
       <div
         id="doc-page"
-        onClick={handleDocPageClick}
         ref={containerRef}
         dangerouslySetInnerHTML={{ __html: highlightCode(html) as string }}
       />
