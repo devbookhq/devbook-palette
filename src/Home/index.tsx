@@ -32,6 +32,7 @@ import electron, {
   trackShowSearchHistory,
   trackHideSearchHistory,
   trackSelectHistoryQuery,
+  getSearchMode,
 } from 'mainCommunication';
 import useDebounce from 'hooks/useDebounce';
 import {
@@ -65,11 +66,19 @@ import {
 import SearchHistory from './SearchHistory';
 import historyStore from './SearchHistory/historyStore';
 import Hotkey, { Key } from './HotkeysPanel/Hotkey';
+import { SearchMode } from 'Preferences/Pages/searchMode';
 
 const Container = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
+`;
+
+const InfoWrapper = styled.div`
+  padding: 5px;
+  margin: 100px auto 0;
+  display: flex;
   align-items: center;
 `;
 
@@ -87,6 +96,17 @@ const InfoMessage = styled.div`
   color: #5A5A6F;
   font-size: 16px;
   font-weight: 600;
+`;
+
+const InfoMessageLeft = styled(InfoMessage)`
+  margin: 0 8px 0 0;
+`;
+const InfoMessageRight = styled(InfoMessage)`
+  margin: 0 0 0 8px;
+`;
+
+const TextHotkey = styled(Hotkey)`
+  margin: auto;
 `;
 
 const SignInButton = styled(Button)`
@@ -319,6 +339,15 @@ enum ReducerActionType {
   SetHistoryIndex,
 
   ToggleSearchInputFocus,
+
+  SetSearchMode,
+}
+
+interface SetSearchMode {
+  type: ReducerActionType.SetSearchMode;
+  payload: {
+    mode: SearchMode;
+  };
 }
 
 interface SetSearchQuery {
@@ -496,6 +525,7 @@ type ReducerAction = SetSearchQuery
   | ToggleSearchHistoryPreview
   | SetHistory
   | SetHistoryIndex
+  | SetSearchMode
   | ToggleSearchInputFocus;
 
 interface State {
@@ -511,6 +541,7 @@ interface State {
     docSearchResultsDefaultWidth: number;
     docSearchResultsCurrentWidth: number;
   }
+  searchMode: SearchMode | undefined;
   isSearchingInDocPage: boolean;
   isDocsFilterModalOpened: boolean;
   docSources: DocSource[];
@@ -551,6 +582,7 @@ const initialState: State = {
       },
     },
   },
+  searchMode: undefined,
   modalItem: undefined,
   errorMessage: '',
   layout: {
@@ -616,6 +648,13 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
             scrollTopPosition,
           },
         },
+      };
+    }
+    case ReducerActionType.SetSearchMode: {
+      const { mode } = reducerAction.payload;
+      return {
+        ...state,
+        searchMode: mode,
       };
     }
     case ReducerActionType.SetSearchFilter: {
@@ -864,7 +903,8 @@ function Home() {
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
   const debouncedQuery = useDebounce(state.search.query.trim(), 400);
-  const debouncedLastSearchedQuery = useDebounce(state.search.lastSearchedQuery.trim(), 400);
+  // const debouncedQuery = useDebounce(state.search.query.trim(), 400);
+  const debouncedLastSearchedQuery = state.search.lastSearchedQuery;
 
   const activeFilter = useMemo(() => state.search.filter, [state.search.filter]);
 
@@ -930,6 +970,13 @@ function Home() {
     dispatch({
       type: ReducerActionType.FocusResultItem,
       payload: { filter, idx, focusState },
+    });
+  }, []);
+
+  const setSearchMode = useCallback((mode: SearchMode) => {
+    dispatch({
+      type: ReducerActionType.SetSearchMode,
+      payload: { mode },
     });
   }, []);
 
@@ -1281,15 +1328,52 @@ function Home() {
     state.history,
   ]);
 
-  // 'enter' hotkey - open the focused result in a modal.
-  useHotkeys('enter', () => {
-    if (state.isSearchHistoryPreviewVisible) {
+  const invokeSearch = useCallback((query: string) => {
+    searchAll(
+      query,
+      activeFilter,
+      state.activeDocSource ?? state.docSources[0],
+    );
+
+    setHistory(historyStore.queries);
+    trackSearch({
+      activeFilter: activeFilter.toString(),
+      query: query,
+      searchMode: state.searchMode,
+      activeDocSource: state.activeDocSource,
+    });
+    historyStore.saveDebouncedQuery(query);
+
+  }, [
+    activeFilter,
+    state.activeDocSource,
+    state.docSources,
+    setHistory,
+  ])
+
+  // 'enter' hotkey - search.
+  useHotkeys('enter', (event) => {
+    if (state.isSearchHistoryPreviewVisible && state.history.length > 0) {
       setSearchQuery(state.history[state.historyIndex]);
       toggleSearchHistoryPreview(false);
       trackSelectHistoryQuery();
+      invokeSearch(state.history[state.historyIndex]);
       return;
     }
 
+    if (state.searchMode !== SearchMode['On enter press']) return;
+    invokeSearch(state.search.query);
+  }, { filter: () => true }, [
+    state.search.query,
+    state.searchMode,
+    state.isSearchHistoryPreviewVisible,
+    state.history,
+    state.historyIndex,
+    invokeSearch,
+  ]);
+
+  // 'shift+enter' hotkey - open the focused result in a modal.
+  useHotkeys('shift+enter', () => {
     if (activeFilter === ResultsFilter.Docs) return;
 
     openModal(state.results[activeFilter].items[activeFocusedIdx.idx]);
@@ -1298,12 +1382,8 @@ function Home() {
     state.results,
     activeFilter,
     activeFocusedIdx,
-    state.isSearchHistoryPreviewVisible,
-    state.history,
-    state.historyIndex,
     toggleSearchHistoryPreview,
   ]);
-
 
   // 'esc' hotkey - close modal or hide main window.
   useHotkeys('esc', () => {
@@ -1388,6 +1468,22 @@ function Home() {
     openSignInModal();
   });
 
+  useIPCRenderer(IPCMessage.OnSearchModeChange, (_, { mode }: { mode: SearchMode }) => {
+    setSearchMode(mode);
+  });
+
+  useEffect(() => {
+    if (state.searchMode === undefined
+      && state.search.query !== state.search.lastSearchedQuery
+    ) {
+      invokeSearch(state.search.query);
+    }
+  }, [
+    state.search.query,
+    state.search.lastSearchedQuery,
+    state.searchMode,
+  ]);
+
   // Run only on the initial render.
   // Get the cached search query and search filter.
   useEffect(() => {
@@ -1407,6 +1503,9 @@ function Home() {
       } else {
         setSearchQuery(lastQuery);
       }
+
+      const mode = await getSearchMode();
+      setSearchMode(mode);
 
       try {
         const allDocSources = await fetchDocSources();
@@ -1437,9 +1536,13 @@ function Home() {
 
   // Search when the debounced query changes.
   useEffect(() => {
-    setHistory(historyStore.queries);
+    if (state.searchMode !== SearchMode['As you type'] &&
+      state.searchMode !== undefined
+    ) return;
+
     if (!debouncedQuery || debouncedQuery === debouncedLastSearchedQuery) return;
 
+    setHistory(historyStore.queries);
     searchAll(
       debouncedQuery,
       activeFilter,
@@ -1451,6 +1554,7 @@ function Home() {
     trackSearch({
       activeFilter: activeFilter.toString(),
       query: debouncedQuery,
+      searchMode: state.searchMode,
       activeDocSource: state.activeDocSource,
     });
     // TODO WARNING - Don't include 'searchAll' in the deps array
@@ -1546,9 +1650,12 @@ function Home() {
           isDocsFilterModalOpened={state.isDocsFilterModalOpened}
           onInputFocusChange={toggleSearchInputFocus}
           onToggleSearchHistoryClick={() => toggleSearchHistoryPreview(!state.isSearchHistoryPreviewVisible)}
+          onToggleSearchClick={() => invokeSearch(state.search.query)}
+          searchMode={state.searchMode}
         />
 
         {!state.search.query
+          && state.searchMode === SearchMode['As you type']
           && !isActiveFilterLoading
           &&
           <>
@@ -1559,6 +1666,31 @@ function Home() {
             {activeFilter !== ResultsFilter.Docs
               &&
               <InfoMessage>Type your search query</InfoMessage>
+            }
+          </>
+        }
+
+        {!state.search.query
+          && state.searchMode !== SearchMode['As you type']
+          && !isActiveFilterLoading
+          // && (state.results.Docs.items.length === 0 && activeFilter === ResultsFilter.Docs) || (state.results.StackOverflow.items.length === 0 && activeFilter === ResultsFilter.StackOverflow)
+          &&
+          <>
+            {/* 
+              We can show the text right away for SO because
+              we don't have to wait until a user account is loaded.
+            */}
+            {activeFilter !== ResultsFilter.Docs
+              &&
+              <InfoWrapper>
+                <InfoMessageLeft>
+                  Type your search query and press
+                </InfoMessageLeft>
+                <TextHotkey hotkey={['Enter']} />
+                <InfoMessageRight>
+                  to search.
+                </InfoMessageRight>
+              </InfoWrapper>
             }
           </>
         }
@@ -1688,10 +1820,10 @@ function Home() {
               <EmptyDocPage>
                 {!isActiveFilterLoading &&
                   <>
-                  {state.search.query
-                    ? <>Nothing found. Try different query.</>
-                    : <>Type your search query</>
-                  }
+                    {state.search.query
+                      ? <>Nothing found. Try different query.</>
+                      : <>Type your search query</>
+                    }
                   </>
                 }
               </EmptyDocPage>
@@ -1699,7 +1831,7 @@ function Home() {
           </DocsWrapper>
         }
 
-        {state.search.query
+        {(state.search.query || state.searchMode !== SearchMode['As you type'])
           && !hasActiveFilterEmptyResults
           && !isActiveFilterLoading
           &&

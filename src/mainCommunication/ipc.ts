@@ -29,4 +29,8 @@ export enum IPCMessage {
 
   TrackCopyCodeSnippetStackOverflow = 'TrackCopyCodeSnippetStackOverflow',
   TrackCopyCodeSnippetDocs = 'TrackCopyCodeSnippetDocs',
+
+  GetSearchMode = 'GetSearchMode',
+  UserDidChangeSearchMode = 'UserDidChangeSearchMode',
+  OnSearchModeChange = 'OnSearchModeChange',
 }

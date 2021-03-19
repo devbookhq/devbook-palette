@@ -22,7 +22,7 @@ function SearchHotkeysPanel({
       hotkeysLeft={[
         { text: 'Next result', hotkey: [Key.ArrowDown], onClick: onNavigateDownClick },
         { text: 'Previous result', hotkey: [Key.ArrowUp], onClick: onNavigateUpClick },
-        { text: 'Open', hotkey: [Key.Enter], onClick: onOpenClick},
+        { text: 'Open', hotkey: [Key.Shift, Key.Enter], onClick: onOpenClick },
       ]}
       hotkeysRight={[
         { text: 'Scroll page', hotkey: [Key.Shift, Key.ArrowUp, Key.ArrowDown] },

@@ -9,6 +9,7 @@ import {
   auth,
 } from 'Auth';
 import { PreferencesPage } from 'Preferences';
+import { SearchMode } from 'Preferences/Pages/searchMode';
 
 // So we see logs from the main process in the Chrome debug tools.
 electron.ipcRenderer.on('console', (_, args) => {
@@ -39,6 +40,10 @@ export function signOutUser() {
 
 export function getGlobalShortcut() {
   return electron.ipcRenderer.invoke('get-global-shortcut') as Promise<string>;
+}
+
+export function getSearchMode() {
+  return electron.ipcRenderer.invoke(IPCMessage.GetSearchMode) as Promise<SearchMode>;
 }
 
 export function openLink(url: string) {
@@ -81,6 +86,7 @@ export function saveSearchFilter(filter: ResultsFilter) {
 export function trackSearch(searchInfo: {
   activeFilter: string,
   query: string,
+  searchMode: SearchMode | undefined,
   activeDocSource?: DocSource,
 }) {
   electron.ipcRenderer.send('track-search', searchInfo);
@@ -95,6 +101,11 @@ export function trackModalOpened(modalInfo: {
 
 export function userDidChangeShortcut(shortcut: string) {
   electron.ipcRenderer.send('user-did-change-shortcut', { shortcut });
+}
+
+export function userDidChangeSearchMode(mode: SearchMode) {
+  console.log(mode);
+  electron.ipcRenderer.send(IPCMessage.UserDidChangeSearchMode, { mode });
 }
 
 export function getAuthFromMainWindow() {

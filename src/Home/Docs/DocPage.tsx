@@ -9,7 +9,6 @@ import Prism from 'prismjs';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import electron, { openLink } from 'mainCommunication';
-import useDebounce from 'hooks/useDebounce';
 import { DocResult } from 'search/docs';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
 
@@ -213,7 +212,6 @@ function DocPage({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const debouncedSearchQuery = useDebounce(searchQuery, 0);
 
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -336,7 +334,7 @@ function DocPage({
     setHighlights([]);
     setSelectedIdx(0);
 
-    if (!debouncedSearchQuery || !containerRef?.current) return;
+    if (!searchQuery || !containerRef?.current) return;
 
     const textNodes = getTextNodeChildren(containerRef.current as Node);
     let wholeText = '';
@@ -344,7 +342,7 @@ function DocPage({
       wholeText += n.nodeValue || '';
     });
 
-    const escaped = debouncedSearchQuery
+    const escaped = searchQuery
       .toLowerCase()
       .replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string.
     const re = new RegExp(escaped, 'g');
@@ -352,7 +350,7 @@ function DocPage({
     let highlightIndex = 0;
     while ((match = re.exec(wholeText.toLowerCase())) !== null) {
       // TODO: highlightPattern sometimes returns an empty array
-      const nodes = highlightPattern([...textNodes], match.index, debouncedSearchQuery);
+      const nodes = highlightPattern([...textNodes], match.index, searchQuery);
       if (nodes.length > 0) {
         const highlight: Highlight = { index: highlightIndex++, nodes };
         setHighlights(c => c.concat(highlight));
@@ -365,7 +363,7 @@ function DocPage({
     // because we would end up in an infinite cycle.
     // We just want to remove highlights every time user changes the
     // query. Not when highlights change.
-  }, [setHighlights, debouncedSearchQuery]);
+  }, [setHighlights, searchQuery]);
 
   useEffect(() => {
     if (!containerRef?.current) return;

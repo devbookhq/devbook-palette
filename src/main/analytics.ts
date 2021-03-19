@@ -5,7 +5,8 @@ import { app } from 'electron';
 import ElectronStore from 'electron-store';
 
 import isDev from './utils/isDev';
-import debounce from '../utils/debounce';
+import { debounce } from 'debounce';
+import { SearchMode } from '../Preferences/Pages/searchMode';
 
 enum AnalyticsEvent {
   ShowedApp = 'Showed app',
@@ -42,6 +43,8 @@ enum AnalyticsEvent {
   CopyCodeSnippetDocs = 'Copy code snippet from docs',
 
   OpenDocsFilter = 'Open documentation filter',
+
+  SearchModeChanged = 'Search mode changed',
 }
 
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
@@ -176,6 +179,22 @@ export function trackShortcut(shortcutInfo: { action: string, hotkey: string }, 
       platform,
       appVersion,
       ...shortcutInfo,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
+    },
+  });
+}
+
+export function trackSearchModeChanged(modeInfo: { mode: SearchMode }, searchWindow?: electron.BrowserWindow) {
+  client.track({
+    event: AnalyticsEvent.SearchModeChanged,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+      ...modeInfo,
       searchWindowWidth: searchWindow?.getSize()[0],
       searchWindowHeight: searchWindow?.getSize()[1],
     },

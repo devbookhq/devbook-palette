@@ -25,6 +25,7 @@ import Hotkey, { Key } from '../HotkeysPanel/Hotkey';
 
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
+import { SearchMode } from 'Preferences/Pages/searchMode';
 
 const Container = styled.div`
   width: 100%;
@@ -222,11 +223,14 @@ interface SearchHeaderPanelProps {
   onFilterSelect: (f: ResultsFilter) => void;
   onInputFocusChange: (isFocused: boolean) => void;
   onToggleSearchHistoryClick: (e: any) => void;
+  onToggleSearchClick: (e: any) => void;
 
   isLoading?: boolean;
   isModalOpened?: boolean;
   isSignInModalOpened?: boolean;
   isDocsFilterModalOpened?: boolean;
+
+  searchMode: SearchMode | undefined;
 }
 
 function SearchHeaderPanel({
@@ -235,11 +239,13 @@ function SearchHeaderPanel({
   onChange,
   activeFilter,
   onFilterSelect,
+  searchMode,
   isLoading,
   isModalOpened,
   isSignInModalOpened,
   isDocsFilterModalOpened,
   onInputFocusChange,
+  onToggleSearchClick,
   onToggleSearchHistoryClick,
 }: SearchHeaderPanelProps) {
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
@@ -318,7 +324,7 @@ function SearchHeaderPanel({
             inputRef={inputRef}
             onInputFocusChange={handleInputFocusChange}
             initialValue={value}
-            value={value}
+            // value={value}
             placeholder={placeholder}
             onChange={onChange}
             isModalOpened={isModalOpened}
@@ -326,6 +332,19 @@ function SearchHeaderPanel({
             isDocsFilterModalOpened={isDocsFilterModalOpened}
           />
           {isLoading && <StyledLoader />}
+
+          {searchMode === SearchMode['On enter press'] &&
+            <HotkeyWrapper
+              onClick={onToggleSearchClick}
+            >
+              <Hotkey
+                hotkey={['Enter']}
+              />
+              <HotkeyText>
+                to search
+            </HotkeyText>
+            </HotkeyWrapper>
+          }
           <HotkeyWrapper
             onClick={onToggleSearchHistoryClick}
           >
@@ -333,7 +352,7 @@ function SearchHeaderPanel({
               hotkey={['Tab']}
             />
             <HotkeyText>
-              to show search history
+              to show history
             </HotkeyText>
           </HotkeyWrapper>
         </InputLoaderContainer>

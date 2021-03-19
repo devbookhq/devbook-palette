@@ -5,7 +5,6 @@ import React, {
 import styled from 'styled-components';
 
 import useIPCRenderer from 'hooks/useIPCRenderer';
-import useDebounce from 'hooks/useDebounce';
 
 const Input = styled.input`
   padding: 10px 15px;
@@ -30,7 +29,7 @@ interface SearchInputProps {
   onChange: (value: string) => void;
 
   initialValue: string;
-  value: string;
+  // value: string;
 
   inputRef: React.RefObject<HTMLInputElement>;
 
@@ -50,16 +49,15 @@ function SearchInput({
   isSignInModalOpened,
   isDocsFilterModalOpened,
   onInputFocusChange,
-  value,
+  // value,
 }: SearchInputProps) {
   const [inputState, setInputState] = useState({ value: '', isInitialized: false });
-  const debouncedValue = useDebounce(inputState.value, 400);
 
-  useEffect(() => {
-    if (inputState.isInitialized) {
-      setInputState({ value: initialValue, isInitialized: true });
-    }
-  }, [value]);
+  // useEffect(() => {
+  //   if (inputState.isInitialized) {
+  //     setInputState({ value: initialValue, isInitialized: true });
+  //   }
+  // }, [value]);
 
   useEffect(() => {
     if (!inputState.value) {
@@ -69,9 +67,9 @@ function SearchInput({
 
   useEffect(() => {
     if (inputState.isInitialized) {
-      onChange(debouncedValue);
+      onChange(inputState.value);
     }
-  }, [debouncedValue]);
+  }, [inputState.value]);
 
   function handleChangeValue(e: any) {
     if (inputState.isInitialized) {

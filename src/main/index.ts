@@ -33,6 +33,7 @@ import {
   trackSearchDebounced,
   trackModalOpened,
   trackShortcut,
+  trackSearchModeChanged,
   changeAnalyticsUser,
   trackSignInModalOpened,
   trackSignInModalClosed,
@@ -57,6 +58,7 @@ import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
+import { SearchMode } from '../Preferences/Pages/searchMode';
 
 toDesktop.init();
 
@@ -64,6 +66,7 @@ enum StoreKey {
   Email = 'email',
   IsPinModeEnabled = 'isPinModeEnabled',
   ActiveDocSource = 'activeDocSource',
+  SearchMode = 'searchMode',
 }
 
 const PORT = 3000;
@@ -263,6 +266,11 @@ function trySetGlobalShortcut(shortcut: string) {
   store.set('globalShortcut', shortcut);
 }
 
+function trySetSearchMode(mode: SearchMode) {
+  store.set(StoreKey.SearchMode, mode);
+  mainWindow?.webContents?.send(IPCMessage.OnSearchModeChange, { mode });
+}
+
 /////////// App Events ///////////
 app.once('ready', async () => {
   if (isDev) {
@@ -331,7 +339,12 @@ app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 ipcMain.on('hide-window', () => hideMainWindow());
 
 ipcMain.on('user-did-change-shortcut', (_, { shortcut }) => {
-  trySetGlobalShortcut(shortcut)
+  trySetGlobalShortcut(shortcut);
+});
+
+ipcMain.on(IPCMessage.UserDidChangeSearchMode, (_, { mode }) => {
+  trySetSearchMode(mode);
+  trackSearchModeChanged({ mode }, mainWindow?.window);
 });
 
 ipcMain.on('finish-onboarding', () => {
@@ -352,6 +365,10 @@ ipcMain.on('track-shortcut', (_, shortcutInfo: { hotkey: string, action: string 
 
 ipcMain.handle('get-global-shortcut', () => {
   return store.get('globalShortcut', 'Alt+Space');
+});
+
+ipcMain.handle(IPCMessage.GetSearchMode, () => {
+  return store.get(StoreKey.SearchMode, SearchMode['On enter press']);
 });
 
 ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => {

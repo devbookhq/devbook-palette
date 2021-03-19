@@ -1,5 +1,5 @@
 import { ElectronStore } from 'mainCommunication/electron';
-import debounce from 'utils/debounce';
+import { debounce } from 'debounce';
 
 interface HistoryEntry {
   query: string;
@@ -17,6 +17,7 @@ class HistoryStore {
   static readonly saveDebouncedQuery = debounce(HistoryStore.saveQuery, 4000);
 
   static get queries() {
+    console.log(HistoryStore.entries);
     return HistoryStore.entries
       .map(e => e.query)
       .slice(-10)
