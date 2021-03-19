@@ -1,4 +1,4 @@
-import React, {
+import {
   useEffect,
   useState,
 } from 'react';
@@ -21,7 +21,6 @@ import Button from 'components/Button';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 
 import GeneralPreferences from './Pages/GeneralPreferences';
-import Integrations from './Pages/Integrations';
 import Account from './Pages/Account';
 
 import logo from 'img/logo.png';
@@ -111,7 +110,6 @@ const UpdateButton = styled(Button)`
 
 export enum PreferencesPage {
   General = 'general',
-  Integrations = 'integrations',
   Account = 'account',
 }
 
@@ -168,16 +166,6 @@ function Preferences() {
 
           <LinkButton
             replace
-            to="/preferences/integrations"
-            activeStyle={{
-              background: '#3B3A4A',
-            }}
-          >
-            Integrations
-          </LinkButton>
-
-          <LinkButton
-            replace
             to="/preferences/account"
             activeStyle={{
               background: '#3B3A4A',
@@ -208,12 +196,6 @@ function Preferences() {
           path="/preferences/general"
           exact
           component={GeneralPreferences}
-        />
-
-        <Route
-          path="/preferences/integrations"
-          exact
-          component={Integrations}
         />
 
         <Route

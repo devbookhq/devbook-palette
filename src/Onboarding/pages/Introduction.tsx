@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 
 import devbookPreviewSOImg from 'img/onboarding-so-preview.png';
-import devbookPreviewCodeImg from 'img/onboarding-code-preview.png';
 import devbookPreviewDocsImg from 'img/onboarding-docs-preview.png';
 
 const Container = styled.div`
@@ -77,7 +76,6 @@ const DevbookImg = styled.img`
 
 enum Feature {
   StackOverflow,
-  GitHubCode,
   Docs,
 }
 
@@ -102,13 +100,6 @@ function IntroductionPage() {
         </FeatureButton>
         <Delimiter/>
         <FeatureButton
-          selected={activeFeature === Feature.GitHubCode}
-          onClick={() => setActiveFeature(Feature.GitHubCode)}
-        >
-          Search code on GitHub
-        </FeatureButton>
-        <Delimiter/>
-        <FeatureButton
           selected={activeFeature === Feature.Docs}
           onClick={() => setActiveFeature(Feature.Docs)}
         >
@@ -118,9 +109,6 @@ function IntroductionPage() {
 
       {activeFeature === Feature.StackOverflow &&
         <DevbookImg src={devbookPreviewSOImg} />
-      }
-      {activeFeature === Feature.GitHubCode &&
-        <DevbookImg src={devbookPreviewCodeImg} />
       }
       {activeFeature === Feature.Docs &&
         <DevbookImg src={devbookPreviewDocsImg} />
