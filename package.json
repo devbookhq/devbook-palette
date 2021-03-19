@@ -37,7 +37,7 @@
     "build:dev": "npm run compile && todesktop build --code-sign=false"
   },
   "dependencies": {
-    "@todesktop/runtime": "^0.4.0",
+    "@todesktop/runtime": "^0.5.4",
     "analytics-node": "^3.5.0",
     "auto-launch": "^5.0.5",
     "axios": "^0.21.1",
