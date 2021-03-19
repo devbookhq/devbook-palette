@@ -29,7 +29,7 @@ interface SearchInputProps {
   onChange: (value: string) => void;
 
   initialValue: string;
-  // value: string;
+  value: string;
 
   inputRef: React.RefObject<HTMLInputElement>;
 
@@ -45,36 +45,14 @@ function SearchInput({
   inputRef,
   onChange,
   isModalOpened,
-  initialValue,
   isSignInModalOpened,
   isDocsFilterModalOpened,
   onInputFocusChange,
-  // value,
+  value,
 }: SearchInputProps) {
-  const [inputState, setInputState] = useState({ value: '', isInitialized: false });
-
-  // useEffect(() => {
-  //   if (inputState.isInitialized) {
-  //     setInputState({ value: initialValue, isInitialized: true });
-  //   }
-  // }, [value]);
-
-  useEffect(() => {
-    if (!inputState.value) {
-      setInputState({ value: initialValue, isInitialized: true });
-    }
-  }, [initialValue]);
-
-  useEffect(() => {
-    if (inputState.isInitialized) {
-      onChange(inputState.value);
-    }
-  }, [inputState.value]);
 
   function handleChangeValue(e: any) {
-    if (inputState.isInitialized) {
-      setInputState({ value: e.target.value, isInitialized: true });
-    }
+    onChange(e.target.value);
   }
 
   function handleInputKeyDown(e: any) {
@@ -110,12 +88,11 @@ function SearchInput({
     else inputRef?.current?.focus();
   }, [isDocsFilterModalOpened]);
 
-
   return (
     <Input
       ref={inputRef}
       placeholder={placeholder}
-      value={inputState.value}
+      value={value}
       onChange={handleChangeValue}
       onFocus={() => onInputFocusChange(true)}
       onBlur={() => onInputFocusChange(false)}

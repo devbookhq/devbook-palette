@@ -1536,9 +1536,7 @@ function Home() {
 
   // Search when the debounced query changes.
   useEffect(() => {
-    if (state.searchMode !== SearchMode['As you type'] &&
-      state.searchMode !== undefined
-    ) return;
+    if (state.searchMode !== SearchMode['As you type']) return;
 
     if (!debouncedQuery || debouncedQuery === debouncedLastSearchedQuery) return;
 

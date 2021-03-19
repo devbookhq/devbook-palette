@@ -321,6 +321,7 @@ function SearchHeaderPanel({
       >
         <InputLoaderContainer>
           <SearchInput
+            value={value}
             inputRef={inputRef}
             onInputFocusChange={handleInputFocusChange}
             initialValue={value}
