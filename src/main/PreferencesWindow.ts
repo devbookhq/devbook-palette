@@ -8,7 +8,6 @@ import { IPCMessage } from '../mainCommunication/ipc';
 
 export enum PreferencesPage {
   General = 'general',
-  Integrations = 'integrations',
   Account = 'account',
 }
 
