@@ -490,6 +490,7 @@ interface State {
   errorMessage: string;
   layout: {
     docSearchResultsDefaultWidth: number;
+    docSearchResultsCurrentWidth: number;
   }
   isSearchingInDocPage: boolean;
   isDocsFilterModalOpened: boolean;
@@ -535,6 +536,7 @@ const initialState: State = {
   errorMessage: '',
   layout: {
     docSearchResultsDefaultWidth: 200,
+    docSearchResultsCurrentWidth: 0,
   },
   isSearchingInDocPage: false,
   isDocsFilterModalOpened: false,
@@ -722,7 +724,13 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
       // and just return it as it is.
       const { width } = reducerAction.payload;
       saveDocSearchResultsDefaultWidth(width);
-      return { ...state };
+      return {
+        ...state,
+        layout: {
+          ...state.layout,
+          docSearchResultsCurrentWidth: width,
+        },
+      };
     }
     case ReducerActionType.SearchInDocPage: {
       return {
@@ -1631,7 +1639,7 @@ function Home() {
               <DocsWrapper>
                 <Resizable
                   defaultSize={{
-                    width: state.layout.docSearchResultsDefaultWidth,
+                    width: state.layout.docSearchResultsCurrentWidth || state.layout.docSearchResultsDefaultWidth,
                     height: "100%"
                   }}
                   maxWidth="50%"
