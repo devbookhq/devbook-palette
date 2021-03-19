@@ -13,7 +13,6 @@ import useDebounce from 'hooks/useDebounce';
 import { DocResult } from 'search/docs';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
 
-// Leave this here until we have separate CSS file for all docs (some are still not finished).
 const SearchInputWrapper = styled.div`
   position: absolute;
   top: 115px;

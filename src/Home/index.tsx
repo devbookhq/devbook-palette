@@ -245,6 +245,25 @@ const HotkeyText = styled.div`
   transition: color 170ms ease-in;
 `;
 
+const EmptyDocPage = styled.div`
+  flex: 1;
+  padding: 10px 15px 20px;
+  height: 100%;
+  width: 100%;
+  min-width: 1px;
+  background: #1f1e1e;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #5A5A6F;
+  font-size: 16px;
+  font-weight: 600;
+
+  overflow: hidden;
+  overflow-y: overlay;
+`;
 
 type SearchResultItem = StackOverflowResult | DocResult;
 type SearchResultItems = StackOverflowResult[] | DocResult[];
@@ -1517,7 +1536,7 @@ function Home() {
       <Container>
         <SearchHeaderPanel
           value={state.search.query}
-          placeholder="Search StackOverflow and docs"
+          placeholder={activeFilter === ResultsFilter.StackOverflow ? "Search StackOverflow" : "Search documentation"}
           onChange={handleSearchInputChange}
           activeFilter={activeFilter}
           onFilterSelect={f => setSearchFilter(f)}
@@ -1537,13 +1556,6 @@ function Home() {
               We can show the text right away for SO because
               we don't have to wait until a user account is loaded.
             */}
-
-            {activeFilter === ResultsFilter.Docs
-              && (authInfo.state === AuthState.UserAndMetadataLoaded)
-              &&
-              <InfoMessage>Type your search query</InfoMessage>
-            }
-
             {activeFilter !== ResultsFilter.Docs
               &&
               <InfoMessage>Type your search query</InfoMessage>
@@ -1554,6 +1566,7 @@ function Home() {
         {state.search.query
           && hasActiveFilterEmptyResults
           && !isActiveFilterLoading
+          && activeFilter !== ResultsFilter.Docs
           &&
           <InfoMessage>Nothing found. Try something else.</InfoMessage>
         }
@@ -1610,6 +1623,82 @@ function Home() {
           </>
         }
 
+        {activeFilter === ResultsFilter.Docs
+          && state.activeDocSource
+          && isUserSignedInWithOrWithoutMetadata
+          &&
+          <DocsWrapper>
+            <Resizable
+              defaultSize={{
+                width: state.layout.docSearchResultsCurrentWidth || state.layout.docSearchResultsDefaultWidth,
+                height: "100%"
+              }}
+              maxWidth="50%"
+              minWidth="265"
+              enable={{ right: true }}
+              onResizeStop={(e, dir, ref) => handleDocSearchResultsResizeStop(e, dir, ref)}
+            >
+              <DocsResultsWrapper>
+                <ActiveDocset>
+                  <DocsetNameLogo
+                    onClick={openDocsFilterModal}
+                  >
+                    <DocsetIcon src={state.activeDocSource.iconURL} />
+                    <ActiveDocsetName>
+                      {state.activeDocSource.name}
+                    </ActiveDocsetName>
+                  </DocsetNameLogo>
+                  <HotkeyWrapper
+                    onClick={openDocsFilterModal}
+                  >
+                    <Hotkey
+                      hotkey={electron.remote.process.platform === 'darwin'
+                        ? [Key.Command, 'D']
+                        : ['Ctrl', 'D']
+                      }
+                    />
+                    <HotkeyText>
+                      to change
+                    </HotkeyText>
+                  </HotkeyWrapper>
+                </ActiveDocset>
+                <DocSearchResults>
+                  {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
+                    <DocSearchResultItem
+                      key={idx}
+                      docResult={d}
+                      focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+                      onClick={() => focusResultItem(ResultsFilter.Docs, idx, FocusState.NoScroll)}
+                    />
+                  ))}
+                </DocSearchResults>
+              </DocsResultsWrapper>
+            </Resizable>
+            {activeFocusedItem &&
+              <DocPage
+                searchInputRef={docPageSearchInputRef}
+                isDocsFilterModalOpened={state.isDocsFilterModalOpened}
+                isSearchingInDocPage={state.isSearchingInDocPage}
+                isSearchHistoryOpened={state.isSearchHistoryPreviewVisible}
+                docResult={activeFocusedItem as DocResult}
+              />
+            }
+            {!activeFocusedItem
+              &&
+              <EmptyDocPage>
+                {!isActiveFilterLoading &&
+                  <>
+                  {state.search.query
+                    ? <>Nothing found. Try different query.</>
+                    : <>Type your search query</>
+                  }
+                  </>
+                }
+              </EmptyDocPage>
+            }
+          </DocsWrapper>
+        }
+
         {state.search.query
           && !hasActiveFilterEmptyResults
           && !isActiveFilterLoading
@@ -1632,66 +1721,6 @@ function Home() {
               </SearchResultsWrapper>
             }
 
-            {activeFilter === ResultsFilter.Docs
-              && state.activeDocSource
-              && isUserSignedInWithOrWithoutMetadata
-              &&
-              <DocsWrapper>
-                <Resizable
-                  defaultSize={{
-                    width: state.layout.docSearchResultsCurrentWidth || state.layout.docSearchResultsDefaultWidth,
-                    height: "100%"
-                  }}
-                  maxWidth="50%"
-                  minWidth="265"
-                  enable={{ right: true }}
-                  onResizeStop={(e, dir, ref) => handleDocSearchResultsResizeStop(e, dir, ref)}
-                >
-                  <DocsResultsWrapper>
-                    <ActiveDocset>
-                      <DocsetNameLogo
-                        onClick={openDocsFilterModal}
-                      >
-                        <DocsetIcon src={state.activeDocSource.iconURL} />
-                        <ActiveDocsetName>
-                          {state.activeDocSource.name}
-                        </ActiveDocsetName>
-                      </DocsetNameLogo>
-                      <HotkeyWrapper
-                        onClick={openDocsFilterModal}
-                      >
-                        <Hotkey
-                          hotkey={electron.remote.process.platform === 'darwin'
-                            ? [Key.Command, 'D']
-                            : ['Ctrl', 'D']
-                          }
-                        />
-                        <HotkeyText>
-                          to change
-                        </HotkeyText>
-                      </HotkeyWrapper>
-                    </ActiveDocset>
-                    <DocSearchResults>
-                      {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
-                        <DocSearchResultItem
-                          key={idx}
-                          docResult={d}
-                          focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
-                          onClick={() => focusResultItem(ResultsFilter.Docs, idx, FocusState.NoScroll)}
-                        />
-                      ))}
-                    </DocSearchResults>
-                  </DocsResultsWrapper>
-                </Resizable>
-                <DocPage
-                  searchInputRef={docPageSearchInputRef}
-                  isDocsFilterModalOpened={state.isDocsFilterModalOpened}
-                  isSearchingInDocPage={state.isSearchingInDocPage}
-                  isSearchHistoryOpened={state.isSearchHistoryPreviewVisible}
-                  docResult={activeFocusedItem as DocResult}
-                />
-              </DocsWrapper>
-            }
 
             {/* StackOverflow search results hotkeys */}
             {!state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
