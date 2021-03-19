@@ -375,9 +375,15 @@ function DocPage({
       const href = link.getAttribute('href');
       link.onclick = e => handleLinkClick(e, href ?? '');
     }
+    const imgs = containerRef.current.getElementsByTagName('img');
+    for (const img of imgs) {
+      img.onclick = e => { e.preventDefault(); }
+    }
 
     const anchorEl = containerRef.current.querySelector(`#${anchor}`);
-    anchorEl?.scrollIntoView();
+    if (!anchorEl) return;
+
+    anchorEl.scrollIntoView();
   }, [html, anchor]);
 
   return (
