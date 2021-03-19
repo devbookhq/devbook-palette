@@ -46,6 +46,8 @@ export interface DocSource {
 export async function search(query: string, docSource: DocSource): Promise<DocResult[]> {
   const version = docSource.version === DocSourceVersion.V0 ? '' : `/${docSource.version}`;
   const url = isDev ? `https://dev.usedevbook.com${version}/search/docs` : `https://api.usedevbook.com${version}/search/docs`;
+  //const url = `http://127.0.0.1:3002${version}/search/docs`;
+
 
   const body = {
     query,
