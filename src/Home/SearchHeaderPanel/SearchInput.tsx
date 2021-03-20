@@ -102,32 +102,34 @@ function SearchInput({
 }: SearchInputProps) {
   const [value, setValue] = useState('');
   const [lastValue, setLastValue] = useState('');
+  const [lastDocSource, setLastDocSource] = useState<DocSource>();
+  const [isEmptyQuery, setIsEmptyQuery] = useState(true);
+  const [lastHistoryValue, setLastHistoryValue] = useState('');
 
   const debouncedValue = useDebounce(value, 280);
 
-  const [lastDocSource, setLastDocSource] = useState<DocSource>();
-  const [isEmptyQuery, setIsEmptyQuery] = useState(true);
-
-  const [lastHistoryValue, setLastHistoryValue] = useState('');
+  const search = useCallback((query: string) => {
+    invokeSearch(query);
+    setLastValue(query);
+  }, [invokeSearch]);
 
   useEffect(() => {
     if (!historyValue) return;
-    if (historyValue !== lastHistoryValue && historyValue !== value) {
-      if (historyValue !== lastValue) {
-        onDidQueryChanged();
-      }
-      setValue(historyValue);
-      setLastHistoryValue(historyValue);
-      invokeSearch(historyValue);
-      setLastValue(historyValue);
-    }
+    if (historyValue === lastHistoryValue) return;
+    if (historyValue === value) return;
+
+    onDidQueryChanged();
+    setValue(historyValue);
+    setLastHistoryValue(historyValue);
+
+    search(historyValue);
   }, [
     historyValue,
-    onDidQueryChanged,
-    lastValue,
     lastHistoryValue,
     value,
-    invokeSearch,
+    lastValue,
+    onDidQueryChanged,
+    search,
   ]);
 
   function handleChangeValue(e: any) {
@@ -147,14 +149,15 @@ function SearchInput({
   }
 
   useEffect(() => {
-    if (activeDocSource !== lastDocSource) {
-      setLastDocSource(activeDocSource);
-      invokeSearch(value);
-    }
+    if (activeDocSource === lastDocSource) return;
+
+    setLastDocSource(activeDocSource);
+    search(value);
   }, [
-    value,
-    lastDocSource,
     activeDocSource,
+    lastDocSource,
+    search,
+    value,
   ]);
 
   function handleInputKeyDown(e: any) {
@@ -172,32 +175,27 @@ function SearchInput({
   useHotkeys('enter', (event) => {
     if (isSignInModalOpened) return;
     if (isDocsFilterModalOpened) return;
-
     if (isSearchHistoryPreviewVisible) return onEnterInSearchHistory();
-
-    if (searchMode !== SearchMode.OnEnterPress) return;
-    invokeSearch(value);
-    setLastValue(value);
+    if (searchMode === SearchMode.OnEnterPress) search(value);
   }, { filter: () => true }, [
-    invokeSearch,
     isSignInModalOpened,
     isDocsFilterModalOpened,
-    value,
-    searchMode,
+    isSearchHistoryPreviewVisible,
     onEnterInSearchHistory,
+    searchMode,
+    search,
+    value,
   ]);
 
   useEffect(() => {
-    if (searchMode !== SearchMode.Automatic) return;
-
-    if (lastValue === debouncedValue) return;
-    invokeSearch(debouncedValue);
-    setLastValue(debouncedValue);
+    if (searchMode === SearchMode.Automatic && lastValue !== debouncedValue) {
+      search(debouncedValue);
+    }
   }, [
-    invokeSearch,
-    debouncedValue,
     searchMode,
     lastValue,
+    debouncedValue,
+    search,
   ]);
 
   useIPCRenderer('did-show-main-window', () => {
@@ -237,7 +235,7 @@ function SearchInput({
 
       {searchMode === SearchMode.OnEnterPress &&
         <HotkeyWrapper
-          onClick={() => invokeSearch(value)}
+          onClick={() => search(value)}
         >
           <Hotkey
             hotkey={['Enter']}

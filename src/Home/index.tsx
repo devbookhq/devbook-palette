@@ -904,6 +904,9 @@ function Home() {
   const [queryFromHistoryValue, setQueryFromHistoryValue] = useState('');
   const [hasQueryChanged, setHasQueryChanged] = useState(true);
 
+
+  console.log('QUERY', hasQueryChanged);
+
   const activeFilter = useMemo(() => state.search.filter, [state.search.filter]);
 
   const activeFocusedIdx = useMemo(() => {
@@ -917,13 +920,6 @@ function Home() {
   const hasActiveFilterEmptyResults = useMemo(() => {
     return state.results[activeFilter].items.length === 0;
   }, [state.results, activeFilter]);
-
-  const hasCurrentQueryNoResults = useMemo(() => {
-    return hasQueryChanged && hasActiveFilterEmptyResults;
-  }, [
-    hasActiveFilterEmptyResults,
-    hasQueryChanged,
-  ]);
 
   const isActiveFilterLoading = useMemo(() => {
     return state.results[activeFilter].isLoading;
@@ -1830,10 +1826,9 @@ function Home() {
                 {!isActiveFilterLoading &&
                   <>
                     {state.search.isQueryPresent
-                      && hasActiveFilterEmptyResults
-                      && hasCurrentQueryNoResults
-                      && !hasQueryChanged
                       && state.searchMode !== SearchMode.Automatic
+                      && hasActiveFilterEmptyResults
+                      && !hasQueryChanged
                       &&
                       <InfoWrapper>
                         <InfoMessageLeft>
@@ -1847,15 +1842,14 @@ function Home() {
                     }
 
                     {state.search.isQueryPresent
-                      && hasActiveFilterEmptyResults
-                      && !hasCurrentQueryNoResults
-                      && hasQueryChanged
                       && state.searchMode !== SearchMode.Automatic
+                      && hasActiveFilterEmptyResults
+                      && hasQueryChanged
                       &&
                       <InfoWrapper>
                         <InfoMessageLeft>
                           Type your search query and press
-                        </InfoMessageLeft>
+                          </InfoMessageLeft>
                         <TextHotkey hotkey={['Enter']} />
                         <InfoMessageRight>
                           to search
@@ -1865,7 +1859,7 @@ function Home() {
 
                     {!state.search.isQueryPresent
                       && state.searchMode !== SearchMode.Automatic
-                      && hasQueryChanged
+                      && hasActiveFilterEmptyResults
                       &&
                       <InfoWrapper>
                         <InfoMessageLeft>
@@ -1880,8 +1874,7 @@ function Home() {
 
                     {state.search.isQueryPresent
                       && state.searchMode === SearchMode.Automatic
-                      && hasCurrentQueryNoResults
-                      && !hasQueryChanged
+                      && hasActiveFilterEmptyResults
                       &&
                       <InfoMessage>
                         Nothing found. Try a different query.
@@ -1890,7 +1883,7 @@ function Home() {
 
                     {!state.search.isQueryPresent
                       && state.searchMode === SearchMode.Automatic
-                      && hasQueryChanged
+                      && hasActiveFilterEmptyResults
                       &&
                       <InfoMessage>
                         Type your search query
