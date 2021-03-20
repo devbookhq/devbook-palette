@@ -33,7 +33,7 @@ const Item = styled.div`
   margin-bottom: 20px;
   width: 100%;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
 `;
 
