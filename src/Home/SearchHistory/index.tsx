@@ -74,12 +74,6 @@ const TopBar = styled.div`
   justify-content: flex-start;
 `;
 
-const Hotkeys = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
 const HotkeyWrapper = styled.div`
   padding: 5px;
   display: flex;
