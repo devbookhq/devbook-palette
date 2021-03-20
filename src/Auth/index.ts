@@ -16,6 +16,23 @@ import {
 } from 'mainCommunication';
 import timeout from 'utils/timeout';
 
+axios.interceptors.response.use((value) => {
+  setIsReconnecting(false);
+  return Promise.resolve(value);
+}, (error) => {
+  if (error.response) {
+    setIsReconnecting(false);
+    return Promise.reject(error);
+  }
+
+  if (error.request) {
+    setIsReconnecting(true);
+    console.log('Reconnecting');
+    return timeout(1000).then(() => axios.request(error.config));
+  }
+  return Promise.reject(error);
+});
+
 export enum AuthError {
   // The error when the looking for a valid stored user failed - probably because of the network connection.
   // User is no signed in and no metadata are present.
@@ -69,14 +86,14 @@ type SigningInUserAuthInfo = { state: AuthState.SigningInUser }
 type SigningOutUserAuthInfo = { state: AuthState.SigningOutUser, user?: User }
 type UserAndMetadataLoadedAuthInfo = { state: AuthState.UserAndMetadataLoaded, user: User };
 
-export type AuthInfo = FailedSigningOutAuthInfo
+export type AuthInfo = (FailedSigningOutAuthInfo
   | FailedSigningInAuthInfo
   | NoUserAuthInfo
   | FailedLookingForStoredUserAuthInfo
   | SigningInUserAuthInfo
   | UserAndMetadataLoadedAuthInfo
   | LookingForStoredUserAuthInfo
-  | SigningOutUserAuthInfo;
+  | SigningOutUserAuthInfo) & { isReconnecting?: boolean }
 
 export type { MagicUserMetadata };
 
@@ -111,6 +128,13 @@ function getRefreshToken(): string {
 
 function deleteRefreshToken() {
   return electronStore.delete(refreshTokenStoreName);
+}
+
+function setIsReconnecting(isReconnecting: boolean) {
+  updateAuth({
+    ...auth,
+    isReconnecting,
+  });
 }
 
 function changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
@@ -281,6 +305,7 @@ export async function refreshAuth() {
     updateAuth({ state: AuthState.UserAndMetadataLoaded, user });
     setRefreshToken(refreshToken);
   } catch (error) {
+    deleteRefreshToken();
     updateAuth({ state: AuthState.NoUser, error: AuthError.FailedLookingForStoredUser });
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 
 import {
@@ -90,6 +90,22 @@ const SignInAgainButton = styled(Button)`
   }
 `;
 
+const InfoWrapper = styled.div`
+  padding: 5px;
+  height: 100%;
+  display: flex;
+  margin: auto;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+`;
+
+const InfoMessage = styled.div`
+  color: #5A5A6F;
+  font-size: 16px;
+  font-weight: 600;
+`;
+
 const InputWrapper = styled.div`
   margin-bottom: 20px;
   width: 100%;
@@ -140,11 +156,11 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
 
-  const auth = useContext(AuthContext);
+  const authInfo = useContext(AuthContext);
 
-  const isLoading = auth.state === AuthState.SigningInUser;
+  const isLoading = authInfo.state === AuthState.SigningInUser;
 
-  const isSignedIn = auth.state === AuthState.UserAndMetadataLoaded;
+  const isSignedIn = authInfo.state === AuthState.UserAndMetadataLoaded;
 
   function handleEmailInputChange(e: any) {
     setEmail(e.target.value);
@@ -166,6 +182,7 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
 
     try {
       await signIn(email);
+      setError('');
       trackSignInFinished();
     } catch (error) {
       console.error(error.message);
@@ -180,7 +197,10 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
   }
 
   function handleEmailInputOnKeyDown(e: any) {
-    if (e.key === 'Enter') handleSignInButtonClick();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSignInButtonClick();
+    }
   }
 
   function handleContinueIntoAppButtonClick() {
@@ -188,82 +208,105 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
     onCloseRequest?.();
   }
 
+  useEffect(() => {
+    if (authInfo.isReconnecting) {
+      cancelSignIn();
+    }
+  }, [
+    authInfo.isReconnecting,
+  ]);
+
   return (
     <StyledModal
       onCloseRequest={handleCloseRequest}
     >
-      {!isSignedIn && !isLoading &&
-        <>
-          <Title>
-            Sign in with your email
-          </Title>
 
-          <Description>
-            Click on the sign-in button to receive an email with a sign-in link.
-          </Description>
-
-          <InputWrapper>
-            <InputTitle>EMAIL</InputTitle>
-            <EmailInput
-              autoFocus
-              placeholder="your@email.com"
-              value={email}
-              onChange={handleEmailInputChange}
-              onKeyDown={handleEmailInputOnKeyDown}
-            />
-          </InputWrapper>
-
-          {error &&
-            <Error>
-              {error}
-            </Error>
-          }
-          <SignInButton
-            onClick={handleSignInButtonClick}
-          >
-            Sign in to Devbook
-         </SignInButton>
-        </>
-      }
-
-      {!isSignedIn
-        && isLoading
-        && !error
+      {authInfo.isReconnecting
         &&
-        <>
-          <Title>
-            Check your email
-          </Title>
-
-          <Description>
-            We just sent an email with the sign-in link to the following email address:
-            <br />
-            <strong>{email}</strong>
-          </Description>
-
-          <Description>
-            Click on the link and you'll be signed-in in a few seconds...
-          </Description>
-
-          <Loader />
-
-          <SignInAgainButton
-            onClick={handleSignInAgainButtonClick}
-          >
-            Sign in again
-         </SignInAgainButton>
-        </>
+        <InfoWrapper>
+          <InfoMessage>Contacting Devbook servers failed.</InfoMessage>
+          <InfoMessage>Reconnecting...</InfoMessage>
+        </InfoWrapper>
       }
 
-      {isSignedIn &&
+      {!authInfo.isReconnecting &&
         <>
-          <Title>
-            You are signed in!
+          {!isSignedIn
+            && !isLoading
+            &&
+            <>
+              <Title>
+                Sign in with your email
           </Title>
-          <CheckIcon />
-          <ContinueIntoAppButton onClick={handleContinueIntoAppButtonClick}>
-            Continue into the app
+
+              <Description>
+                Click on the sign-in button to receive an email with a sign-in link.
+          </Description>
+
+              <InputWrapper>
+                <InputTitle>EMAIL</InputTitle>
+                <EmailInput
+                  autoFocus
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={handleEmailInputChange}
+                  onKeyDown={handleEmailInputOnKeyDown}
+                />
+              </InputWrapper>
+
+              {error &&
+                <Error>
+                  {error}
+                </Error>
+              }
+              <SignInButton
+                onClick={handleSignInButtonClick}
+              >
+                Sign in to Devbook
+         </SignInButton>
+            </>
+          }
+
+          {!isSignedIn
+            && isLoading
+            && !error
+            &&
+            <>
+              <Title>
+                Check your email
+          </Title>
+
+              <Description>
+                We just sent an email with the sign-in link to the following email address:
+            <br />
+                <strong>{email}</strong>
+              </Description>
+
+              <Description>
+                Click on the link and you'll be signed-in in a few seconds...
+          </Description>
+
+              <Loader />
+
+              <SignInAgainButton
+                onClick={handleSignInAgainButtonClick}
+              >
+                Sign in again
+         </SignInAgainButton>
+            </>
+          }
+
+          {isSignedIn &&
+            <>
+              <Title>
+                You are signed in!
+          </Title>
+              <CheckIcon />
+              <ContinueIntoAppButton onClick={handleContinueIntoAppButtonClick}>
+                Continue into the app
           </ContinueIntoAppButton>
+            </>
+          }
         </>
       }
     </StyledModal>

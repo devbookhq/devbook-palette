@@ -14,7 +14,6 @@ import electron, {
   postponeUpdate,
   togglePinMode,
 } from 'mainCommunication';
-import Loader from 'components/Loader';
 import { PreferencesPage } from 'Preferences';
 import { IPCMessage } from 'mainCommunication/ipc';
 

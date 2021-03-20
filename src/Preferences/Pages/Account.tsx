@@ -25,6 +25,22 @@ const Container = styled.div`
 const Email = styled.span`
 `;
 
+const InfoWrapper = styled.div`
+  padding: 5px;
+  height: 100%;
+  display: flex;
+  margin: auto;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+`;
+
+const InfoMessage = styled.div`
+  color: #5A5A6F;
+  font-size: 16px;
+  font-weight: 600;
+`;
+
 const SignOutButton = styled.div`
   margin: 6px 0;
 
@@ -73,11 +89,25 @@ function Account() {
   return (
     <Base title="Account">
       <Container>
-        {isLoading &&
+
+        {authInfo.isReconnecting
+          &&
+          <InfoWrapper>
+            <InfoMessage>Contacting Devbook servers failed.</InfoMessage>
+            <InfoMessage>Reconnecting...</InfoMessage>
+          </InfoWrapper>
+        }
+        
+        {isLoading
+          && !authInfo.isReconnecting
+          &&
           < StyledLoader />
         }
 
-        {!isLoading && authInfo.state === AuthState.UserAndMetadataLoaded &&
+        {!isLoading
+          && authInfo.state === AuthState.UserAndMetadataLoaded
+          && !authInfo.isReconnecting
+          &&
           <>
             <Email>
               {authInfo.user.email}
@@ -88,7 +118,10 @@ function Account() {
           </>
         }
 
-        {!isLoading && authInfo.state === AuthState.NoUser &&
+        {!isLoading
+          && authInfo.state === AuthState.NoUser
+          && !authInfo.isReconnecting
+          &&
           <SignInWrapper>
             <SignInText>
               You are not signed in

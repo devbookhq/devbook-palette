@@ -2,6 +2,7 @@ import React, {
   useState,
   useEffect,
   useCallback,
+  useContext,
 } from 'react';
 import styled from 'styled-components';
 
@@ -12,6 +13,7 @@ import useDebounce from 'hooks/useDebounce';
 import { DocSource } from 'search/docs';
 import Loader from 'components/Loader';
 import Hotkey from 'Home/HotkeysPanel/Hotkey';
+import { AuthContext } from 'Auth';
 
 const Input = styled.input`
   padding: 10px 15px;
@@ -100,6 +102,8 @@ function SearchInput({
   searchMode,
   onInputFocusChange,
 }: SearchInputProps) {
+  const authInfo = useContext(AuthContext);
+
   const [value, setValue] = useState('');
   const [lastValue, setLastValue] = useState('');
   const [lastDocSource, setLastDocSource] = useState<DocSource>();
@@ -231,7 +235,11 @@ function SearchInput({
         onBlur={() => onInputFocusChange(false)}
         onKeyDown={handleInputKeyDown}
       />
-      {isLoading && <StyledLoader />}
+      {isLoading
+        && !authInfo.isReconnecting
+        &&
+        < StyledLoader />
+      }
 
       {searchMode === SearchMode.OnEnterPress &&
         <HotkeyWrapper
