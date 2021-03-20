@@ -4,6 +4,7 @@ import React, {
   useCallback,
   useReducer,
   useMemo,
+  useState,
   useContext,
 } from 'react';
 import styled from 'styled-components';
@@ -901,8 +902,10 @@ function Home() {
   const searchResultsWrapperRef = useRef<HTMLDivElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
-  const debouncedQuery = useDebounce(state.search.query.trim(), 400);
-  const debouncedLastSearchedQuery = state.search.lastSearchedQuery;
+  const stateQuery = state.search.query;
+  const lastStateQuery = state.search.lastSearchedQuery;
+
+  const [historyValue, setHistoryValue] = useState('');
 
   const activeFilter = useMemo(() => state.search.filter, [state.search.filter]);
 
@@ -1226,9 +1229,17 @@ function Home() {
   }
 
   function handleSearchHistoryQueryClick(query: string) {
-    setSearchQuery(query);
     toggleSearchHistoryPreview(false);
     trackSelectHistoryQuery();
+    setHistoryValue(query);
+  }
+
+  function handleSearchHistoryEnterPress() {
+    if (state.history.length === 0) return;
+
+    toggleSearchHistoryPreview(false);
+    trackSelectHistoryQuery();
+    setHistoryValue(state.history[state.historyIndex]);
   }
 
   /* HOTKEYS */
@@ -1341,34 +1352,32 @@ function Home() {
       activeDocSource: state.activeDocSource,
     });
     historyStore.saveDebouncedQuery(query);
-
+    saveSearchQuery(query);
   }, [
     activeFilter,
     state.activeDocSource,
     state.docSources,
     setHistory,
-  ])
+  ]);
 
-  // // 'enter' hotkey - search.
-  // useHotkeys('enter', (event) => {
-  //   if (state.isSearchHistoryPreviewVisible && state.history.length > 0) {
-  //     setSearchQuery(state.history[state.historyIndex]);
-  //     toggleSearchHistoryPreview(false);
-  //     trackSelectHistoryQuery();
-  //     invokeSearch(state.history[state.historyIndex]);
-  //     return;
-  //   }
+  const invokeHistorySearch = useCallback(() => {
+    if (state.isSearchHistoryPreviewVisible && state.history.length > 0) {
+      setSearchQuery(state.history[state.historyIndex]);
+      toggleSearchHistoryPreview(false);
+      trackSelectHistoryQuery();
+      invokeSearch(state.history[state.historyIndex]);
+    }
+  }, [
+    state.isSearchHistoryPreviewVisible,
+    state.history,
+    state.historyIndex,
+    invokeSearch,
+    toggleSearchHistoryPreview,
+  ]);
 
-  //   if (state.searchMode !== SearchMode['On enter press']) return;
-  //   invokeSearch(state.search.query);
-  // }, { filter: () => true }, [
-  //   state.search.query,
-  //   state.searchMode,
-  //   state.isSearchHistoryPreviewVisible,
-  //   state.history,
-  //   state.historyIndex,
-  //   invokeSearch,
-  // ]);
+  const activeSearch = state.isSearchHistoryPreviewVisible && state.history.length > 0
+    ? invokeHistorySearch
+    : invokeSearch;
 
   // 'shift+enter' hotkey - open the focused result in a modal.
   useHotkeys('shift+enter', () => {
@@ -1533,47 +1542,6 @@ function Home() {
     console.error(state.errorMessage);
   }, [state.errorMessage]);
 
-  // Search when the debounced query changes.
-  useEffect(() => {
-    if (state.searchMode !== SearchMode['As you type']) return;
-
-    if (!debouncedQuery || debouncedQuery === debouncedLastSearchedQuery) return;
-
-    setHistory(historyStore.queries);
-    searchAll(
-      debouncedQuery,
-      activeFilter,
-      state.activeDocSource ?? state.docSources[0],
-    );
-
-    historyStore.saveDebouncedQuery(debouncedQuery);
-
-    trackSearch({
-      activeFilter: activeFilter.toString(),
-      query: debouncedQuery,
-      searchMode: state.searchMode,
-      activeDocSource: state.activeDocSource,
-    });
-    // TODO WARNING - Don't include 'searchAll' in the deps array
-    // otherwise an infinite cycle will start. Why?
-    // Answer - `searchAll` function is defined in the body of the component
-    // and with each rerender it is defined again, thus having a new identity and triggering deps change.
-  }, [
-    debouncedQuery,
-    debouncedLastSearchedQuery,
-    activeFilter,
-    state.activeDocSource,
-    state.docSources,
-    setHistory,
-  ]);
-
-  // Cache the debounced query.
-  useEffect(() => {
-    if (debouncedQuery !== debouncedLastSearchedQuery) {
-      saveSearchQuery(debouncedQuery);
-    }
-  }, [debouncedQuery, debouncedLastSearchedQuery]);
-
   // Cache the currently active filter.
   useEffect(() => {
     if (state.isLoadingCachedData) return;
@@ -1585,8 +1553,8 @@ function Home() {
     if (!state.activeDocSource) return;
     saveActiveDocSource(state.activeDocSource);
 
-    if (debouncedQuery) {
-      searchDocs(debouncedQuery, state.activeDocSource);
+    if (stateQuery) {
+      searchDocs(stateQuery, state.activeDocSource);
     }
 
     // NOTE: We don't want to run this useEffect every time
@@ -1636,20 +1604,25 @@ function Home() {
 
       <Container>
         <SearchHeaderPanel
+          historyValue={historyValue}
+          activeDocSource={state.activeDocSource}
+          initialValue={state.search.query}
+          onEmptyQuery={() => handleSearchInputChange('')}
+          onNonEmptyQuery={() => handleSearchInputChange('#')}
           placeholder={activeFilter === ResultsFilter.StackOverflow ? 'Search StackOverflow' : 'Search documentation'}
-          //onChange={handleSearchInputChange}
-          onChange={() => { }}
-          invokeSearch={invokeSearch}
+          invokeSearch={activeSearch}
+          searchMode={state.searchMode}
           activeFilter={activeFilter}
           onFilterSelect={f => setSearchFilter(f)}
           isLoading={isActiveFilterLoading}
           isModalOpened={!!state.modalItem}
           isSignInModalOpened={state.isSignInModalOpened}
           isDocsFilterModalOpened={state.isDocsFilterModalOpened}
+          isSearchHistoryPreviewVisible={state.isSearchHistoryPreviewVisible}
           onInputFocusChange={toggleSearchInputFocus}
           onToggleSearchHistoryClick={() => toggleSearchHistoryPreview(!state.isSearchHistoryPreviewVisible)}
           onToggleSearchClick={() => invokeSearch(state.search.query)}
-          searchMode={state.searchMode}
+          onEnterInSearchHistory={handleSearchHistoryEnterPress}
         />
 
         {!state.search.query

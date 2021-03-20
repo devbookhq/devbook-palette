@@ -26,6 +26,7 @@ import Hotkey, { Key } from '../HotkeysPanel/Hotkey';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
 import { SearchMode } from 'Preferences/Pages/searchMode';
+import { DocSource } from 'search/docs';
 
 const Container = styled.div`
   width: 100%;
@@ -121,9 +122,7 @@ const CloseIcon = styled(closeIcon)`
   }
 `;
 
-const StyledLoader = styled(Loader)`
-  position: relative;
-  right: 2px; `;
+
 
 const SearchInputContainer = styled.div<{ isFocused?: boolean }>`
   min-height: 58px;
@@ -216,8 +215,10 @@ const HotkeyText = styled.div`
 
 interface SearchHeaderPanelProps {
   placeholder?: string;
-  onChange: (value: string) => void;
+  initialValue: string;
 
+  onEmptyQuery: () => void;
+  onNonEmptyQuery: () => void;
   activeFilter: ResultsFilter;
   onFilterSelect: (f: ResultsFilter) => void;
   onInputFocusChange: (isFocused: boolean) => void;
@@ -225,24 +226,33 @@ interface SearchHeaderPanelProps {
   onToggleSearchClick: (e: any) => void;
   invokeSearch: (query: string) => void;
 
+  isSearchHistoryPreviewVisible: boolean;
+  activeDocSource: DocSource | undefined;
+  searchMode: SearchMode | undefined;
   isLoading?: boolean;
   isModalOpened?: boolean;
   isSignInModalOpened?: boolean;
   isDocsFilterModalOpened?: boolean;
-
-  searchMode: SearchMode | undefined;
+  historyValue: string | undefined;
+  onEnterInSearchHistory: () => void;
 }
 
 function SearchHeaderPanel({
   placeholder,
-  onChange,
+  initialValue,
   invokeSearch,
+  activeDocSource,
   activeFilter,
+  isSearchHistoryPreviewVisible,
   onFilterSelect,
-  searchMode,
+  onEmptyQuery,
+  historyValue,
   isLoading,
+  onNonEmptyQuery,
   isModalOpened,
+  onEnterInSearchHistory,
   isSignInModalOpened,
+  searchMode,
   isDocsFilterModalOpened,
   onInputFocusChange,
   onToggleSearchClick,
@@ -312,6 +322,10 @@ function SearchHeaderPanel({
     onInputFocusChange(isFocused);
   }
 
+  function handleOnClickSearch(query: string) {
+    
+  }
+
   return (
     <Container
       onMouseDown={handleContentMouseDown}
@@ -321,29 +335,24 @@ function SearchHeaderPanel({
       >
         <InputLoaderContainer>
           <SearchInput
+            activeDocSource={activeDocSource}
+            onNonEmptyQuery={onNonEmptyQuery}
+            onEmptyQuery={onEmptyQuery}
+            isSearchHistoryPreviewVisible={isSearchHistoryPreviewVisible}
+            initialValue={initialValue}
             inputRef={inputRef}
+            isLoading={isLoading}
+            historyValue={historyValue}
+            onEnterInSearchHistory={onEnterInSearchHistory}
+            searchMode={searchMode}
             onInputFocusChange={handleInputFocusChange}
             invokeSearch={invokeSearch}
             placeholder={placeholder}
-            onChange={onChange}
             isModalOpened={isModalOpened}
             isSignInModalOpened={isSignInModalOpened}
             isDocsFilterModalOpened={isDocsFilterModalOpened}
           />
-          {isLoading && <StyledLoader />}
 
-          {searchMode === SearchMode['On enter press'] &&
-            <HotkeyWrapper
-              onClick={onToggleSearchClick}
-            >
-              <Hotkey
-                hotkey={['Enter']}
-              />
-              <HotkeyText>
-                to search
-            </HotkeyText>
-            </HotkeyWrapper>
-          }
           <HotkeyWrapper
             onClick={onToggleSearchHistoryClick}
           >
