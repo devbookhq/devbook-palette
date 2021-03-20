@@ -1343,13 +1343,13 @@ function Home() {
 
   const invokeSearch = useCallback((query: string) => {
     if (!query) return;
+    setHasQueryChanged(false);
     searchAll(
       query,
       activeFilter,
       state.activeDocSource ?? state.docSources[0],
     );
 
-    setHasQueryChanged(false);
     setHistory(historyStore.queries);
     trackSearch({
       activeFilter: activeFilter.toString(),

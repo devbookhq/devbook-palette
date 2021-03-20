@@ -1,6 +1,7 @@
 import React, {
   useState,
   useEffect,
+  useCallback,
 } from 'react';
 import styled from 'styled-components';
 
@@ -102,17 +103,19 @@ function SearchInput({
   const [value, setValue] = useState('');
   const [lastValue, setLastValue] = useState('');
 
-  const debouncedValue = useDebounce(value, 250);
+  const debouncedValue = useDebounce(value, 280);
 
   const [lastDocSource, setLastDocSource] = useState<DocSource>();
   const [isEmptyQuery, setIsEmptyQuery] = useState(true);
 
-  const [isInitialized, setIsInitialized] = useState(false);
   const [lastHistoryValue, setLastHistoryValue] = useState('');
 
   useEffect(() => {
     if (!historyValue) return;
     if (historyValue !== lastHistoryValue && historyValue !== value) {
+      if (historyValue !== lastValue) {
+        onDidQueryChanged();
+      }
       setValue(historyValue);
       setLastHistoryValue(historyValue);
       invokeSearch(historyValue);
@@ -120,6 +123,8 @@ function SearchInput({
     }
   }, [
     historyValue,
+    onDidQueryChanged,
+    lastValue,
     lastHistoryValue,
     value,
     invokeSearch,
