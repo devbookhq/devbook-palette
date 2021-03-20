@@ -17,7 +17,6 @@ class HistoryStore {
   static readonly saveDebouncedQuery = debounce(HistoryStore.saveQuery, 200);
 
   static get queries() {
-    console.log(HistoryStore.entries);
     return HistoryStore.entries
       .map(e => e.query)
       .slice(-10)
