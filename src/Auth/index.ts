@@ -27,7 +27,6 @@ axios.interceptors.response.use((value) => {
 
   if (error.request) {
     setIsReconnecting(true);
-    console.log('Reconnecting');
     return timeout(1000).then(() => axios.request(error.config));
   }
   return Promise.reject(error);

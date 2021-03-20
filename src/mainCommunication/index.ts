@@ -104,7 +104,6 @@ export function userDidChangeShortcut(shortcut: string) {
 }
 
 export function userDidChangeSearchMode(mode: SearchMode) {
-  console.log(mode);
   electron.ipcRenderer.send(IPCMessage.UserDidChangeSearchMode, { mode });
 }
 
