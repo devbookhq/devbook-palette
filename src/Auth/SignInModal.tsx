@@ -208,14 +208,6 @@ function SignInModal({ onCloseRequest }: SignInModalProps) {
     onCloseRequest?.();
   }
 
-  useEffect(() => {
-    if (authInfo.isReconnecting) {
-      cancelSignIn();
-    }
-  }, [
-    authInfo.isReconnecting,
-  ]);
-
   return (
     <StyledModal
       onCloseRequest={handleCloseRequest}
