@@ -9,21 +9,6 @@ const Body = styled.div`
   flex-direction: column;
   align-items: flex-start;
 
-  /*
-  * {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.6em;
-    color: #fff;
-  }
-
-
-  strong {
-    font-weight: 600;
-    font-size: 14px;
-  }
-  */
-
   color: #c1c9d2;
   font-size: 14px;
   line-height: 1.65em;
