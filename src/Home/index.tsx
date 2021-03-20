@@ -1355,6 +1355,7 @@ function Home() {
     saveSearchQuery(query);
   }, [
     activeFilter,
+    state.searchMode,
     state.activeDocSource,
     state.docSources,
     setHistory,
@@ -1487,6 +1488,7 @@ function Home() {
       invokeSearch(state.search.query);
     }
   }, [
+    invokeSearch,
     state.search.query,
     state.search.lastSearchedQuery,
     state.searchMode,

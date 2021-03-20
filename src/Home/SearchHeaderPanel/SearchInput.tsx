@@ -159,6 +159,7 @@ function SearchInput({
     }
   }, [
     value,
+    lastDocSource,
     activeDocSource,
   ]);
 
@@ -188,18 +189,20 @@ function SearchInput({
     isSignInModalOpened,
     isDocsFilterModalOpened,
     value,
+    searchMode,
     onEnterInSearchHistory,
   ]);
 
   useEffect(() => {
     if (searchMode !== SearchMode['As you type']) return;
 
-    if (lastValue === value) return;
-    invokeSearch(value);
-    setLastValue(value);
+    if (lastValue === debouncedValue) return;
+    invokeSearch(debouncedValue);
+    setLastValue(debouncedValue);
   }, [
     invokeSearch,
     debouncedValue,
+    searchMode,
     lastValue,
   ]);
 
