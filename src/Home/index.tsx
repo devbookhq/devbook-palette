@@ -76,11 +76,20 @@ const Container = styled.div`
   align-items: center;
 `;
 
+
 const InfoWrapper = styled.div`
   padding: 5px;
-  margin: 100px auto 0;
+  height: 100%;
   display: flex;
   align-items: center;
+  justify-content: center;
+`;
+
+const SignInRequest = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 `;
 
 const SearchResultsWrapper = styled.div`
@@ -92,8 +101,6 @@ const SearchResultsWrapper = styled.div`
 `;
 
 const InfoMessage = styled.div`
-  margin: 100px auto 0;
-
   color: #5A5A6F;
   font-size: 16px;
   font-weight: 600;
@@ -111,7 +118,7 @@ const TextHotkey = styled(Hotkey)`
 `;
 
 const SignInButton = styled(Button)`
-  margin-top: 30px;
+  margin-top: 8px;
   padding: 10px 20px;
 
   font-size: 15px;
@@ -121,7 +128,7 @@ const SignInButton = styled(Button)`
 `;
 
 const SignInAgainButton = styled(Button)`
-  margin-top: 30px;
+  margin-top: 8px;
   padding: 10px 20px;
 
   color: #535BD7;
@@ -1638,7 +1645,9 @@ function Home() {
             */}
             {activeFilter !== ResultsFilter.Docs
               &&
-              <InfoMessage>Type your search query.</InfoMessage>
+              <InfoWrapper>
+                <InfoMessage>Type your search query.</InfoMessage>
+              </InfoWrapper>
             }
           </>
         }
@@ -1649,7 +1658,7 @@ function Home() {
           && hasActiveFilterEmptyResults
           &&
           <>
-            {/* 
+            {/*
               We can show the text right away for SO because
               we don't have to wait until a user account is loaded.
             */}
@@ -1674,7 +1683,9 @@ function Home() {
           && state.searchMode === SearchMode['As you type']
           && activeFilter !== ResultsFilter.Docs
           &&
-          <InfoMessage>Nothing found. Try a different query.</InfoMessage>
+          <InfoWrapper>
+            <InfoMessage>Nothing found. Try a different query.</InfoMessage>
+          </InfoWrapper>
         }
 
         {(state.search.query && state.search.query === state.search.lastSearchedQuery)
@@ -1702,6 +1713,7 @@ function Home() {
           &&
           <InfoWrapper>
             <InfoMessageLeft>
+            flex-direction: column;
               Type your search query and press
           </InfoMessageLeft>
             <TextHotkey hotkey={['Enter']} />
@@ -1714,22 +1726,26 @@ function Home() {
         {activeFilter === ResultsFilter.Docs
           && authInfo.state === AuthState.LookingForStoredUser
           &&
-          <DocsLoader />
+          <DocsLoader/>
         }
 
         {activeFilter === ResultsFilter.Docs
           && authInfo.state === AuthState.SigningInUser
           &&
           <>
-            <DocsLoader />
-            <InfoMessage>
-              You're being signed in. Please check your email.
-              </InfoMessage>
-            <SignInAgainButton
-              onClick={openSignInModal}
-            >
-              Sign in with a different email
+            <DocsLoader/>
+            <SignInRequest>
+              <InfoWrapper>
+                <InfoMessage>
+                  You're being signed in. Please check your email.
+                </InfoMessage>
+              </InfoWrapper>
+              <SignInAgainButton
+                onClick={openSignInModal}
+              >
+                Sign in with a different email
               </SignInAgainButton>
+            </SignInRequest>
           </>
         }
 
@@ -1738,12 +1754,16 @@ function Home() {
           && !isUserSignedInWithOrWithoutMetadata
           &&
           <>
-            <InfoMessage>You need to sign in to search documentations</InfoMessage>
-            <SignInButton
-              onClick={openSignInModal}
-            >
-              Sign in to Devbook
-            </SignInButton>
+            <InfoWrapper>
+              <SignInRequest>
+                <InfoMessage>You need to sign in to search documentations</InfoMessage>
+                <SignInButton
+                  onClick={openSignInModal}
+                >
+                  Sign in to Devbook
+                </SignInButton>
+              </SignInRequest>
+            </InfoWrapper>
           </>
         }
 
@@ -1828,7 +1848,8 @@ function Home() {
               <EmptyDocPage>
                 {!isActiveFilterLoading &&
                   <>
-                    {(state.search.query && state.search.query === state.search.lastSearchedQuery)
+                    {(state.search.query
+                      && state.search.query === state.search.lastSearchedQuery)
                       && state.searchMode !== SearchMode['As you type']
                       &&
                       <InfoWrapper>
@@ -1838,11 +1859,12 @@ function Home() {
                         <TextHotkey hotkey={['Enter']} />
                         <InfoMessageRight>
                           .
-                      </InfoMessageRight>
+                        </InfoMessageRight>
                       </InfoWrapper>
                     }
 
-                    {(state.search.query && state.search.query !== state.search.lastSearchedQuery)
+                    {(state.search.query
+                      && state.search.query !== state.search.lastSearchedQuery)
                       && state.searchMode !== SearchMode['As you type']
                       &&
                       <InfoWrapper>
@@ -1852,10 +1874,9 @@ function Home() {
                         <TextHotkey hotkey={['Enter']} />
                         <InfoMessageRight>
                           to search.
-                    </InfoMessageRight>
+                        </InfoMessageRight>
                       </InfoWrapper>
                     }
-
 
                     {!state.search.query
                       && state.searchMode !== SearchMode['As you type']
@@ -1867,7 +1888,7 @@ function Home() {
                         <TextHotkey hotkey={['Enter']} />
                         <InfoMessageRight>
                           to search.
-                      </InfoMessageRight>
+                        </InfoMessageRight>
                       </InfoWrapper>
                     }
 
