@@ -215,7 +215,6 @@ const HotkeyText = styled.div`
 
 interface SearchHeaderPanelProps {
   placeholder?: string;
-  initialValue: string;
 
   onEmptyQuery: () => void;
   onNonEmptyQuery: () => void;
@@ -223,7 +222,6 @@ interface SearchHeaderPanelProps {
   onFilterSelect: (f: ResultsFilter) => void;
   onInputFocusChange: (isFocused: boolean) => void;
   onToggleSearchHistoryClick: (e: any) => void;
-  onToggleSearchClick: (e: any) => void;
   invokeSearch: (query: string) => void;
 
   isSearchHistoryPreviewVisible: boolean;
@@ -235,12 +233,13 @@ interface SearchHeaderPanelProps {
   isDocsFilterModalOpened?: boolean;
   historyValue: string | undefined;
   onEnterInSearchHistory: () => void;
+  onDidQueryChanged: () => void;
 }
 
 function SearchHeaderPanel({
   placeholder,
-  initialValue,
   invokeSearch,
+  onDidQueryChanged,
   activeDocSource,
   activeFilter,
   isSearchHistoryPreviewVisible,
@@ -255,7 +254,6 @@ function SearchHeaderPanel({
   searchMode,
   isDocsFilterModalOpened,
   onInputFocusChange,
-  onToggleSearchClick,
   onToggleSearchHistoryClick,
 }: SearchHeaderPanelProps) {
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
@@ -323,7 +321,7 @@ function SearchHeaderPanel({
   }
 
   function handleOnClickSearch(query: string) {
-    
+
   }
 
   return (
@@ -339,9 +337,9 @@ function SearchHeaderPanel({
             onNonEmptyQuery={onNonEmptyQuery}
             onEmptyQuery={onEmptyQuery}
             isSearchHistoryPreviewVisible={isSearchHistoryPreviewVisible}
-            initialValue={initialValue}
             inputRef={inputRef}
             isLoading={isLoading}
+            onDidQueryChanged={onDidQueryChanged}
             historyValue={historyValue}
             onEnterInSearchHistory={onEnterInSearchHistory}
             searchMode={searchMode}

@@ -368,7 +368,7 @@ ipcMain.handle('get-global-shortcut', () => {
 });
 
 ipcMain.handle(IPCMessage.GetSearchMode, () => {
-  return store.get(StoreKey.SearchMode, SearchMode['On enter press']);
+  return store.get(StoreKey.SearchMode, SearchMode.OnEnterPress);
 });
 
 ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => {

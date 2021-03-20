@@ -25,6 +25,8 @@ class HistoryStore {
   }
 
   private static saveQuery(query: string) {
+    if (!query) return;
+
     const index = HistoryStore.entries.findIndex(e => e.query === query);
     const entry = HistoryStore.entries[index];
 

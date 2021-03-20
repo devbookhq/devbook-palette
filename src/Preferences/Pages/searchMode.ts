@@ -1,4 +1,4 @@
 export enum SearchMode {
-    'On enter press' = 'keyPressEnter',
-    'As you type' = 'automatic',
+  'OnEnterPress' = 'onEnterPress',
+  'Automatic' = 'automatic',
 }

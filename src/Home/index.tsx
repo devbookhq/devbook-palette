@@ -35,7 +35,6 @@ import electron, {
   trackSelectHistoryQuery,
   getSearchMode,
 } from 'mainCommunication';
-import useDebounce from 'hooks/useDebounce';
 import {
   search as searchStackOverflow,
   StackOverflowResult,
@@ -75,7 +74,6 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
 `;
-
 
 const InfoWrapper = styled.div`
   padding: 5px;
@@ -307,7 +305,7 @@ type SearchResults = {
 }
 
 enum ReducerActionType {
-  SetSearchQuery,
+  SetIsQueryPresent,
   SetSearchFilter,
 
   CacheScrollTopPosition,
@@ -357,10 +355,10 @@ interface SetSearchMode {
   };
 }
 
-interface SetSearchQuery {
-  type: ReducerActionType.SetSearchQuery;
+interface SetIsQueryPresent {
+  type: ReducerActionType.SetIsQueryPresent;
   payload: {
-    query: string;
+    isQueryPresent: boolean;
   };
 }
 
@@ -507,7 +505,7 @@ interface ToggleSearchInputFocus {
   payload: { isFocused: boolean };
 }
 
-type ReducerAction = SetSearchQuery
+type ReducerAction = SetIsQueryPresent
   | SetSearchFilter
   | CacheScrollTopPosition
   | ClearResults
@@ -537,8 +535,7 @@ type ReducerAction = SetSearchQuery
 
 interface State {
   search: {
-    query: string;
-    lastSearchedQuery: string;
+    isQueryPresent: boolean;
     filter: ResultsFilter;
   };
   results: SearchResults;
@@ -563,10 +560,7 @@ interface State {
 
 const initialState: State = {
   search: {
-    query: '',
-    lastSearchedQuery: '',
-    // TODO: Since we load the last saved search query we should also load
-    // the last saved results filter.
+    isQueryPresent: false,
     filter: ResultsFilter.StackOverflow,
   },
   results: {
@@ -614,13 +608,13 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
   }
 
   switch (reducerAction.type) {
-    case ReducerActionType.SetSearchQuery: {
-      const { query } = reducerAction.payload;
+    case ReducerActionType.SetIsQueryPresent: {
+      const { isQueryPresent: query } = reducerAction.payload;
       return {
         ...state,
         search: {
           ...state.search,
-          query,
+          isQueryPresent: query,
         },
       };
     }
@@ -636,8 +630,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         ...state,
         search: {
           ...state.search,
-          query: '',
-          lastSearchedQuery: '',
+          isQueryPresent: false,
         },
         results: {
           ...emptyResults,
@@ -711,7 +704,6 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         ...state,
         search: {
           ...state.search,
-          lastSearchedQuery: state.search.query,
         },
         results: {
           ...state.results,
@@ -909,10 +901,8 @@ function Home() {
   const searchResultsWrapperRef = useRef<HTMLDivElement>(null);
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
-  const stateQuery = state.search.query;
-  const lastStateQuery = state.search.lastSearchedQuery;
-
-  const [historyValue, setHistoryValue] = useState('');
+  const [queryFromHistoryValue, setQueryFromHistoryValue] = useState('');
+  const [hasQueryChanged, setHasQueryChanged] = useState(true);
 
   const activeFilter = useMemo(() => state.search.filter, [state.search.filter]);
 
@@ -928,15 +918,22 @@ function Home() {
     return state.results[activeFilter].items.length === 0;
   }, [state.results, activeFilter]);
 
+  const hasCurrentQueryNoResults = useMemo(() => {
+    return hasQueryChanged && hasActiveFilterEmptyResults;
+  }, [
+    hasActiveFilterEmptyResults,
+    hasQueryChanged,
+  ]);
+
   const isActiveFilterLoading = useMemo(() => {
     return state.results[activeFilter].isLoading;
   }, [state.results, activeFilter]);
 
   // Dispatch helpers
-  const setSearchQuery = useCallback((query: string) => {
+  const setIsQueryPresent = useCallback((query: boolean) => {
     dispatch({
-      type: ReducerActionType.SetSearchQuery,
-      payload: { query },
+      type: ReducerActionType.SetIsQueryPresent,
+      payload: { isQueryPresent: query },
     });
   }, []);
 
@@ -1202,13 +1199,13 @@ function Home() {
     }
   }
 
-  function handleSearchInputChange(value: string) {
-    // User explicitely deleted the query. We should remove all results.
-    if (!value) {
-      clearResults();
-      return;
-    }
-    setSearchQuery(value);
+  function handleQueryChangedToEmpty() {
+    if (!state.searchMode) clearResults();
+    setIsQueryPresent(false);
+  }
+
+  function handleQueryChangedtoNonEmpty() {
+    setIsQueryPresent(true);
   }
 
   function handleDocSearchResultsResizeStop(e: any, dir: any, elRef: HTMLElement) {
@@ -1238,7 +1235,7 @@ function Home() {
   function handleSearchHistoryQueryClick(query: string) {
     toggleSearchHistoryPreview(false);
     trackSelectHistoryQuery();
-    setHistoryValue(query);
+    setQueryFromHistoryValue(query);
   }
 
   function handleSearchHistoryEnterPress() {
@@ -1246,7 +1243,7 @@ function Home() {
 
     toggleSearchHistoryPreview(false);
     trackSelectHistoryQuery();
-    setHistoryValue(state.history[state.historyIndex]);
+    setQueryFromHistoryValue(state.history[state.historyIndex]);
   }
 
   /* HOTKEYS */
@@ -1345,12 +1342,14 @@ function Home() {
   ]);
 
   const invokeSearch = useCallback((query: string) => {
+    if (!query) return;
     searchAll(
       query,
       activeFilter,
       state.activeDocSource ?? state.docSources[0],
     );
 
+    setHasQueryChanged(false);
     setHistory(historyStore.queries);
     trackSearch({
       activeFilter: activeFilter.toString(),
@@ -1370,7 +1369,6 @@ function Home() {
 
   const invokeHistorySearch = useCallback(() => {
     if (state.isSearchHistoryPreviewVisible && state.history.length > 0) {
-      setSearchQuery(state.history[state.historyIndex]);
       toggleSearchHistoryPreview(false);
       trackSelectHistoryQuery();
       invokeSearch(state.history[state.historyIndex]);
@@ -1383,7 +1381,7 @@ function Home() {
     toggleSearchHistoryPreview,
   ]);
 
-  const activeSearch = state.isSearchHistoryPreviewVisible && state.history.length > 0
+  const activateSearch = state.isSearchHistoryPreviewVisible && state.history.length > 0
     ? invokeHistorySearch
     : invokeSearch;
 
@@ -1487,20 +1485,6 @@ function Home() {
     setSearchMode(mode);
   });
 
-  // Starts the initial search after the app loads.
-  useEffect(() => {
-    if (state.searchMode === undefined
-      && state.search.query !== state.search.lastSearchedQuery
-    ) {
-      invokeSearch(state.search.query);
-    }
-  }, [
-    invokeSearch,
-    state.search.query,
-    state.search.lastSearchedQuery,
-    state.searchMode,
-  ]);
-
   // Run only on the initial render.
   // Get the cached search query and search filter.
   useEffect(() => {
@@ -1518,7 +1502,7 @@ function Home() {
         searchingSuccess(ResultsFilter.StackOverflow, []);
         searchingSuccess(ResultsFilter.Docs, []);
       } else {
-        setSearchQuery(lastQuery);
+        setQueryFromHistoryValue(lastQuery);
       }
 
       const mode = await getSearchMode();
@@ -1561,10 +1545,6 @@ function Home() {
   useEffect(() => {
     if (!state.activeDocSource) return;
     saveActiveDocSource(state.activeDocSource);
-
-    if (stateQuery) {
-      searchDocs(stateQuery, state.activeDocSource);
-    }
 
     // NOTE: We don't want to run this useEffect every time
     // the search query changes. We just want to refresh
@@ -1613,13 +1593,13 @@ function Home() {
 
       <Container>
         <SearchHeaderPanel
-          historyValue={historyValue}
+          historyValue={queryFromHistoryValue}
           activeDocSource={state.activeDocSource}
-          initialValue={state.search.query}
-          onEmptyQuery={() => handleSearchInputChange('')}
-          onNonEmptyQuery={() => handleSearchInputChange('#')}
+          onEmptyQuery={handleQueryChangedToEmpty}
+          onDidQueryChanged={() => setHasQueryChanged(true)}
+          onNonEmptyQuery={handleQueryChangedtoNonEmpty}
           placeholder={activeFilter === ResultsFilter.StackOverflow ? 'Search StackOverflow' : 'Search documentation'}
-          invokeSearch={activeSearch}
+          invokeSearch={activateSearch}
           searchMode={state.searchMode}
           activeFilter={activeFilter}
           onFilterSelect={f => setSearchFilter(f)}
@@ -1630,12 +1610,11 @@ function Home() {
           isSearchHistoryPreviewVisible={state.isSearchHistoryPreviewVisible}
           onInputFocusChange={toggleSearchInputFocus}
           onToggleSearchHistoryClick={() => toggleSearchHistoryPreview(!state.isSearchHistoryPreviewVisible)}
-          onToggleSearchClick={() => invokeSearch(state.search.query)}
           onEnterInSearchHistory={handleSearchHistoryEnterPress}
         />
 
-        {!state.search.query
-          && state.searchMode === SearchMode['As you type']
+        {!state.search.isQueryPresent
+          && state.searchMode === SearchMode.Automatic
           && !isActiveFilterLoading
           &&
           <>
@@ -1646,14 +1625,14 @@ function Home() {
             {activeFilter !== ResultsFilter.Docs
               &&
               <InfoWrapper>
-                <InfoMessage>Type your search query.</InfoMessage>
+                <InfoMessage>Type your search query</InfoMessage>
               </InfoWrapper>
             }
           </>
         }
 
-        {!state.search.query
-          && state.searchMode !== SearchMode['As you type']
+        {!state.search.isQueryPresent
+          && state.searchMode !== SearchMode.Automatic
           && !isActiveFilterLoading
           && hasActiveFilterEmptyResults
           &&
@@ -1670,17 +1649,18 @@ function Home() {
                 </InfoMessageLeft>
                 <TextHotkey hotkey={['Enter']} />
                 <InfoMessageRight>
-                  to search.
+                  to search
                 </InfoMessageRight>
               </InfoWrapper>
             }
           </>
         }
 
-        {state.search.query
+        {state.search.isQueryPresent
           && hasActiveFilterEmptyResults
           && !isActiveFilterLoading
-          && state.searchMode === SearchMode['As you type']
+          && !hasQueryChanged
+          && state.searchMode === SearchMode.Automatic
           && activeFilter !== ResultsFilter.Docs
           &&
           <InfoWrapper>
@@ -1688,10 +1668,11 @@ function Home() {
           </InfoWrapper>
         }
 
-        {(state.search.query && state.search.query === state.search.lastSearchedQuery)
+        {state.search.isQueryPresent
           && hasActiveFilterEmptyResults
           && !isActiveFilterLoading
-          && state.searchMode !== SearchMode['As you type']
+          && !hasQueryChanged
+          && state.searchMode !== SearchMode.Automatic
           && activeFilter !== ResultsFilter.Docs
           &&
           <InfoWrapper>
@@ -1705,20 +1686,20 @@ function Home() {
           </InfoWrapper>
         }
 
-        {(state.search.query && state.search.query !== state.search.lastSearchedQuery)
+        {state.search.isQueryPresent
           && hasActiveFilterEmptyResults
           && !isActiveFilterLoading
-          && state.searchMode !== SearchMode['As you type']
+          && hasQueryChanged
+          && state.searchMode !== SearchMode.Automatic
           && activeFilter !== ResultsFilter.Docs
           &&
           <InfoWrapper>
             <InfoMessageLeft>
-            flex-direction: column;
               Type your search query and press
           </InfoMessageLeft>
             <TextHotkey hotkey={['Enter']} />
             <InfoMessageRight>
-              to search.
+              to search
           </InfoMessageRight>
           </InfoWrapper>
         }
@@ -1726,14 +1707,14 @@ function Home() {
         {activeFilter === ResultsFilter.Docs
           && authInfo.state === AuthState.LookingForStoredUser
           &&
-          <DocsLoader/>
+          <DocsLoader />
         }
 
         {activeFilter === ResultsFilter.Docs
           && authInfo.state === AuthState.SigningInUser
           &&
           <>
-            <DocsLoader/>
+            <DocsLoader />
             <SignInRequest>
               <InfoWrapper>
                 <InfoMessage>
@@ -1767,7 +1748,7 @@ function Home() {
           </>
         }
 
-        {state.search.query
+        {state.search.isQueryPresent
           && activeFilter === ResultsFilter.Docs
           && isUserSignedInWithOrWithoutMetadata
           && !state.activeDocSource
@@ -1848,9 +1829,11 @@ function Home() {
               <EmptyDocPage>
                 {!isActiveFilterLoading &&
                   <>
-                    {(state.search.query
-                      && state.search.query === state.search.lastSearchedQuery)
-                      && state.searchMode !== SearchMode['As you type']
+                    {state.search.isQueryPresent
+                      && hasActiveFilterEmptyResults
+                      && hasCurrentQueryNoResults
+                      && !hasQueryChanged
+                      && state.searchMode !== SearchMode.Automatic
                       &&
                       <InfoWrapper>
                         <InfoMessageLeft>
@@ -1863,9 +1846,11 @@ function Home() {
                       </InfoWrapper>
                     }
 
-                    {(state.search.query
-                      && state.search.query !== state.search.lastSearchedQuery)
-                      && state.searchMode !== SearchMode['As you type']
+                    {state.search.isQueryPresent
+                      && hasActiveFilterEmptyResults
+                      && !hasCurrentQueryNoResults
+                      && hasQueryChanged
+                      && state.searchMode !== SearchMode.Automatic
                       &&
                       <InfoWrapper>
                         <InfoMessageLeft>
@@ -1873,13 +1858,14 @@ function Home() {
                         </InfoMessageLeft>
                         <TextHotkey hotkey={['Enter']} />
                         <InfoMessageRight>
-                          to search.
+                          to search
                         </InfoMessageRight>
                       </InfoWrapper>
                     }
 
-                    {!state.search.query
-                      && state.searchMode !== SearchMode['As you type']
+                    {!state.search.isQueryPresent
+                      && state.searchMode !== SearchMode.Automatic
+                      && hasQueryChanged
                       &&
                       <InfoWrapper>
                         <InfoMessageLeft>
@@ -1887,24 +1873,27 @@ function Home() {
                           </InfoMessageLeft>
                         <TextHotkey hotkey={['Enter']} />
                         <InfoMessageRight>
-                          to search.
+                          to search
                         </InfoMessageRight>
                       </InfoWrapper>
                     }
 
-                    {state.search.query
-                      && state.searchMode === SearchMode['As you type']
+                    {state.search.isQueryPresent
+                      && state.searchMode === SearchMode.Automatic
+                      && hasCurrentQueryNoResults
+                      && !hasQueryChanged
                       &&
                       <InfoMessage>
                         Nothing found. Try a different query.
                       </InfoMessage>
                     }
 
-                    {!state.search.query
-                      && state.searchMode === SearchMode['As you type']
+                    {!state.search.isQueryPresent
+                      && state.searchMode === SearchMode.Automatic
+                      && hasQueryChanged
                       &&
                       <InfoMessage>
-                        Type your search query.
+                        Type your search query
                       </InfoMessage>
                     }
                   </>
@@ -1914,7 +1903,7 @@ function Home() {
           </DocsWrapper>
         }
 
-        {(state.search.query || state.searchMode !== SearchMode['As you type'])
+        {(state.search.isQueryPresent || state.searchMode !== SearchMode.Automatic)
           && !hasActiveFilterEmptyResults
           && !isActiveFilterLoading
           &&

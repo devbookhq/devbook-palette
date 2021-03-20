@@ -65,7 +65,6 @@ interface SearchInputProps {
   onEmptyQuery: () => void;
   onNonEmptyQuery: () => void;
 
-  initialValue: string;
   activeDocSource: DocSource | undefined;
   searchMode: SearchMode | undefined;
   inputRef: React.RefObject<HTMLInputElement>;
@@ -79,6 +78,7 @@ interface SearchInputProps {
   onEnterInSearchHistory: () => void;
   isSearchHistoryPreviewVisible: boolean;
   onInputFocusChange: (isFocused: boolean) => void;
+  onDidQueryChanged: () => void;
 }
 
 function SearchInput({
@@ -87,12 +87,12 @@ function SearchInput({
   historyValue,
   activeDocSource,
   onEnterInSearchHistory,
-  initialValue,
   isSearchHistoryPreviewVisible,
   onEmptyQuery,
   onNonEmptyQuery,
   isModalOpened,
   invokeSearch,
+  onDidQueryChanged,
   isSignInModalOpened,
   isDocsFilterModalOpened,
   isLoading,
@@ -125,30 +125,19 @@ function SearchInput({
     invokeSearch,
   ]);
 
-  useEffect(() => {
-    if (initialValue && !isInitialized) {
-      setIsInitialized(true);
-      setValue(initialValue);
-    }
-  }, [
-    isInitialized,
-    initialValue,
-  ]);
-
-  useEffect(() => {
-    if (!value) setValue(initialValue);
-  }, [initialValue]);
-
   function handleChangeValue(e: any) {
     setValue(e.target.value);
 
     if (isEmptyQuery && e.target.value !== '') {
       setIsEmptyQuery(false);
-      return onNonEmptyQuery();
+      onNonEmptyQuery();
     }
     if (!isEmptyQuery && e.target.value === '') {
       setIsEmptyQuery(true);
-      return onEmptyQuery();
+      onEmptyQuery();
+    }
+    if (e.target.value !== lastValue) {
+      onDidQueryChanged();
     }
   }
 
@@ -181,7 +170,7 @@ function SearchInput({
 
     if (isSearchHistoryPreviewVisible) return onEnterInSearchHistory();
 
-    if (searchMode !== SearchMode['On enter press']) return;
+    if (searchMode !== SearchMode.OnEnterPress) return;
     invokeSearch(value);
     setLastValue(value);
   }, { filter: () => true }, [
@@ -194,7 +183,7 @@ function SearchInput({
   ]);
 
   useEffect(() => {
-    if (searchMode !== SearchMode['As you type']) return;
+    if (searchMode !== SearchMode.Automatic) return;
 
     if (lastValue === debouncedValue) return;
     invokeSearch(debouncedValue);
@@ -241,7 +230,7 @@ function SearchInput({
       />
       {isLoading && <StyledLoader />}
 
-      {searchMode === SearchMode['On enter press'] &&
+      {searchMode === SearchMode.OnEnterPress &&
         <HotkeyWrapper
           onClick={() => invokeSearch(value)}
         >

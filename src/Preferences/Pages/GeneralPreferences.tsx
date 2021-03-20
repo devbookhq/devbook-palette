@@ -51,7 +51,7 @@ const Title = styled.span`
   font-weight: 500;
 `;
 
-const Description = styled.div`
+const Description = styled.div` 
   color: #959CB1;
   font-size: 15px;
   font-weight: 400;
@@ -60,6 +60,11 @@ const Description = styled.div`
 const StyledSelect = styled(Select)`
   min-width: 250px;
 `;
+
+const searchModeLabels: { [searchMode in SearchMode]: string } = {
+  [SearchMode.Automatic]: 'As I type',
+  [SearchMode.OnEnterPress]: 'On Enter press',
+};
 
 function GeneralPreferences() {
   const [selectedShortcut, setSelectedShortcut] = useState('');
@@ -130,8 +135,8 @@ function GeneralPreferences() {
                 <Description>When should Devbook start searching.</Description>
               </Text>
               <StyledSelect value={selectedMode} onChange={e => handleModeChange(e.target.value as SearchMode)}>
-                {Object.keys(SearchMode).map((mode) =>
-                  <option key={mode} value={(SearchMode as any)[mode]}>{mode}</option>
+                {(Object.values(SearchMode) as SearchMode[]).map((mode) =>
+                  <option key={mode} value={mode}>{searchModeLabels[mode]}</option>
                 )}
               </StyledSelect>
             </Item>
