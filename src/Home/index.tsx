@@ -906,7 +906,7 @@ function Home() {
   const [state, dispatch] = useReducer(stateReducer, initialState);
 
   const [queryFromHistoryValue, setQueryFromHistoryValue] = useState('');
-  const [hasQueryChanged, setHasQueryChanged] = useState(true);
+  const [didQueryChange, setDidQueryChange] = useState(true);
 
   const activeFilter = useMemo(() => state.search.filter, [state.search.filter]);
 
@@ -1349,7 +1349,7 @@ function Home() {
       state.activeDocSource ?? state.docSources[0],
     );
 
-    setHasQueryChanged(false);
+    setDidQueryChange(false);
     setHistory(historyStore.queries);
     trackSearch({
       activeFilter: activeFilter.toString(),
@@ -1596,7 +1596,7 @@ function Home() {
           historyValue={queryFromHistoryValue}
           activeDocSource={state.activeDocSource}
           onEmptyQuery={handleQueryChangedToEmpty}
-          onDidQueryChanged={() => setHasQueryChanged(true)}
+          onQueryDidChange={() => setDidQueryChange(true)}
           onNonEmptyQuery={handleQueryChangedtoNonEmpty}
           placeholder={activeFilter === ResultsFilter.StackOverflow ? 'Search StackOverflow' : 'Search documentation'}
           invokeSearch={activateSearch}
@@ -1668,7 +1668,7 @@ function Home() {
           {state.search.isQueryPresent
             && hasActiveFilterEmptyResults
             && !isActiveFilterLoading
-            && !hasQueryChanged
+            && !didQueryChange
             && state.searchMode === SearchMode.Automatic
             && activeFilter !== ResultsFilter.Docs
             &&
@@ -1680,7 +1680,7 @@ function Home() {
           {state.search.isQueryPresent
             && hasActiveFilterEmptyResults
             && !isActiveFilterLoading
-            && !hasQueryChanged
+            && !didQueryChange
             && state.searchMode !== SearchMode.Automatic
             && activeFilter !== ResultsFilter.Docs
             &&
@@ -1698,7 +1698,7 @@ function Home() {
           {state.search.isQueryPresent
             && hasActiveFilterEmptyResults
             && !isActiveFilterLoading
-            && hasQueryChanged
+            && didQueryChange
             && state.searchMode !== SearchMode.Automatic
             && activeFilter !== ResultsFilter.Docs
             &&
@@ -1841,7 +1841,7 @@ function Home() {
                       {state.search.isQueryPresent
                         && state.searchMode !== SearchMode.Automatic
                         && hasActiveFilterEmptyResults
-                        && !hasQueryChanged
+                        && !didQueryChange
                         &&
                         <InfoWrapper>
                           <InfoMessageLeft>
@@ -1857,7 +1857,7 @@ function Home() {
                       {state.search.isQueryPresent
                         && state.searchMode !== SearchMode.Automatic
                         && hasActiveFilterEmptyResults
-                        && hasQueryChanged
+                        && didQueryChange
                         &&
                         <InfoWrapper>
                           <InfoMessageLeft>

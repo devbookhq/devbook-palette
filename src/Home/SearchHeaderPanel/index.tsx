@@ -232,13 +232,13 @@ interface SearchHeaderPanelProps {
   isDocsFilterModalOpened?: boolean;
   historyValue: string | undefined;
   onEnterInSearchHistory: () => void;
-  onDidQueryChanged: () => void;
+  onQueryDidChange: () => void;
 }
 
 function SearchHeaderPanel({
   placeholder,
   invokeSearch,
-  onDidQueryChanged,
+  onQueryDidChange,
   activeDocSource,
   activeFilter,
   isSearchHistoryPreviewVisible,
@@ -319,10 +319,6 @@ function SearchHeaderPanel({
     onInputFocusChange(isFocused);
   }
 
-  function handleOnClickSearch(query: string) {
-
-  }
-
   return (
     <Container
       onMouseDown={handleContentMouseDown}
@@ -338,7 +334,7 @@ function SearchHeaderPanel({
             isSearchHistoryPreviewVisible={isSearchHistoryPreviewVisible}
             inputRef={inputRef}
             isLoading={isLoading}
-            onDidQueryChanged={onDidQueryChanged}
+            onQueryDidChange={onQueryDidChange}
             historyValue={historyValue}
             onEnterInSearchHistory={onEnterInSearchHistory}
             searchMode={searchMode}

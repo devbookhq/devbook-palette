@@ -37,28 +37,35 @@ const StyledLoader = styled(Loader)`
   position: relative;
   right: 2px; `;
 
-const HotkeyWrapper = styled.div`
+const HotkeyWrapper = styled.div<{ isHighlighted?: boolean }>`
   padding: 5px;
+  margin-right: 8px;
   display: flex;
   align-items: center;
 
   border-radius: 5px;
   user-select: none;
+  background: ${props => props.isHighlighted ? '#535BD7' : 'transparent'};
+  box-shadow: ${props => props.isHighlighted ? '0px 0px 8px 5px rgba(83, 91, 215, 0.15)' : 'none'};
+
   :hover {
     transition: background 170ms ease-in;
     cursor: pointer;
-    background: #434252;
-    > div {
-      color: #fff;
-    }
+    background: ${props => props.isHighlighted ? '#535BD7' : '#434252' };
   }
 `;
 
-const HotkeyText = styled.div`
+const StyledHotkey = styled(Hotkey)<{ isHighlighted?: boolean }>`
+  background: ${props => props.isHighlighted ? '#535BD7' : 'auto'};
+  color: ${props => props.isHighlighted ? '#fff' : 'auto'};
+`;
+
+const HotkeyText = styled.div<{ isHighlighted?: boolean }>`
   margin-left: 8px;
   font-size: 12px;
   color: #616171;
   transition: color 170ms ease-in;
+  color: ${props => props.isHighlighted ? '#fff' : 'auto'};
 `;
 
 interface SearchInputProps {
@@ -81,7 +88,7 @@ interface SearchInputProps {
   onEnterInSearchHistory: () => void;
   isSearchHistoryPreviewVisible: boolean;
   onInputFocusChange: (isFocused: boolean) => void;
-  onDidQueryChanged: () => void;
+  onQueryDidChange: () => void;
 }
 
 function SearchInput({
@@ -95,7 +102,7 @@ function SearchInput({
   onNonEmptyQuery,
   isModalOpened,
   invokeSearch,
-  onDidQueryChanged,
+  onQueryDidChange,
   isSignInModalOpened,
   isDocsFilterModalOpened,
   isLoading,
@@ -109,32 +116,20 @@ function SearchInput({
   const [lastDocSource, setLastDocSource] = useState<DocSource>();
   const [isEmptyQuery, setIsEmptyQuery] = useState(true);
   const [lastHistoryValue, setLastHistoryValue] = useState('');
+  const [isDirty, setIsDirty] = useState(false);
 
   const debouncedValue = useDebounce(value, 280);
 
   const search = useCallback((query: string) => {
     invokeSearch(query);
     setLastValue(query);
+    setIsDirty(false);
   }, [invokeSearch]);
 
-  useEffect(() => {
-    if (!historyValue) return;
-    if (historyValue === lastHistoryValue) return;
-    if (historyValue === value) return;
-
-    onDidQueryChanged();
-    setValue(historyValue);
-    setLastHistoryValue(historyValue);
-
-    search(historyValue);
-  }, [
-    historyValue,
-    lastHistoryValue,
-    value,
-    lastValue,
-    onDidQueryChanged,
-    search,
-  ]);
+  function informQueryChange() {
+    setIsDirty(true);
+    onQueryDidChange();
+  }
 
   function handleChangeValue(e: any) {
     setValue(e.target.value);
@@ -148,26 +143,14 @@ function SearchInput({
       onEmptyQuery();
     }
     if (e.target.value !== lastValue) {
-      onDidQueryChanged();
+      informQueryChange();
     }
   }
-
-  useEffect(() => {
-    if (activeDocSource === lastDocSource) return;
-
-    setLastDocSource(activeDocSource);
-    search(value);
-  }, [
-    activeDocSource,
-    lastDocSource,
-    search,
-    value,
-  ]);
 
   function handleInputKeyDown(e: any) {
     // We want to prevent cursor from moving when the up or down arrow is pressed.
     // The default behavior is that cursor moves either to the start or to the end.
-    // 38 - up arrow 
+    // 38 - up arrow
     // 40 - down arrow
     if (e.keyCode === 38 || e.keyCode === 40) {
       e.preventDefault();
@@ -176,7 +159,7 @@ function SearchInput({
   }
 
   // 'enter' hotkey - search.
-  useHotkeys('enter', (event) => {
+  useHotkeys('enter', () => {
     if (isSignInModalOpened) return;
     if (isDocsFilterModalOpened) return;
     if (isSearchHistoryPreviewVisible) return onEnterInSearchHistory();
@@ -187,6 +170,25 @@ function SearchInput({
     isSearchHistoryPreviewVisible,
     onEnterInSearchHistory,
     searchMode,
+    search,
+    value,
+  ]);
+
+  useIPCRenderer('did-show-main-window', () => {
+    if (!isModalOpened && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.setSelectionRange(0, 999999);
+    }
+  });
+
+  useEffect(() => {
+    if (activeDocSource === lastDocSource) return;
+
+    setLastDocSource(activeDocSource);
+    search(value);
+  }, [
+    activeDocSource,
+    lastDocSource,
     search,
     value,
   ]);
@@ -202,12 +204,24 @@ function SearchInput({
     search,
   ]);
 
-  useIPCRenderer('did-show-main-window', () => {
-    if (!isModalOpened && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.setSelectionRange(0, 999999);
-    }
-  });
+  useEffect(() => {
+    if (!historyValue) return;
+    if (historyValue === lastHistoryValue) return;
+    if (historyValue === value) return;
+
+    informQueryChange();
+    setValue(historyValue);
+    setLastHistoryValue(historyValue);
+
+    search(historyValue);
+  }, [
+    historyValue,
+    lastHistoryValue,
+    value,
+    lastValue,
+    informQueryChange,
+    search,
+  ]);
 
   useEffect(() => {
     if (isModalOpened) inputRef?.current?.blur();
@@ -244,13 +258,17 @@ function SearchInput({
       {searchMode === SearchMode.OnEnterPress &&
         <HotkeyWrapper
           onClick={() => search(value)}
+          isHighlighted={isDirty}
         >
-          <Hotkey
+          <StyledHotkey
             hotkey={['Enter']}
+            isHighlighted={isDirty}
           />
-          <HotkeyText>
+          <HotkeyText
+            isHighlighted={isDirty}
+          >
             to search
-      </HotkeyText>
+          </HotkeyText>
         </HotkeyWrapper>
       }
     </>
