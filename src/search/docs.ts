@@ -59,6 +59,7 @@ export async function search(query: string, docSource: DocSource): Promise<DocRe
 
 export async function fetchDocSources(): Promise<DocSource[]> {
   const url = isDev ? 'https://dev.usedevbook.com/v1/search/docs' : 'https://api.usedevbook.com/v1/search/docs';
+  //const url = `http://127.0.0.1:3002${version}/search/docs`;
 
   const result = await axios.get(url);
   return result.data.docs;
