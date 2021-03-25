@@ -9,7 +9,7 @@
     "email": "hello@usedevbook.com",
     "url": "https://usedevbook.com"
   },
-  "main": "build/main",
+  "main": "build/electron/main",
   "productName": "Devbook",
   "eslintConfig": {
     "extends": "react-app"
@@ -30,11 +30,13 @@
     "node": "12"
   },
   "scripts": {
-    "compile": "craco build && tsc -p src/main",
+    "compile:client": "./scripts/build-client.sh",
+    "compile:electron": "tsc -p src/main",
     "postinstall": "electron-rebuild",
-    "electron:dev": "concurrently \"npx cross-env BROWSER=none craco start\" \"wait-on http://localhost:3000 && tsc -p src/main -w\" \"wait-on http://localhost:3000 && tsc -p src/main && electron --enable-logging .\"",
-    "build:prod": "npm run compile && todesktop build",
-    "build:dev": "npm run compile && todesktop build --code-sign=false"
+    "electron:dev": "concurrently \"tsc -p src/main -w\" \"tsc -p src/main && electron --enable-logging .\"",
+    "build:electron:prod": "npm run compile:electron && todesktop build",
+    "build:electron:dev": "npm run compile:electron && todesktop build --code-sign=false",
+    "deploy:client": "./scripts/deploy-client.sh"
   },
   "dependencies": {
     "@todesktop/runtime": "^0.5.4",
@@ -72,7 +74,7 @@
     "electron": "11.1.1",
     "electron-rebuild": "^2.3.5",
     "electron-reload": "^1.5.0",
-    "react-scripts": "^4.0.1",
+    "react-scripts": "^4.0.3",
     "typescript": "^4.0.2",
     "wait-on": "^5.2.1"
   }

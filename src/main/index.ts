@@ -276,7 +276,7 @@ app.once('ready', async () => {
   if (isDev) {
     // Load react dev tools.
     await electron.session.defaultSession.loadExtension(
-      path.join(__dirname, '..', '..', 'react-dev-tools-4.9.0_26'),
+      path.join(__dirname, '..', '..', '..', 'react-dev-tools-4.9.0_26'),
     );
   }
 
@@ -485,7 +485,6 @@ ipcMain.on(IPCMessage.TrackSignInButtonClicked, () => {
 ipcMain.on(IPCMessage.TrackSignInAgainButtonClicked, () => {
   trackSignInAgainButtonClicked(mainWindow?.window);
 });
-
 ipcMain.on(IPCMessage.TrackSignInFinished, () => {
   trackSignInFinished(mainWindow?.window);
 });
@@ -533,3 +532,48 @@ ipcMain.on(IPCMessage.TrackCopyCodeSnippetStackOverflow, () => {
 ipcMain.on(IPCMessage.TrackCopyCodeSnippetDocs, () => {
   trackCopyCodeSnippetDocs(mainWindow?.window);
 });
+
+// ================
+
+/*
+ipcMain.on(IPCMesssage.Interface, handleInterfaceMessage);
+
+ipcMain.on(IPCMesssage.Update, handleUpdateMessage);
+
+ipcMain.on(IPCMesssage.Auth, handleAuthMessage);
+
+ipcMain.on(IPCMesssage.Store, handleStoreMessage);
+
+ipcMain.on(IPCMesssage.Telemetry, handleTelemetryMessage);
+
+ipcMain.on('???', handleUndefinedMessage);
+
+ipcMain.on('renderer_message', dispatchIPCMessage);
+
+function dispatchIPCMessage(event, payload) {
+  const { type } = payload;
+
+  switch (type) {
+    case 'Interface':
+      handleInterfaceMessage();
+    break;
+    case 'Auth':
+      handleAuthMessage();
+    break;
+    case 'Store':
+      handleStoreMessage():
+    break;
+    default:
+      handleUnknownIPCMessage(event, payload);
+    break;
+  }
+}
+*/
+
+
+
+
+
+
+
+

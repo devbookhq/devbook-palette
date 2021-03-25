@@ -208,4 +208,27 @@ export function trackCopyCodeSnippetDocs() {
 
 export { isDev };
 
+/*
+export function retrieveQuery() {
+  dispatchMessage('Invoke', 'Store', { action: 'get', key: 'searchQuery' });
+}
+
+export function saveQuery(value: string) {
+  dispatchMessage('Invoke', 'Store', { action: 'set', key: 'searchQuery', value });
+}
+
+export function dispatchMessage(ipc: 'Send' | 'Invoke', msgType: 'Store' | 'Auth' | 'Interface', data: any = undefined) {
+  const payload = {
+    type: msgType,
+    data: {}
+  };
+
+  if (ipc === 'Send')
+    return electron.ipcRenderer.send('renderer_message', payload);
+  else
+    return electron.ipcRenderer.invoke('renderer_message', payload);
+}
+*/
+
 export default electron;
+

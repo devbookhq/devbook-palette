@@ -4,9 +4,12 @@ import ElectronStore from 'electron-store';
 import * as path from 'path';
 import { inspect } from 'util';
 import { debounce } from 'debounce';
+// import axios from 'axios';
 
 import isDev from './utils/isDev';
 import { IPCMessage } from '../mainCommunication/ipc';
+
+const { version } = require('../../../package.json');
 
 class MainWindow {
   public window: electron.BrowserWindow | undefined;
@@ -143,7 +146,23 @@ class MainWindow {
     });
 
     if (isDev) {
-      this.window.loadURL(`http://localhost:${PORT}/index.html`);
+      //this.window.loadURL(`http://localhost:${PORT}/index.html`);
+      this.window.loadURL('https://client.usedevbook.com/0.1.14');
+
+      /*
+      this.window.loadURL('https://storage.googleapis.com/testing-js-bundle/loading.html');
+      this.window.webContents.on('did-finish-load', async () => {
+        axios.get('https://storage.googleapis.com/testing-js-bundle/static/css/main.9ba11604.css')
+        .then(response => {
+          this.window?.webContents.send('content', { css: response.data });
+        })
+        axios.get('https://storage.googleapis.com/testing-js-bundle/static/js/main.806b35ed.js')
+        .then(response => {
+          this.window?.webContents.send('content', { bundle: response.data });
+        });
+      });
+      */
+
       // Hot Reloading
       require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
@@ -153,7 +172,9 @@ class MainWindow {
 
       this.webContents?.openDevTools();
     } else {
-      this.window.loadURL(`file://${__dirname}/../index.html#/`);
+      //this.window.loadURL(`file://${__dirname}/../index.html#/`);
+      const url = `https://client.usedevbook.com/${version}`;
+      this.window.loadURL(url);
     }
   }
 

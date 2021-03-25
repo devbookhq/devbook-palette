@@ -5,7 +5,7 @@
     "sourceMap": true,
     "strict": true,
     "allowJs": true,
-    "outDir": "../../build",
+    "outDir": "../../build/electron",
     "rootDir": "../",
     "noEmitOnError": true,
     "esModuleInterop": true,
