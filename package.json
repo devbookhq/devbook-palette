@@ -30,13 +30,13 @@
     "node": "12"
   },
   "scripts": {
-    "compile:client": "./scripts/build-client.sh",
-    "compile:electron": "tsc -p src/main",
+    "bundle:client": "./scripts/bundle-client.sh",
+    "bundle:electron": "./scripts/bundle-electron.sh",
     "postinstall": "electron-rebuild",
-    "electron:dev": "concurrently \"tsc -p src/main -w\" \"tsc -p src/main && electron --enable-logging .\"",
-    "build:electron:prod": "npm run compile:electron && todesktop build",
-    "build:electron:dev": "npm run compile:electron && todesktop build --code-sign=false",
-    "deploy:client": "./scripts/deploy-client.sh"
+    "build:electron": "npm run compile:electron && todesktop build",
+    "build:electron:nosign": "npm run compile:electron && todesktop build --code-sign=false",
+    "deploy:client": "./scripts/deploy-client.sh",
+    "start": "concurrently \"./scripts/watch-electron.sh\" \"electron --enable-logging .\""
   },
   "dependencies": {
     "@todesktop/runtime": "^0.5.4",

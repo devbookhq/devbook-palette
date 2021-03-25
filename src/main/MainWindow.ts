@@ -146,22 +146,11 @@ class MainWindow {
     });
 
     if (isDev) {
-      //this.window.loadURL(`http://localhost:${PORT}/index.html`);
-      this.window.loadURL('https://client.usedevbook.com/0.1.14');
-
-      /*
-      this.window.loadURL('https://storage.googleapis.com/testing-js-bundle/loading.html');
-      this.window.webContents.on('did-finish-load', async () => {
-        axios.get('https://storage.googleapis.com/testing-js-bundle/static/css/main.9ba11604.css')
-        .then(response => {
-          this.window?.webContents.send('content', { css: response.data });
-        })
-        axios.get('https://storage.googleapis.com/testing-js-bundle/static/js/main.806b35ed.js')
-        .then(response => {
-          this.window?.webContents.send('content', { bundle: response.data });
-        });
+      this.window.loadURL(`file://${__dirname}/assets/loading.html`);
+      this.window.webContents.on('did-finish-load', () => {
+        this.window?.loadURL(`https://client.usedevbook.com/${version}`);
+        //this.window.loadURL(`http://localhost:${PORT}/index.html`);
       });
-      */
 
       // Hot Reloading
       require('electron-reload')(__dirname, {
@@ -172,9 +161,10 @@ class MainWindow {
 
       this.webContents?.openDevTools();
     } else {
-      //this.window.loadURL(`file://${__dirname}/../index.html#/`);
-      const url = `https://client.usedevbook.com/${version}`;
-      this.window.loadURL(url);
+      this.window.loadURL(`file://${__dirname}/assets/loading.html`);
+      this.window.webContents.on('did-finish-load', () => {
+        this.window?.loadURL(`https://client.usedevbook.com/${version}`);
+      });
     }
   }
 

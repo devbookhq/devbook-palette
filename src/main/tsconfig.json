@@ -15,6 +15,6 @@
   },
   "include": [
     ".",
-    "../utils/debounce.ts",
+    "../utils/debounce.ts"
   ]
 }

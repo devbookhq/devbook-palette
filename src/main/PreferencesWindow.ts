@@ -78,7 +78,6 @@ class PreferencesWindow {
       });
       */
 
-
       // Hot Reloading
       require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
@@ -87,23 +86,9 @@ class PreferencesWindow {
       });
       this.window.webContents.openDevTools();
     } else {
-      //const url = `file://${__dirname}/../index.html#/preferences` + (page ? `/${page}` : '');
-      //const url = `file://${__dirname}/../loading.html#/preferences` + (page ? `/${page}` : '');
+      this.window.loadURL(`file://${__dirname}/assets/loading.html`);
       const url = `https://client.usedevbook.com/${version}`;
       this.window.loadURL(url);
-
-      /*
-      this.window.webContents.on('did-finish-load', async () => {
-        axios.get('https://storage.googleapis.com/testing-js-bundle/static/css/main.9ba11604.css')
-        .then(response => {
-          this.window?.webContents.send('content', { css: response.data });
-        })
-        axios.get('https://storage.googleapis.com/testing-js-bundle/static/js/main.806b35ed.js')
-        .then(response => {
-          this.window?.webContents.send('content', { bundle: response.data });
-        });
-      });
-      */
     }
 
     if (process.platform === 'darwin') {
