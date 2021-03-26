@@ -30,8 +30,8 @@ fi
 
 read -p "🚨 You are about to deploy client v$VERSION-$BUNDLE. Press enter to continue."
 
-gsutil -m rm $BUCKET_URL/$VERSION/**
-gsutil -m -h "Cache-Control:no-cache, max-age=0" cp -r $BUILD_PATH/* $BUCKET_URL/$VERSION
+gsutil -m -h "Cache-Control:no-cache, max-age=0" cp -r $BUILD_PATH $BUCKET_URL
+gsutil -m mv $BUCKET_URL/$VERSION-$BUNDLE $BUCKET_URL/$VERSION
 
 echo "\n\n>>> ✅ Client v$VERSION -$BUNDLE uploaded to storage at URL $BUCKET_URL/$VERSION."
 
