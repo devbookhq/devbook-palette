@@ -107,6 +107,7 @@ function App() {
 
   return (
     <>
+      <h3>Hello {clientBundle}</h3>
       {isNewBundleAvailable && !didUserDismissNotif &&
         <NewBundleNotif>
           New Bundle Available ({availableBundle}). Reload.
