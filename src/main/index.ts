@@ -533,6 +533,10 @@ ipcMain.on(IPCMessage.TrackCopyCodeSnippetDocs, () => {
   trackCopyCodeSnippetDocs(mainWindow?.window);
 });
 
+ipcMain.on(IPCMessage.ReloadMainWindow, () => {
+  mainWindow?.webContents?.reload();
+});
+
 // ================
 
 /*

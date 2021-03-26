@@ -33,4 +33,6 @@ export enum IPCMessage {
   GetSearchMode = 'GetSearchMode',
   UserDidChangeSearchMode = 'UserDidChangeSearchMode',
   OnSearchModeChange = 'OnSearchModeChange',
+
+  ReloadMainWindow = 'ReloadMainWindow',
 }

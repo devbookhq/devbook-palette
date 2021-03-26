@@ -206,6 +206,10 @@ export function trackCopyCodeSnippetDocs() {
   return electron.ipcRenderer.send(IPCMessage.TrackCopyCodeSnippetDocs);
 }
 
+export function reloadMainWindow() {
+  return electron.ipcRenderer.send(IPCMessage.ReloadMainWindow);
+}
+
 export { isDev };
 
 /*

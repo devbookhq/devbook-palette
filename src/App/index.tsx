@@ -7,6 +7,7 @@ import {
   Redirect,
 } from 'react-router-dom';
 
+import electron, { isDev, reloadMainWindow } from 'mainCommunication';
 import Onboarding from 'Onboarding';
 import Preferences from 'Preferences';
 import Home from 'Home';
@@ -32,19 +33,85 @@ const Container = styled.div`
   overflow: hidden;
 `;
 
+const NewBundleNotif = styled.div`
+  padding: 8px;
+  position: absolute;
+  bottom: 56px;
+  right: 16px;
+  z-index: 100;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  font-size: 13px;
+
+  box-shadow: 0 0 16px rgba(0, 0, 0, 0.2);
+  background: black;
+`;
+
+const DismissNotif = styled.div`
+  font-size: 13px;
+  :hover {
+    cursor: pointer;
+  }
+`;
+
+const ReloadApp = styled.div`
+  font-size: 13px;
+  :hover {
+    cursor: pointer;
+  }
+`;
+
 function App() {
+  //const bundleCheckInterval = 1000 * 60 * 10 // 10 minutes.
+  const bundleCheckInterval = 1000 * 10
+  const appVersion = electron.remote.app.getVersion();
+  const clientBundle = document.getElementById('bundle')?.textContent;
+
+  const [isNewBundleAvailable, setIsNewBundleAvailable] = useState(false);
+  const [didUserDismissNotif, setDidUserDismissNotif] = useState(false);
+
   function handleDragHeaderClick(e: any) {
     e.preventDefault();
     e.stopPropagation();
   }
 
-  useLatestBundle(({ bundle, error }) => {
-    console.log('Bundle', bundle);
-    console.log('Error', error);
-  }, '0.1.14', 1000);
+  function handleReloadClick() {
+    // TODO: Track analytics.
+    reloadMainWindow();
+  }
+
+  function handleDismissClick() {
+    // TODO: Track analytics.
+    setDidUserDismissNotif(true);
+  }
+
+  useLatestBundle(({ bundle: latestBundle, error }) => {
+    if (error) {
+      // TODO: Handle.
+      console.error(error);
+    } else {
+      console.log('Client bundle', clientBundle);
+      console.log('Latest available bundle', latestBundle);
+      setIsNewBundleAvailable(clientBundle !== latestBundle);
+    }
+  }, appVersion, bundleCheckInterval, [clientBundle]);
 
   return (
     <>
+      {isNewBundleAvailable && !didUserDismissNotif &&
+        <NewBundleNotif>
+          New Bundle Available. Reload.
+          <DismissNotif onClick={handleDismissClick}>
+           Dismiss
+          </DismissNotif>
+          <ReloadApp onClick={handleReloadClick}>
+            Relaod
+          </ReloadApp>
+        </NewBundleNotif>
+      }
       <DragHeader onClick={handleDragHeaderClick} />
       <Container>
         <Router>
