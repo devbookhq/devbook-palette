@@ -146,8 +146,8 @@ class MainWindow {
     });
 
     if (isDev) {
-      //this.window?.loadURL(`https://client.usedevbook.com/${version}`);
-      this.window.loadURL(`http://localhost:${PORT}/index.html`);
+      this.window?.loadURL(`https://client.usedevbook.com/${version}`);
+      //this.window.loadURL(`http://localhost:${PORT}/index.html`);
       //this.window.loadURL(`file://${__dirname}/assets/loading.html`);
       /*
       this.window.webContents.on('did-finish-load', () => {

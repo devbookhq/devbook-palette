@@ -73,6 +73,8 @@ function App() {
   const [isNewBundleAvailable, setIsNewBundleAvailable] = useState(false);
   const [didUserDismissNotif, setDidUserDismissNotif] = useState(false);
 
+  const [availableBundle, setAvailableBundle] = useState('');
+
   function handleDragHeaderClick(e: any) {
     e.preventDefault();
     e.stopPropagation();
@@ -92,10 +94,14 @@ function App() {
     if (error) {
       // TODO: Handle.
       console.error(error);
-    } else {
+    } else if (latestBundle) {
       console.log('Client bundle', clientBundle);
       console.log('Latest available bundle', latestBundle);
+      setAvailableBundle(latestBundle)
       setIsNewBundleAvailable(clientBundle !== latestBundle);
+    } else {
+      // TODO: Handle.
+      console.error('Both error and bundle are undefined. Should not happen.');
     }
   }, appVersion, bundleCheckInterval, [clientBundle]);
 
@@ -103,7 +109,7 @@ function App() {
     <>
       {isNewBundleAvailable && !didUserDismissNotif &&
         <NewBundleNotif>
-          New Bundle Available. Reload.
+          New Bundle Available ({availableBundle}). Reload.
           <DismissNotif onClick={handleDismissClick}>
            Dismiss
           </DismissNotif>
