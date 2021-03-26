@@ -36,7 +36,7 @@
     "build:electron": "npm run compile:electron && todesktop build",
     "build:electron:nosign": "npm run compile:electron && todesktop build --code-sign=false",
     "deploy:client": "./scripts/deploy-client.sh",
-    "start": "concurrently \"./scripts/watch-electron.sh\" \"electron --enable-logging .\""
+    "start": "concurrently \"./scripts/watch-electron.sh\" \"npm run bundle:electron && electron --enable-logging .\""
   },
   "dependencies": {
     "@todesktop/runtime": "^0.5.4",

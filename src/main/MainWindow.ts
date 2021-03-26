@@ -146,11 +146,14 @@ class MainWindow {
     });
 
     if (isDev) {
-      this.window.loadURL(`file://${__dirname}/assets/loading.html`);
+      this.window?.loadURL(`https://client.usedevbook.com/${version}`);
+      //this.window.loadURL(`file://${__dirname}/assets/loading.html`);
+      /*
       this.window.webContents.on('did-finish-load', () => {
         this.window?.loadURL(`https://client.usedevbook.com/${version}`);
         //this.window.loadURL(`http://localhost:${PORT}/index.html`);
       });
+      */
 
       // Hot Reloading
       require('electron-reload')(__dirname, {
@@ -161,10 +164,12 @@ class MainWindow {
 
       this.webContents?.openDevTools();
     } else {
+      /*
       this.window.loadURL(`file://${__dirname}/assets/loading.html`);
       this.window.webContents.on('did-finish-load', () => {
         this.window?.loadURL(`https://client.usedevbook.com/${version}`);
       });
+      */
     }
   }
 

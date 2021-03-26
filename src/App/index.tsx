@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import {
   HashRouter as Router,
@@ -10,6 +10,7 @@ import {
 import Onboarding from 'Onboarding';
 import Preferences from 'Preferences';
 import Home from 'Home';
+import useLatestBundle from 'hooks/useLatestBundle';
 
 // The electron window is set to be frameless.
 // Frameless window stops being draggable - this is the solution.
@@ -36,6 +37,11 @@ function App() {
     e.preventDefault();
     e.stopPropagation();
   }
+
+  useLatestBundle(({ bundle, error }) => {
+    console.log('Bundle', bundle);
+    console.log('Error', error);
+  }, '0.1.14', 1000);
 
   return (
     <>
