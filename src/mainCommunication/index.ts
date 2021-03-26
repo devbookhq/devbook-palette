@@ -210,6 +210,14 @@ export function reloadMainWindow() {
   return electron.ipcRenderer.send(IPCMessage.ReloadMainWindow);
 }
 
+export function trackDismissBundleUpdate() {
+  return electron.ipcRenderer.send(IPCMessage.TrackDismissBundleUpdate);
+}
+
+export function trackPerformBundleUpdate() {
+  return electron.ipcRenderer.send(IPCMessage.TrackPerformBundleUpdate);
+}
+
 export { isDev };
 
 /*

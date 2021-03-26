@@ -32,7 +32,7 @@ read -p "🚨 You are about to deploy client v$VERSION-$BUNDLE. Press enter to c
 
 gsutil -m -h "Cache-Control:no-cache, max-age=0" rsync -r $BUILD_PATH $BUCKET_URL/$VERSION
 
-echo "\n\n>>> ✅ Client v$VERSION -$BUNDLE uploaded to storage at URL $BUCKET_URL/$VERSION."
+echo "\n\n>>> ✅ Client v$VERSION $BUNDLE uploaded to storage at URL $BUCKET_URL/$VERSION."
 
 echo "\n\n"
 read -p ">>> 🗑 Will purge the CDN cache. Press enter to continue."

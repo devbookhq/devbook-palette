@@ -30,6 +30,9 @@ export enum IPCMessage {
   TrackCopyCodeSnippetStackOverflow = 'TrackCopyCodeSnippetStackOverflow',
   TrackCopyCodeSnippetDocs = 'TrackCopyCodeSnippetDocs',
 
+  TrackDismissBundleUpdate = 'TrackDismissBundleUpdate',
+  TrackPerformBundleUpdate = 'TrackPerformBundleUpdate',
+
   GetSearchMode = 'GetSearchMode',
   UserDidChangeSearchMode = 'UserDidChangeSearchMode',
   OnSearchModeChange = 'OnSearchModeChange',

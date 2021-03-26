@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import {
   HashRouter as Router,
@@ -7,7 +7,11 @@ import {
   Redirect,
 } from 'react-router-dom';
 
-import electron, { isDev, reloadMainWindow } from 'mainCommunication';
+import electron, {
+  reloadMainWindow,
+  trackDismissBundleUpdate,
+  trackPerformBundleUpdate,
+} from 'mainCommunication';
 import Onboarding from 'Onboarding';
 import Preferences from 'Preferences';
 import Home from 'Home';
@@ -37,7 +41,7 @@ const NewBundleNotif = styled.div`
   padding: 8px;
   position: absolute;
   bottom: 56px;
-  right: 16px;
+  right: 10px;
   z-index: 100;
 
   display: flex;
@@ -45,33 +49,52 @@ const NewBundleNotif = styled.div`
   align-items: center;
 
   font-size: 13px;
+  color: #fff;
 
-  box-shadow: 0 0 16px rgba(0, 0, 0, 0.2);
-  background: black;
+  background: #25252E;
+  border: 1px solid #3A41AF;
+  border-radius: 4px;
+  box-shadow: 0 0 16px 10px rgba(0, 0, 0, 0.3);
 `;
 
-const DismissNotif = styled.div`
-  font-size: 13px;
+const NotifButtons = styled.div`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const NotifButton = styled.button`
+  padding: 6px;
+  margin-top: 16px;
+
+  font-size: 14px;
+
+  border-radius: 4px;
+  border: 1px solid #3B3A4A;
+  background: transparent;
+
   :hover {
     cursor: pointer;
   }
 `;
 
-const ReloadApp = styled.div`
-  font-size: 13px;
-  :hover {
-    cursor: pointer;
-  }
+const DismissButton = styled(NotifButton)`
+  margin-right: 16px;
+  color: #9CACC5;
+`;
+
+const ReloadButton = styled(NotifButton)`
+  color: #fff;
 `;
 
 function App() {
-  //const bundleCheckInterval = 1000 * 60 * 10 // 10 minutes.
-  const bundleCheckInterval = 1000 * 10
+  const bundleCheckInterval = 1000 * 60 * 60 * 1 // 1 hour.
   const appVersion = electron.remote.app.getVersion();
   const clientBundle = document.getElementById('bundle')?.textContent;
 
+  const [dismissTime, setDismissTime] = useState(0) // When user presses 'dismiss' we shouldn't display notif for some time.
   const [isNewBundleAvailable, setIsNewBundleAvailable] = useState(false);
-  const [didUserDismissNotif, setDidUserDismissNotif] = useState(false);
 
   const [availableBundle, setAvailableBundle] = useState('');
 
@@ -82,41 +105,44 @@ function App() {
 
   function handleReloadClick() {
     // TODO: Track analytics.
+    trackPerformBundleUpdate();
     reloadMainWindow();
   }
 
   function handleDismissClick() {
     // TODO: Track analytics.
-    setDidUserDismissNotif(true);
+    trackDismissBundleUpdate();
+    setDismissTime(1000 * 60 * 60 * 4); // 4 hours.
+    setIsNewBundleAvailable(false);
   }
 
   useLatestBundle(({ bundle: latestBundle, error }) => {
     if (error) {
-      // TODO: Handle.
       console.error(error);
     } else if (latestBundle) {
       console.log('Client bundle', clientBundle);
       console.log('Latest available bundle', latestBundle);
       setAvailableBundle(latestBundle)
       setIsNewBundleAvailable(clientBundle !== latestBundle);
+      setIsNewBundleAvailable(true);
     } else {
-      // TODO: Handle.
-      console.error('Both error and bundle are undefined. Should not happen.');
+      console.error('Both error and bundle are undefined. This should not happen!');
     }
-  }, appVersion, bundleCheckInterval, [clientBundle]);
+  }, appVersion, bundleCheckInterval + dismissTime, [clientBundle]);
 
   return (
     <>
-      <h3>Hello {clientBundle}</h3>
-      {isNewBundleAvailable && !didUserDismissNotif &&
+      {isNewBundleAvailable &&
         <NewBundleNotif>
-          New Bundle Available ({availableBundle}). Reload.
-          <DismissNotif onClick={handleDismissClick}>
-           Dismiss
-          </DismissNotif>
-          <ReloadApp onClick={handleReloadClick}>
-            Relaod
-          </ReloadApp>
+          New update available (v{appVersion}-{availableBundle})
+          <NotifButtons>
+            <DismissButton onClick={handleDismissClick}>
+             Dismiss
+            </DismissButton>
+            <ReloadButton onClick={handleReloadClick}>
+              Reload
+            </ReloadButton>
+          </NotifButtons>
         </NewBundleNotif>
       }
       <DragHeader onClick={handleDragHeaderClick} />

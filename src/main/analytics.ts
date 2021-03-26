@@ -45,6 +45,9 @@ enum AnalyticsEvent {
   OpenDocsFilter = 'Open documentation filter',
 
   SearchModeChanged = 'Search mode changed',
+
+  DismissBundleUpdate = 'Dismiss bundle update',
+  PerformBundleUpdate = 'Perform bundle update'
 }
 
 const SEGMENT_WRITE_KEY = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
@@ -489,6 +492,38 @@ export function trackCopyCodeSnippetStackOverflow(searchWindow?: electron.Browse
 export function trackCopyCodeSnippetDocs(searchWindow?: electron.BrowserWindow) {
   client.track({
     event: AnalyticsEvent.CopyCodeSnippetDocs,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
+    },
+  });
+}
+
+
+
+export function trackDismissBundleUpdate(searchWindow?: electron.BrowserWindow) {
+  client.track({
+    event: AnalyticsEvent.DismissBundleUpdate,
+    anonymousId: anonymousID,
+    userId: userID,
+    properties: {
+      isSignedIn,
+      platform,
+      appVersion,
+      searchWindowWidth: searchWindow?.getSize()[0],
+      searchWindowHeight: searchWindow?.getSize()[1],
+    },
+  });
+}
+
+export function trackPerformBundleUpdate(searchWindow?: electron.BrowserWindow) {
+  client.track({
+    event: AnalyticsEvent.PerformBundleUpdate,
     anonymousId: anonymousID,
     userId: userID,
     properties: {

@@ -52,6 +52,8 @@ import {
   trackUpdateCancelClicked,
   trackCopyCodeSnippetStackOverflow,
   trackCopyCodeSnippetDocs,
+  trackDismissBundleUpdate,
+  trackPerformBundleUpdate,
 } from './analytics';
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
@@ -535,6 +537,14 @@ ipcMain.on(IPCMessage.TrackCopyCodeSnippetDocs, () => {
 
 ipcMain.on(IPCMessage.ReloadMainWindow, () => {
   mainWindow?.webContents?.reload();
+});
+
+ipcMain.on(IPCMessage.TrackDismissBundleUpdate, () => {
+  trackDismissBundleUpdate(mainWindow?.window);
+});
+
+ipcMain.on(IPCMessage.TrackPerformBundleUpdate, () => {
+  trackPerformBundleUpdate(mainWindow?.window);
 });
 
 // ================
