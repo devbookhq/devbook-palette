@@ -345,19 +345,33 @@ ipcMain.on('load-app-client', (_, { window }: { window: AppWindow }) => {
   if (isDev) {
     if (window === AppWindow.Onboarding) {
       //onboardingWindow?.window?.loadURL(`http://localhost:${PORT}/index.html#/onboarding`);
-      onboardingWindow?.window?.loadURL(`https://client.usedevbook.com/${version}#/onboarding`);
+      onboardingWindow?.window?.webContents.loadURL(
+        //`https://client.usedevbook.com/${version}#/onboarding`,
+        `http://localhost:${PORT}/index.html#/onboarding`,
+        { extraHeaders: 'pragma: no-cache\n' },
+      );
     }
 
     if (window === AppWindow.Main) {
-      //mainWindow?.window?.loadURL(`http://localhost:${PORT}/index.html`);
-      mainWindow?.window?.loadURL(`https://client.usedevbook.com/${version}`);
+      //mainWindow?.window?.loadURL(``);
+      mainWindow?.window?.webContents.loadURL(
+        //`https://client.usedevbook.com/${version}`,
+        `http://localhost:${PORT}/index.html`,
+        { extraHeaders: 'pragma: no-cache\n' },
+      );
     }
   } else {
     if (window === AppWindow.Onboarding) {
-      onboardingWindow?.window?.loadURL(`https://client.usedevbook.com/${version}#/onboarding`);
+      onboardingWindow?.window?.webContents.loadURL(
+        `https://client.usedevbook.com/${version}#/onboarding`,
+        { extraHeaders: 'pragma: no-cache\n' },
+      );
     }
     if (window === AppWindow.Main) {
-      mainWindow?.window?.loadURL(`https://client.usedevbook.com/${version}`);
+      mainWindow?.window?.webContents.loadURL(
+        `https://client.usedevbook.com/${version}`,
+        { extraHeaders: 'pragma: no-cache\n' },
+      );
     }
   }
 });

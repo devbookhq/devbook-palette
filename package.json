@@ -1,8 +1,7 @@
 {
   "name": "devbook",
   "description": "Search engine for developers",
-  "version": "0.1.14",
-  "private": true,
+  "version": "0.1.14", "private": true,
   "homepage": ".",
   "author": {
     "name": "FoundryLabs, Inc.",
@@ -30,14 +29,14 @@
     "node": "12"
   },
   "scripts": {
-    "start:client": "npx cross-env BROWSER=none craco start",
+    "start:client": "npx cross-env craco start",
     "start:electron": "npm run bundle:electron && electron --enable-loggin .",
     "start": "concurrently \"npm run start:client\" \"./scripts/watch-electron.sh\" \"wait-on http://localhost:3000 && npm run start:electron\"",
     "bundle:client": "./scripts/bundle-client.sh",
     "bundle:electron": "./scripts/bundle-electron.sh",
     "postinstall": "electron-rebuild",
-    "build:electron": "npm run compile:electron && todesktop build",
-    "build:electron:nosign": "npm run compile:electron && todesktop build --code-sign=false",
+    "build:electron": "npm run bundle:electron && todesktop build --code-sign=false",
+    "build:electron:prod": "npm run bundle:electron && todesktop build",
     "deploy:client": "./scripts/deploy-client.sh"
   },
   "dependencies": {

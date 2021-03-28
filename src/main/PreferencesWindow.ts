@@ -66,7 +66,10 @@ class PreferencesWindow {
       });
       this.window.webContents.openDevTools();
     } else {
-      this.window.loadURL(`https://client.usedevbook.com/${version}#/preferences` + (page ? `/${page}` : ''));
+      this.window.webContents.loadURL(
+        `https://client.usedevbook.com/${version}#/preferences` + (page ? `/${page}` : ''),
+        { extraHeaders: 'pragma: no-cache\n' },
+      );
     }
 
     if (process.platform === 'darwin') {

@@ -125,7 +125,7 @@ function App() {
     if (error) {
       console.error(error);
     } else if (latestBundle) {
-      console.log('Client bundle', clientBundle);
+      console.log('Current client bundle', clientBundle);
       console.log('Latest available bundle', latestBundle);
       setAvailableBundle(latestBundle)
       setIsNewBundleAvailable(clientBundle !== latestBundle);
