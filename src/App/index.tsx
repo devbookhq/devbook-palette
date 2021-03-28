@@ -104,13 +104,11 @@ function App() {
   }
 
   function handleReloadClick() {
-    // TODO: Track analytics.
     trackPerformBundleUpdate();
     reloadMainWindow();
   }
 
   function handleDismissClick() {
-    // TODO: Track analytics.
     trackDismissBundleUpdate();
     setDismissTime(1000 * 60 * 60 * 4); // 4 hours.
     setIsNewBundleAvailable(false);

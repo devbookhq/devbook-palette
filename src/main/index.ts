@@ -9,6 +9,7 @@ import {
 import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 import AutoLaunch from 'auto-launch';
+const { version } = require('../../../package.json');
 
 import isDev from './utils/isDev';
 
@@ -58,6 +59,7 @@ import {
 import Tray from './Tray';
 import OnboardingWindow from './OnboardingWindow';
 import PreferencesWindow, { PreferencesPage } from './PreferencesWindow';
+import AppWindow from './AppWindow';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
 import { SearchMode } from '../Preferences/Pages/searchMode';
@@ -338,6 +340,28 @@ app.on('activate', () => {
 app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 
 /////////// IPC events ///////////
+
+ipcMain.on('load-app-client', (_, { window }: { window: AppWindow }) => {
+  if (isDev) {
+    if (window === AppWindow.Onboarding) {
+      onboardingWindow?.window?.loadURL(`http://localhost:${PORT}/index.html#/onboarding`);
+      //onboardingWindow?.window?.loadURL(`https://client.usedevbook.com/${version}#/onboarding`);
+    }
+
+    if (window === AppWindow.Main) {
+      mainWindow?.window?.loadURL(`http://localhost:${PORT}/index.html`);
+      //mainWindow?.window?.loadURL(`https://client.usedevbook.com/${version}`);
+    }
+  } else {
+    if (window === AppWindow.Onboarding) {
+      onboardingWindow?.window?.loadURL(`https://client.usedevbook.com/${version}#/onboarding`);
+    }
+    if (window === AppWindow.Main) {
+      mainWindow?.window?.loadURL(`https://client.usedevbook.com/${version}`);
+    }
+  }
+});
+
 ipcMain.on('hide-window', () => hideMainWindow());
 
 ipcMain.on('user-did-change-shortcut', (_, { shortcut }) => {

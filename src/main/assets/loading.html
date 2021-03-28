@@ -3,13 +3,36 @@
   <head>
     <title>Devbook - Search Engine for Developers</title>
     <style type="text/css">
-      html {
+      * , *:before, *:after {
+        box-sizing: border-box;
+        outline: none;
+      }
+
+      html, .wrapper {
         width: 100%;
         height: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
+
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
       }
+
+      .drag-header {
+        position: absolute;
+        left: 5px;
+        top: 2px;
+        height: 25px;
+        width: calc(100% - 10px);
+        background: transparent;
+        -webkit-app-region: drag;
+        -webkit-user-select: none;
+      }
+
+      .wrapper {
+        flex-direction: column;
+      }
+
       .lds-ripple {
         display: inline-block;
         position: relative;
@@ -42,9 +65,72 @@
           opacity: 0;
         }
       }
+
+      #network-error {
+        margin-top: 32px;
+        color: #fff;
+      }
     </style>
   </head>
   <body>
-    <div class="lds-ripple"><div></div><div></div></div>
+    <div class="drag-header"></div>
+
+    <div class="wrapper">
+      <div class="lds-ripple"><div></div><div></div></div>
+      <div id="network-error">
+      </div>
+    </div>
+
+    <script>
+      const electron = window.require('electron');
+      const networkErrEl = document.getElementById('network-error');
+      const waitTime = 15;
+      let counter = waitTime;
+      let intervalID;
+
+      // Try to ping every 'waitTime' seconds.
+      function startInterval() {
+        intervalID = setInterval(() => {
+          counter -= 1;
+          networkErrEl.textContent = `Devbook can't reach its servers. Will try again in ${counter} seconds.`
+          if (counter % waitTime === 0) {
+            clearInterval(intervalID);
+            pingServer(true);
+          }
+        }, 1000);
+      }
+
+      async function pingServer(isTryingAgain) {
+        let success = false;
+        try {
+          if (isTryingAgain) {
+            networkErrEl.textContent = 'Trying to reach Devbook servers...';
+          }
+          const response = await fetch('https://client.usedevbook.com/__ping');
+          console.log('ping response', response);
+          if (response.status < 299) {
+            success = true;
+
+            const params = new URLSearchParams(window.location.search)
+            const windowType = params.get('window'); // <url>?window=<window-type>
+            electron.ipcRenderer.send('load-app-client', { window: windowType });
+          }
+        } catch (error) {
+          console.log('ping fetch error', error);
+        }
+
+        if (!success) {
+          // We just wait 1.5s here so user can see 'Trying to reach Devbook servers...'.
+          // If user isn't connected to the internet at all the network error element text would change too quickly.
+          setTimeout(() => {
+            counter = waitTime;
+            networkErrEl.textContent = `Devbook can't reach its servers. Will try again in ${counter} seconds.`
+            startInterval();
+          }, 1500)
+        }
+      }
+
+      pingServer(false)
+    </script>
   </body>
 </html>

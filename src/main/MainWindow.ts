@@ -2,14 +2,11 @@ import * as electron from 'electron';
 import * as process from 'process';
 import ElectronStore from 'electron-store';
 import * as path from 'path';
-import { inspect } from 'util';
 import { debounce } from 'debounce';
-// import axios from 'axios';
 
+import AppWindow from './AppWindow';
 import isDev from './utils/isDev';
 import { IPCMessage } from '../mainCommunication/ipc';
-
-const { version } = require('../../../package.json');
 
 class MainWindow {
   public window: electron.BrowserWindow | undefined;
@@ -53,7 +50,6 @@ class MainWindow {
     startHidden?: boolean) {
     const [mainWinWidth, mainWinHeight] = store.get('mainWinSize', [900, 500]);
     const [mainWinPosX, mainWinPosY] = store.get('mainWinPosition', [undefined, undefined]);
-
 
     this.window = new electron.BrowserWindow({
       x: mainWinPosX,
@@ -141,21 +137,8 @@ class MainWindow {
       }
     });
 
-    this.webContents?.on('crashed', (event, killed) => {
-      console.error('main window crashed', killed, inspect(event, { depth: null }));
-    });
-
+    this.window.loadURL(`file://${__dirname}/assets/loading.html?window=${AppWindow.Main}`);
     if (isDev) {
-      //this.window?.loadURL(`https://client.usedevbook.com/${version}`);
-      this.window.loadURL(`http://localhost:${PORT}/index.html`);
-      //this.window.loadURL(`file://${__dirname}/assets/loading.html`);
-      /*
-      this.window.webContents.on('did-finish-load', () => {
-        this.window?.loadURL(`https://client.usedevbook.com/${version}`);
-        //this.window.loadURL(`http://localhost:${PORT}/index.html`);
-      });
-      */
-
       // Hot Reloading
       require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
@@ -164,13 +147,6 @@ class MainWindow {
       });
 
       this.webContents?.openDevTools();
-    } else {
-      /*
-      this.window.loadURL(`file://${__dirname}/assets/loading.html`);
-      this.window.webContents.on('did-finish-load', () => {
-        this.window?.loadURL(`https://client.usedevbook.com/${version}`);
-      });
-      */
     }
   }
 

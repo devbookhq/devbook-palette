@@ -1,8 +1,8 @@
 import * as electron from 'electron';
 import * as path from 'path';
 import * as process from 'process';
-import { inspect } from 'util';
 
+import AppWindow from './AppWindow';
 import isDev from './utils/isDev';
 
 class OnboardingWindow {
@@ -42,12 +42,8 @@ class OnboardingWindow {
       this.window = undefined;
     });
 
-    this.window.webContents.on('crashed', (event, killed) => {
-      console.error('onboarding window crashed', killed, inspect(event, { depth: null }));
-    });
-
+    this.window.loadURL(`file://${__dirname}/assets/loading.html?window=${AppWindow.Onboarding}`);
     if (isDev) {
-      this.window.loadURL(`http://localhost:${PORT}/index.html#/onboarding`);
       // Hot Reloading
       require('electron-reload')(__dirname, {
         electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
@@ -55,8 +51,6 @@ class OnboardingWindow {
         hardResetMethod: 'exit',
       });
       this.window.webContents.openDevTools();
-    } else {
-      this.window.loadURL(`file://${__dirname}/../index.html#/onboarding`);
     }
   }
 

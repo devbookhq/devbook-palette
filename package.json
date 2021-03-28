@@ -32,7 +32,7 @@
   "scripts": {
     "start:client": "npx cross-env BROWSER=none craco start",
     "start:electron": "npm run bundle:electron && electron --enable-loggin .",
-    "start": "concurrently \"npm run start:client\" \"wait-on http://localhost:3000\" \"./scripts/watch-electron.sh\" \"npm run start:electron\"",
+    "start": "concurrently \"npm run start:client\" \"./scripts/watch-electron.sh\" \"wait-on http://localhost:3000 && npm run start:electron\"",
     "bundle:client": "./scripts/bundle-client.sh",
     "bundle:electron": "./scripts/bundle-electron.sh",
     "postinstall": "electron-rebuild",
