@@ -114,6 +114,13 @@ function App() {
     setIsNewBundleAvailable(false);
   }
 
+  // We have to use window.location because React Router's location is accessible
+  // from components that are children of the Router. App isn't.
+  function isOnHomePath() {
+    const url = new URL(window.location.href);
+    return url.hash === '#/home';
+  }
+
   useLatestBundle(({ bundle: latestBundle, error }) => {
     if (error) {
       console.error(error);
@@ -130,7 +137,7 @@ function App() {
 
   return (
     <>
-      {isNewBundleAvailable &&
+      {isNewBundleAvailable && isOnHomePath() &&
         <NewBundleNotif>
           New update available (v{appVersion}-{availableBundle})
           <NotifButtons>

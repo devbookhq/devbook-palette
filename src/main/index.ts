@@ -344,13 +344,13 @@ app.on('will-quit', () => electron.globalShortcut.unregisterAll());
 ipcMain.on('load-app-client', (_, { window }: { window: AppWindow }) => {
   if (isDev) {
     if (window === AppWindow.Onboarding) {
-      onboardingWindow?.window?.loadURL(`http://localhost:${PORT}/index.html#/onboarding`);
-      //onboardingWindow?.window?.loadURL(`https://client.usedevbook.com/${version}#/onboarding`);
+      //onboardingWindow?.window?.loadURL(`http://localhost:${PORT}/index.html#/onboarding`);
+      onboardingWindow?.window?.loadURL(`https://client.usedevbook.com/${version}#/onboarding`);
     }
 
     if (window === AppWindow.Main) {
-      mainWindow?.window?.loadURL(`http://localhost:${PORT}/index.html`);
-      //mainWindow?.window?.loadURL(`https://client.usedevbook.com/${version}`);
+      //mainWindow?.window?.loadURL(`http://localhost:${PORT}/index.html`);
+      mainWindow?.window?.loadURL(`https://client.usedevbook.com/${version}`);
     }
   } else {
     if (window === AppWindow.Onboarding) {

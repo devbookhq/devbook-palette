@@ -3,7 +3,7 @@
 set -e
 
 BUNDLE=`git rev-parse --short HEAD` # Bundle is a hash value of the current commit.
-BUCKET_URL="gs://testing-js-bundle"
+BUCKET_URL="gs://client-releases-prod"
 VERSION=`cat package.json | jq -r '.version'`
 BUILD_PATH=build/client/$VERSION-$BUNDLE
 
