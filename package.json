@@ -1,7 +1,7 @@
 {
   "name": "devbook",
   "description": "Search engine for developers",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "private": true,
   "homepage": ".",
   "author": {
