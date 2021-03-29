@@ -129,7 +129,6 @@ function App() {
       console.log('Latest available bundle', latestBundle);
       setAvailableBundle(latestBundle)
       setIsNewBundleAvailable(clientBundle !== latestBundle);
-      setIsNewBundleAvailable(true);
     } else {
       console.error('Both error and bundle are undefined. This should not happen!');
     }
