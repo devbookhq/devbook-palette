@@ -30,7 +30,7 @@
     "node": "12"
   },
   "scripts": {
-    "start:client": "npx cross-env craco start",
+    "start:client": "craco start",
     "start:electron": "npm run bundle:electron && electron --enable-loggin .",
     "start": "concurrently \"npm run start:client\" \"./scripts/watch-electron.sh\" \"wait-on http://localhost:3000 && npm run start:electron\"",
     "bundle:client": "./scripts/bundle-client.sh",
@@ -72,7 +72,6 @@
     "@types/uuid": "^8.3.0",
     "@types/webpack-env": "^1.15.2",
     "concurrently": "^5.2.0",
-    "cross-env": "^7.0.3",
     "electron": "11.1.1",
     "electron-rebuild": "^2.3.5",
     "electron-reload": "^1.5.0",
