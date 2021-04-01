@@ -1,12 +1,12 @@
 import * as electron from 'electron';
 import * as process from 'process';
-import ElectronStore from 'electron-store';
 import * as path from 'path';
 import { debounce } from 'debounce';
 
 import AppWindow from './AppWindow';
 import isDev from './utils/isDev';
 import { IPCMessage } from '../mainCommunication/ipc';
+import LocalStore from './LocalStore';
 
 class MainWindow {
   public window: electron.BrowserWindow | undefined;
@@ -43,13 +43,13 @@ class MainWindow {
 
   public constructor(
     PORT: number,
-    private store: ElectronStore,
     hideWindow: (window?: electron.BrowserWindow) => void,
     private trackShowApp: (window?: electron.BrowserWindow) => void,
     private identifyUser: (window?: electron.BrowserWindow) => void,
     startHidden?: boolean) {
-    const [mainWinWidth, mainWinHeight] = store.get('mainWinSize', [900, 500]);
-    const [mainWinPosX, mainWinPosY] = store.get('mainWinPosition', [undefined, undefined]);
+
+    const [mainWinWidth, mainWinHeight] = LocalStore.mainWinSize;
+    const [mainWinPosX, mainWinPosY] = LocalStore.mainWinPosition;
 
     this.window = new electron.BrowserWindow({
       x: mainWinPosX,
@@ -88,17 +88,18 @@ class MainWindow {
     this.window.on('moved', () => {
       if (this.window) {
         const [x, y] = this.window.getPosition();
-        store.set('mainWinPosition', [x, y]);
+        LocalStore.mainWinPosition = [x, y];
       }
     });
 
     this.window.on('close', () => {
-      if (this.window) {
-        const [width, height] = this.window.getSize();
-        store.set('mainWinSize', [width, height]);
-        const [x, y] = this.window.getPosition();
-        store.set('mainWinPosition', [x, y]);
-      }
+      if (!this.window) return;
+
+      const [width, height] = this.window.getSize();
+      LocalStore.mainWinSize = [width, height];
+
+      const [x, y] = this.window.getPosition();
+      LocalStore.mainWinPosition = [x, y];
     });
 
     this.window.on('blur', () => {
@@ -155,7 +156,7 @@ class MainWindow {
       this.window.webContents.send('console', __dirname);
 
       const [width, height] = this.window.getSize();
-      this.store.set('mainWinSize', [width, height]);
+      LocalStore.mainWinSize = [width, height];
       this.identifyUser(this.window);
     }
   }

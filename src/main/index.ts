@@ -63,15 +63,9 @@ import AppWindow from './AppWindow';
 import MainWindow from './MainWindow';
 import { IPCMessage } from '../mainCommunication/ipc';
 import { SearchMode } from '../Preferences/Pages/searchMode';
+import LocalStore from './LocalStore';
 
 toDesktop.init();
-
-enum StoreKey {
-  Email = 'email',
-  IsPinModeEnabled = 'isPinModeEnabled',
-  ActiveDocSource = 'activeDocSource',
-  SearchMode = 'searchMode',
-}
 
 const PORT = 3000;
 let isPinModeEnabled = false;
@@ -113,7 +107,7 @@ if (!isFirstInstance) {
       mainWindow.window.restore();
       mainWindow.window.focus();
     } else {
-      mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser);
+      mainWindow = new MainWindow(PORT, hideMainWindow, trackShowApp, identifyUser);
       mainWindow.isPinModeEnabled = isPinModeEnabled;
       mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
     }
@@ -206,7 +200,6 @@ let mainWindow: MainWindow | undefined = undefined;
 let onboardingWindow: OnboardingWindow | undefined = undefined;
 let preferencesWindow: PreferencesWindow | undefined = undefined;
 
-const store = new Store();
 
 identifyUser();
 
@@ -227,11 +220,11 @@ function openPreferences(page?: PreferencesPage) {
   hideMainWindow();
 }
 
-const shouldOpenAtLogin = store.get('openAtLogin', true);
+const shouldOpenAtLogin = LocalStore.openAtLogin;
 
 setOpenAtLogin(shouldOpenAtLogin);
 
-let isFirstRun = store.get('firstRun', true);
+let isFirstRun = LocalStore.firstRun;
 
 if (process.platform === 'darwin' && !isFirstRun) {
   // Hide the dock icon only when the onboarding process is complete.
@@ -242,7 +235,7 @@ if (process.platform === 'darwin' && !isFirstRun) {
 // or just calls .show() or .hide() on an existing instance.
 function toggleVisibilityOnMainWindow() {
   if (!mainWindow || !mainWindow.window) {
-    mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser);
+    mainWindow = new MainWindow(PORT, hideMainWindow, trackShowApp, identifyUser);
     mainWindow.isPinModeEnabled = isPinModeEnabled;
     onboardingWindow?.webContents?.send('did-show-main-window');
     return;
@@ -267,11 +260,11 @@ function trySetGlobalShortcut(shortcut: string) {
     return;
   }
 
-  store.set('globalShortcut', shortcut);
+  LocalStore.globalShortcut = shortcut;
 }
 
 function trySetSearchMode(mode: SearchMode) {
-  store.set(StoreKey.SearchMode, mode);
+  LocalStore.globalShortcut = mode;
   mainWindow?.webContents?.send(IPCMessage.OnSearchModeChange, { mode });
 }
 
@@ -284,10 +277,11 @@ app.once('ready', async () => {
     );
   }
 
-  isFirstRun = store.get('firstRun', true);
+
+  isFirstRun = LocalStore.firstRun;
 
   // If user registered a global shortcut from the previos session, load it and register again.
-  const savedShortcut = store.get('globalShortcut');
+  const savedShortcut = LocalStore.globalShortcut;
   if (savedShortcut) {
     // TODO: Since we still don't offer for a user to change the shortcut after onboarding
     // this might fail and user won't be able to show Devbook through a shortcut ever again.
@@ -298,21 +292,21 @@ app.once('ready', async () => {
     onShowDevbookClick: toggleVisibilityOnMainWindow,
     // TODO: What if the main window is undefined?
     onOpenAtLoginClick: () => {
-      const currentVal = store.get('openAtLogin', true);
-      store.set('openAtLogin', !currentVal);
+      const currentVal = LocalStore.openAtLogin;
+      LocalStore.openAtLogin = !currentVal;
       setOpenAtLogin(!currentVal);
       tray.setOpenAtLogin(!currentVal);
     },
     openPreferences: () => openPreferences(),
     onQuitClick: () => app.quit(),
-    shouldOpenAtLogin: store.get('openAtLogin', true),
+    shouldOpenAtLogin: LocalStore.openAtLogin,
     version: app.getVersion(),
     restartAndUpdate: () => restartAndUpdate('tray'),
     isUpdateAvailable,
   });
 
   if (isFirstRun) {
-    mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser, true);
+    mainWindow = new MainWindow(PORT, hideMainWindow, trackShowApp, identifyUser, true);
     mainWindow.isPinModeEnabled = isPinModeEnabled;
     mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
 
@@ -321,7 +315,7 @@ app.once('ready', async () => {
 
     trackOnboardingStarted(mainWindow?.window);
   } else {
-    mainWindow = new MainWindow(PORT, store, hideMainWindow, trackShowApp, identifyUser, getIsOpeningHidden());
+    mainWindow = new MainWindow(PORT, hideMainWindow, trackShowApp, identifyUser, getIsOpeningHidden());
     mainWindow.isPinModeEnabled = isPinModeEnabled;
     mainWindow?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: isPinModeEnabled });
   }
@@ -388,7 +382,7 @@ ipcMain.on('finish-onboarding', () => {
   // TODO: This should be onboardingWindow?.close() but it produces a runtime error when toggling
   // a visibility on the main window.
   onboardingWindow?.hide();
-  store.set('firstRun', false);
+  LocalStore.firstRun = false;
   isFirstRun = false;
   if (!preferencesWindow?.window?.isVisible() && process.platform === 'darwin') {
     app.dock.hide();
@@ -401,11 +395,11 @@ ipcMain.on('track-shortcut', (_, shortcutInfo: { hotkey: string, action: string 
 });
 
 ipcMain.handle('get-global-shortcut', () => {
-  return store.get('globalShortcut', 'Alt+Space');
+  return LocalStore.globalShortcut;
 });
 
 ipcMain.handle(IPCMessage.GetSearchMode, () => {
-  return store.get(StoreKey.SearchMode, SearchMode.OnEnterPress);
+  return LocalStore.searchMode;
 });
 
 ipcMain.on('open-preferences', (_, { page }: { page?: PreferencesPage }) => {
@@ -419,7 +413,7 @@ ipcMain.on('restart-and-update', (_, location) => {
 ipcMain.on(IPCMessage.ChangeUserInMain, async (_, user: { userID: string, email: string } | undefined) => {
   if (user) {
     changeAnalyticsUser(mainWindow?.window, user);
-    store.set(StoreKey.Email, user.email);
+    LocalStore.email = user.email;
   } else {
     changeAnalyticsUser(mainWindow?.window);
   }
@@ -451,11 +445,11 @@ ipcMain.on(IPCMessage.OpenSignInModal, () => {
 ipcMain.on('track-modal-opened', (_, modalInfo: any) => trackModalOpened(modalInfo));
 
 ipcMain.on('save-search-query', (_, { query }: { query: string }) => {
-  store.set('lastQuery', query);
+  LocalStore.lastQuery = query;
 });
 
 ipcMain.on('save-search-filter', (_, { filter }: { filter: string }) => {
-  store.set('searchFilter', filter);
+  LocalStore.searchFilter = filter;
 });
 
 let postponeHandler: NodeJS.Timeout | undefined;
@@ -478,11 +472,11 @@ ipcMain.handle('is-dev', () => {
 });
 
 ipcMain.handle('get-saved-search-query', () => {
-  return store.get('lastQuery', '');
+  return LocalStore.lastQuery;
 });
 
 ipcMain.handle('get-saved-search-filter', async () => {
-  return store.get('searchFilter', '');
+  return LocalStore.searchFilter;
 });
 
 ipcMain.handle('update-status', () => {
@@ -490,19 +484,19 @@ ipcMain.handle('update-status', () => {
 });
 
 ipcMain.on('save-doc-search-results-default-width', (_, { width }: { width: number }) => {
-  store.set('docSearchResultsDefaultWidth', width);
+  LocalStore.docSearchResultsDefaultWidth = width;
 });
 
 ipcMain.handle('get-doc-search-results-default-width', () => {
-  return store.get('docSearchResultsDefaultWidth', 200);
+  return LocalStore.docSearchResultsDefaultWidth;
 });
 
 ipcMain.handle(IPCMessage.GetActiveDocSource, async () => {
-  return store.get(StoreKey.ActiveDocSource, undefined);
+  return LocalStore.activeDocSource;
 });
 
 ipcMain.on(IPCMessage.SaveActiveDocSource, (_, { docSource }) => {
-  store.set(StoreKey.ActiveDocSource, docSource);
+  LocalStore.activeDocSource = docSource;
 });
 
 ipcMain.on('track-search', (_, searchInfo: any) => trackSearchDebounced(searchInfo, mainWindow?.window));
