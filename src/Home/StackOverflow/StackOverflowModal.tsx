@@ -12,7 +12,7 @@ import {
   StackOverflowResult,
   StackOverflowAnswer,
   AnswerType,
-} from 'search/stackOverflow';
+} from 'Search/stackOverflow';
 import Modal from 'components/Modal';
 import StackOverflowModalHotkeysPanel from 'Home/HotkeysPanel/StackOverflow/ModalHotkeysPanel';
 

@@ -9,7 +9,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 
 import { openLink } from 'mainCommunication';
 import useOnClickOutside from 'hooks/useOnClickOutside';
-import { DocSource } from 'search/docs';
+import { DocSource } from 'Search/docs';
 import Modal from 'components/Modal';
 import { ReactComponent as searchImg } from 'img/search.svg';
 

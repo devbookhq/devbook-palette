@@ -1,7 +1,7 @@
 import { IPCMessage } from './ipc';
 import electron, { isDev } from './electron';
 import { ResultsFilter } from 'Home/SearchHeaderPanel';
-import { DocSource } from 'search/docs';
+import { DocSource } from 'Search/docs';
 import {
   AuthInfo,
   updateAuth,

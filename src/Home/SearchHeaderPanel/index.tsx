@@ -5,6 +5,10 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useHistory, useRouteMatch } from 'react-router-dom';
+import { observer } from 'mobx-react-lite';
+
+import { useUIStore } from 'ui/ui.store';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import electron, {
   openPreferences,
@@ -25,7 +29,8 @@ import Hotkey, { Key } from '../HotkeysPanel/Hotkey';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import { ReactComponent as closeIcon } from 'img/close.svg';
 import { SearchMode } from 'Preferences/Pages/searchMode';
-import { DocSource } from 'search/docs';
+import { DocSource } from 'Search/docs';
+import {SearchSource} from 'Search';
 
 const Container = styled.div`
   width: 100%;
@@ -121,8 +126,6 @@ const CloseIcon = styled(closeIcon)`
   }
 `;
 
-
-
 const SearchInputContainer = styled.div<{ isFocused?: boolean }>`
   min-height: 58px;
   width: 100%;
@@ -217,8 +220,7 @@ interface SearchHeaderPanelProps {
 
   onEmptyQuery: () => void;
   onNonEmptyQuery: () => void;
-  activeFilter: ResultsFilter;
-  onFilterSelect: (f: ResultsFilter) => void;
+  //activeFilter: ResultsFilter;
   onInputFocusChange: (isFocused: boolean) => void;
   onToggleSearchHistoryClick: (e: any) => void;
   invokeSearch: (query: string) => void;
@@ -228,33 +230,35 @@ interface SearchHeaderPanelProps {
   searchMode: SearchMode | undefined;
   isLoading?: boolean;
   isModalOpened?: boolean;
-  isSignInModalOpened?: boolean;
   isDocsFilterModalOpened?: boolean;
   historyValue: string | undefined;
   onEnterInSearchHistory: () => void;
   onQueryDidChange: () => void;
 }
 
-function SearchHeaderPanel({
+const SearchHeaderPanel = observer(({
   placeholder,
   invokeSearch,
   onQueryDidChange,
   activeDocSource,
-  activeFilter,
+  //activeFilter,
   isSearchHistoryPreviewVisible,
-  onFilterSelect,
   onEmptyQuery,
   historyValue,
   isLoading,
   onNonEmptyQuery,
   isModalOpened,
   onEnterInSearchHistory,
-  isSignInModalOpened,
   searchMode,
   isDocsFilterModalOpened,
   onInputFocusChange,
   onToggleSearchHistoryClick,
-}: SearchHeaderPanelProps) {
+}: SearchHeaderPanelProps) => {
+
+  const uiStore = useUIStore();
+  const history = useHistory();
+  const { url } = useRouteMatch();
+
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const [isUpdatePanelOpened, setIsUpdatePanelOpened] = useState(true);
   const [isInputFocused, setIsInputFocused] = useState(false);
@@ -283,6 +287,22 @@ function SearchHeaderPanel({
     setIsPinModeEnabled(v => !v);
   }
 
+  function handleHotkeyClick(filter: ResultsFilter) {
+    // TODO: Use SearchSource instead of ResultsFilter.
+    const source = filter === ResultsFilter.StackOverflow ? SearchSource.Stack : SearchSource.Docs
+    history.push(`${url}/${source}`);
+  }
+
+  function getResultsFilterDisplayName(resultsFilter: ResultsFilter) {
+    if (resultsFilter === ResultsFilter.StackOverflow) { return 'Stack Overflow'; }
+    return resultsFilter;
+  }
+
+  function handleInputFocusChange(isFocused: boolean) {
+    setIsInputFocused(isFocused);
+    onInputFocusChange(isFocused);
+  }
+
   useIPCRenderer('update-available', (_, { isReminder }: { isReminder?: boolean }) => {
     setIsUpdateAvailable(true);
     if (isReminder) {
@@ -309,16 +329,6 @@ function SearchHeaderPanel({
     setIsPinModeEnabled(v => !v);
   }, { filter: () => true }, [isPinModeEnabled, setIsPinModeEnabled]);
 
-  function getResultsFilterDisplayName(resultsFilter: ResultsFilter) {
-    if (resultsFilter === ResultsFilter.StackOverflow) { return 'Stack Overflow'; }
-    return resultsFilter;
-  }
-
-  function handleInputFocusChange(isFocused: boolean) {
-    setIsInputFocused(isFocused);
-    onInputFocusChange(isFocused);
-  }
-
   return (
     <Container
       onMouseDown={handleContentMouseDown}
@@ -342,7 +352,6 @@ function SearchHeaderPanel({
             invokeSearch={invokeSearch}
             placeholder={placeholder}
             isModalOpened={isModalOpened}
-            isSignInModalOpened={isSignInModalOpened}
             isDocsFilterModalOpened={isDocsFilterModalOpened}
           />
 
@@ -363,8 +372,8 @@ function SearchHeaderPanel({
               key={f}
             >
               <FilterButton
-                selected={activeFilter === f}
-                onClick={() => onFilterSelect(f)}
+                //selected={activeFilter === f}
+                onClick={() => handleHotkeyClick(f)}
               >{getResultsFilterDisplayName(f)}
               </FilterButton>
               {electron.remote.process.platform === 'darwin' &&
@@ -417,7 +426,7 @@ function SearchHeaderPanel({
       }
     </Container>
   );
-}
+});
 
 export { ResultsFilter };
 

@@ -5,14 +5,16 @@ import React, {
   useContext,
 } from 'react';
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 
 import { useHotkeys } from 'react-hotkeys-hook';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import { SearchMode } from 'Preferences/Pages/searchMode';
 import useDebounce from 'hooks/useDebounce';
-import { DocSource } from 'search/docs';
+import { DocSource } from 'Search/docs';
 import Loader from 'components/Loader';
 import Hotkey from 'Home/HotkeysPanel/Hotkey';
+import { useUIStore } from 'ui/ui.store';
 import { AuthContext } from 'Auth';
 
 const Input = styled.input`
@@ -83,7 +85,6 @@ interface SearchInputProps {
 
   isLoading?: boolean;
   isModalOpened?: boolean;
-  isSignInModalOpened?: boolean;
   isDocsFilterModalOpened?: boolean;
   onEnterInSearchHistory: () => void;
   isSearchHistoryPreviewVisible: boolean;
@@ -91,7 +92,7 @@ interface SearchInputProps {
   onQueryDidChange: () => void;
 }
 
-function SearchInput({
+const SearchInput = observer(({
   placeholder,
   inputRef,
   historyValue,
@@ -103,13 +104,13 @@ function SearchInput({
   isModalOpened,
   invokeSearch,
   onQueryDidChange,
-  isSignInModalOpened,
   isDocsFilterModalOpened,
   isLoading,
   searchMode,
   onInputFocusChange,
-}: SearchInputProps) {
+}: SearchInputProps) => {
   const authInfo = useContext(AuthContext);
+  const uiStore = useUIStore();
 
   const [value, setValue] = useState('');
   const [lastValue, setLastValue] = useState('');
@@ -160,12 +161,12 @@ function SearchInput({
 
   // 'enter' hotkey - search.
   useHotkeys('enter', () => {
-    if (isSignInModalOpened) return;
+    if (uiStore.isSignInModalOpened) return;
     if (isDocsFilterModalOpened) return;
     if (isSearchHistoryPreviewVisible) return onEnterInSearchHistory();
     if (searchMode === SearchMode.OnEnterPress) search(value);
   }, { filter: () => true }, [
-    isSignInModalOpened,
+    uiStore.isSignInModalOpened,
     isDocsFilterModalOpened,
     isSearchHistoryPreviewVisible,
     onEnterInSearchHistory,
@@ -229,9 +230,9 @@ function SearchInput({
   }, [isModalOpened]);
 
   useEffect(() => {
-    if (isSignInModalOpened) inputRef?.current?.blur();
+    if (uiStore.isSignInModalOpened) inputRef?.current?.blur();
     else inputRef?.current?.focus();
-  }, [isSignInModalOpened]);
+  }, [uiStore.isSignInModalOpened]);
 
   useEffect(() => {
     if (isDocsFilterModalOpened) inputRef?.current?.blur();
@@ -273,6 +274,6 @@ function SearchInput({
       }
     </>
   );
-}
+});
 
 export default SearchInput;
