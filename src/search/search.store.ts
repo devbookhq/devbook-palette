@@ -6,8 +6,8 @@ import {
 import RootStore, { useRootStore } from 'App/RootStore';
 import SearchService from 'services/search.service';
 import SyncService from 'services/sync.service';
-import {SearchSource} from 'Search';
-import {SearchMode} from 'Preferences/Pages/searchMode';
+import { SearchSource } from 'Search';
+import { SearchMode } from 'Preferences/Pages/searchMode';
 
 export function useSearchStore() {
   const { searchStore } = useRootStore();
