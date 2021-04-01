@@ -6,13 +6,16 @@ import './index.css';
 import { notifyViewReady, } from 'mainCommunication';
 import * as serviceWorker from 'serviceWorker';
 import App from 'App';
+import { RootStoreProvider } from './App/RootStore';
 import { authEmitter, AuthContext, auth } from 'Auth';
 
 ReactDOM.render(
   <React.StrictMode>
-    <AuthContext.Provider value={auth}>
-      <App />
-    </AuthContext.Provider>
+    <RootStoreProvider>
+      <AuthContext.Provider value={auth}>
+        <App />
+      </AuthContext.Provider>
+    </RootStoreProvider>
   </React.StrictMode>
   ,
   document.getElementById('root'),
@@ -21,9 +24,11 @@ ReactDOM.render(
 authEmitter.on('changed', (authInfo) => {
   ReactDOM.render(
     <React.StrictMode>
-      <AuthContext.Provider value={authInfo}>
-        <App />
-      </AuthContext.Provider>
+      <RootStoreProvider>
+        <AuthContext.Provider value={authInfo}>
+          <App />
+        </AuthContext.Provider>
+      </RootStoreProvider>
     </React.StrictMode>
     ,
     document.getElementById('root'),

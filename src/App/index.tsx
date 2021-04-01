@@ -16,6 +16,7 @@ import Onboarding from 'Onboarding';
 import Preferences from 'Preferences';
 import Home from 'Home';
 import useLatestBundle from 'hooks/useLatestBundle';
+import { SearchSource } from 'Search';
 
 // The electron window is set to be frameless.
 // Frameless window stops being draggable - this is the solution.
@@ -170,11 +171,11 @@ function App() {
               path="/"
               exact
             >
-              <Redirect to={{ pathname: "/home" }} />
+              <Redirect to={{ pathname: `/home/search/${SearchSource.Stack}` }} />
             </Route>
 
             <Route
-              path="/home"
+              path="/home/search"
             >
               <Home />
             </Route>

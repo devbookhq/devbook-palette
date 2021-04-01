@@ -5,7 +5,7 @@ import React, {
 } from 'react';
 import styled from 'styled-components';
 
-import { DocResult } from 'search/docs';
+import { DocResult } from 'Search/docs';
 import FocusState from '../SearchItemFocusState';
 
 const maxSummaryLength = 180;

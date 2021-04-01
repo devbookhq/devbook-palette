@@ -10,7 +10,7 @@ import {
   StackOverflowResult,
   StackOverflowAnswer,
   AnswerType,
-} from 'search/stackOverflow';
+} from 'Search/stackOverflow';
 import electron, {
   openLink,
   trackCopyCodeSnippetStackOverflow,

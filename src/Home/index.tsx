@@ -7,10 +7,19 @@ import React, {
   useState,
   useContext,
 } from 'react';
+import {
+  HashRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+  useRouteMatch,
+} from 'react-router-dom';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
 import { Resizable } from 're-resizable';
+import { observer } from 'mobx-react-lite';
 
+import { useUIStore } from 'ui/ui.store';
 import { IPCMessage } from 'mainCommunication/ipc';
 import { AuthContext, AuthState, refreshAuth } from 'Auth';
 import electron, {
@@ -35,16 +44,17 @@ import electron, {
   trackSelectHistoryQuery,
   getSearchMode,
 } from 'mainCommunication';
+import Search from 'Search';
 import {
   search as searchStackOverflow,
   StackOverflowResult,
-} from 'search/stackOverflow';
+} from 'Search/stackOverflow';
 import {
   search as searchDocumentation,
   fetchDocSources,
   DocResult,
   DocSource,
-} from 'search/docs';
+} from 'Search/docs';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
 import Loader from 'components/Loader';
@@ -334,8 +344,8 @@ enum ReducerActionType {
   OpenDocsFilterModal,
   CloseDocsFilterModal,
 
-  OpenSignInModal,
-  CloseSignInModal,
+  //OpenSignInModal,
+  //CloseSignInModal,
 
   FetchDocSourcesSuccess,
   FetchDocSourcesFail,
@@ -343,21 +353,23 @@ enum ReducerActionType {
 
   SetIsLoadingCachedData,
 
-  SetHistory,
-  ToggleSearchHistoryPreview,
+  //SetHistory,
+  //ToggleSearchHistoryPreview,
   SetHistoryIndex,
 
   ToggleSearchInputFocus,
 
-  SetSearchMode,
+  //SetSearchMode,
 }
 
+/*
 interface SetSearchMode {
   type: ReducerActionType.SetSearchMode;
   payload: {
     mode: SearchMode;
   };
 }
+*/
 
 interface SetIsQueryPresent {
   type: ReducerActionType.SetIsQueryPresent;
@@ -458,6 +470,7 @@ interface CloseDocsFilterModal {
   type: ReducerActionType.CloseDocsFilterModal;
 }
 
+/*
 interface OpenSignInModal {
   type: ReducerActionType.OpenSignInModal;
 }
@@ -465,6 +478,7 @@ interface OpenSignInModal {
 interface CloseSignInModal {
   type: ReducerActionType.CloseSignInModal;
 }
+*/
 
 interface FetchDocSourcesSuccess {
   type: ReducerActionType.FetchDocSourcesSuccess;
@@ -489,15 +503,19 @@ interface SetIsLoadingCachedData {
   payload: { isLoadingCachedData: boolean };
 }
 
+/*
 interface ToggleSearchHistoryPreview {
   type: ReducerActionType.ToggleSearchHistoryPreview;
   payload: { isVisible: boolean };
 }
+*/
 
+/*
 interface SetHistory {
   type: ReducerActionType.SetHistory;
   payload: { history: string[] };
 }
+*/
 
 interface SetHistoryIndex {
   type: ReducerActionType.SetHistoryIndex;
@@ -525,22 +543,22 @@ type ReducerAction = SetIsQueryPresent
   | CancelSearchInDocPage
   | OpenDocsFilterModal
   | CloseDocsFilterModal
-  | OpenSignInModal
-  | CloseSignInModal
+  //| OpenSignInModal
+  //| CloseSignInModal
   | FetchDocSourcesSuccess
   | FetchDocSourcesFail
   | SetActiveDocSource
   | SetIsLoadingCachedData
-  | ToggleSearchHistoryPreview
-  | SetHistory
+  //| ToggleSearchHistoryPreview
+  //| SetHistory
   | SetHistoryIndex
-  | SetSearchMode
+  //| SetSearchMode
   | ToggleSearchInputFocus;
 
 interface State {
   search: {
     isQueryPresent: boolean;
-    filter: ResultsFilter;
+    //filter: ResultsFilter;
   };
   results: SearchResults;
   modalItem: SearchResultItem | undefined;
@@ -549,15 +567,15 @@ interface State {
     docSearchResultsDefaultWidth: number;
     docSearchResultsCurrentWidth: number;
   }
-  searchMode: SearchMode | undefined;
+  //searchMode: SearchMode | undefined;
   isSearchingInDocPage: boolean;
   isDocsFilterModalOpened: boolean;
   docSources: DocSource[];
   activeDocSource?: DocSource;
   isLoadingCachedData: boolean;
-  isSignInModalOpened: boolean;
-  isSearchHistoryPreviewVisible: boolean;
-  history: string[];
+  //isSignInModalOpened: boolean;
+  //isSearchHistoryPreviewVisible: boolean;
+  //history: string[];
   historyIndex: number;
   isSearchInputFocused: boolean;
 }
@@ -565,7 +583,7 @@ interface State {
 const initialState: State = {
   search: {
     isQueryPresent: false,
-    filter: ResultsFilter.StackOverflow,
+    //filter: ResultsFilter.StackOverflow,
   },
   results: {
     [ResultsFilter.StackOverflow]: {
@@ -587,7 +605,7 @@ const initialState: State = {
       },
     },
   },
-  searchMode: undefined,
+  //searchMode: undefined,
   modalItem: undefined,
   errorMessage: '',
   layout: {
@@ -599,9 +617,9 @@ const initialState: State = {
   docSources: [],
   activeDocSource: undefined,
   isLoadingCachedData: true,
-  isSignInModalOpened: false,
-  history: [],
-  isSearchHistoryPreviewVisible: false,
+  //isSignInModalOpened: false,
+  //history: [],
+  //isSearchHistoryPreviewVisible: false,
   historyIndex: 0,
   isSearchInputFocused: true,
 }
@@ -654,6 +672,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         },
       };
     }
+    /*
     case ReducerActionType.SetSearchMode: {
       const { mode } = reducerAction.payload;
       return {
@@ -661,6 +680,8 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         searchMode: mode,
       };
     }
+    */
+    /*
     case ReducerActionType.SetSearchFilter: {
       const { filter } = reducerAction.payload;
       return {
@@ -669,25 +690,9 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
           ...state.search,
           filter,
         },
-        // TODO: https://github.com/DevbookHQ/devbook/issues/7
-        /*
-        results: {
-          ...state.results,
-          [filter]: {
-            ...state.results[filter],
-            focusedIdx: {
-              ...state.results[filter].focusedIdx,
-              // We want to disable automatic scrolling to the focused
-              // element. When a user is changing filters we should
-              // respect the cached scroll position instead. This position
-              // might be different then the position of a focused element.
-              state: FocusState.NoScroll,
-            },
-          },
-        },
-        */
       };
     }
+    */
     case ReducerActionType.StartSearching: {
       const { filter } = reducerAction.payload;
       return {
@@ -817,18 +822,22 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         isDocsFilterModalOpened: false,
       };
     }
+    /*
     case ReducerActionType.OpenSignInModal: {
       return {
         ...state,
         isSignInModalOpened: true,
       };
     }
+    */
+    /*
     case ReducerActionType.CloseSignInModal: {
       return {
         ...state,
         isSignInModalOpened: false,
       };
     }
+    */
     case ReducerActionType.FetchDocSourcesSuccess: {
       const { docSources, activeDocSource } = reducerAction.payload;
       return {
@@ -865,6 +874,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         isSearchInputFocused: isFocused,
       };
     }
+    /*
     case ReducerActionType.SetHistory: {
       const { history } = reducerAction.payload;
       return {
@@ -872,6 +882,8 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         history,
       };
     }
+    */
+    /*
     case ReducerActionType.ToggleSearchHistoryPreview: {
       const { isVisible } = reducerAction.payload;
       return {
@@ -879,6 +891,7 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
         isSearchHistoryPreviewVisible: isVisible,
       };
     }
+    */
     case ReducerActionType.SetHistoryIndex: {
       const { index } = reducerAction.payload;
       return {
@@ -891,8 +904,10 @@ function stateReducer(state: State, reducerAction: ReducerAction): State {
   }
 }
 
-function Home() {
+const Home = observer(() => {
+  const { path } = useRouteMatch();
   const authInfo = useContext(AuthContext);
+  const uiStore = useUIStore();
 
   const isUserLoading =
     authInfo.state === AuthState.LookingForStoredUser ||
@@ -934,8 +949,7 @@ function Home() {
     dispatch({
       type: ReducerActionType.SetIsQueryPresent,
       payload: { isQueryPresent: query },
-    });
-  }, []);
+    }); }, []);
 
   const cacheScrollTopPosition = useCallback((filter: ResultsFilter, scrollTopPosition: number) => {
     dispatch({
@@ -1077,19 +1091,23 @@ function Home() {
     });
   }, []);
 
+  /*
   const openSignInModal = useCallback(() => {
     trackSignInModalOpened();
     dispatch({
       type: ReducerActionType.OpenSignInModal,
     });
   }, []);
+  */
 
+  /*
   const closeSignInModal = useCallback(() => {
     trackSignInModalClosed();
     dispatch({
       type: ReducerActionType.CloseSignInModal,
     });
   }, []);
+  */
 
   const fetchDocSourcesSuccess = useCallback((docSources: DocSource[], activeDocSource: DocSource) => {
     dispatch({
@@ -1418,10 +1436,16 @@ function Home() {
       return;
     }
 
+    if (uiStore.isSignInModalOpened) {
+      uiStore.isSignInModalOpened = false;
+      return;
+    }
+    /*
     if (state.isSignInModalOpened) {
       closeSignInModal();
       return;
     }
+    */
 
     hideMainWindow();
     trackShortcut({ action: 'Hide main window' });
@@ -1429,7 +1453,8 @@ function Home() {
     state.modalItem,
     state.isSearchingInDocPage,
     state.isDocsFilterModalOpened,
-    state.isSignInModalOpened,
+    //state.isSignInModalOpened,
+    uiStore.isSignInModalOpened,
   ]);
 
   // 'cmd+o' hotkey - open the focused result in a browser.
@@ -1478,7 +1503,8 @@ function Home() {
   /* //////////////////// */
 
   useIPCRenderer(IPCMessage.OpenSignInModal, () => {
-    openSignInModal();
+    //openSignInModal();
+    uiStore.isSignInModalOpened = true;
   });
 
   useIPCRenderer(IPCMessage.OnSearchModeChange, (_, { mode }: { mode: SearchMode }) => {
@@ -1558,430 +1584,463 @@ function Home() {
   }, []);
 
   return (
-    <>
-      {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
-        <StackOverflowModal
-          soResult={state.modalItem as StackOverflowResult}
-          onOpenInBrowserClick={openFocusedSOItemInBrowser}
-          onCloseRequest={closeModal}
-        />
-      }
+    <Container>
+      <SearchHeaderPanel
+        historyValue={queryFromHistoryValue}
+        activeDocSource={state.activeDocSource}
+        onEmptyQuery={handleQueryChangedToEmpty}
+        onQueryDidChange={() => setDidQueryChange(true)}
+        onNonEmptyQuery={handleQueryChangedtoNonEmpty}
+        placeholder={activeFilter === ResultsFilter.StackOverflow ? 'Search StackOverflow' : 'Search documentation'}
+        invokeSearch={activateSearch}
+        searchMode={state.searchMode}
+        //activeFilter={activeFilter}
+        //onFilterSelect={f => setSearchFilter(f)}
+        isLoading={isActiveFilterLoading}
+        isModalOpened={!!state.modalItem}
+        //isSignInModalOpened={state.isSignInModalOpened}
+        isDocsFilterModalOpened={state.isDocsFilterModalOpened}
+        isSearchHistoryPreviewVisible={state.isSearchHistoryPreviewVisible}
+        onInputFocusChange={toggleSearchInputFocus}
+        onToggleSearchHistoryClick={() => toggleSearchHistoryPreview(!state.isSearchHistoryPreviewVisible)}
+        onEnterInSearchHistory={handleSearchHistoryEnterPress}
+      />
 
-      {state.isDocsFilterModalOpened && activeFilter === ResultsFilter.Docs &&
-        <DocsFilterModal
-          docSources={state.docSources}
-          onDocSourceSelect={handleDocSourceSelect}
-          onCloseRequest={closeDocsFilterModal}
-        />
-      }
-
-      {state.isSignInModalOpened &&
-        <SignInModal
-          onCloseRequest={closeSignInModal}
-        />
-      }
-
-      {state.isSearchHistoryPreviewVisible &&
-        <SearchHistory
-          isFocused
-          historyIdx={state.historyIndex}
-          history={state.history}
-          onQueryClick={handleSearchHistoryQueryClick}
-          onHideHotkeyClick={() => toggleSearchHistoryPreview(false)}
-        />
-      }
-
-      <Container>
-        <SearchHeaderPanel
-          historyValue={queryFromHistoryValue}
-          activeDocSource={state.activeDocSource}
-          onEmptyQuery={handleQueryChangedToEmpty}
-          onQueryDidChange={() => setDidQueryChange(true)}
-          onNonEmptyQuery={handleQueryChangedtoNonEmpty}
-          placeholder={activeFilter === ResultsFilter.StackOverflow ? 'Search StackOverflow' : 'Search documentation'}
-          invokeSearch={activateSearch}
-          searchMode={state.searchMode}
-          activeFilter={activeFilter}
-          onFilterSelect={f => setSearchFilter(f)}
-          isLoading={isActiveFilterLoading}
-          isModalOpened={!!state.modalItem}
-          isSignInModalOpened={state.isSignInModalOpened}
-          isDocsFilterModalOpened={state.isDocsFilterModalOpened}
-          isSearchHistoryPreviewVisible={state.isSearchHistoryPreviewVisible}
-          onInputFocusChange={toggleSearchInputFocus}
-          onToggleSearchHistoryClick={() => toggleSearchHistoryPreview(!state.isSearchHistoryPreviewVisible)}
-          onEnterInSearchHistory={handleSearchHistoryEnterPress}
-        />
-
-        {authInfo.isReconnecting &&
-          <ReconnectingWrapper>
-            <InfoMessage>Contacting Devbook servers failed.</InfoMessage>
-            <InfoMessage>Reconnecting...</InfoMessage>
-          </ReconnectingWrapper>
-        }
-
-        {!authInfo.isReconnecting && <>
-
-          {!state.search.isQueryPresent
-            && state.searchMode === SearchMode.Automatic
-            && !isActiveFilterLoading
-            &&
-            <>
-              {/*
-              We can show the text right away for SO because
-              we don't have to wait until a user account is loaded.
-            */}
-              {activeFilter !== ResultsFilter.Docs
-                &&
-                <InfoWrapper>
-                  <InfoMessage>Type your search query</InfoMessage>
-                </InfoWrapper>
-              }
-            </>
-          }
-
-          {!state.search.isQueryPresent
-            && state.searchMode !== SearchMode.Automatic
-            && !isActiveFilterLoading
-            && hasActiveFilterEmptyResults
-            &&
-            <>
-              {/*
-              We can show the text right away for SO because
-              we don't have to wait until a user account is loaded.
-            */}
-              {activeFilter !== ResultsFilter.Docs
-                &&
-                <InfoWrapper>
-                  <InfoMessageLeft>
-                    Type your search query and press
-                </InfoMessageLeft>
-                  <TextHotkey hotkey={['Enter']} />
-                  <InfoMessageRight>
-                    to search
-                </InfoMessageRight>
-                </InfoWrapper>
-              }
-            </>
-          }
-
-          {state.search.isQueryPresent
-            && hasActiveFilterEmptyResults
-            && !isActiveFilterLoading
-            && !didQueryChange
-            && state.searchMode === SearchMode.Automatic
-            && activeFilter !== ResultsFilter.Docs
-            &&
-            <InfoWrapper>
-              <InfoMessage>Nothing found. Try a different query.</InfoMessage>
-            </InfoWrapper>
-          }
-
-          {state.search.isQueryPresent
-            && hasActiveFilterEmptyResults
-            && !isActiveFilterLoading
-            && !didQueryChange
-            && state.searchMode !== SearchMode.Automatic
-            && activeFilter !== ResultsFilter.Docs
-            &&
-            <InfoWrapper>
-              <InfoMessageLeft>
-                Nothing found. Try a different query and then press
-                </InfoMessageLeft>
-              <TextHotkey hotkey={['Enter']} />
-              <InfoMessageRight>
-                .
-            </InfoMessageRight>
-            </InfoWrapper>
-          }
-
-          {state.search.isQueryPresent
-            && hasActiveFilterEmptyResults
-            && !isActiveFilterLoading
-            && didQueryChange
-            && state.searchMode !== SearchMode.Automatic
-            && activeFilter !== ResultsFilter.Docs
-            &&
-            <InfoWrapper>
-              <InfoMessageLeft>
-                Type your search query and press
-          </InfoMessageLeft>
-              <TextHotkey hotkey={['Enter']} />
-              <InfoMessageRight>
-                to search
-          </InfoMessageRight>
-            </InfoWrapper>
-          }
-
-          {activeFilter === ResultsFilter.Docs
-            && authInfo.state === AuthState.LookingForStoredUser
-            &&
-            <DocsLoader />
-          }
-
-          {activeFilter === ResultsFilter.Docs
-            && authInfo.state === AuthState.SigningInUser
-            &&
-            <>
-              <DocsLoader />
-              <SignInRequest>
-                <InfoWrapper>
-                  <InfoMessage>
-                    You're being signed in. Please check your email.
-                </InfoMessage>
-                </InfoWrapper>
-                <SignInAgainButton
-                  onClick={openSignInModal}
-                >
-                  Sign in with a different email
-              </SignInAgainButton>
-              </SignInRequest>
-            </>
-          }
-
-          {activeFilter === ResultsFilter.Docs
-            && !isUserLoading
-            && !isUserSignedInWithOrWithoutMetadata
-            &&
-            <>
-              <InfoWrapper>
-                <SignInRequest>
-                  <InfoMessage>You need to sign in to search documentations</InfoMessage>
-                  <SignInButton
-                    onClick={openSignInModal}
-                  >
-                    Sign in to Devbook
-                </SignInButton>
-                </SignInRequest>
-              </InfoWrapper>
-            </>
-          }
-
-          {state.search.isQueryPresent
-            && activeFilter === ResultsFilter.Docs
-            && isUserSignedInWithOrWithoutMetadata
-            && !state.activeDocSource
-            && !isActiveFilterLoading
-            &&
-            <>
-              <InfoMessage>No documentation is enabled</InfoMessage>
-              <EnableDocSourcesButton
-                onClick={openDocsFilterModal}
-              >
-                Enable documentations
-            </EnableDocSourcesButton>
-            </>
-          }
-
-          {activeFilter === ResultsFilter.Docs
-            && state.activeDocSource
-            && isUserSignedInWithOrWithoutMetadata
-            &&
-            <DocsWrapper>
-              <Resizable
-                defaultSize={{
-                  width: state.layout.docSearchResultsCurrentWidth || state.layout.docSearchResultsDefaultWidth,
-                  height: "100%"
-                }}
-                maxWidth="50%"
-                minWidth="265"
-                enable={{ right: true }}
-                onResizeStop={(e, dir, ref) => handleDocSearchResultsResizeStop(e, dir, ref)}
-              >
-                <DocsResultsWrapper>
-                  <ActiveDocset>
-                    <DocsetNameLogo
-                      onClick={openDocsFilterModal}
-                    >
-                      <DocsetIcon src={state.activeDocSource.iconURL} />
-                      <ActiveDocsetName>
-                        {state.activeDocSource.name}
-                      </ActiveDocsetName>
-                    </DocsetNameLogo>
-                    <HotkeyWrapper
-                      onClick={openDocsFilterModal}
-                    >
-                      <Hotkey
-                        hotkey={electron.remote.process.platform === 'darwin'
-                          ? [Key.Command, 'D']
-                          : ['Ctrl', 'D']
-                        }
-                      />
-                      <HotkeyText>
-                        to change
-                    </HotkeyText>
-                    </HotkeyWrapper>
-                  </ActiveDocset>
-                  <DocSearchResults>
-                    {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
-                      <DocSearchResultItem
-                        key={idx}
-                        docResult={d}
-                        focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
-                        onClick={() => focusResultItem(ResultsFilter.Docs, idx, FocusState.NoScroll)}
-                      />
-                    ))}
-                  </DocSearchResults>
-                </DocsResultsWrapper>
-              </Resizable>
-              {activeFocusedItem &&
-                <DocPage
-                  searchInputRef={docPageSearchInputRef}
-                  isDocsFilterModalOpened={state.isDocsFilterModalOpened}
-                  isSearchingInDocPage={state.isSearchingInDocPage}
-                  isSearchHistoryOpened={state.isSearchHistoryPreviewVisible}
-                  docResult={activeFocusedItem as DocResult}
-                />
-              }
-              {!activeFocusedItem
-                &&
-                <EmptyDocPage>
-                  {!isActiveFilterLoading &&
-                    <>
-                      {state.search.isQueryPresent
-                        && state.searchMode !== SearchMode.Automatic
-                        && hasActiveFilterEmptyResults
-                        && !didQueryChange
-                        &&
-                        <InfoWrapper>
-                          <InfoMessageLeft>
-                            Nothing found. Try a different query and then press
-                          </InfoMessageLeft>
-                          <TextHotkey hotkey={['Enter']} />
-                          <InfoMessageRight>
-                            .
-                        </InfoMessageRight>
-                        </InfoWrapper>
-                      }
-
-                      {state.search.isQueryPresent
-                        && state.searchMode !== SearchMode.Automatic
-                        && hasActiveFilterEmptyResults
-                        && didQueryChange
-                        &&
-                        <InfoWrapper>
-                          <InfoMessageLeft>
-                            Type your search query and press
-                          </InfoMessageLeft>
-                          <TextHotkey hotkey={['Enter']} />
-                          <InfoMessageRight>
-                            to search
-                        </InfoMessageRight>
-                        </InfoWrapper>
-                      }
-
-                      {!state.search.isQueryPresent
-                        && state.searchMode !== SearchMode.Automatic
-                        && hasActiveFilterEmptyResults
-                        &&
-                        <InfoWrapper>
-                          <InfoMessageLeft>
-                            Type your search query and press
-                          </InfoMessageLeft>
-                          <TextHotkey hotkey={['Enter']} />
-                          <InfoMessageRight>
-                            to search
-                        </InfoMessageRight>
-                        </InfoWrapper>
-                      }
-
-                      {state.search.isQueryPresent
-                        && state.searchMode === SearchMode.Automatic
-                        && hasActiveFilterEmptyResults
-                        &&
-                        <InfoMessage>
-                          Nothing found. Try a different query.
-                      </InfoMessage>
-                      }
-
-                      {!state.search.isQueryPresent
-                        && state.searchMode === SearchMode.Automatic
-                        && hasActiveFilterEmptyResults
-                        &&
-                        <InfoMessage>
-                          Type your search query
-                      </InfoMessage>
-                      }
-                    </>
-                  }
-                </EmptyDocPage>
-              }
-            </DocsWrapper>
-          }
-
-          {(state.search.isQueryPresent || state.searchMode !== SearchMode.Automatic)
-            && !hasActiveFilterEmptyResults
-            && !isActiveFilterLoading
-            &&
-            <>
-              {activeFilter === ResultsFilter.StackOverflow &&
-                <SearchResultsWrapper
-                  ref={searchResultsWrapperRef}
-                >
-                  {activeFilter === ResultsFilter.StackOverflow
-                    && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
-                      <StackOverflowItem
-                        key={idx}
-                        soResult={sor}
-                        focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
-                        onHeaderClick={() => focusResultItem(ResultsFilter.StackOverflow, idx, FocusState.NoScroll)}
-                        onTitleClick={() => openModal(sor)}
-                      />
-                    ))}
-                </SearchResultsWrapper>
-              }
-
-
-              {/* StackOverflow search results hotkeys */}
-              {!state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
-                <StackOverflowSearchHotkeysPanel
-                  onOpenClick={() => openModal(activeFocusedItem)}
-                  onOpenInBrowserClick={openFocusedSOItemInBrowser}
-                  onNavigateUpClick={() => navigateSearchResultsUp(
-                    state.results[ResultsFilter.StackOverflow].focusedIdx.idx,
-                    ResultsFilter.StackOverflow,
-                    false,
-                  )}
-                  onNavigateDownClick={() => navigateSearchResultsDown(
-                    state.results[ResultsFilter.StackOverflow].focusedIdx.idx,
-                    ResultsFilter.StackOverflow,
-                    false,
-                  )}
-                />
-              }
-              {/*-------------------------------------------------------------*/}
-
-              {/* Docs search results hotkeys */}
-              {!state.modalItem
-                && activeFilter === ResultsFilter.Docs
-                && isUserSignedInWithOrWithoutMetadata
-                && state.activeDocSource
-                &&
-                <DocsSearchHotkeysPanel
-                  onNavigateUpClick={() => navigateSearchResultsUp(
-                    state.results[ResultsFilter.Docs].focusedIdx.idx,
-                    ResultsFilter.Docs,
-                    false,
-                  )}
-                  onNavigateDownClick={() => navigateSearchResultsDown(
-                    state.results[ResultsFilter.Docs].focusedIdx.idx,
-                    ResultsFilter.Docs,
-                    false,
-                  )}
-                  isDocsFilterModalOpened={state.isDocsFilterModalOpened}
-                  isSearchingInDocPage={state.isSearchingInDocPage}
-                  onCloseFilterDocsClick={closeDocsFilterModal}
-                  onSearchInDocPageClick={searchInDocPage}
-                  onCancelSearchInDocPageClick={cancelSearchInDocPage}
-                />
-              }
-              {/*-------------------------------------------------------------*/}
-            </>
-          }
-        </>}
-      </Container>
-    </>
+      <Router>
+        <Switch>
+          <Route path={`${path}/:searchSource`}>
+            <Search/>
+          </Route>
+        </Switch>
+      </Router>
+    </Container>
   );
-}
+
+//  return (
+//    <>
+//      {state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
+//        <StackOverflowModal
+//          soResult={state.modalItem as StackOverflowResult}
+//          onOpenInBrowserClick={openFocusedSOItemInBrowser}
+//          onCloseRequest={closeModal}
+//        />
+//      }
+//
+//      {state.isDocsFilterModalOpened && activeFilter === ResultsFilter.Docs &&
+//        <DocsFilterModal
+//          docSources={state.docSources}
+//          onDocSourceSelect={handleDocSourceSelect}
+//          onCloseRequest={closeDocsFilterModal}
+//        />
+//      }
+//
+//      {state.isSignInModalOpened &&
+//        <SignInModal
+//          onCloseRequest={closeSignInModal}
+//        />
+//      }
+//
+//      {state.isSearchHistoryPreviewVisible &&
+//        <SearchHistory
+//          isFocused
+//          historyIdx={state.historyIndex}
+//          history={state.history}
+//          onQueryClick={handleSearchHistoryQueryClick}
+//          onHideHotkeyClick={() => toggleSearchHistoryPreview(false)}
+//        />
+//      }
+//
+//      <Container>
+//        <SearchHeaderPanel
+//          historyValue={queryFromHistoryValue}
+//          activeDocSource={state.activeDocSource}
+//          onEmptyQuery={handleQueryChangedToEmpty}
+//          onQueryDidChange={() => setDidQueryChange(true)}
+//          onNonEmptyQuery={handleQueryChangedtoNonEmpty}
+//          placeholder={activeFilter === ResultsFilter.StackOverflow ? 'Search StackOverflow' : 'Search documentation'}
+//          invokeSearch={activateSearch}
+//          searchMode={state.searchMode}
+//          activeFilter={activeFilter}
+//          onFilterSelect={f => setSearchFilter(f)}
+//          isLoading={isActiveFilterLoading}
+//          isModalOpened={!!state.modalItem}
+//          isSignInModalOpened={state.isSignInModalOpened}
+//          isDocsFilterModalOpened={state.isDocsFilterModalOpened}
+//          isSearchHistoryPreviewVisible={state.isSearchHistoryPreviewVisible}
+//          onInputFocusChange={toggleSearchInputFocus}
+//          onToggleSearchHistoryClick={() => toggleSearchHistoryPreview(!state.isSearchHistoryPreviewVisible)}
+//          onEnterInSearchHistory={handleSearchHistoryEnterPress}
+//        />
+//
+//        {authInfo.isReconnecting &&
+//          <ReconnectingWrapper>
+//            <InfoMessage>Contacting Devbook servers failed.</InfoMessage>
+//            <InfoMessage>Reconnecting...</InfoMessage>
+//          </ReconnectingWrapper>
+//        }
+//
+//        {!authInfo.isReconnecting && <>
+//
+//          {!state.search.isQueryPresent
+//            && state.searchMode === SearchMode.Automatic
+//            && !isActiveFilterLoading
+//            &&
+//            <>
+//              {/*
+//              We can show the text right away for SO because
+//              we don't have to wait until a user account is loaded.
+//            */}
+//              {activeFilter !== ResultsFilter.Docs
+//                &&
+//                <InfoWrapper>
+//                  <InfoMessage>Type your search query</InfoMessage>
+//                </InfoWrapper>
+//              }
+//            </>
+//          }
+//
+//          {!state.search.isQueryPresent
+//            && state.searchMode !== SearchMode.Automatic
+//            && !isActiveFilterLoading
+//            && hasActiveFilterEmptyResults
+//            &&
+//            <>
+//              {/*
+//              We can show the text right away for SO because
+//              we don't have to wait until a user account is loaded.
+//            */}
+//              {activeFilter !== ResultsFilter.Docs
+//                &&
+//                <InfoWrapper>
+//                  <InfoMessageLeft>
+//                    Type your search query and press
+//                </InfoMessageLeft>
+//                  <TextHotkey hotkey={['Enter']} />
+//                  <InfoMessageRight>
+//                    to search
+//                </InfoMessageRight>
+//                </InfoWrapper>
+//              }
+//            </>
+//          }
+//
+//          {state.search.isQueryPresent
+//            && hasActiveFilterEmptyResults
+//            && !isActiveFilterLoading
+//            && !didQueryChange
+//            && state.searchMode === SearchMode.Automatic
+//            && activeFilter !== ResultsFilter.Docs
+//            &&
+//            <InfoWrapper>
+//              <InfoMessage>Nothing found. Try a different query.</InfoMessage>
+//            </InfoWrapper>
+//          }
+//
+//          {state.search.isQueryPresent
+//            && hasActiveFilterEmptyResults
+//            && !isActiveFilterLoading
+//            && !didQueryChange
+//            && state.searchMode !== SearchMode.Automatic
+//            && activeFilter !== ResultsFilter.Docs
+//            &&
+//            <InfoWrapper>
+//              <InfoMessageLeft>
+//                Nothing found. Try a different query and then press
+//                </InfoMessageLeft>
+//              <TextHotkey hotkey={['Enter']} />
+//              <InfoMessageRight>
+//                .
+//            </InfoMessageRight>
+//            </InfoWrapper>
+//          }
+//
+//          {state.search.isQueryPresent
+//            && hasActiveFilterEmptyResults
+//            && !isActiveFilterLoading
+//            && didQueryChange
+//            && state.searchMode !== SearchMode.Automatic
+//            && activeFilter !== ResultsFilter.Docs
+//            &&
+//            <InfoWrapper>
+//              <InfoMessageLeft>
+//                Type your search query and press
+//          </InfoMessageLeft>
+//              <TextHotkey hotkey={['Enter']} />
+//              <InfoMessageRight>
+//                to search
+//          </InfoMessageRight>
+//            </InfoWrapper>
+//          }
+//
+//          {activeFilter === ResultsFilter.Docs
+//            && authInfo.state === AuthState.LookingForStoredUser
+//            &&
+//            <DocsLoader />
+//          }
+//
+//          {activeFilter === ResultsFilter.Docs
+//            && authInfo.state === AuthState.SigningInUser
+//            &&
+//            <>
+//              <DocsLoader />
+//              <SignInRequest>
+//                <InfoWrapper>
+//                  <InfoMessage>
+//                    You're being signed in. Please check your email.
+//                </InfoMessage>
+//                </InfoWrapper>
+//                <SignInAgainButton
+//                  onClick={openSignInModal}
+//                >
+//                  Sign in with a different email
+//              </SignInAgainButton>
+//              </SignInRequest>
+//            </>
+//          }
+//
+//          {activeFilter === ResultsFilter.Docs
+//            && !isUserLoading
+//            && !isUserSignedInWithOrWithoutMetadata
+//            &&
+//            <>
+//              <InfoWrapper>
+//                <SignInRequest>
+//                  <InfoMessage>You need to sign in to search documentations</InfoMessage>
+//                  <SignInButton
+//                    onClick={openSignInModal}
+//                  >
+//                    Sign in to Devbook
+//                </SignInButton>
+//                </SignInRequest>
+//              </InfoWrapper>
+//            </>
+//          }
+//
+//          {state.search.isQueryPresent
+//            && activeFilter === ResultsFilter.Docs
+//            && isUserSignedInWithOrWithoutMetadata
+//            && !state.activeDocSource
+//            && !isActiveFilterLoading
+//            &&
+//            <>
+//              <InfoMessage>No documentation is enabled</InfoMessage>
+//              <EnableDocSourcesButton
+//                onClick={openDocsFilterModal}
+//              >
+//                Enable documentations
+//            </EnableDocSourcesButton>
+//            </>
+//          }
+//
+//          {activeFilter === ResultsFilter.Docs
+//            && state.activeDocSource
+//            && isUserSignedInWithOrWithoutMetadata
+//            &&
+//            <DocsWrapper>
+//              <Resizable
+//                defaultSize={{
+//                  width: state.layout.docSearchResultsCurrentWidth || state.layout.docSearchResultsDefaultWidth,
+//                  height: "100%"
+//                }}
+//                maxWidth="50%"
+//                minWidth="265"
+//                enable={{ right: true }}
+//                onResizeStop={(e, dir, ref) => handleDocSearchResultsResizeStop(e, dir, ref)}
+//              >
+//                <DocsResultsWrapper>
+//                  <ActiveDocset>
+//                    <DocsetNameLogo
+//                      onClick={openDocsFilterModal}
+//                    >
+//                      <DocsetIcon src={state.activeDocSource.iconURL} />
+//                      <ActiveDocsetName>
+//                        {state.activeDocSource.name}
+//                      </ActiveDocsetName>
+//                    </DocsetNameLogo>
+//                    <HotkeyWrapper
+//                      onClick={openDocsFilterModal}
+//                    >
+//                      <Hotkey
+//                        hotkey={electron.remote.process.platform === 'darwin'
+//                          ? [Key.Command, 'D']
+//                          : ['Ctrl', 'D']
+//                        }
+//                      />
+//                      <HotkeyText>
+//                        to change
+//                    </HotkeyText>
+//                    </HotkeyWrapper>
+//                  </ActiveDocset>
+//                  <DocSearchResults>
+//                    {(state.results[ResultsFilter.Docs].items as DocResult[]).map((d, idx) => (
+//                      <DocSearchResultItem
+//                        key={idx}
+//                        docResult={d}
+//                        focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+//                        onClick={() => focusResultItem(ResultsFilter.Docs, idx, FocusState.NoScroll)}
+//                      />
+//                    ))}
+//                  </DocSearchResults>
+//                </DocsResultsWrapper>
+//              </Resizable>
+//              {activeFocusedItem &&
+//                <DocPage
+//                  searchInputRef={docPageSearchInputRef}
+//                  isDocsFilterModalOpened={state.isDocsFilterModalOpened}
+//                  isSearchingInDocPage={state.isSearchingInDocPage}
+//                  isSearchHistoryOpened={state.isSearchHistoryPreviewVisible}
+//                  docResult={activeFocusedItem as DocResult}
+//                />
+//              }
+//              {!activeFocusedItem
+//                &&
+//                <EmptyDocPage>
+//                  {!isActiveFilterLoading &&
+//                    <>
+//                      {state.search.isQueryPresent
+//                        && state.searchMode !== SearchMode.Automatic
+//                        && hasActiveFilterEmptyResults
+//                        && !didQueryChange
+//                        &&
+//                        <InfoWrapper>
+//                          <InfoMessageLeft>
+//                            Nothing found. Try a different query and then press
+//                          </InfoMessageLeft>
+//                          <TextHotkey hotkey={['Enter']} />
+//                          <InfoMessageRight>
+//                            .
+//                        </InfoMessageRight>
+//                        </InfoWrapper>
+//                      }
+//
+//                      {state.search.isQueryPresent
+//                        && state.searchMode !== SearchMode.Automatic
+//                        && hasActiveFilterEmptyResults
+//                        && didQueryChange
+//                        &&
+//                        <InfoWrapper>
+//                          <InfoMessageLeft>
+//                            Type your search query and press
+//                          </InfoMessageLeft>
+//                          <TextHotkey hotkey={['Enter']} />
+//                          <InfoMessageRight>
+//                            to search
+//                        </InfoMessageRight>
+//                        </InfoWrapper>
+//                      }
+//
+//                      {!state.search.isQueryPresent
+//                        && state.searchMode !== SearchMode.Automatic
+//                        && hasActiveFilterEmptyResults
+//                        &&
+//                        <InfoWrapper>
+//                          <InfoMessageLeft>
+//                            Type your search query and press
+//                          </InfoMessageLeft>
+//                          <TextHotkey hotkey={['Enter']} />
+//                          <InfoMessageRight>
+//                            to search
+//                        </InfoMessageRight>
+//                        </InfoWrapper>
+//                      }
+//
+//                      {state.search.isQueryPresent
+//                        && state.searchMode === SearchMode.Automatic
+//                        && hasActiveFilterEmptyResults
+//                        &&
+//                        <InfoMessage>
+//                          Nothing found. Try a different query.
+//                      </InfoMessage>
+//                      }
+//
+//                      {!state.search.isQueryPresent
+//                        && state.searchMode === SearchMode.Automatic
+//                        && hasActiveFilterEmptyResults
+//                        &&
+//                        <InfoMessage>
+//                          Type your search query
+//                      </InfoMessage>
+//                      }
+//                    </>
+//                  }
+//                </EmptyDocPage>
+//              }
+//            </DocsWrapper>
+//          }
+//
+//          {(state.search.isQueryPresent || state.searchMode !== SearchMode.Automatic)
+//            && !hasActiveFilterEmptyResults
+//            && !isActiveFilterLoading
+//            &&
+//            <>
+//              {activeFilter === ResultsFilter.StackOverflow &&
+//                <SearchResultsWrapper
+//                  ref={searchResultsWrapperRef}
+//                >
+//                  {activeFilter === ResultsFilter.StackOverflow
+//                    && (state.results[ResultsFilter.StackOverflow].items as StackOverflowResult[]).map((sor, idx) => (
+//                      <StackOverflowItem
+//                        key={idx}
+//                        soResult={sor}
+//                        focusState={activeFocusedIdx.idx === idx ? activeFocusedIdx.focusState : FocusState.None}
+//                        onHeaderClick={() => focusResultItem(ResultsFilter.StackOverflow, idx, FocusState.NoScroll)}
+//                        onTitleClick={() => openModal(sor)}
+//                      />
+//                    ))}
+//                </SearchResultsWrapper>
+//              }
+//
+//
+//              {/* StackOverflow search results hotkeys */}
+//              {!state.modalItem && activeFilter === ResultsFilter.StackOverflow &&
+//                <StackOverflowSearchHotkeysPanel
+//                  onOpenClick={() => openModal(activeFocusedItem)}
+//                  onOpenInBrowserClick={openFocusedSOItemInBrowser}
+//                  onNavigateUpClick={() => navigateSearchResultsUp(
+//                    state.results[ResultsFilter.StackOverflow].focusedIdx.idx,
+//                    ResultsFilter.StackOverflow,
+//                    false,
+//                  )}
+//                  onNavigateDownClick={() => navigateSearchResultsDown(
+//                    state.results[ResultsFilter.StackOverflow].focusedIdx.idx,
+//                    ResultsFilter.StackOverflow,
+//                    false,
+//                  )}
+//                />
+//              }
+//              {/*-------------------------------------------------------------*/}
+//
+//              {/* Docs search results hotkeys */}
+//              {!state.modalItem
+//                && activeFilter === ResultsFilter.Docs
+//                && isUserSignedInWithOrWithoutMetadata
+//                && state.activeDocSource
+//                &&
+//                <DocsSearchHotkeysPanel
+//                  onNavigateUpClick={() => navigateSearchResultsUp(
+//                    state.results[ResultsFilter.Docs].focusedIdx.idx,
+//                    ResultsFilter.Docs,
+//                    false,
+//                  )}
+//                  onNavigateDownClick={() => navigateSearchResultsDown(
+//                    state.results[ResultsFilter.Docs].focusedIdx.idx,
+//                    ResultsFilter.Docs,
+//                    false,
+//                  )}
+//                  isDocsFilterModalOpened={state.isDocsFilterModalOpened}
+//                  isSearchingInDocPage={state.isSearchingInDocPage}
+//                  onCloseFilterDocsClick={closeDocsFilterModal}
+//                  onSearchInDocPageClick={searchInDocPage}
+//                  onCancelSearchInDocPageClick={cancelSearchInDocPage}
+//                />
+//              }
+//              {/*-------------------------------------------------------------*/}
+//            </>
+//          }
+//        </>}
+//      </Container>
+//    </>
+//  );
+});
 
 export default Home;

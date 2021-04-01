@@ -9,7 +9,7 @@ import Prism from 'prismjs';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import electron, { openLink } from 'mainCommunication';
-import { DocResult } from 'search/docs';
+import { DocResult } from 'Search/docs';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
 
 const SearchInputWrapper = styled.div`
