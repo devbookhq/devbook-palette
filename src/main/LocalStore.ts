@@ -1,4 +1,6 @@
 import ElectronStore from 'electron-store';
+import { v4 as uuidv4 } from 'uuid';
+
 import { SearchMode } from '../Preferences/Pages/searchMode';
 
 // Initialize IPC communication so the electron-store works in renderers
@@ -15,8 +17,9 @@ enum StoreKey {
   LastQuery = 'lastQuery',
   SearchFilter = 'searchFilter',
   DocSearchResultsDefaultWidth = 'docSearchResultsDefaultWidth',
-  MainWinSize= 'mainWinSize',
-  MainWinPosition= 'mainWinPosition',
+  MainWinSize = 'mainWinSize',
+  MainWinPosition = 'mainWinPosition',
+  UserID = 'userID',
 }
 
 type StoreValue = {
@@ -32,9 +35,10 @@ type StoreValue = {
   [StoreKey.DocSearchResultsDefaultWidth]: number,
   [StoreKey.MainWinSize]: [number, number],
   [StoreKey.MainWinPosition]: [number, number],
+  [StoreKey.UserID]: string,
 }
 
-type StoreRecord = { 
+type StoreRecord = {
   [key in StoreKey]: StoreValue[key]
 }
 
@@ -88,6 +92,10 @@ export default class LocalStore {
         type: ['integer'],
         default: [undefined, undefined]
       },
+      userID: {
+        type: 'string',
+        default: uuidv4(),
+      },
     },
   });
 
@@ -139,6 +147,10 @@ export default class LocalStore {
     return this.electronStore.get(StoreKey.MainWinPosition);
   }
 
+  static get userID() {
+    return this.electronStore.get(StoreKey.UserID);
+  }
+
   static set openAtLogin(value: StoreValue[StoreKey.OpenAtLogin]) {
     this.electronStore.set(StoreKey.OpenAtLogin, value);
   }
@@ -185,5 +197,9 @@ export default class LocalStore {
 
   static set mainWinPosition(value: StoreValue[StoreKey.MainWinPosition]) {
     this.electronStore.set(StoreKey.MainWinPosition, value);
+  }
+
+  static set userID(value: StoreValue[StoreKey.UserID]) {
+    this.electronStore.set(StoreKey.UserID, value);
   }
 }
