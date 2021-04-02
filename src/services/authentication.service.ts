@@ -2,31 +2,49 @@ import { Magic } from 'magic-sdk';
 import axios from 'axios';
 
 import timeout from 'utils/timeout';
-import {
-  querystring,
-  openLink,
-  isDev,
-} from '../electronRemote';
-import randomKey from '../utils/randomKey';
-import { User } from '../user/user';
+import ElectronService from './electron.service';
+import { APIVersion } from 'services/api.service';
+import { User } from 'user/user';
 
-enum APIVersion {
-  v1 = 'v1',
-}
+// Handle unreachable server by waiting a trying the request again.
+// axios.interceptors.response.use((value) => {
+//   setIsReconnecting(false);
+//   return Promise.resolve(value);
+// }, (error) => {
+//   if (error.response) {
+//     setIsReconnecting(false);
+//     return Promise.reject(error);
+//   }
+
+//   if (error.request) {
+//     setIsReconnecting(true);
+//     return timeout(1000).then(() => axios.request(error.config));
+//   }
+//   return Promise.reject(error);
+// });
+
+
 
 const CredentialPingPeriod = 100; // In ms. We ping server every N ms.
 
-class AuthenticationLayer {
-  private static readonly baseURL = isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
+class AuthenticationService {
+  private constructor() { }
+  private static readonly baseURL = ElectronService.isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
   private static readonly apiVersion = APIVersion.v1;
-  private static readonly baseURLWithVersion = `${AuthenticationLayer.baseURL}/${AuthenticationLayer.apiVersion}`;
-  private static readonly magicAPIKey = isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
+  private static readonly baseURLWithVersion = `${AuthenticationService.baseURL}/${AuthenticationService.apiVersion}`;
+  private static readonly magicAPIKey = ElectronService.isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
 
-  private readonly magic = new Magic(AuthenticationLayer.magicAPIKey);
-  private signInCancelHandle: (() => void) | undefined = undefined;
+  private static readonly magic = new Magic(AuthenticationService.magicAPIKey);
+  private static signInCancelHandle: (() => void) | undefined = undefined;
 
-  async signIn(email: string): Promise<{ user: User, refreshToken: string, accessToken: string }> {
-    this.cancelSignIn();
+  private static randomKey(byteSize: number = 64) {
+    return ElectronService.crypto
+      .randomBytes(byteSize)
+      .toString('base64');
+  }
+
+  static async signIn(email: string): Promise<{ user: User, refreshToken: string, accessToken: string }> {
+    AuthenticationService.cancelSignIn();
 
     let rejectHandle: (reason?: any) => void;
     let isCancelled = false;
@@ -34,14 +52,14 @@ class AuthenticationLayer {
     const cancelableSignIn = new Promise<{ user: User, refreshToken: string, accessToken: string }>(async (resolve, reject) => {
       rejectHandle = reject;
 
-      const sessionID = encodeURIComponent(randomKey());
-      const params = querystring.encode({
+      const sessionID = encodeURIComponent(this.randomKey());
+      const params = ElectronService.querystring.encode({
         email,
-        ...isDev && { test: 'true' },
+        ...ElectronService.isDev && { test: 'true' },
       });
 
       // This route should NOT be "/auth/signIn" - "/auth/signin" is correct because it uses the old API.
-      await openLink(`${AuthenticationLayer.baseURL}/auth/signin/${sessionID}?${params}`);
+      await ElectronService.openLink(`${AuthenticationService.baseURL}/auth/signin/${sessionID}?${params}`);
 
       let credential: string | undefined = undefined;
       const requestLimit = 15 * 60;
@@ -52,7 +70,7 @@ class AuthenticationLayer {
 
         try {
           const result = await axios.get(`/auth/credential/${sessionID}`, {
-            baseURL: AuthenticationLayer.baseURLWithVersion,
+            baseURL: AuthenticationService.baseURLWithVersion,
             params: {
               email,
             },
@@ -72,7 +90,7 @@ class AuthenticationLayer {
       if (isCancelled) {
         try {
           await axios.delete(`/auth/credential/${sessionID}`, {
-            baseURL: AuthenticationLayer.baseURLWithVersion,
+            baseURL: AuthenticationService.baseURLWithVersion,
           });
           return reject({ message: 'Sign in was cancelled.' });
         } catch (error) {
@@ -91,7 +109,7 @@ class AuthenticationLayer {
         }
 
         const { data } = await axios.post('/auth/signIn', null, {
-          baseURL: AuthenticationLayer.baseURLWithVersion,
+          baseURL: AuthenticationService.baseURLWithVersion,
           withCredentials: true,
           headers: {
             'Authorization': `Bearer ${didToken}`,
@@ -103,7 +121,7 @@ class AuthenticationLayer {
       }
     });
 
-    this.signInCancelHandle = () => {
+    AuthenticationService.signInCancelHandle = () => {
       rejectHandle({ message: 'Sign in was cancelled.' });
       isCancelled = true;
     };
@@ -111,7 +129,7 @@ class AuthenticationLayer {
     return cancelableSignIn;
   }
 
-  async signOut(refreshToken?: string) {
+  static async signOut(refreshToken?: string) {
     try {
       await this.magic.user.logout();
     } catch (error) {
@@ -120,7 +138,7 @@ class AuthenticationLayer {
 
     try {
       await axios.post('/auth/signOut', null, {
-        baseURL: AuthenticationLayer.baseURLWithVersion,
+        baseURL: AuthenticationService.baseURLWithVersion,
         params: {
           refreshToken,
         },
@@ -131,14 +149,14 @@ class AuthenticationLayer {
     }
   }
 
-  async cancelSignIn() {
+  static async cancelSignIn() {
     this.signInCancelHandle?.();
   }
 
-  async refreshAccessToken(oldRefreshToken: string): Promise<{ user: User, refreshToken: string, accessToken: string }> {
+  static async refreshAccessToken(oldRefreshToken: string): Promise<{ user: User, refreshToken: string, accessToken: string }> {
     try {
       const { data } = await axios.get('/auth/accessToken', {
-        baseURL: AuthenticationLayer.baseURLWithVersion,
+        baseURL: AuthenticationService.baseURLWithVersion,
         params: {
           refreshToken: oldRefreshToken,
         },
@@ -149,11 +167,11 @@ class AuthenticationLayer {
     }
   }
 
-  async restoreUserSession(): Promise<{ user: User, refreshToken: string, accessToken: string }> {
+  static async restoreUserSession(): Promise<{ user: User, refreshToken: string, accessToken: string }> {
     if (await this.magic.user.isLoggedIn()) {
       const didToken = await this.magic.user.getIdToken();
       const { data } = await axios.post('/auth/signIn', null, {
-        baseURL: AuthenticationLayer.baseURLWithVersion,
+        baseURL: AuthenticationService.baseURLWithVersion,
         withCredentials: true,
         headers: {
           'Authorization': `Bearer ${didToken}`,
@@ -165,4 +183,4 @@ class AuthenticationLayer {
   }
 }
 
-export default AuthenticationLayer;
+export default AuthenticationService;
