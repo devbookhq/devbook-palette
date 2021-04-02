@@ -16,8 +16,6 @@ export function useSearchStore() {
 
 export default class SearchStore {
   autosaveHandler: IReactionDisposer;
-  searchService = new SearchService();
-  syncService = new SyncService();
 
   query: string = '';
   results: any[] = []; // TODO: Type
