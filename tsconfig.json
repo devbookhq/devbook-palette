@@ -12,7 +12,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "module": "ES2020",
+    "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "downlevelIteration": true,
@@ -26,7 +26,7 @@
     "inlineSources": true
   },
   "include": [
-    "src",
+    "src"
   ],
   "exclude": [
     "src/main"
