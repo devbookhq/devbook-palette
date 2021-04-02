@@ -122,7 +122,7 @@ function setRefreshToken(refreshToken: string) {
 }
 
 function getRefreshToken(): string {
-  return electronStore.get(refreshTokenStoreName);
+  return electronStore.get(refreshTokenStoreName) as string;
 }
 
 function deleteRefreshToken() {
