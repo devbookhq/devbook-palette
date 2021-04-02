@@ -31,7 +31,7 @@
   },
   "scripts": {
     "start:client": "craco start",
-    "start:electron": "npm run bundle:electron && electron --enable-loggin .",
+    "start:electron": "npm run bundle:electron && electron --enable-logging .",
     "start": "concurrently \"npm run start:client\" \"./scripts/watch-electron.sh\" \"wait-on http://localhost:3000 && npm run start:electron\"",
     "bundle:client": "./scripts/bundle-client.sh",
     "bundle:electron": "./scripts/bundle-electron.sh",
