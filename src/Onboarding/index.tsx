@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import {
-  userDidChangeShortcut,
-  finishOnboarding,
-} from 'mainCommunication';
+import IPCService, { SendIPC } from 'services/ipc.service'
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
 import IntroductionPage from './pages/Introduction';
@@ -72,15 +69,15 @@ function Onboarding() {
     // We should unify who handles the full state. Probably this component.
 
     // Tell the main proces to register the default shortcut before user chooses any shortcut.
-    userDidChangeShortcut('Alt+Space');
+    IPCService.send(SendIPC.UserDidChangeShortcut, 'Alt+Space');
   }, []);
 
   function handleDidChangeShortcut(shortcut: string) {
-    userDidChangeShortcut(shortcut);
+    IPCService.send(SendIPC.UserDidChangeShortcut, shortcut);
   }
 
   function handleFinishButtonClick() {
-    finishOnboarding();
+    IPCService.send(SendIPC.FinishOnboarding, undefined);
   }
 
   return (
