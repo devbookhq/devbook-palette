@@ -4,4 +4,3 @@ enum AppWindow {
 }
 
 export default AppWindow;
-

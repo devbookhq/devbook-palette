@@ -38,4 +38,7 @@ export enum IPCMessage {
   OnSearchModeChange = 'OnSearchModeChange',
 
   ReloadMainWindow = 'ReloadMainWindow',
+
+  UserDidChangeShortcut = 'UserDidChangeShortcut',
+  FinishOnboarding = 'FinishOnboarding',
 }

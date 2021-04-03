@@ -44,9 +44,23 @@ import ElectronService from './electron.service';
 //   ReloadMainWindow = 'ReloadMainWindow',
 // }
 
+
+// export function userDidChangeShortcut(shortcut: string) {
+//   IPCService.send('user-did-change-shortcut', { shortcut });
+// }
+
+// export function finishOnboarding() {
+//   IPCService.send('finish-onboarding');
+// }
+
 export enum SendIPC {
   ChangeUserInMain = 'ChangeUserInMain',
   SetAuthInOtherWindows = 'SetAuthInOtherWindows',
+  TrackPerformBundleUpdate = 'TrackPerformBundleUpdate',
+  TrackDismissBundleUpdate = 'TrackDismissBundleUpdate',
+  ReloadMainWindow = 'ReloadMainWindow',
+  UserDidChangeShortcut = 'UserDidChangeShortcut',
+  FinishOnboarding = 'FinishOnboarding',
 }
 
 export enum OnIPC {
@@ -62,6 +76,12 @@ type IPCArgsTypings = {
 
   [SendIPC.ChangeUserInMain]: User | undefined;
   [SendIPC.SetAuthInOtherWindows]: AuthInfo;
+  [SendIPC.TrackDismissBundleUpdate]: undefined;
+  [SendIPC.TrackPerformBundleUpdate]: undefined;
+  [SendIPC.ReloadMainWindow]: undefined;
+  [SendIPC.UserDidChangeShortcut]: string;
+  [SendIPC.FinishOnboarding]: undefined;
+
   [OnIPC.GetAuthFromMainWindow]: () => void;
 }
 

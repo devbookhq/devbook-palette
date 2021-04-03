@@ -4,9 +4,8 @@ import {
   reaction,
 } from 'mobx';
 import RootStore, { useRootStore } from 'App/RootStore';
-import SearchService from 'services/search.service';
+import SearchService, { SearchSource, SearchResultMap, SearchFilterTypings, SearchResultTypings } from 'services/search.service';
 import SyncService from 'services/sync.service';
-import { SearchSource } from 'Search';
 import { SearchMode } from 'Preferences/Pages/searchMode';
 
 export function useSearchStore() {
@@ -14,16 +13,25 @@ export function useSearchStore() {
   return searchStore;
 }
 
+type SourceFilters = {
+  [source in SearchSource]?: {
+    availableFilters: SearchFilterTypings[source][];
+    selectedFilter?: SearchFilterTypings[source];
+  };
+}
+
+type SourceResults = {
+  [source in SearchSource]?: SearchResultTypings[source][];
+}
+
 export default class SearchStore {
   autosaveHandler: IReactionDisposer;
 
   query: string = '';
-  results: any[] = []; // TODO: Type
-  searchMode: any; // TODO: Type
-  history: string[] = []; // TODO: Type
-
-  activeSearchSource = SearchSource.Stack;
-  activeSearchMode = SearchMode.OnEnterPress;
+  searchMode: SearchMode = SearchMode.OnEnterPress;
+  readonly history: string[] = [];
+  readonly results: SourceResults = {};
+  readonly filters: SourceFilters = {};
 
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this);
@@ -47,6 +55,27 @@ export default class SearchStore {
       searchMode: this.searchMode,
       history: this.history,
     };
+  }
+
+  private async refreshSearchFilters() {
+    return Promise.all((Object.keys(SearchSource) as SearchSource[]).map(async (source) => {
+      // TypeScript cannot dynamically derive generic types, so we are using `any` here.
+      const availableFilters = await SearchService.listFilters(source) as any;
+      const selectedFilter = this.filters[source]?.selectedFilter || availableFilters[0];
+
+      this.filters[source] = {
+        availableFilters,
+        selectedFilter,
+      };
+    }));
+  }
+
+  async executeSearch() {
+    this.history.push(this.query);
+    return Promise.all((Object.keys(SearchSource) as SearchSource[]).map(async (source) => {
+      // TypeScript cannot dynamically derive generic types, so we are using `any` here.
+      this.results[source] = await SearchService.search(source, { query: this.query }) as any;
+    }));
   }
 
   private sync() {

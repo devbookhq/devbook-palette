@@ -32,7 +32,6 @@ class RootStore {
   readonly uiStore = new UIStore();
   readonly userStore = new UserStore(this);
 
-
   static get instance() {
     return RootStore._instance || (RootStore._instance = new RootStore())
   }

@@ -2,25 +2,22 @@ import {
   useParams,
 } from 'react-router-dom';
 
+import { SearchSource } from 'services/search.service'
 import StackOverflowSearch from './StackOverflowSearch';
 import DocsSearch from './DocsSearch';
 
-export enum SearchSource {
-  Stack = 'Stack',
-  Docs = 'Docs',
-}
 
 function Search() {
   const { searchSource } = useParams<{ searchSource: SearchSource }>();
 
   return (
     <>
-      {searchSource === SearchSource.Stack &&
-        <StackOverflowSearch/>
+      {searchSource === SearchSource.StackOverflow &&
+        <StackOverflowSearch />
       }
 
       {searchSource === SearchSource.Docs &&
-        <DocsSearch/>
+        <DocsSearch />
       }
     </>
   );

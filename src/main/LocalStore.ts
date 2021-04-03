@@ -55,10 +55,17 @@ export default class LocalStore {
       },
       email: {
         type: 'string',
+        default: undefined,
       },
       activeDocSource: {
-        type: 'string',
-        default: undefined,
+        type: ['object', 'null'],
+        properties: {
+          slug: { type: 'string' },
+          name: { type: 'string' },
+          version: { type: 'string' },
+          iconURL: { type: 'string' },
+        },
+        default: null,
       },
       globalShortcut: {
         type: 'string',
@@ -85,12 +92,24 @@ export default class LocalStore {
         default: 200,
       },
       mainWinSize: {
-        type: ['integer'],
-        default: [900, 500]
+        type: ['array'],
+        items: {
+          anyOf: [
+            { type: 'integer' },
+            { type: 'null' },
+          ],
+        },
+        default: [900, 500],
       },
       mainWinPosition: {
-        type: ['integer'],
-        default: [undefined, undefined]
+        type: ['array'],
+        items: {
+          anyOf: [
+            { type: 'integer' },
+            { type: 'null' },
+          ],
+        },
+        default: [null, null],
       },
       userID: {
         type: 'string',

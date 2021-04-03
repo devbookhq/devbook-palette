@@ -7,16 +7,16 @@ import timeout from '../utils/timeout';
 
 // Handle unreachable server by waiting a trying the request again.
 axios.interceptors.response.use((value) => {
-  ReconnectionService.signalConnected();
+  ReconnectionService.reportConnection();
   return Promise.resolve(value);
 }, async (error) => {
   if (error.response) {
-    ReconnectionService.signalConnected();
+    ReconnectionService.reportConnection();
     return Promise.reject(error);
   }
 
   if (error.request) {
-    ReconnectionService.signalDisconnected();
+    ReconnectionService.reportDisconnection();
     await timeout(1000);
     return await axios.request(error.config);
   }
@@ -30,19 +30,19 @@ class ReconnectionService {
     return ReconnectionService._isConnected;
   }
 
-  static signalDisconnected() {
+  static reportDisconnection() {
     this._isConnected = false;
   }
 
-  static signalConnected() {
+  static reportConnection() {
     this._isConnected = true;
   }
 }
 
 makeAutoObservable(ReconnectionService, {
   isConnected: false,
-  signalConnected: false,
-  signalDisconnected: false,
+  reportConnection: false,
+  reportDisconnection: false,
 });
 
 export default ReconnectionService;

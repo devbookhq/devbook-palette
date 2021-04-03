@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as process from 'process';
 import * as electron from 'electron';
-import Store from 'electron-store';
 import {
   app,
   ipcMain,
@@ -369,7 +368,7 @@ ipcMain.on('load-app-client', (_, { window }: { window: AppWindow }) => {
 
 ipcMain.on('hide-window', () => hideMainWindow());
 
-ipcMain.on('user-did-change-shortcut', (_, { shortcut }) => {
+ipcMain.on(IPCMessage.UserDidChangeShortcut, (_, { shortcut }) => {
   trySetGlobalShortcut(shortcut);
 });
 
@@ -378,7 +377,7 @@ ipcMain.on(IPCMessage.UserDidChangeSearchMode, (_, { mode }) => {
   trackSearchModeChanged({ mode }, mainWindow?.window);
 });
 
-ipcMain.on('finish-onboarding', () => {
+ipcMain.on(IPCMessage.FinishOnboarding, () => {
   // TODO: This should be onboardingWindow?.close() but it produces a runtime error when toggling
   // a visibility on the main window.
   onboardingWindow?.hide();

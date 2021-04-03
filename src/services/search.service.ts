@@ -7,8 +7,8 @@ export enum SearchSource {
   Docs = 'docs',
 }
 
-type SearchFilterTypings = {
-  [SearchSource.Docs]: string[];
+export type SearchFilterTypings = {
+  [SearchSource.Docs]: DocSource;
   [SearchSource.StackOverflow]: never;
 }
 
@@ -22,20 +22,20 @@ interface Page {
   pageURL: string;
 }
 
-export interface DocResult {
+interface DocResult {
   score: number;
   id: string;
   page: Page;
 }
 
-export interface DocSource {
+interface DocSource {
   slug: string;
   name: string;
   version: APIVersion;
   iconURL: string;
 }
 
-export interface StackOverflowQuestion {
+interface StackOverflowQuestion {
   link: string;
   title: string;
   html: string;
@@ -43,21 +43,21 @@ export interface StackOverflowQuestion {
   votes: number;
 }
 
-export interface StackOverflowAnswer {
+interface StackOverflowAnswer {
   html: string;
   votes: number;
   isAccepted: boolean;
   timestamp: number;
 }
 
-export interface StackOverflowResult {
+interface StackOverflowResult {
   question: StackOverflowQuestion;
   answers: StackOverflowAnswer[];
 }
 
-type SearchResultTypings = {
-  [SearchSource.Docs]: DocResult[];
-  [SearchSource.StackOverflow]: StackOverflowResult[];
+export type SearchResultTypings = {
+  [SearchSource.Docs]: DocResult;
+  [SearchSource.StackOverflow]: StackOverflowResult;
 };
 
 type SearchOptionsTypings = {
@@ -73,7 +73,7 @@ type SearchOptionsMap = {
   [source in SearchSource]: SearchOptionsTypings[source] & { version?: APIVersion, query: string };
 }
 
-type SearchResultMap = {
+export type SearchResultMap = {
   [source in SearchSource]: SearchResultTypings[source];
 }
 
@@ -83,7 +83,7 @@ class SearchService {
   private static readonly apiVersion = APIVersion.v1;
   private static readonly baseURLWithVersion = `${SearchService.baseURL}/${SearchService.apiVersion}`;
 
-  static async listFilters<T extends SearchSource>(source: T): Promise<SearchFilterMap[T]> {
+  static async listFilters<T extends SearchSource>(source: T): Promise<SearchFilterMap[T][]> {
     switch (source) {
       case SearchSource.Docs:
         return (await axios.get('/search/docs',
@@ -95,7 +95,7 @@ class SearchService {
     }
   }
 
-  static async search<T extends SearchSource>(source: T, options: SearchOptionsMap[T]): Promise<SearchResultMap[T]> {
+  static async search<T extends SearchSource>(source: T, options: SearchOptionsMap[T]): Promise<SearchResultMap[T][]> {
     const { query, version } = options;
 
     const baseURL = version
@@ -115,8 +115,10 @@ class SearchService {
           { query, filter },
           { baseURL },
         )).data.results;
+
+      default:
+        throw new Error(`Invalid search source ${source}.`);
     }
-    throw new Error(`Invalid search source ${source}.`);
   }
 }
 

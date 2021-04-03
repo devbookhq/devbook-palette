@@ -7,16 +7,13 @@ import {
   Redirect,
 } from 'react-router-dom';
 
-import electron, {
-  reloadMainWindow,
-  trackDismissBundleUpdate,
-  trackPerformBundleUpdate,
-} from 'mainCommunication';
+import ElectronService from 'services/electron.service';
 import Onboarding from 'Onboarding';
 import Preferences from 'Preferences';
-import Home from 'Home';
 import useLatestBundle from 'hooks/useLatestBundle';
-import { SearchSource } from 'Search';
+import Search from 'Search';
+import { SearchSource } from 'services/search.service';
+import IPCService, { SendIPC } from 'services/ipc.service';
 
 // The electron window is set to be frameless.
 // Frameless window stops being draggable - this is the solution.
@@ -91,7 +88,8 @@ const ReloadButton = styled(NotifButton)`
 
 function App() {
   const bundleCheckInterval = 1000 * 60 * 60 * 1 // 1 hour.
-  const appVersion = electron.remote.app.getVersion();
+  const appVersion = ElectronService.appVersion;
+  console.log('AppVersion', appVersion);
   const clientBundle = document.getElementById('bundle')?.textContent;
 
   const [dismissTime, setDismissTime] = useState(0) // When user presses 'dismiss' we shouldn't display notif for some time.
@@ -105,12 +103,12 @@ function App() {
   }
 
   function handleReloadClick() {
-    trackPerformBundleUpdate();
-    reloadMainWindow();
+    IPCService.send(SendIPC.TrackPerformBundleUpdate, undefined);
+    IPCService.send(SendIPC.ReloadMainWindow, undefined);
   }
 
   function handleDismissClick() {
-    trackDismissBundleUpdate();
+    IPCService.send(SendIPC.TrackDismissBundleUpdate, undefined);
     setDismissTime(1000 * 60 * 60 * 4); // 4 hours.
     setIsNewBundleAvailable(false);
   }
@@ -142,7 +140,7 @@ function App() {
           New update available (v{appVersion}-{availableBundle})
           <NotifButtons>
             <DismissButton onClick={handleDismissClick}>
-             Dismiss
+              Dismiss
             </DismissButton>
             <ReloadButton onClick={handleReloadClick}>
               Reload
@@ -171,13 +169,13 @@ function App() {
               path="/"
               exact
             >
-              <Redirect to={{ pathname: `/home/search/${SearchSource.Stack}` }} />
+              <Redirect to={{ pathname: `/home/search/${SearchSource.StackOverflow}` }} />
             </Route>
 
             <Route
               path="/home/search"
             >
-              <Home />
+              <Search />
             </Route>
           </Switch>
         </Router>

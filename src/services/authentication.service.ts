@@ -1,29 +1,11 @@
 import { Magic } from 'magic-sdk';
 import axios from 'axios';
+import { v4 as uuidv4 } from 'uuid';
 
 import timeout from 'utils/timeout';
 import ElectronService from './electron.service';
 import { APIVersion } from 'services/api.service';
 import { User } from 'user/user';
-
-// Handle unreachable server by waiting a trying the request again.
-// axios.interceptors.response.use((value) => {
-//   setIsReconnecting(false);
-//   return Promise.resolve(value);
-// }, (error) => {
-//   if (error.response) {
-//     setIsReconnecting(false);
-//     return Promise.reject(error);
-//   }
-
-//   if (error.request) {
-//     setIsReconnecting(true);
-//     return timeout(1000).then(() => axios.request(error.config));
-//   }
-//   return Promise.reject(error);
-// });
-
-
 
 const CredentialPingPeriod = 100; // In ms. We ping server every N ms.
 
@@ -37,10 +19,8 @@ class AuthenticationService {
   private static readonly magic = new Magic(AuthenticationService.magicAPIKey);
   private static signInCancelHandle: (() => void) | undefined = undefined;
 
-  private static randomKey(byteSize: number = 64) {
-    return ElectronService.crypto
-      .randomBytes(byteSize)
-      .toString('base64');
+  private static randomKey() {
+    const key = uuidv4();
   }
 
   static async signIn(email: string): Promise<{ user: User, refreshToken: string, accessToken: string }> {
@@ -52,11 +32,12 @@ class AuthenticationService {
     const cancelableSignIn = new Promise<{ user: User, refreshToken: string, accessToken: string }>(async (resolve, reject) => {
       rejectHandle = reject;
 
-      const sessionID = encodeURIComponent(this.randomKey());
-      const params = ElectronService.querystring.encode({
+      const sessionID = encodeURIComponent(uuidv4());
+
+      const params = new URLSearchParams({
         email,
         ...ElectronService.isDev && { test: 'true' },
-      });
+      }).toString();
 
       // This route should NOT be "/auth/signIn" - "/auth/signin" is correct because it uses the old API.
       await ElectronService.openLink(`${AuthenticationService.baseURL}/auth/signin/${sessionID}?${params}`);
