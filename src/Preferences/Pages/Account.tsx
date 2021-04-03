@@ -1,18 +1,9 @@
-import React, { useContext } from 'react';
 import styled from 'styled-components';
+import { useUserStore } from 'user/user.store';
+import { AuthState } from 'user/authState';
 
-import {
-  AuthState,
-  AuthContext,
-} from 'Auth';
-import {
-  openSignInModal,
-  signOutUser,
-  trackSignOutButtonClicked,
-} from 'mainCommunication';
 import Button from 'components/Button';
 import Loader from 'components/Loader';
-
 import Base from './Base';
 
 const Container = styled.div`
@@ -74,60 +65,50 @@ const StyledLoader = styled(Loader)`
 const SignInButton = styled(Button)``;
 
 function Account() {
-  const authInfo = useContext(AuthContext);
-
-  const isLoading =
-    authInfo.state === AuthState.LookingForStoredUser ||
-    authInfo.state === AuthState.SigningOutUser ||
-    authInfo.state === AuthState.SigningInUser;
-
-  function handleSignOutButtonClicked() {
-    signOutUser();
-    trackSignOutButtonClicked();
-  }
+  const userStore = useUserStore();
 
   return (
     <Base title="Account">
       <Container>
 
-        {authInfo.isReconnecting
+        {userStore.isReconnecting
           &&
           <InfoWrapper>
             <InfoMessage>Contacting Devbook servers failed.</InfoMessage>
             <InfoMessage>Reconnecting...</InfoMessage>
           </InfoWrapper>
         }
-        
-        {isLoading
-          && !authInfo.isReconnecting
+
+        {userStore.isLoading
+          && !userStore.isReconnecting
           &&
           < StyledLoader />
         }
 
-        {!isLoading
-          && authInfo.state === AuthState.UserAndMetadataLoaded
-          && !authInfo.isReconnecting
+        {!userStore.isLoading
+          && userStore.auth.state === AuthState.UserSignedIn
+          && !userStore.isReconnecting
           &&
           <>
             <Email>
-              {authInfo.user.email}
+              {userStore.auth.user?.email}
             </Email>
-            <SignOutButton onClick={handleSignOutButtonClicked}>
+            <SignOutButton onClick={() => { throw new Error('Not implemented') }}>
               Sign Out
             </SignOutButton>
           </>
         }
 
-        {!isLoading
-          && authInfo.state === AuthState.NoUser
-          && !authInfo.isReconnecting
+        {!userStore.isLoading
+          && userStore.auth.state === AuthState.NoUser
+          && !userStore.isReconnecting
           &&
           <SignInWrapper>
             <SignInText>
               You are not signed in
             </SignInText>
 
-            <SignInButton onClick={openSignInModal}>
+            <SignInButton onClick={() => { throw new Error('Not implemented') }}>
               Sign in to Devbook
             </SignInButton>
           </SignInWrapper>
