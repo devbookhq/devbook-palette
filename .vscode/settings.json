@@ -1,0 +1,32 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "build/**": true,
+    "node_modules/**": true,
+    "react-dev-tools-4.9.0_26/**": true,
+  },
+  "search.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "build/**": true,
+    "node_modules/**": true,
+    "react-dev-tools-4.9.0_26/**": true,
+  },
+  "files.watcherExclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "build/**": true,
+    "node_modules/**": true,
+    "react-dev-tools-4.9.0_26/**": true,
+  },
+}
