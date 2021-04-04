@@ -9,6 +9,7 @@
     "removeComments": true,
     "strict": true,
     "allowJs": true,
+    "skipLibCheck": true,
     "outDir": "../../build/electron",
     "rootDir": "../",
     "noEmitOnError": true,

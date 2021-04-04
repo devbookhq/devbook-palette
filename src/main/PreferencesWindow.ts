@@ -1,15 +1,12 @@
 import * as electron from 'electron';
 import * as path from 'path';
 import * as process from 'process';
+import { app } from 'electron';
 
 import isDev from './utils/isDev';
-import { IPCMessage } from '../mainCommunication/ipc';
-const { version } = require('../../../package.json');
-
-export enum PreferencesPage {
-  General = 'general',
-  Account = 'account',
-}
+import MainIPCService from './services/mainIPC.service';
+import { IPCOnChannel } from '../services/ipc.service/onChannel';
+import { PreferencesPage } from '../Preferences/preferencesPage';
 
 class PreferencesWindow {
   public window: electron.BrowserWindow | undefined;
@@ -67,7 +64,7 @@ class PreferencesWindow {
       this.window.webContents.openDevTools();
     } else {
       this.window.webContents.loadURL(
-        `https://client.usedevbook.com/${version}#/preferences` + (page ? `/${page}` : ''),
+        `https://client.usedevbook.com/${app.getVersion()}#/preferences` + (page ? `/${page}` : ''),
         { extraHeaders: 'pragma: no-cache\n' },
       );
     }
@@ -88,7 +85,7 @@ class PreferencesWindow {
   public show(page?: PreferencesPage) {
     this.window?.show();
     if (page) {
-      this.window?.webContents?.send(IPCMessage.GoToPreferencesPage, { page });
+      MainIPCService.send(IPCOnChannel.GoToPreferencesPage, this.window, { page });
     }
   }
 }

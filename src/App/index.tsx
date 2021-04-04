@@ -13,7 +13,8 @@ import Preferences from 'Preferences';
 import useLatestBundle from 'hooks/useLatestBundle';
 import Search from 'Search';
 import { SearchSource } from 'services/search.service';
-import IPCService, { SendIPC } from 'services/ipc.service';
+import IPCService, { IPCSendChannel } from 'services/ipc.service';
+import AnalyticsService, { AnalyticsEvent } from 'services/analytics.service';
 
 // The electron window is set to be frameless.
 // Frameless window stops being draggable - this is the solution.
@@ -103,12 +104,12 @@ function App() {
   }
 
   function handleReloadClick() {
-    IPCService.send(SendIPC.TrackPerformBundleUpdate, undefined);
-    IPCService.send(SendIPC.ReloadMainWindow, undefined);
+    AnalyticsService.track(AnalyticsEvent.PerformBundleUpdate, undefined);
+    IPCService.send(IPCSendChannel.ReloadMainWindow, undefined);
   }
 
   function handleDismissClick() {
-    IPCService.send(SendIPC.TrackDismissBundleUpdate, undefined);
+    AnalyticsService.track(AnalyticsEvent.DismissBundleUpdate, undefined);
     setDismissTime(1000 * 60 * 60 * 4); // 4 hours.
     setIsNewBundleAvailable(false);
   }

@@ -11,19 +11,17 @@ import {
 } from 'react-router-dom';
 import { NavLink } from 'react-router-dom';
 
-import { IPCMessage } from 'mainCommunication/ipc';
-import electron, {
-  getUpdateStatus,
-  restartAndUpdate,
-  getAuthFromMainWindow,
-} from 'mainCommunication';
 import Button from 'components/Button';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 
 import GeneralPreferences from './Pages/GeneralPreferences';
 import Account from './Pages/Account';
+import { PreferencesPage } from './preferencesPage';
 
 import logo from 'img/logo.png';
+import IPCService, { IPCInvokeChannel, IPCOnChannel, IPCSendChannel } from 'services/ipc.service';
+import { UpdateLocation } from 'services/appWindow';
+import ElectronService from 'services/electron.service';
 
 const Container = styled.div`
   width: 100%;
@@ -108,18 +106,13 @@ const UpdateButton = styled(Button)`
   margin: 0px 15px 10px;
 `;
 
-export enum PreferencesPage {
-  General = 'general',
-  Account = 'account',
-}
-
 function Preferences() {
   const history = useHistory();
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
 
   useEffect(() => {
     async function checkUpdateStatus() {
-      const isNewUpdateAvailable = await getUpdateStatus();
+      const isNewUpdateAvailable = await IPCService.invoke(IPCInvokeChannel.UpdateStatus, undefined);
       if (isNewUpdateAvailable) {
         setIsUpdateAvailable(true);
       }
@@ -128,19 +121,19 @@ function Preferences() {
   }, []);
 
   useEffect(() => {
-    getAuthFromMainWindow();
+    IPCService.send(IPCSendChannel.GetAuthFromMainWindow, undefined);
   }, []);
 
-  useIPCRenderer('update-available', () => {
+  useIPCRenderer(IPCOnChannel.UpdateAvailable, () => {
     setIsUpdateAvailable(true);
   });
 
-  useIPCRenderer(IPCMessage.GoToPreferencesPage, (_, { page }: { page: PreferencesPage }) => {
+  useIPCRenderer(IPCOnChannel.GoToPreferencesPage, (_, { page }: { page: PreferencesPage }) => {
     history.push(`/preferences/${page}`);
   });
 
   function handleUpdate() {
-    restartAndUpdate('preferences');
+    IPCService.send(IPCSendChannel.RestartAndUpdate, { location: UpdateLocation.Preferences });
   }
 
   return (
@@ -180,7 +173,7 @@ function Preferences() {
               {'Restart & Update'}
             </UpdateButton>
           }
-          <Version>v{electron.remote.app.getVersion()}</Version>
+          <Version>v{ElectronService.appVersion}</Version>
         </UpdateWrapper>
       </Sidebar>
 

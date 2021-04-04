@@ -3,10 +3,12 @@ import * as process from 'process';
 import * as path from 'path';
 import { debounce } from 'debounce';
 
-import AppWindow from './AppWindow';
+import { AppWindow } from '../services/AppWindow';
 import isDev from './utils/isDev';
-import { IPCMessage } from '../mainCommunication/ipc';
-import LocalStore from './LocalStore';
+import MainSyncService, { StorageKey } from './services/mainSync.service';
+import MainAnalyticsService, { AnalyticsEvent } from './services/mainAnalytics.service';
+import MainIPCService from './services/mainIPC.service';
+import { IPCOnChannel } from '../services/ipc.service/onChannel';
 
 class MainWindow {
   public window: electron.BrowserWindow | undefined;
@@ -41,15 +43,9 @@ class MainWindow {
     return this.window?.webContents;
   }
 
-  public constructor(
-    PORT: number,
-    hideWindow: (window?: electron.BrowserWindow) => void,
-    private trackShowApp: (window?: electron.BrowserWindow) => void,
-    private identifyUser: (window?: electron.BrowserWindow) => void,
-    startHidden?: boolean) {
-
-    const [mainWinWidth, mainWinHeight] = LocalStore.mainWinSize;
-    const [mainWinPosX, mainWinPosY] = LocalStore.mainWinPosition;
+  public constructor(hideWindow: (window?: electron.BrowserWindow) => void, startHidden?: boolean) {
+    const [mainWinWidth, mainWinHeight] = MainSyncService.get(StorageKey.MainWinSize);
+    const [mainWinPosX, mainWinPosY] = MainSyncService.get(StorageKey.MainWinPosition);
 
     this.window = new electron.BrowserWindow({
       x: mainWinPosX,
@@ -88,7 +84,7 @@ class MainWindow {
     this.window.on('moved', () => {
       if (this.window) {
         const [x, y] = this.window.getPosition();
-        LocalStore.mainWinPosition = [x, y];
+        MainSyncService.set(StorageKey.MainWinPosition, [x, y]);
       }
     });
 
@@ -96,10 +92,10 @@ class MainWindow {
       if (!this.window) return;
 
       const [width, height] = this.window.getSize();
-      LocalStore.mainWinSize = [width, height];
+      MainSyncService.set(StorageKey.MainWinSize, [width, height]);
 
       const [x, y] = this.window.getPosition();
-      LocalStore.mainWinPosition = [x, y];
+      MainSyncService.set(StorageKey.MainWinPosition, [x, y]);
     });
 
     this.window.on('blur', () => {
@@ -129,7 +125,7 @@ class MainWindow {
     });
 
     this.window.on('ready-to-show', () => {
-      this.window?.webContents?.send(IPCMessage.OnPinModeChange, { isEnabled: this._isPinModeEnabled });
+      MainIPCService.send(IPCOnChannel.OnPinModeChange, this.window, { isEnabled: this._isPinModeEnabled })
     });
 
     this.window.on('minimize', () => {
@@ -156,8 +152,8 @@ class MainWindow {
       this.window.webContents.send('console', __dirname);
 
       const [width, height] = this.window.getSize();
-      LocalStore.mainWinSize = [width, height];
-      this.identifyUser(this.window);
+      MainSyncService.set(StorageKey.MainWinSize, [width, height]);
+      MainAnalyticsService.identify({}, { searchWindow: this.window });
     }
   }
 
@@ -172,7 +168,7 @@ class MainWindow {
 
   public show() {
     this.window?.show();
-    this.trackShowApp(this.window);
+    MainAnalyticsService.track(AnalyticsEvent.ShowedApp, undefined);
   }
 
   public isVisible() {

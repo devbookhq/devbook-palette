@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 
-import electron from 'mainCommunication';
+import ElectronService from 'services/electron.service';
+import { Platform } from 'services/electron.service/platform';
 
 import { ReactComponent as CheckIcon } from 'img/check.svg';
+import { GlobalShortcut } from 'services/shortcut.service';
 
 const Container = styled.div`
   width: 100%;
@@ -99,23 +101,23 @@ const CheckIconNotDone = styled(CheckIcon)`
 
 interface TrayPageProps {
   didHitShortcut: boolean;
-  onDidChangeShortcut: (shortcut: string) => void;
+  onDidChangeShortcut: (shortcut: GlobalShortcut) => void;
 }
 
 function TrayPage(props: TrayPageProps) {
-  const [selectedShortcut, setSelectedShortcut] = useState('Alt+Space');
+  const [selectedShortcut, setSelectedShortcut] = useState<GlobalShortcut>(GlobalShortcut.AltSpace);
 
-  function handleShortcutChange(shortcut: string) {
+  function handleShortcutChange(shortcut: GlobalShortcut) {
     setSelectedShortcut(shortcut);
     props.onDidChangeShortcut(shortcut);
   }
 
   function getShortcutText() {
-    if (electron.remote.process.platform === 'darwin') {
-      if (selectedShortcut === 'Alt+Space') return 'Option+Space';
-      else if (selectedShortcut === 'Command+Alt+Space') return 'Command+Option+Space';
-      else if (selectedShortcut === 'Control+Alt+Space') return 'Control+Option+Space';
-      else if (selectedShortcut === 'Shift+Alt+Space') return 'Shift+Option+Space';
+    if (ElectronService.platform === Platform.MacOS) {
+      if (selectedShortcut === GlobalShortcut.AltSpace) return 'Option+Space';
+      else if (selectedShortcut === GlobalShortcut.CommandAltSpace) return 'Command+Option+Space';
+      else if (selectedShortcut === GlobalShortcut.ControlAltSpace) return 'Control+Option+Space';
+      else if (selectedShortcut === GlobalShortcut.ShiftAltSpace) return 'Shift+Option+Space';
       else return selectedShortcut;
     }
     return selectedShortcut;
@@ -136,25 +138,25 @@ function TrayPage(props: TrayPageProps) {
             <CheckIconDone />
             1. Choose a global shortcut
           </Step>
-          <Select value={selectedShortcut} onChange={e => handleShortcutChange(e.target.value)}>
-            <option value="Control+Space">Control+Space</option>
-            <option value="Shift+Space">Shift+Space</option>
-            {electron.remote.process.platform === 'darwin' &&
+          <Select value={selectedShortcut} onChange={e => handleShortcutChange(e.target.value as unknown as GlobalShortcut)}>
+            <option value={GlobalShortcut.ControlSpace}>Control+Space</option>
+            <option value={GlobalShortcut.ShiftSpace}>Shift+Space</option>
+            {ElectronService.platform === Platform.MacOS &&
               <>
-                <option value="Alt+Space">Option+Space</option>
-                <option value="Command+Space">Command+Space</option>
-                <option value="Command+Shift+Space">Command+Shift+Space</option>
-                <option value="Command+Alt+Space">Command+Option+Space</option>
-                <option value="Control+Alt+Space">Control+Option+Space</option>
-                <option value="Shift+Alt+Space">Shift+Option+Space</option>
+                <option value={GlobalShortcut.AltSpace}>Option+Space</option>
+                <option value={GlobalShortcut.CommandSpace}>Command+Space</option>
+                <option value={GlobalShortcut.CommandShiftSpace}>Command+Shift+Space</option>
+                <option value={GlobalShortcut.CommandAltSpace}>Command+Option+Space</option>
+                <option value={GlobalShortcut.CommandAltSpace}>Control+Option+Space</option>
+                <option value={GlobalShortcut.ShiftAltSpace}>Shift+Option+Space</option>
               </>
             }
-            {electron.remote.process.platform !== 'darwin' &&
+            {ElectronService.platform !== Platform.MacOS &&
               <>
-                <option value="Alt+Space">Alt+Space</option>
-                <option value="Control+Shift+Space">Control+Shift+Space</option>
-                <option value="Control+Alt+Space">Control+Alt+Space</option>
-                <option value="Shift+Alt+Space">Shift+Alt+Space</option>
+                <option value={GlobalShortcut.AltSpace}>Alt+Space</option>
+                <option value={GlobalShortcut.ControlShiftSpace}>Control+Shift+Space</option>
+                <option value={GlobalShortcut.ControlAltSpace}>Control+Alt+Space</option>
+                <option value={GlobalShortcut.ShiftAltSpace}>Shift+Alt+Space</option>
               </>
             }
           </Select>

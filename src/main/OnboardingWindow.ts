@@ -2,8 +2,8 @@ import * as electron from 'electron';
 import * as path from 'path';
 import * as process from 'process';
 
-import AppWindow from './AppWindow';
 import isDev from './utils/isDev';
+import { AppWindow } from '../services/appWindow';
 
 class OnboardingWindow {
   public window: electron.BrowserWindow | undefined;
@@ -12,7 +12,7 @@ class OnboardingWindow {
     return this.window?.webContents;
   }
 
-  public constructor(PORT: number, taskBarIcon: electron.NativeImage) {
+  public constructor(taskBarIcon: electron.NativeImage) {
     this.window = new electron.BrowserWindow({
       width: 1250,
       height: 720,

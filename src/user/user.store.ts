@@ -4,19 +4,15 @@ import {
   makeAutoObservable,
 } from 'mobx';
 
-import {
-  changeUserInMain,
-  setAuthInOtherWindows,
-  handleGetAuthFromMainWindow,
-} from './user.ipc';
 import RootStore, { useRootStore } from 'App/RootStore';
-import StorageService, { SyncStorageKey } from 'services/sync.service';
+import SyncService, { StorageKey } from 'services/sync.service';
 import AuthenticationService from 'services/authentication.service';
 import ReconnectionService from 'services/reconnection.service';
 
 import { AuthInfo } from './authInfo';
 import { AuthState } from './authState';
 import { AuthErrorType } from './authError';
+import IPCService, { IPCOnChannel, IPCSendChannel } from 'services/ipc.service';
 
 export function useUserStore() {
   return useRootStore().userStore;
@@ -65,7 +61,17 @@ class UserStore {
       console.log('Authentication:', this.auth);
     });
 
-    handleGetAuthFromMainWindow(() => this.auth);
+    IPCService.on(IPCOnChannel.GetAuthFromMainWindow, () => {
+      IPCService.send(IPCSendChannel.SetAuthInOtherWindows, { auth: this.auth });
+    });
+
+    IPCService.on(IPCOnChannel.SetAuthInOtherWindows, (_, { auth }) => {
+      this.updateAuth(auth);
+    });
+
+    IPCService.on(IPCOnChannel.SignOut, () => {
+      this.signOut();
+    });
 
     this.refreshAuth();
   }
@@ -73,9 +79,9 @@ class UserStore {
   private changeAnalyticsUserAndSaveEmail(auth: AuthInfo) {
     switch (auth.state) {
       case AuthState.UserSignedIn:
-        return changeUserInMain(auth.user);
+        return IPCService.send(IPCSendChannel.ChangeUserInMain, { user: auth.user });
       case AuthState.NoUser:
-        return changeUserInMain();
+        return IPCService.send(IPCSendChannel.ChangeUserInMain, { user: undefined });
       default:
         break;
     }
@@ -84,7 +90,7 @@ class UserStore {
   private updateAuthEverywhere(auth: AuthInfo) {
     this.updateAuth(auth);
     this.changeAnalyticsUserAndSaveEmail(this.auth);
-    setAuthInOtherWindows(this.auth);
+    IPCService.send(IPCSendChannel.SetAuthInOtherWindows, { auth: this.auth });
   }
 
   updateAuth(auth: AuthInfo) {
@@ -95,12 +101,12 @@ class UserStore {
     else this._auth.user = undefined;
   }
 
-  signOut() {
+  async signOut() {
     if (this.isLoading) return;
     this.updateAuthEverywhere({ state: AuthState.SigningOutUser, user: this.user });
 
-    const refreshToken = StorageService.get(SyncStorageKey.RefreshToken);
-    StorageService.set(SyncStorageKey.RefreshToken, '');
+    const refreshToken = await SyncService.get(StorageKey.RefreshToken);
+    SyncService.set(StorageKey.RefreshToken, '');
     this.updateAuthEverywhere({ state: AuthState.NoUser });
 
     return AuthenticationService.signOut(refreshToken);
@@ -116,7 +122,7 @@ class UserStore {
     this.updateAuthEverywhere({ state: AuthState.SigningInUser });
     try {
       const { refreshToken, user } = await AuthenticationService.signIn(email);
-      StorageService.set(SyncStorageKey.RefreshToken, refreshToken);
+      SyncService.set(StorageKey.RefreshToken, refreshToken);
       this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
     } catch (error) {
       this.updateAuthEverywhere({
@@ -134,17 +140,17 @@ class UserStore {
     this.updateAuthEverywhere({ state: AuthState.LookingForStoredUser });
 
     try {
-      const oldRefreshToken = StorageService.get(SyncStorageKey.RefreshToken);
+      const oldRefreshToken = await SyncService.get(StorageKey.RefreshToken);
 
       if (!oldRefreshToken) {
         const { refreshToken, user } = await AuthenticationService.restoreUserSession();
-        StorageService.set(SyncStorageKey.RefreshToken, refreshToken);
+        SyncService.set(StorageKey.RefreshToken, refreshToken);
         this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
         return;
       }
 
       const { refreshToken, user } = await AuthenticationService.refreshAccessToken(oldRefreshToken);
-      StorageService.set(SyncStorageKey.RefreshToken, refreshToken);
+      SyncService.set(StorageKey.RefreshToken, refreshToken);
       this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
     } catch (error) {
       this.updateAuthEverywhere({

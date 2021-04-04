@@ -4,9 +4,8 @@ import {
   reaction,
 } from 'mobx';
 import RootStore, { useRootStore } from 'App/RootStore';
-import SearchService, { SearchSource, SearchResultMap, SearchFilterTypings, SearchResultTypings } from 'services/search.service';
-import SyncService from 'services/sync.service';
-import { SearchMode } from 'Preferences/Pages/searchMode';
+import SearchService, { SearchSource, SearchFilterTypings, SearchResultTypings } from 'services/search.service';
+import { SearchMode } from 'services/search.service/searchMode';
 
 export function useSearchStore() {
   const { searchStore } = useRootStore();
@@ -82,4 +81,3 @@ export default class SearchStore {
     // TODO: Load values using syncService.
   }
 }
-

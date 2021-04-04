@@ -39,10 +39,10 @@ class ReconnectionService {
   }
 }
 
-makeAutoObservable(ReconnectionService, {
-  isConnected: false,
-  reportConnection: false,
-  reportDisconnection: false,
-});
+// makeAutoObservable(ReconnectionService, {
+//   isConnected: false,
+//   reportConnection: false,
+//   reportDisconnection: false,
+// });
 
 export default ReconnectionService;

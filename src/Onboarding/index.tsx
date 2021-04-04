@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import IPCService, { SendIPC } from 'services/ipc.service'
+import IPCService, { IPCSendChannel } from 'services/ipc.service'
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import Button from 'components/Button';
 import IntroductionPage from './pages/Introduction';
 import ShortcutPage from './pages/Shortcut';
+import { IPCOnChannel } from 'services/ipc.service';
+import { GlobalShortcut } from 'services/shortcut.service';
 
 const Container = styled.div`
   margin-top: 7px;
@@ -60,7 +62,7 @@ function Onboarding() {
   const [pageIndex, setPageIndex] = useState(0);
   const [didShowMainWindow, setDidShowMainWindow] = useState(false);
 
-  useIPCRenderer('did-show-main-window', () => {
+  useIPCRenderer(IPCOnChannel.DidShowMainWindow, () => {
     setDidShowMainWindow(true);
   });
 
@@ -69,15 +71,15 @@ function Onboarding() {
     // We should unify who handles the full state. Probably this component.
 
     // Tell the main proces to register the default shortcut before user chooses any shortcut.
-    IPCService.send(SendIPC.UserDidChangeShortcut, 'Alt+Space');
+    IPCService.send(IPCSendChannel.UserDidChangeShortcut, { shortcut: GlobalShortcut.AltSpace });
   }, []);
 
-  function handleDidChangeShortcut(shortcut: string) {
-    IPCService.send(SendIPC.UserDidChangeShortcut, shortcut);
+  function handleDidChangeShortcut(shortcut: GlobalShortcut) {
+    IPCService.send(IPCSendChannel.UserDidChangeShortcut, { shortcut });
   }
 
   function handleFinishButtonClick() {
-    IPCService.send(SendIPC.FinishOnboarding, undefined);
+    IPCService.send(IPCSendChannel.FinishOnboarding, undefined);
   }
 
   return (
