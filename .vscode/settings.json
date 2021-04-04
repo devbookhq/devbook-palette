@@ -18,6 +18,7 @@
     "build/**": true,
     "node_modules/**": true,
     "react-dev-tools-4.9.0_26/**": true,
+    "package-lock.json": true,
   },
   "files.watcherExclude": {
     "**/.git": true,
@@ -28,5 +29,6 @@
     "build/**": true,
     "node_modules/**": true,
     "react-dev-tools-4.9.0_26/**": true,
+    "package-lock.json": true,
   },
 }
