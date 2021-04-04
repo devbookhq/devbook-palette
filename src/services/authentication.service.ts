@@ -12,7 +12,7 @@ const CredentialPingPeriod = 100; // In ms. We ping server every N ms.
 class AuthenticationService {
   private constructor() { }
   private static readonly baseURL = ElectronService.isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
-  private static readonly apiVersion = APIVersion.v1;
+  private static readonly apiVersion = APIVersion.V1;
   private static readonly baseURLWithVersion = `${AuthenticationService.baseURL}/${AuthenticationService.apiVersion}`;
   private static readonly magicAPIKey = ElectronService.isDev ? 'pk_test_2AE829E9A03C1FA0' : 'pk_live_C99F68FD8F927F2E';
 

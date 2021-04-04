@@ -2,6 +2,7 @@ import {
   useParams,
 } from 'react-router-dom';
 
+import ControlPanel from 'ControlPanel';
 import { SearchSource } from 'services/search.service'
 import StackOverflowSearch from './StackOverflowSearch';
 import DocsSearch from './DocsSearch';
@@ -11,7 +12,7 @@ function Search() {
 
   return (
     <>
-      {/* <ControlPanel /> */}
+      <ControlPanel />
       {searchSource === SearchSource.StackOverflow &&
         <StackOverflowSearch />
       }

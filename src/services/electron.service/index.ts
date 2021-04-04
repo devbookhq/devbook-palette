@@ -11,7 +11,7 @@ class ElectronService {
   static readonly platform = ElectronService.getPlatform();
   static readonly appVersion = ElectronService.getVersion();
   static readonly environment = ElectronService.getEnvironment();
-  static readonly isDev = ElectronService.environment === Environment.Production;
+  static readonly isDev = ElectronService.environment === Environment.Development;
 
   private static getPlatform() {
     switch (electron.remote.process.platform) {

@@ -1,11 +1,9 @@
-interface ControlPanelProps {
+import SearchControls from './SearchControls';
 
-}
-
-function ControlPanel({ }: ControlPanelProps) {
+function ControlPanel() {
   return (
     <>
-      {/* <SearchControls /> */}
+      <SearchControls />
       {/* <InfoPannel /> */}
     </>
   );

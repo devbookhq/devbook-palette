@@ -55,7 +55,7 @@ interface StackOverflowResult {
   answers: StackOverflowAnswer[];
 }
 
-export type SearchResultTypings = {
+export type SearchResult = {
   [SearchSource.Docs]: DocResult;
   [SearchSource.StackOverflow]: StackOverflowResult;
 };
@@ -74,13 +74,13 @@ type SearchOptionsMap = {
 }
 
 export type SearchResultMap = {
-  [source in SearchSource]: SearchResultTypings[source];
+  [source in SearchSource]: SearchResult[source];
 }
 
 class SearchService {
   private constructor() { }
   private static readonly baseURL = ElectronService.isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
-  private static readonly apiVersion = APIVersion.v1;
+  private static readonly apiVersion = APIVersion.V1;
   private static readonly baseURLWithVersion = `${SearchService.baseURL}/${SearchService.apiVersion}`;
 
   static async listFilters<T extends SearchSource>(source: T): Promise<SearchFilterMap[T][]> {
@@ -102,22 +102,29 @@ class SearchService {
       ? `${SearchService.baseURL}/${version}`
       : SearchService.baseURLWithVersion;
 
-    switch (source) {
-      case SearchSource.StackOverflow:
-        return (await axios.post('/search/stackoverflow',
-          { query },
-          { baseURL },
-        )).data.results;
+    try {
+      switch (source) {
+        case SearchSource.StackOverflow:
+          const result = await axios.post('/search/stackoverflow',
+            { query },
+            { baseURL },
+          );
+          console.log(result);
+          return result.data.results;
 
-      case SearchSource.Docs:
-        const { filter } = options as SearchOptionsMap[SearchSource.Docs];
-        return (await axios.post('/search/docs',
-          { query, filter },
-          { baseURL },
-        )).data.results;
+        case SearchSource.Docs:
+          const { filter } = options as SearchOptionsMap[SearchSource.Docs];
+          return (await axios.post('/search/docs',
+            { query, filter },
+            { baseURL },
+          )).data.results;
 
-      default:
-        throw new Error(`Invalid search source ${source}.`);
+        default:
+          throw new Error(`Invalid search source ${source}.`);
+      }
+    } catch (error) {
+      console.error(error.response);
+      throw error;
     }
   }
 }

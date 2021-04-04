@@ -1,4 +1,5 @@
 export enum APIVersion {
-  v0 = 'v0',
-  v1 = 'v1',
+  V0 = 'v0',
+  V1 = 'v1',
+  V2 = 'v2',
 }

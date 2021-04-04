@@ -91,6 +91,7 @@ function App() {
   const bundleCheckInterval = 1000 * 60 * 60 * 1 // 1 hour.
   const appVersion = ElectronService.appVersion;
   console.log('AppVersion', appVersion);
+  console.log('Environment', ElectronService.environment);
   const clientBundle = document.getElementById('bundle')?.textContent;
 
   const [dismissTime, setDismissTime] = useState(0) // When user presses 'dismiss' we shouldn't display notif for some time.
