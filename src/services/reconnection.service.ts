@@ -3,7 +3,7 @@ import {
   makeAutoObservable,
 } from 'mobx';
 
-import timeout from '../utils/timeout';
+import timeout from 'utils/timeout';
 
 // Handle unreachable server by waiting a trying the request again.
 axios.interceptors.response.use((value) => {

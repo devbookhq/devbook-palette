@@ -1,8 +1,8 @@
 import { ipcMain, BrowserWindow } from 'electron';
 
-import { IPCInvokeChannel, IPCInvokeHandler } from '../../services/ipc.service/invokeChannel';
-import { IPCOnChannel, IPCOnPayload } from '../../services/ipc.service/onChannel';
-import { IPCSendChannel, IPCSendHandler } from '../../services/ipc.service/sendChannel';
+import { IPCInvokeChannel, IPCInvokeHandler } from '@renderer/services/ipc.service/invokeChannel';
+import { IPCOnChannel, IPCOnPayload } from '@renderer/services/ipc.service/onChannel';
+import { IPCSendChannel, IPCSendHandler } from '@renderer/services/ipc.service/sendChannel';
 
 class MainIPCService {
   private constructor() { }

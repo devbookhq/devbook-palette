@@ -2,8 +2,9 @@ import * as electron from 'electron';
 import * as path from 'path';
 import * as process from 'process';
 
-import isDev from './utils/isDev';
-import { AppWindow } from '../services/appWindow';
+import isDev from '@main/utils/isDev';
+
+import { AppWindow } from '@renderer/services/appWindow';
 
 class OnboardingWindow {
   public window: electron.BrowserWindow | undefined;

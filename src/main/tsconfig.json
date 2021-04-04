@@ -14,12 +14,20 @@
     "rootDir": "../",
     "noEmitOnError": true,
     "esModuleInterop": true,
-    "typeRoots": [
-      "node_modules/@types"
-    ]
+    "baseUrl": ".",
+    "rootDirs": [
+      ".",
+    ],
+    "paths": {
+      "@renderer/*": [
+        "../*"
+      ],
+      "@main/*": [
+        "./*"
+      ],
+    },
   },
   "include": [
     ".",
-    "../utils/debounce.ts"
   ]
 }

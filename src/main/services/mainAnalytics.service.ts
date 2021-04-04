@@ -3,11 +3,12 @@ import { BrowserWindow } from 'electron';
 import Analytics from 'analytics-node';
 import { app } from 'electron';
 
-import isDev from '../utils/isDev';
-import MainSyncService, { StorageKey } from './mainSync.service';
-import { User } from '../../user/user';
-import { AnalyticsEvent, AnalyticsPayload } from '../../services/analytics.service/analyticsEvent';
-import MainIPCService, { IPCSendChannel } from './mainIPC.service';
+import isDev from '@main/utils/isDev';
+import MainSyncService, { StorageKey } from '@main/services/mainSync.service';
+import MainIPCService, { IPCSendChannel } from '@main/services/mainIPC.service';
+
+import { User } from '@renderer/user/user';
+import { AnalyticsEvent, AnalyticsPayload } from '@renderer/services/analytics.service/analyticsEvent';
 
 class MainAnalyticsService {
   private constructor() { }

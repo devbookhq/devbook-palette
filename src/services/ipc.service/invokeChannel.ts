@@ -7,7 +7,7 @@ export enum IPCInvokeChannel {
   StorageGet = 'StorageGet',
 }
 
-export type IPCInvokePayload<T extends StorageKey = StorageKey> = {
+export type IPCInvokePayload = {
   [IPCInvokeChannel.UpdateStatus]: void;
   [IPCInvokeChannel.StorageGet]: { key: StorageKey };
 }

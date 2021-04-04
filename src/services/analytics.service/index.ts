@@ -1,4 +1,4 @@
-import IPCService, { IPCSendChannel } from '../ipc.service';
+import IPCService, { IPCSendChannel } from 'services/ipc.service';
 import { AnalyticsEvent, AnalyticsPayload } from './analyticsEvent';
 
 class AnalyticsService {

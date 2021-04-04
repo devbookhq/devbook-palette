@@ -1,5 +1,5 @@
-import { GlobalShortcut } from '../../services/shortcut.service';
-import { SearchMode } from '../search.service/searchMode';
+import { GlobalShortcut } from 'services/shortcut.service';
+import { SearchMode } from 'services/search.service/searchMode';
 
 export enum StorageKey {
   Email = 'email',

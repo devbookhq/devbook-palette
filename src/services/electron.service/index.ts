@@ -13,7 +13,6 @@ class ElectronService {
   static readonly environment = ElectronService.getEnvironment();
   static readonly isDev = ElectronService.environment === Environment.Production;
 
-
   private static getPlatform() {
     switch (electron.remote.process.platform) {
       case 'darwin':

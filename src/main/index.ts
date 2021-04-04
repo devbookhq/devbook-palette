@@ -6,7 +6,7 @@ import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 import AutoLaunch from 'auto-launch';
 
-import isDev from './utils/isDev';
+import isDev from '@main/utils/isDev';
 // Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.
 // Top-level property 'productName' in the package.json overwrites top-level property 'name' as an app identifier.
 // At the same time, the 'productName' is required to be top-level by ToDesktop - we used 'productName' in a 'build' property before.
@@ -20,18 +20,19 @@ if (isDev) {
   app.setPath('userData', path.resolve(app.getPath('userData'), '..', appDataFolder));
 }
 
-import MainIPCService, { IPCInvokeChannel, IPCOnChannel, IPCSendChannel } from './services/mainIPC.service'
-import { UpdateLocation } from '../services/appWindow';
-import MainAnalyticsService, { AnalyticsEvent } from './services/mainAnalytics.service';
-import Tray from './Tray';
-import OnboardingWindow from './OnboardingWindow';
-import PreferencesWindow from './PreferencesWindow';
-import MainWindow from './MainWindow';
-import { AppWindow } from '../services/AppWindow';
-import { PreferencesPage } from '../Preferences/preferencesPage';
-import MainSyncService, { StorageKey } from './services/mainSync.service';
-import { SearchMode } from '../services/search.service/searchMode';
-import { GlobalShortcut } from '../services/shortcut.service';
+import MainIPCService, { IPCInvokeChannel, IPCOnChannel, IPCSendChannel } from '@main/services/mainIPC.service'
+import MainAnalyticsService, { AnalyticsEvent } from '@main/services/mainAnalytics.service';
+import Tray from '@main/Tray';
+import OnboardingWindow from '@main/OnboardingWindow';
+import PreferencesWindow from '@main/PreferencesWindow';
+import MainWindow from '@main/MainWindow';
+import MainSyncService, { StorageKey } from '@main/services/mainSync.service';
+
+import { UpdateLocation } from '@renderer/services/appWindow';
+import { AppWindow } from '@renderer/services/appWindow';
+import { PreferencesPage } from '@renderer/Preferences/preferencesPage';
+import { SearchMode } from '@renderer/services/search.service/searchMode';
+import { GlobalShortcut } from '@renderer/services/shortcut.service';
 
 const port = 3000;
 let isPinModeEnabled = false;

@@ -1,12 +1,12 @@
 // We are not using path aliases here, because when we import this file from the main the aliases stop working.
-import { SearchMode } from '../search.service/searchMode';
-import { AuthInfo } from '../../user/authInfo';
-import { User } from '../../user/user';
-import { AppWindow, UpdateLocation } from '../../services/appWindow';
-import { GlobalShortcut } from '../../services/shortcut.service';
-import { PreferencesPage } from '../../Preferences/preferencesPage';
-import { StorageKey, StorageValue } from '../../services/sync.service/storage';
-import { AnalyticsEvent, AnalyticsPayload } from '../../services/analytics.service/analyticsEvent';
+import { SearchMode } from 'services/search.service/searchMode';
+import { AuthInfo } from 'user/authInfo';
+import { User } from 'user/user';
+import { AppWindow, UpdateLocation } from 'services/appWindow';
+import { GlobalShortcut } from 'services/shortcut.service';
+import { PreferencesPage } from 'Preferences/preferencesPage';
+import { StorageKey, StorageValue } from 'services/sync.service/storage';
+import { AnalyticsEvent, AnalyticsPayload } from 'services/analytics.service/analyticsEvent';
 
 export type IPCSendHandler<T extends IPCSendChannel> = (event: Electron.IpcMainInvokeEvent, payload: IPCSendPayload[T]) => (Promise<void> | void);
 

@@ -1,7 +1,7 @@
 // We are not using path aliases here, because when we import this file from the main the aliases stop working.
-import { PreferencesPage } from '../../Preferences/preferencesPage';
-import { SearchMode } from '../search.service/searchMode';
-import { AuthInfo } from '../../user/authInfo';
+import { PreferencesPage } from 'Preferences/preferencesPage';
+import { SearchMode } from 'services/search.service/searchMode';
+import { AuthInfo } from 'user/authInfo';
 
 export type IPCOnHandler<T extends IPCOnChannel> = (event: Electron.IpcRendererEvent, payload: IPCOnPayload[T]) => (Promise<void> | void);
 

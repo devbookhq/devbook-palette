@@ -1,5 +1,5 @@
-import { UpdateLocation } from '../appWindow';
-import { SearchMode } from '../search.service/searchMode';
+import { UpdateLocation } from 'services/appWindow';
+import { SearchMode } from 'services/search.service/searchMode';
 
 export enum AnalyticsEvent {
   ShowedApp = 'Showed app',

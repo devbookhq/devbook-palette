@@ -3,10 +3,11 @@ import * as path from 'path';
 import * as process from 'process';
 import { app } from 'electron';
 
-import isDev from './utils/isDev';
-import MainIPCService from './services/mainIPC.service';
-import { IPCOnChannel } from '../services/ipc.service/onChannel';
-import { PreferencesPage } from '../Preferences/preferencesPage';
+import isDev from '@main/utils/isDev';
+import MainIPCService from '@main/services/mainIPC.service';
+
+import { IPCOnChannel } from '@renderer/services/ipc.service/onChannel';
+import { PreferencesPage } from '@renderer/Preferences/preferencesPage';
 
 class PreferencesWindow {
   public window: electron.BrowserWindow | undefined;

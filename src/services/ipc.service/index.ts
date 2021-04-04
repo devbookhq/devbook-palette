@@ -1,4 +1,4 @@
-import ElectronService from '../electron.service';
+import ElectronService from 'services/electron.service';
 import { IPCInvokePayload, IPCInvokeChannel, IPCInvokeReturn } from './invokeChannel';
 import { IPCOnPayload, IPCOnChannel, IPCOnHandler } from './onChannel';
 import { IPCSendChannel, IPCSendPayload } from './sendChannel';

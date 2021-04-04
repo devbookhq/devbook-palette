@@ -1,8 +1,10 @@
 import ElectronStore from 'electron-store';
 import { v4 as uuidv4 } from 'uuid';
-import { SearchMode } from '../../services/search.service/searchMode';
-import { StorageKey, StorageValue, Storage } from '../../services/sync.service/storage';
-import MainIPCService, { IPCInvokeChannel, IPCSendChannel } from './mainIPC.service';
+
+import MainIPCService, { IPCInvokeChannel, IPCSendChannel } from '@main/services/mainIPC.service';
+
+import { SearchMode } from '@renderer/services/search.service/searchMode';
+import { StorageKey, StorageValue, Storage } from '@renderer/services/sync.service/storage';
 
 class MainSyncService {
   private static electronStore = new ElectronStore<Storage>({

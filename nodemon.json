@@ -1,0 +1,8 @@
+{
+  "watch": [
+    "src/main"
+  ],
+  "ext": ".ts,.js",
+  "ignore": [],
+  "exec": "./scripts/esbuild.js"
+}

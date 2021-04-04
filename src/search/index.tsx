@@ -6,12 +6,12 @@ import { SearchSource } from 'services/search.service'
 import StackOverflowSearch from './StackOverflowSearch';
 import DocsSearch from './DocsSearch';
 
-
 function Search() {
   const { searchSource } = useParams<{ searchSource: SearchSource }>();
 
   return (
     <>
+      {/* <ControlPanel /> */}
       {searchSource === SearchSource.StackOverflow &&
         <StackOverflowSearch />
       }
@@ -19,9 +19,9 @@ function Search() {
       {searchSource === SearchSource.Docs &&
         <DocsSearch />
       }
+      {/* <ShortcutPanel /> */}
     </>
   );
 }
 
 export default Search;
-
