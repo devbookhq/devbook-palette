@@ -3,6 +3,8 @@
 const esbuild = require('esbuild');
 const { nodeExternalsPlugin } = require('esbuild-node-externals');
 
+const watch = process.argv[process.argv.length - 1] === '--watch';
+
 esbuild.build({
   target: 'node14',
   tsconfig: './src/main/tsconfig.json',
@@ -15,6 +17,7 @@ esbuild.build({
   loader: {
     '.ts': 'ts'
   },
+  watch,
   plugins: [
     nodeExternalsPlugin({
       packagePath: './package.json',

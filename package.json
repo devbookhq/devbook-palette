@@ -32,10 +32,10 @@
   "scripts": {
     "start:client": "craco start",
     "esbuild:start": "concurrently \"npm run start:client\" \"./scripts/esbuild-watch-electron.sh\" \"wait-on http://localhost:3000 && npm run esbuild:start:electron\"",
-    "esbuild:start:electron": "npm run esbuild:bundle:electron && electron .",
+    "esbuild:start:electron": "npm run esbuild:bundle:electron && electron --enable-logging .",
     "esbuild:bundle:electron": "./scripts/esbuild-bundle-electron.sh",
     "start": "concurrently \"npm run start:client\" \"./scripts/watch-electron.sh\" \"wait-on http://localhost:3000 && npm run start:electron\"",
-    "start:electron": "npm run bundle:electron && electron .",
+    "start:electron": "npm run bundle:electron && electron --enable-logging .",
     "bundle:client": "./scripts/bundle-client.sh",
     "bundle:electron": "./scripts/bundle-electron.sh",
     "postinstall": "electron-rebuild",
@@ -82,7 +82,6 @@
     "electron-reload": "^1.5.0",
     "esbuild": "^0.11.5",
     "esbuild-node-externals": "^1.0.3",
-    "nodemon": "^2.0.7",
     "react-scripts": "^4.0.3",
     "typescript": "^4.2.3",
     "wait-on": "^5.3.0"
