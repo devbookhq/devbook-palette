@@ -24,6 +24,7 @@ axios.interceptors.response.use((value) => {
 });
 
 class ReconnectionService {
+  private constructor() { }
   static _isConnected = false;
 
   static get isConnected() {

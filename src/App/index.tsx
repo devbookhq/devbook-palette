@@ -172,10 +172,11 @@ function App() {
               exact
             >
               <Redirect to={{ pathname: `/home/search/${SearchSource.StackOverflow}` }} />
+              {/* <Redirect to={{ pathname: `/home/search/so` }} /> */}
             </Route>
 
             <Route
-              path="/home/search"
+              path="/home/search/:searchSource"
             >
               <Search />
             </Route>

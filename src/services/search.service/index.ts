@@ -14,21 +14,21 @@ export type SearchFilterTypings = {
 
 interface Page {
   html: string;
-  documentation: string; // Name of the documentation.
   name: string; // Title of the found section.
   breadcrumbs: string[];
   summary: string;
   anchor: string; // ID of the element where the found section starts.
-  pageURL: string;
+  pageURL?: string;
+  urlWithoutAnchor?: string;
 }
 
-interface DocResult {
+export interface DocResult {
   score: number;
   id: string;
   page: Page;
 }
 
-interface DocSource {
+export interface DocSource {
   slug: string;
   name: string;
   version: APIVersion;
@@ -50,7 +50,7 @@ interface StackOverflowAnswer {
   timestamp: number;
 }
 
-interface StackOverflowResult {
+export interface StackOverflowResult {
   question: StackOverflowQuestion;
   answers: StackOverflowAnswer[];
 }
@@ -62,7 +62,7 @@ export type SearchResult = {
 
 type SearchOptionsTypings = {
   [SearchSource.StackOverflow]: {};
-  [SearchSource.Docs]: { filter: string };
+  [SearchSource.Docs]: { filter: DocSource };
 };
 
 type SearchFilterMap = {
@@ -87,37 +87,60 @@ class SearchService {
     switch (source) {
       case SearchSource.Docs:
         return (await axios.get('/search/docs',
-          { baseURL: SearchService.baseURL },
+          { baseURL: SearchService.baseURLWithVersion },
         )).data.docs;
 
       default:
-        throw new Error(`Source ${source} has no list of filters.`);
+        return [];
     }
   }
 
   static async search<T extends SearchSource>(source: T, options: SearchOptionsMap[T]): Promise<SearchResultMap[T][]> {
     const { query, version } = options;
 
-    const baseURL = version
-      ? `${SearchService.baseURL}/${version}`
-      : SearchService.baseURLWithVersion;
-
     try {
+      const stackOverflowBaseURL = version
+        ? `${SearchService.baseURL}/${version}`
+        : SearchService.baseURLWithVersion;
+
       switch (source) {
         case SearchSource.StackOverflow:
-          const result = await axios.post('/search/stackoverflow',
+          const stackOverflowResults = await axios.post('/search/stackoverflow',
             { query },
-            { baseURL },
+            { baseURL: stackOverflowBaseURL },
           );
-          console.log(result);
-          return result.data.results;
+          return stackOverflowResults.data.results;
 
         case SearchSource.Docs:
           const { filter } = options as SearchOptionsMap[SearchSource.Docs];
-          return (await axios.post('/search/docs',
-            { query, filter },
-            { baseURL },
-          )).data.results;
+
+          const docsVersion = filter.version ? filter.version : version;
+          const docsBaseURL = docsVersion ? `${SearchService.baseURL}/${docsVersion}` : SearchService.baseURLWithVersion;
+          const docsFilter = docsVersion === APIVersion.V0 ? [filter.slug] : filter.slug;
+
+          const docsResults = await axios.post('/search/docs',
+            {
+              query,
+              filter: docsFilter,
+            },
+            {
+              baseURL: docsBaseURL,
+            },
+          );
+
+          if (version || SearchService.apiVersion >= APIVersion.V2) {
+            const results = docsResults.data.results as DocResult[];
+            const pages = docsResults.data.pages as { content: string; url_without_anchor: string }[];
+            const style = docsResults.data.style as string;
+            return results.map(r => ({
+              ...r,
+              page: {
+                ...r.page,
+                html: `${style}${pages.find(p => p.url_without_anchor === r.page.urlWithoutAnchor)}`,
+              },
+            })) as any;
+          }
+          return docsResults.data.results;
 
         default:
           throw new Error(`Invalid search source ${source}.`);

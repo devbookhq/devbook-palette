@@ -1,27 +1,23 @@
-import {
-  useParams,
-} from 'react-router-dom';
+import styled from 'styled-components';
 
-import ControlPanel from 'ControlPanel';
-import { SearchSource } from 'services/search.service'
-import StackOverflowSearch from './StackOverflowSearch';
-import DocsSearch from './DocsSearch';
+import Controls from 'Controls';
+import SearchResults from './SearchResults';
+import Shortcuts from 'Shortcuts';
+
+const Container = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+`;
 
 function Search() {
-  const { searchSource } = useParams<{ searchSource: SearchSource }>();
-
   return (
-    <>
-      <ControlPanel />
-      {searchSource === SearchSource.StackOverflow &&
-        <StackOverflowSearch />
-      }
-
-      {searchSource === SearchSource.Docs &&
-        <DocsSearch />
-      }
-      {/* <ShortcutPanel /> */}
-    </>
+    <Container>
+      <Controls />
+      <SearchResults />
+      <Shortcuts />
+    </Container>
   );
 }
 
