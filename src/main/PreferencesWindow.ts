@@ -1,5 +1,4 @@
 import * as electron from 'electron';
-import * as path from 'path';
 import * as process from 'process';
 import { app } from 'electron';
 
@@ -53,16 +52,7 @@ class PreferencesWindow {
     });
 
     if (isDev) {
-      const url = `http://localhost:${this.port}/index.html#/preferences` + (page ? `/${page}` : '');
-      this.window.loadURL(url);
-
-      // Hot Reloading
-      require('electron-reload')(__dirname, {
-        electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
-        forceHardReset: true,
-        hardResetMethod: 'exit',
-      });
-      this.window.webContents.openDevTools();
+      this.window.loadURL(`http://localhost:${this.port}/index.html#/preferences` + (page ? `/${page}` : ''));
     } else {
       this.window.webContents.loadURL(
         `https://client.usedevbook.com/${app.getVersion()}#/preferences` + (page ? `/${page}` : ''),

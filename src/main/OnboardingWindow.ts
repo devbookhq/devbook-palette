@@ -44,15 +44,6 @@ class OnboardingWindow {
     });
 
     this.window.loadURL(`file://${__dirname}/assets/loading.html?window=${AppWindow.Onboarding}`);
-    if (isDev) {
-      // Hot Reloading
-      require('electron-reload')(__dirname, {
-        electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
-        forceHardReset: true,
-        hardResetMethod: 'exit',
-      });
-      this.window.webContents.openDevTools();
-    }
   }
 
   public close() {

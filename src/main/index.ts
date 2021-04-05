@@ -35,7 +35,7 @@ import { SearchMode } from '@renderer/services/search.service/searchMode';
 import { GlobalShortcut } from '@renderer/services/shortcut.service';
 
 const port = 3000;
-let isPinModeEnabled = false;
+let isPinModeEnabled = isDev ? true : false;
 
 app.disableHardwareAcceleration();
 
@@ -223,11 +223,17 @@ function trySetSearchMode(mode: SearchMode) {
 app.once('ready', async () => {
   if (isDev) {
     // Load react dev tools.
-    await electron.session.defaultSession.loadExtension(
-      path.join(__dirname, '..', '..', '..', 'react-dev-tools-4.9.0_26'),
-    );
-  }
+    // await electron.session.defaultSession.loadExtension(
+    //   path.join(__dirname, '..', '..', '..', 'react-dev-tools-4.9.0_26'),
+    // );
 
+    // Enable Electron hot reloading
+    require('electron-reload')(__dirname, {
+      electron: path.join(__dirname, '..', '..', 'node_modules', '.bin', 'electron'),
+      forceHardReset: true,
+      hardResetMethod: 'exit',
+    });
+  }
 
   isFirstRun = MainSyncService.get(StorageKey.FirstRun);
 
