@@ -2,7 +2,6 @@ import {
   makeAutoObservable,
   IReactionDisposer,
   reaction,
-  observable,
 } from 'mobx';
 import RootStore, { useRootStore } from 'App/RootStore';
 import SearchService, { SearchSource, SearchFilterTypings, SearchResult } from 'services/search.service';

@@ -2,8 +2,8 @@ import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { SearchSource } from 'services/search.service';
-import StackOverflowShortcuts from './StackOverflowShortcuts';
-import DocsShortcuts from './DocsShortcuts';
+import StackOverflowHotkeys from './StackOverflowHotkeys';
+import DocsHotkeys from './DocsHotkeys';
 
 const Container = styled.div`
   width: 100%;
@@ -16,20 +16,20 @@ const Container = styled.div`
   border-top: 1px solid #3B3A4A;
 `;
 
-function Shortcuts() {
+function HotkeysPanel() {
   const { searchSource } = useParams<{ searchSource: SearchSource }>();
 
   return (
     <Container>
       {searchSource === SearchSource.StackOverflow &&
-        <StackOverflowShortcuts />
+        <StackOverflowHotkeys />
       }
 
       {searchSource === SearchSource.Docs &&
-        <DocsShortcuts />
+        <DocsHotkeys />
       }
     </Container>
   );
 }
 
-export default Shortcuts;
+export default HotkeysPanel;

@@ -12,7 +12,7 @@ const Container = styled.div`
   background: #25252E;
 `;
 
-function ControlPanel() {
+function SearchPanel() {
   return (
     <Container>
       <SearchControls />
@@ -21,4 +21,4 @@ function ControlPanel() {
   );
 }
 
-export default ControlPanel;
+export default SearchPanel;

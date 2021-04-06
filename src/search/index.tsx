@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
-import Controls from 'Controls';
+import SearchPanel from 'Controls/SearchPanel';
 import SearchResults from './SearchResults';
-import Shortcuts from 'Shortcuts';
+import HotkeysPanel from 'Controls/HotkeysPanel';
 
 const Container = styled.div`
   flex: 1;
@@ -14,9 +14,9 @@ const Container = styled.div`
 function Search() {
   return (
     <Container>
-      <Controls />
+      <SearchPanel />
       <SearchResults />
-      <Shortcuts />
+      <HotkeysPanel />
     </Container>
   );
 }
