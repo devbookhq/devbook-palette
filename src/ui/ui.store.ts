@@ -65,10 +65,10 @@ class UIStore {
         hotkey: 'cmd+shift+p',
         label: [Key.Command, Key.Shift, 'P'],
       } : {
-        hotkey: 'alt+shift+[',
+        hotkey: 'alt+shift+p',
         label: [Key.Alt, Key.Shift, 'P'],
       },
-      isActive: () => this.isSearchHistoryVisible,
+      isActive: () => true,
     },
     [HotKeyAction.SelectStackOverflowSource]: {
       ...ElectronService.platform === Platform.MacOS ? {

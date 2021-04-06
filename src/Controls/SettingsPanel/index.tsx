@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+
 import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
@@ -8,6 +10,7 @@ import { PreferencesPage } from 'Preferences/preferencesPage';
 import QueryFilter from './QueryFilter';
 import SearchSourceFilters from './SearchSourceFilters';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
+import useHotkey from 'hooks/useHotkey';
 
 const Container = styled.div`
   width: 100%;
@@ -53,6 +56,14 @@ function SettingsPanel() {
     IPCServices.send(IPCSendChannel.OpenPreferences, { page: PreferencesPage.General });
   }
 
+  const togglePinMode = useCallback(() => {
+    uiStore.togglePinMode();
+  }, [uiStore.togglePinMode]);
+
+  useHotkey(uiStore.hotkeys[HotKeyAction.TogglePinMode],
+    togglePinMode,
+  );
+
   return (
     <Container>
       <FilterMenuWrapper>
@@ -61,7 +72,7 @@ function SettingsPanel() {
       <QueryFilter />
       <ButtonsWrapper>
         <Hotkey
-          onClick={() => uiStore.togglePinMode()}
+          onClick={togglePinMode}
           isHighlightedText={uiStore.isPinModeEnabled}
           hotkey={uiStore.hotkeys[HotKeyAction.TogglePinMode].label}
         >
