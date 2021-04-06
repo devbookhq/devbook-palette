@@ -5,6 +5,7 @@ interface StackOverflowSearchModalProps {
 }
 
 function StackOverflowSearchModal({ result }: StackOverflowSearchModalProps) {
+
   return (
     <>
       Stack Overflow Modal

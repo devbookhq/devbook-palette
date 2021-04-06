@@ -22,7 +22,7 @@ const DragHeader = styled.div`
   position: absolute;
   left: 5px;
   top: 2px;
-  height: 25px;
+  height: 20px;
   width: calc(100% - 10px);
   background: transparent;
   -webkit-app-region: drag;

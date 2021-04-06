@@ -13,7 +13,7 @@ function StackOverflowSearchResults({ results, selectedIdx }: StackOverflowSeach
       {results.map((result, i) =>
         <StackOverflowSearchResult
           result={result}
-          key={result.question.link}
+          key={result.question.title}
           isSelected={selectedIdx === i}
         />
       )}

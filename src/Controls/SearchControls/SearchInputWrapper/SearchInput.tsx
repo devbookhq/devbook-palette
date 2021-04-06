@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
+import React, { KeyboardEventHandler } from 'react';
 
 import { useSearchStore } from 'Search/search.store';
-import React from 'react';
 
 const Input = styled.input`
   padding: 10px 5px 10px 15px;
@@ -19,7 +19,12 @@ const Input = styled.input`
   }
 `;
 
-function SearchInput() {
+interface SearchInputProps {
+  inputRef: React.RefObject<HTMLInputElement>;
+  handleInputKeyDown: KeyboardEventHandler<HTMLInputElement>;
+}
+
+function SearchInput({ inputRef, handleInputKeyDown }: SearchInputProps) {
   const searchStore = useSearchStore();
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -28,8 +33,10 @@ function SearchInput() {
 
   return (
     <Input
+      ref={inputRef}
       value={searchStore.query}
       onChange={handleInputChange}
+      onKeyDown={handleInputKeyDown}
     />
   );
 }

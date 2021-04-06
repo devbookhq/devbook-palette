@@ -1,19 +1,27 @@
 import { observer } from 'mobx-react-lite';
-import { useUIStore } from 'ui/ui.store';
+import { useUIStore, HotKeyAction } from 'ui/ui.store';
 
 import SearchHistoryModal from './SearchHistoryModal';
-import Button from 'components/Button';
+import Hotkey from 'components/Hotkey';
+import useHotkey from 'hooks/useHotkey';
 
 function SearchHistory() {
   const uiStore = useUIStore();
 
+  useHotkey(
+    uiStore.hotkeys[HotKeyAction.ToggleHistory],
+    () => uiStore.toggleSeachHistory()
+  );
+
   return (
     <>
-      <Button
-        onClick={uiStore.toggleSeachHistory.bind(uiStore)}
+      <Hotkey
+        onClick={() => uiStore.toggleSeachHistory()}
+        isHighlightedText={uiStore.isSearchHistoryVisible}
+        hotkey={['Tab']}
       >
-        History
-      </Button>
+        to show history
+      </Hotkey>
       {uiStore.isSearchHistoryVisible &&
         <SearchHistoryModal />
       }

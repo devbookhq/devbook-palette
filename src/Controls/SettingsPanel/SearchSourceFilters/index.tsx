@@ -1,8 +1,7 @@
 import {
   useHistory,
   useParams,
-} from 'react-router-dom';
-import styled from 'styled-components';
+} from 'react-router-dom'; 
 
 import { SearchSource } from 'services/search.service';
 import SearchSourceFilter from './SearchSourceFilter';

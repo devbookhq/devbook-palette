@@ -6,7 +6,6 @@ import React, {
 import SearchStore from 'Search/search.store';
 import UIStore from 'ui/ui.store';
 import UserStore from 'user/user.store';
-import ShortcutsStore from 'Shortcuts/shortcuts.store';
 
 const StoreContext = createContext<RootStore | undefined>(undefined);
 
@@ -33,7 +32,6 @@ class RootStore {
   readonly searchStore = new SearchStore(this);
   readonly uiStore = new UIStore();
   readonly userStore = new UserStore(this);
-  readonly shortcutsStore = new ShortcutsStore();
 
   static get instance() {
     return RootStore._instance || (RootStore._instance = new RootStore())

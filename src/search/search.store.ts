@@ -39,6 +39,7 @@ class SearchStore {
   autosaveHandler: IReactionDisposer;
 
   _query: string = '';
+  _lastQuery: string = '';
   _searchMode: SearchMode = SearchMode.OnEnterPress;
   _history: HistoryEntry[] = [];
 
@@ -71,6 +72,14 @@ class SearchStore {
 
   get searchMode() {
     return this._searchMode;
+  }
+
+  get isQueryDirty() {
+    return this._query !== this._lastQuery;
+  }
+
+  private setLastQuery(query: string) {
+    this._lastQuery = query;
   }
 
   constructor(readonly rootStore: RootStore) {
@@ -133,6 +142,7 @@ class SearchStore {
   async executeSearch(query?: string) {
     if (query !== undefined) this.query = query;
     if (!this.query) return;
+    this.setLastQuery(this.query);
 
     console.log('Search query', this.query);
 
@@ -152,6 +162,7 @@ class SearchStore {
   get history() {
     return this._history
       .slice(-10)
+      .filter(h => h.query !== this.query)
       .reverse();
   }
 
