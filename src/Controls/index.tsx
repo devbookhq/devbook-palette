@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 import SearchControls from './SearchControls';
-import SettingsPanel from './SettingsPannel';
+import SettingsPanel from './SettingsPanel';
 
 const Container = styled.div`
   width: 100%;

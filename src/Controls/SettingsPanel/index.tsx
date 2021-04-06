@@ -18,7 +18,7 @@ const ButtonsWrapper = styled.div`
   justify-content: flex-end;
 `;
 
-function InfoPannel() {
+function SettingsPanel() {
   const uiStore = useUIStore();
 
   return (
@@ -40,4 +40,4 @@ function InfoPannel() {
   )
 }
 
-export default observer(InfoPannel);
+export default observer(SettingsPanel);
