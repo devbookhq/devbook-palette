@@ -1,9 +1,9 @@
 import { useSearchStore } from 'Search/search.store';
 import { observer } from 'mobx-react-lite';
 
-import DocsSearchResults from './DocsSearchResults';
-import DocsFilterModal from './DocsFilterModal';
 import { useUIStore } from 'ui/ui.store';
+import DocsSearchResults from './DocsResults';
+import DocsFilterModal from './DocsFilterModal';
 
 function DocsSearch() {
   const searchStore = useSearchStore();
@@ -13,7 +13,7 @@ function DocsSearch() {
     <>
       {uiStore.isFilterModalOpened &&
         <DocsFilterModal
-          filters={searchStore.filters.docs}
+          onCloseRequest={uiStore.toggleFilterModal}
         />
       }
       <DocsSearchResults

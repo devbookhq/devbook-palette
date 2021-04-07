@@ -11,8 +11,7 @@ import ElectronService from 'services/electron.service';
 import Onboarding from 'Onboarding';
 import Preferences from 'Preferences';
 import useLatestBundle from 'hooks/useLatestBundle';
-import Search from 'Search';
-import { SearchSource } from 'services/search.service';
+import Home from 'Home';
 import IPCService, { IPCSendChannel } from 'services/ipc.service';
 import AnalyticsService, { AnalyticsEvent } from 'services/analytics.service';
 
@@ -155,30 +154,29 @@ function App() {
         <Router>
           <Switch>
             <Route
-              path="/onboarding"
+              path='/onboarding'
               exact
             >
               <Onboarding />
             </Route>
 
             <Route
-              path="/preferences"
+              path='/preferences'
             >
               <Preferences />
             </Route>
 
             <Route
-              path="/"
+              path='/'
               exact
             >
-              <Redirect to={{ pathname: `/home/search/${SearchSource.StackOverflow}` }} />
-              {/* <Redirect to={{ pathname: `/home/search/so` }} /> */}
+              <Redirect to='/home' />
             </Route>
 
             <Route
-              path="/home/search/:searchSource"
+              path='/home'
             >
-              <Search />
+              <Home />
             </Route>
           </Switch>
         </Router>

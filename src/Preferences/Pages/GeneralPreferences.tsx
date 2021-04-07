@@ -11,7 +11,7 @@ import ElectronService from 'services/electron.service';
 import { Platform } from 'services/electron.service/platform';
 import { SearchMode } from 'services/search.service/searchMode';
 import SyncService, { StorageKey } from 'services/sync.service';
-import { GlobalShortcut } from 'services/shortcut.service';
+import { GlobalShortcut } from 'services/globalShortcut';
 
 const InfoMessage = styled.div`
   margin: auto;

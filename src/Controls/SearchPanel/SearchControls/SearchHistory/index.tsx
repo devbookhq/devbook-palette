@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react-lite';
-import { useUIStore, HotKeyAction } from 'ui/ui.store';
+import { useUIStore, HotkeyAction } from 'ui/ui.store';
 
 import SearchHistoryModal from './SearchHistoryModal';
 import Hotkey from 'components/Hotkey';
@@ -9,7 +9,7 @@ function SearchHistory() {
   const uiStore = useUIStore();
 
   useHotkey(
-    uiStore.hotkeys[HotKeyAction.ToggleHistory],
+    uiStore.hotkeys[HotkeyAction.ToggleHistory],
     () => uiStore.toggleSeachHistory()
   );
 

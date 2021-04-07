@@ -7,7 +7,7 @@ import Button from 'components/Button';
 import IntroductionPage from './pages/Introduction';
 import ShortcutPage from './pages/Shortcut';
 import { IPCOnChannel } from 'services/ipc.service';
-import { GlobalShortcut } from 'services/shortcut.service';
+import { GlobalShortcut } from 'services/globalShortcut';
 
 const Container = styled.div`
   margin-top: 7px;

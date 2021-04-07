@@ -1,10 +1,11 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useSearchStore } from 'Search/search.store';
 import styled from 'styled-components';
-import SearchHistoryQueries from './SearchHistoryQueries';
-import { HotKeyAction, useUIStore } from 'ui/ui.store';
+import SearchHistoryQuery from './SearchHistoryQuery';
+import { HotkeyAction, useUIStore } from 'ui/ui.store';
 import useHotkey from 'hooks/useHotkey';
+import Hotkey from 'components/Hotkey';
 
 const Container = styled.div<{ isFocused?: boolean }>`
   padding: 8px;
@@ -43,8 +44,6 @@ const Content = styled.div`
   align-items: flex-start;
 `;
 
-
-
 const TopBar = styled.div`
   width: 100%;
   display: flex;
@@ -52,59 +51,16 @@ const TopBar = styled.div`
   justify-content: flex-start;
 `;
 
-const HotkeyWrapper = styled.div`
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  border-radius: 5px;
-  user-select: none;
-  :hover {
-    transition: background 170ms ease-in;
-    cursor: pointer;
-    background: #434252;
-    > div {
-      color: #fff;
-    }
-  }
-  :not(:last-child) {
-    margin-right: 16px;
-  }
-`;
-
-const HotkeyText = styled.div`
-  margin-left: 8px;
-  font-size: 12px;
-  color: #616171;
-  transition: color 170ms ease-in;
-`;
-
-const MoreQueries = styled.div`
-  // margin-top: 8px;
-  font-family: 'Roboto Mono';
-  font-size: 12px;
-  color: #616171;
-`;
-
-const UnfocusedStateWrapper = styled.div`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-
-interface SearchHistoryProps {
-  history: string[];
-  isFocused?: boolean;
-  historyIdx: number;
-  onQueryClick: (q: string) => void;
-  onHideHotkeyClick: (e: any) => void;
-}
-
 function SearchHistoryModal() {
   const searchStore = useSearchStore();
   const uiStore = useUIStore();
-  
+
+  const queryRef = useRef<HTMLDivElement>(null);
   const [selectedQueryIdx, setSelectedQueryIdx] = useState(0);
+
+  useEffect(() => {
+    queryRef?.current?.scrollIntoView({ block: 'end' });
+  }, [selectedQueryIdx]);
 
   const changeHistoryResultUp = useCallback(() => {
     if (selectedQueryIdx > 0) setSelectedQueryIdx(selectedQueryIdx - 1);
@@ -114,29 +70,30 @@ function SearchHistoryModal() {
     if (selectedQueryIdx < searchStore.history.length - 1) setSelectedQueryIdx(selectedQueryIdx + 1);
   }, [selectedQueryIdx, searchStore.history]);
 
-  const searchHistory = useCallback(() => {
+  const searchHistory = useCallback((query?: string) => {
     if (searchStore.history.length - 1 < selectedQueryIdx) return;
-    searchStore.executeSearch(searchStore.history[selectedQueryIdx].query);
+    searchStore.executeSearch(query || searchStore.history[selectedQueryIdx].query);
     uiStore.toggleSeachHistory();
   }, [
     selectedQueryIdx,
     searchStore.history,
     uiStore.isSearchHistoryVisible,
     searchStore.history,
+    uiStore.isSearchHistoryVisible,
   ]);
 
   useHotkey(
-    uiStore.hotkeys[HotKeyAction.HistoryUp],
+    uiStore.hotkeys[HotkeyAction.HistoryUp],
     changeHistoryResultUp,
   );
 
   useHotkey(
-    uiStore.hotkeys[HotKeyAction.HistoryDown],
+    uiStore.hotkeys[HotkeyAction.HistoryDown],
     changeHistoryResultDown,
   );
 
   useHotkey(
-    uiStore.hotkeys[HotKeyAction.SearchHistory],
+    uiStore.hotkeys[HotkeyAction.SearchHistory],
     searchHistory,
   );
 
@@ -145,21 +102,18 @@ function SearchHistoryModal() {
     >
       <TopBar>
         <Heading>Past queries</Heading>
-        <HotkeyWrapper
-        >
-
-          <HotkeyText>
-            to hide
-          </HotkeyText>
-        </HotkeyWrapper>
+        <Hotkey hotkey={['Tab']} onClick={uiStore.toggleSeachHistory.bind(uiStore)}>to hide</Hotkey>
       </TopBar>
 
       <Content>
-        <SearchHistoryQueries
-          selectedQueryIdx={selectedQueryIdx}
-          onQueryClick={(query: string) => searchStore.executeSearch(query)}
-          history={searchStore.history}
-        />
+        {searchStore.history.map((h, i) => (
+          <SearchHistoryQuery
+            key={h.query}
+            query={h.query}
+            isSelected={selectedQueryIdx === i}
+            onClick={() => searchHistory(h.query)}
+          />
+        ))}
       </Content>
     </Container>
   );

@@ -11,11 +11,7 @@ interface SearchHistoryQueriesProps {
 }
 
 function SearchHistoryQueries({ history, onQueryClick, selectedQueryIdx }: SearchHistoryQueriesProps) {
-  const queryRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    queryRef?.current?.scrollIntoView({ block: 'end' });
-  }, [selectedQueryIdx]);
 
   return (
     <>

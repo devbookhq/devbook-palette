@@ -1,21 +1,27 @@
 import styled from 'styled-components';
 
-import SearchInput from './SearchInputWrapper';
+import SearchInput from './SearchInput';
 import SearchButton from './SearchButton';
 import SearchHistory from './SearchHistory';
-import SearchSourceFilters from '../SettingsPanel/SearchSourceFilters';
+import SearchSourceFilters from './SearchSourceFilters';
 
 const Container = styled.div`
   width: 100%;
   display: flex;
   border-bottom: 1px solid #3B3A4A;
   justify-content: space-between;
-  padding: 5px;
-  padding-top: 3px;
+  padding: 0px 10px 5px;
+`;
+
+const FilterMenuWrapper = styled.div`
+  display: flex;
+  border-left: 1px solid #3B3A4A;
+  padding: 0px 0px 0px 5px;
 `;
 
 const SearchOptionsWrapper = styled.div`
   display: flex;
+  padding: 0px 5px 0px 0px;
 `;
 
 function SearchControls() {
@@ -26,6 +32,9 @@ function SearchControls() {
         <SearchButton />
         <SearchHistory />
       </SearchOptionsWrapper >
+      <FilterMenuWrapper>
+        <SearchSourceFilters />
+      </FilterMenuWrapper>
     </Container >
   )
 }

@@ -1,5 +1,6 @@
+import { FocusState } from 'Search/focusState';
 import { DocResult } from 'services/search.service';
-import DocsSearchResult from './DocsSearchResult';
+import DocsItem from './DocsItem';
 
 interface DocsSearchResultsProps {
   results: DocResult[];
@@ -9,13 +10,13 @@ interface DocsSearchResultsProps {
 function DocsSearchResults({ results, selectedIdx }: DocsSearchResultsProps) {
   return (
     <>
-      {results.map((result, i) =>
-        <DocsSearchResult
+      {/* {results.map((result, i) =>
+        <DocsItem
           result={result}
           key={result.id}
-          isSelected={selectedIdx === i}
+          focusState={selectedIdx === i ? FocusState.None : FocusState.NoScroll}
         />
-      )}
+      )} */}
     </>
   );
 }

@@ -1,13 +1,18 @@
-import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { HotkeyType } from 'components/HotkeyText';
+import { observer } from 'mobx-react-lite';
+
 import { SearchSource } from 'services/search.service';
+import { useUIStore } from 'ui/ui.store';
 import StackOverflowHotkeys from './StackOverflowHotkeys';
+import StackOverflowModalHotkeys from './StackOverflowModalHotkeys';
 import DocsHotkeys from './DocsHotkeys';
+import DocsFilterModalHotkeys from './DocsFilterModalHotkeys';
 
 const Container = styled.div`
   width: 100%;
-  padding: 4px 5px;
+  padding: 5px 10px 5px;
   z-index: 10;
   display: flex;
   align-items: center;
@@ -16,20 +21,40 @@ const Container = styled.div`
   border-top: 1px solid #3B3A4A;
 `;
 
+export interface HotkeyWithText {
+  text: string;
+  hotkey: HotkeyType;
+  isSeparated?: boolean; // Separates hotkey's symbols that are listed in the 'hotkey' property.
+  onClick?: (e: any) => void;
+}
+
 function HotkeysPanel() {
-  const { searchSource } = useParams<{ searchSource: SearchSource }>();
+  const uiStore = useUIStore();
 
   return (
     <Container>
-      {searchSource === SearchSource.StackOverflow &&
-        <StackOverflowHotkeys />
+      {uiStore.searchSource === SearchSource.StackOverflow &&
+        <>
+          {!uiStore.isModalOpened &&
+            <StackOverflowHotkeys />
+          }
+          {uiStore.isModalOpened &&
+            <StackOverflowModalHotkeys />
+          }
+        </>
       }
-
-      {searchSource === SearchSource.Docs &&
-        <DocsHotkeys />
+      {uiStore.searchSource === SearchSource.Docs &&
+        <>
+          {!uiStore.isFilterModalOpened &&
+            <DocsHotkeys />
+          }
+          {uiStore.isFilterModalOpened &&
+            <DocsFilterModalHotkeys />
+          }
+        </>
       }
     </Container>
   );
 }
 
-export default HotkeysPanel;
+export default observer(HotkeysPanel);

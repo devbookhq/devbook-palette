@@ -32,15 +32,19 @@ export type SourceResultsSelection = {
   [source in SearchSource]: number;
 }
 
+type SearchInvocation = Promise<void>;
+
 class SearchStore {
   readonly _maxHistorySize = 20;
 
   autosaveHandler: IReactionDisposer;
 
+  _isSearching = false;
   _query: string = '';
   _lastQuery: string = '';
   _searchMode: SearchMode = SearchMode.OnEnterPress;
   _history: HistoryEntry[] = [];
+  _lastSearchInvocation?: SearchInvocation;
 
   readonly results: SourceResults = {
     [SearchSource.Docs]: [],
@@ -77,6 +81,18 @@ class SearchStore {
     return this._query !== this._lastQuery;
   }
 
+  get isSearching() {
+    return this._isSearching;
+  }
+
+  set isSearching(value: boolean) {
+    this._isSearching = value;
+  }
+
+  setSelectedFilter<T extends SearchSource>(source: T, value: SearchFilterTypings[T]) {
+    this.filters[source].selectedFilter = value;
+  }
+
   private setLastQuery(query: string) {
     this._lastQuery = query;
   }
@@ -85,6 +101,7 @@ class SearchStore {
     makeAutoObservable(this, {
       _maxHistorySize: false,
       autosaveHandler: false,
+      _lastSearchInvocation: false,
     });
     this.autosaveHandler = reaction(
       () => this.asJSON,
@@ -142,20 +159,30 @@ class SearchStore {
     if (query !== undefined) this.query = query;
     if (!this.query) return;
     this.setLastQuery(this.query);
+    this.isSearching = true;
 
-    console.log('Search query', this.query);
+    const searchInvocation = new Promise<void>(async (resolve, reject) => {
+      try {
+        const stackOverflowResultsPromise = SearchService.search(SearchSource.StackOverflow, { query: this.query });
+        const docsResultsPromise = this.filters.docs.selectedFilter
+          ? SearchService.search(SearchSource.Docs, { query: this.query, filter: this.filters.docs.selectedFilter })
+          : [];
 
-    const stackOverflowResultsPromise = SearchService.search(SearchSource.StackOverflow, { query: this.query });
-    const docsResultsPromise = this.filters.docs.selectedFilter
-      ? SearchService.search(SearchSource.Docs, { query: this.query, filter: this.filters.docs.selectedFilter })
-      : [];
+        const [stackOverflowResults, docsResults] = await Promise.all([stackOverflowResultsPromise, docsResultsPromise]);
 
-    const [stackOverflowResults, docsResults] = await Promise.all([stackOverflowResultsPromise, docsResultsPromise]);
-
-    this.setResults(SearchSource.StackOverflow, stackOverflowResults);
-    this.setResults(SearchSource.Docs, docsResults);
-
-    if (stackOverflowResults.length > 0 || docsResults.length > 0) this.saveHistoryQuery(this.query);
+        if (this._lastSearchInvocation === searchInvocation) {
+          this.setResults(SearchSource.StackOverflow, stackOverflowResults);
+          this.setResults(SearchSource.Docs, docsResults);
+          this.isSearching = false;
+          if (stackOverflowResults.length > 0 || docsResults.length > 0) this.saveHistoryQuery(this.query);
+        }
+        return resolve();
+      } catch (error) {
+        return reject(error);
+      }
+    });
+    this._lastSearchInvocation = searchInvocation;
+    return searchInvocation;
   }
 
   get history() {

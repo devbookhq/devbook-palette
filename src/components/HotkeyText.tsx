@@ -110,20 +110,6 @@ export enum Key {
   ArrowDown = 'KeyArrowDown',
 }
 
-// TODO: Naming of enums, types, and interfaces here is not great.
-// If someone can come up with better names please go ahead and change them.
-
-/*
-export enum Key {
-  Alt,
-  Shift,
-  Command,
-  Enter,
-  ArrowUp,
-  ArrowDown,
-}
-*/
-
 export enum VisualConcat {
   Plus = 'VisualConcatPlus',
 }
@@ -131,7 +117,7 @@ export enum VisualConcat {
 export type HotkeyElement = (string | Key | VisualConcat)
 export type HotkeyType = HotkeyElement[];
 
-interface HotkeyProps {
+interface HotkeyTextProps {
   className?: string;
   hotkey: HotkeyType;
 }
@@ -157,7 +143,7 @@ function renderVisualConcat(vc: VisualConcat) {
   );
 }
 
-function Hotkey({ className, hotkey }: HotkeyProps) {
+function HotkeyText({ className, hotkey }: HotkeyTextProps) {
   return (
     <>
       {/* Special case when only a single HotkeyType is passed*/}
@@ -201,4 +187,4 @@ function Hotkey({ className, hotkey }: HotkeyProps) {
   );
 }
 
-export default Hotkey;
+export default HotkeyText;

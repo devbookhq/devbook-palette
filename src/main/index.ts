@@ -32,7 +32,7 @@ import { UpdateLocation } from '@renderer/services/appWindow';
 import { AppWindow } from '@renderer/services/appWindow';
 import { PreferencesPage } from '@renderer/Preferences/preferencesPage';
 import { SearchMode } from '@renderer/services/search.service/searchMode';
-import { GlobalShortcut } from '@renderer/services/shortcut.service';
+import { GlobalShortcut } from '@renderer/services/globalShortcut';
 
 const port = 3000;
 let isPinModeEnabled = isDev ? true : false;

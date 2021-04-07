@@ -35,7 +35,12 @@ export interface DocSource {
   iconURL: string;
 }
 
-interface StackOverflowQuestion {
+export enum AnswerType {
+  Accepted = 'Accepted answer',
+  MostUpvoted = 'Most upvoted answer',
+}
+
+export interface StackOverflowQuestion {
   link: string;
   title: string;
   html: string;
@@ -43,7 +48,7 @@ interface StackOverflowQuestion {
   votes: number;
 }
 
-interface StackOverflowAnswer {
+export interface StackOverflowAnswer {
   html: string;
   votes: number;
   isAccepted: boolean;

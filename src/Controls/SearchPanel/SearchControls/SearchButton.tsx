@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 import Hotkey from 'components/Hotkey';
 import { useSearchStore } from 'Search/search.store';
-import { useUIStore, HotKeyAction } from 'ui/ui.store';
+import { useUIStore, HotkeyAction } from 'ui/ui.store';
 import useHotkey from 'hooks/useHotkey';
 import { SearchMode } from 'services/search.service/searchMode';
 
@@ -16,7 +16,7 @@ function SearchButton() {
   }, [uiStore]);
 
   useHotkey(
-    uiStore.hotkeys[HotKeyAction.Search],
+    uiStore.hotkeys[HotkeyAction.Search],
     searchCurrentQuery,
   );
 

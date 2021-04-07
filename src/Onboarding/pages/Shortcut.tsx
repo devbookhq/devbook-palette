@@ -5,7 +5,7 @@ import ElectronService from 'services/electron.service';
 import { Platform } from 'services/electron.service/platform';
 
 import { ReactComponent as CheckIcon } from 'img/check.svg';
-import { GlobalShortcut } from 'services/shortcut.service';
+import { GlobalShortcut } from 'services/globalShortcut';
 
 const Container = styled.div`
   width: 100%;

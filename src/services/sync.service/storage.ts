@@ -1,4 +1,4 @@
-import { GlobalShortcut } from 'services/shortcut.service';
+import { GlobalShortcut } from 'services/globalShortcut';
 import { SearchMode } from 'services/search.service/searchMode';
 
 export enum StorageKey {

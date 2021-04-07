@@ -7,6 +7,7 @@ class ElectronService {
   private constructor() { }
   static readonly ipcRenderer = electron.ipcRenderer;
   static readonly openLink = electron.shell.openExternal;
+  static readonly writeClipboard = electron.clipboard.writeText;
 
   static readonly platform = ElectronService.getPlatform();
   static readonly appVersion = ElectronService.getVersion();

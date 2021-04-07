@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { IPCOnChannel } from 'services/ipc.service';
 import useIPCRenderer from 'hooks/useIPCRenderer';
 import { useUIStore } from 'ui/ui.store';
-import SearchInput from './SearchInput';
+import SearchInput from './Input';
 
 function SearchInputWrapper() {
   const uiStore = useUIStore();

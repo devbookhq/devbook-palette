@@ -1,3 +1,4 @@
+import React from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div<{ isSelected?: boolean, isFullWidth?: boolean }>`
@@ -37,4 +38,4 @@ function SearchHistoryQuery({ query, isSelected, onClick }: SearchHistoryQuery) 
   );
 }
 
-export default SearchHistoryQuery;
+export default React.memo(SearchHistoryQuery);

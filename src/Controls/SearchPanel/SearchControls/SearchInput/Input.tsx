@@ -5,7 +5,7 @@ import React, { KeyboardEventHandler } from 'react';
 import { useSearchStore } from 'Search/search.store';
 
 const Input = styled.input`
-  padding: 10px 5px 10px 15px;
+  padding: 10px 5px 10px 12px;
   color: white;
   flex: 1;
   font-family: 'Roboto Mono';

@@ -4,16 +4,16 @@ import { observer } from 'mobx-react-lite';
 import styled from 'styled-components';
 
 import Hotkey from 'components/Hotkey';
-import { HotKeyAction, useUIStore } from 'ui/ui.store';
+import { HotkeyAction, useUIStore } from 'ui/ui.store';
 import IPCServices, { IPCSendChannel } from 'services/ipc.service';
 import { PreferencesPage } from 'Preferences/preferencesPage';
-import QueryFilter from './QueryFilter';
-import SearchSourceFilters from './SearchSourceFilters';
+import QueryFilters from './QueryFilters';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import useHotkey from 'hooks/useHotkey';
 
 const Container = styled.div`
   width: 100%;
+  padding: 5px 15px;
   display: flex;
   justify-content: space-between;
 `;
@@ -21,12 +21,6 @@ const Container = styled.div`
 const ButtonsWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
-`;
-
-const FilterMenuWrapper = styled.div`
-  display: flex;
-  border-left: 1px solid #3B3A4A;
-  padding-left: 5px;
 `;
 
 const PreferencesIcon = styled(preferencesIcon)`
@@ -39,7 +33,7 @@ const PreferencesIcon = styled(preferencesIcon)`
 `;
 
 const PreferencesButton = styled.div`
-  margin: 0 5px 0 0;
+  margin-left: 5px;
   display: flex;
   :hover {
     path {
@@ -52,29 +46,26 @@ const PreferencesButton = styled.div`
 function SettingsPanel() {
   const uiStore = useUIStore();
 
-  function openPreferences() {
+  const openPreferences = useCallback(() => {
     IPCServices.send(IPCSendChannel.OpenPreferences, { page: PreferencesPage.General });
-  }
+  }, []);
 
   const togglePinMode = useCallback(() => {
     uiStore.togglePinMode();
   }, [uiStore.togglePinMode]);
 
-  useHotkey(uiStore.hotkeys[HotKeyAction.TogglePinMode],
+  useHotkey(uiStore.hotkeys[HotkeyAction.TogglePinMode],
     togglePinMode,
   );
 
   return (
     <Container>
-      <FilterMenuWrapper>
-        <SearchSourceFilters />
-      </FilterMenuWrapper>
-      <QueryFilter />
+      <QueryFilters />
       <ButtonsWrapper>
         <Hotkey
           onClick={togglePinMode}
           isHighlightedText={uiStore.isPinModeEnabled}
-          hotkey={uiStore.hotkeys[HotKeyAction.TogglePinMode].label}
+          hotkey={uiStore.hotkeys[HotkeyAction.TogglePinMode].label}
         >
           {uiStore.isPinModeEnabled ? 'to unpin Devbook' : 'to pin Devbook'}
         </Hotkey>

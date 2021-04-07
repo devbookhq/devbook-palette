@@ -3,7 +3,7 @@ import { SearchMode } from 'services/search.service/searchMode';
 import { AuthInfo } from 'user/authInfo';
 import { User } from 'user/user';
 import { AppWindow, UpdateLocation } from 'services/appWindow';
-import { GlobalShortcut } from 'services/shortcut.service';
+import { GlobalShortcut } from 'services/globalShortcut';
 import { PreferencesPage } from 'Preferences/preferencesPage';
 import { StorageKey, StorageValue } from 'services/sync.service/storage';
 import { AnalyticsEvent, AnalyticsPayload } from 'services/analytics.service/analyticsEvent';

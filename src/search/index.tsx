@@ -1,22 +1,28 @@
 import styled from 'styled-components';
 
-import SearchPanel from 'Controls/SearchPanel';
-import SearchResults from './SearchResults';
-import HotkeysPanel from 'Controls/HotkeysPanel';
+import { useUIStore } from 'ui/ui.store';
+import { SearchSource } from 'services/search.service'
+import StackOverflow from './StackOverflow';
+import Docs from './Docs';
 
 const Container = styled.div`
-  flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
 `;
 
 function Search() {
+  const uiStore = useUIStore();
   return (
     <Container>
-      <SearchPanel />
-      <SearchResults />
-      <HotkeysPanel />
+      {uiStore.searchSource === SearchSource.StackOverflow &&
+        <StackOverflow />
+      }
+
+      {uiStore.searchSource === SearchSource.Docs &&
+        <Docs />
+      }
     </Container>
   );
 }
