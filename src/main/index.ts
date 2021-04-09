@@ -20,6 +20,7 @@ if (isDev) {
   app.setPath('userData', path.resolve(app.getPath('userData'), '..', appDataFolder));
 }
 
+
 import MainIPCService, { IPCInvokeChannel, IPCOnChannel, IPCSendChannel } from '@main/services/mainIPC.service'
 import MainAnalyticsService, { AnalyticsEvent } from '@main/services/mainAnalytics.service';
 import Tray from '@main/Tray';

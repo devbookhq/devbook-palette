@@ -32,7 +32,7 @@
   "scripts": {
     "start:client": "craco start",
     "start": "concurrently \"npm run start:client\" \"./scripts/esbuild-watch-electron.sh\" \"wait-on http://localhost:3000 && npm run start:electron\"",
-    "start:electron": "npm run bundle:electron && electron --enable-logging .",
+    "start:electron": "MINIFY=\"--noMinify\" npm run bundle:electron && electron --enable-logging .",
     "bundle:client": "./scripts/bundle-client.sh",
     "bundle:electron": "./scripts/esbuild-bundle-electron.sh",
     "postinstall": "electron-rebuild",
