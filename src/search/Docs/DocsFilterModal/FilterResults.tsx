@@ -9,7 +9,7 @@ import { useRef } from 'react';
 import { useSearchStore } from 'Search/search.store';
 import { HotkeyAction, useUIStore } from 'ui/ui.store';
 
-const DocsList = styled.div`
+const Container = styled.div`
   height: 100%;
   width: 100%;
 
@@ -56,18 +56,14 @@ function FilterResults({ onCloseRequest }: FilterResultsProps) {
   }, [onCloseRequest]);
 
   const modalFilterUpHandler = useCallback(() => {
-    if (selectedIdx > 0) {
-      setSelectedIdx(c => c -= 1);
-    }
+    setSelectedIdx(c => c > 0 ? c - 1 : c);
     selectedDocRow?.current?.scrollIntoView({ block: 'end' });
-  }, [selectedIdx]);
+  }, [selectedDocRow]);
 
   const modalFilterDownHandler = useCallback(() => {
-    if (selectedIdx < filteredSourceFilters.length - 1) {
-      setSelectedIdx(c => c += 1);
-    }
+    setSelectedIdx(c => c < filteredSourceFilters.length - 1 ? c + 1 : c);
     selectedDocRow?.current?.scrollIntoView({ block: 'end' });
-  }, [selectedIdx, filteredSourceFilters]);
+  }, [filteredSourceFilters, selectedDocRow]);
 
   const modalFilterSelectHandler = useCallback(() => {
     selectSourceFilter(filteredSourceFilters[selectedIdx]);
@@ -92,7 +88,7 @@ function FilterResults({ onCloseRequest }: FilterResultsProps) {
   ]);
 
   return (
-    <DocsList>
+    <Container>
       {filteredSourceFilters.map((ds, i) =>
         <FilterItem
           itemRef={selectedIdx === i ? selectedDocRow : undefined}
@@ -102,7 +98,7 @@ function FilterResults({ onCloseRequest }: FilterResultsProps) {
           isSelected={selectedIdx === i}
         />
       )}
-    </DocsList>
+    </Container>
   );
 }
 

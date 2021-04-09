@@ -1,13 +1,10 @@
 import {
   makeAutoObservable,
-  IReactionDisposer,
-  reaction,
   toJS,
 } from 'mobx';
 import RootStore, { useRootStore } from 'App/RootStore';
 import SearchService, { SearchFilterTypings, SearchResult } from 'services/search.service';
 import { SearchSource } from 'services/search.service/searchSource';
-import { SearchMode } from 'services/search.service/searchMode';
 import SyncService, { StorageKey } from 'services/sync.service';
 import { HistoryEntry } from './historyEntry';
 
@@ -39,7 +36,6 @@ class SearchStore {
   _isSearching = false;
   _query: string = '';
   _lastQuery: string = '';
-  _searchMode: SearchMode = SearchMode.OnEnterPress;
   _history: HistoryEntry[] = [];
   _lastSearchInvocation?: SearchInvocation;
 
@@ -61,14 +57,6 @@ class SearchStore {
     return this._query;
   }
 
-  set searchMode(mode: SearchMode) {
-    this._searchMode = mode;
-  }
-
-  get searchMode() {
-    return this._searchMode;
-  }
-
   get isQueryDirty() {
     return this._query !== this._lastQuery;
   }
@@ -83,6 +71,7 @@ class SearchStore {
 
   setSelectedFilter<T extends SearchSource>(source: T, value: SearchFilterTypings[T] | undefined) {
     this.filters[source].selectedFilter = value;
+    this.executeSearch();
   }
 
   private setLastQuery(query: string) {
@@ -94,20 +83,14 @@ class SearchStore {
       _maxHistorySize: false,
       _lastSearchInvocation: false,
     });
-    this.sync().then(() => this.backup());
+    this.sync().then(() => {
+      this.executeSearch();
+      this.backup();
+    });
   }
 
   private setResults<T extends SearchSource>(source: T, results: SearchResult[T][]) {
     this.results[source].results = results as any;
-  }
-
-  get asJSON() {
-    return {
-      query: this.query,
-      results: this.results,
-      searchMode: this.searchMode,
-      history: this.history,
-    };
   }
 
   private setFilter<T extends SearchSource>(source: T, filters: SourceFilters[T]) {
@@ -184,19 +167,16 @@ class SearchStore {
 
   private async sync() {
     const query = await SyncService.get(StorageKey.LastQuery);
-    const searchMode = await SyncService.get(StorageKey.SearchMode);
     const docsSelectedFilter = await SyncService.get(StorageKey.ActiveDocSource);
     const history = await SyncService.get(StorageKey.SearchHistoryEntries);
     this.query = query;
     this.history = history;
-    this.searchMode = searchMode;
     this.setSelectedFilter(SearchSource.Docs, docsSelectedFilter);
     await this.refreshSearchFilters();
   }
 
   private backup() {
     SyncService.registerBackup(StorageKey.LastQuery, () => this.query);
-    SyncService.registerBackup(StorageKey.SearchMode, () => this.searchMode);
     SyncService.registerBackup(StorageKey.ActiveDocSource, () => toJS(this.filters[SearchSource.Docs].selectedFilter));
     SyncService.registerBackup(StorageKey.SearchHistoryEntries, () => toJS(this._history));
   }

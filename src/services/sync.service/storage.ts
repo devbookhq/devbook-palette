@@ -1,6 +1,5 @@
 import { GlobalShortcut } from 'services/globalShortcut';
 import { SearchSource } from 'services/search.service/searchSource';
-import { SearchMode } from 'services/search.service/searchMode';
 import { DocSource } from 'services/search.service/docSource';
 import { HistoryEntry } from "Search/historyEntry";
 
@@ -9,7 +8,6 @@ export enum StorageKey {
   SearchHistoryEntries = 'searchHistoryEntries',
   IsPinModeEnabled = 'isPinModeEnabled',
   ActiveDocSource = 'activeDocSource',
-  SearchMode = 'searchMode',
   OpenAtLogin = 'openAtLogin',
   FirstRun = 'firstRun',
   GlobalShortcut = 'globalShortcut',
@@ -28,7 +26,6 @@ export type StorageValue = {
   [StorageKey.Email]: string | undefined;
   [StorageKey.IsPinModeEnabled]: boolean;
   [StorageKey.ActiveDocSource]: DocSource | undefined;
-  [StorageKey.SearchMode]: SearchMode;
   [StorageKey.GlobalShortcut]: GlobalShortcut;
   [StorageKey.LastQuery]: string;
   [StorageKey.SearchFilter]: SearchSource;

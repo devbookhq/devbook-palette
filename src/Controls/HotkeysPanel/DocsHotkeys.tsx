@@ -28,7 +28,8 @@ function DocsHotkeys() {
 
   useHotkey(uiStore.hotkeys[HotkeyAction.DocsScrollUp]);
   useHotkey(uiStore.hotkeys[HotkeyAction.DocsScrollDown]);
-  const searchInPage = useHotkey(uiStore.hotkeys[HotkeyAction.DocsSearchInPage]);
+  const searchInPage = useHotkey(uiStore.hotkeys[HotkeyAction.DocsOpenSearchInPage]);
+  const cancelSearchInPage = useHotkey(uiStore.hotkeys[HotkeyAction.DocsCancelSearchInPage]);
 
   return (
     <>
@@ -37,7 +38,8 @@ function DocsHotkeys() {
         <Hotkey hotkey={resultsDown.label} isHighlightedText={true} onClick={resultsDown.handler}>Next result</Hotkey>
       </LeftHotkeyGroup>
       <RightHotkeyGroup>
-        <Hotkey reverseContent={true} hotkey={searchInPage.label} isHighlightedText={true} onClick={searchInPage.handler}>Search in page</Hotkey>
+        {!uiStore.isSearchInPageOpened && <Hotkey reverseContent={true} hotkey={searchInPage.label} isHighlightedText={true} onClick={searchInPage.handler}>Search in page</Hotkey>}
+        {uiStore.isSearchInPageOpened && <Hotkey reverseContent={true} hotkey={cancelSearchInPage.label} isHighlightedText={true} onClick={cancelSearchInPage.handler}>Cancel search in page</Hotkey>}
         <NoClickHotkey reverseContent={true} hotkey={[Key.Shift, Key.ArrowUp, Key.ArrowDown]} isHighlightedText={true}>Scroll page</NoClickHotkey>
       </RightHotkeyGroup>
     </>

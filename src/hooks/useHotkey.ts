@@ -30,3 +30,4 @@ function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], han
 }
 
 export default useHotkey;
+ 

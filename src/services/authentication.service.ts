@@ -19,10 +19,6 @@ class AuthenticationService {
   private static readonly magic = new Magic(AuthenticationService.magicAPIKey);
   private static signInCancelHandle: (() => void) | undefined = undefined;
 
-  private static randomKey() {
-    const key = uuidv4();
-  }
-
   static async signIn(email: string): Promise<{ user: User, refreshToken: string, accessToken: string }> {
     AuthenticationService.cancelSignIn();
 

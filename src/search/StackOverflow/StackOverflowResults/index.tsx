@@ -4,29 +4,33 @@ import { StackOverflowResult } from 'services/search.service';
 import { FocusState } from 'Search/focusState';
 import StackOverflowItem from './StackOverflowItem';
 
+const Container = styled.div`
+  height: 100%;
+  width: 100%;
+  padding: 10px 15px;
+  display: flex;
+  flex-direction: column;
+  overflow: overlay;
+`;
+
 interface StackOverflowSeachResultsProps {
   results: StackOverflowResult[];
   selectedIdx: number;
   containerRef: React.RefObject<HTMLDivElement>;
+  openModalForResult: (i: number) => void;
 }
 
-const Container = styled.div`
-  padding: 10px 15px;
-  width: 100%;
-  overflow: hidden;
-  overflow-y: overlay;
-`;
+function StackOverflowItems({ results, selectedIdx, openModalForResult, containerRef }: StackOverflowSeachResultsProps) {
 
-function StackOverflowItems({ results, selectedIdx, containerRef }: StackOverflowSeachResultsProps) {
   return (
-    <Container ref={containerRef}>
+    <Container>
       {results.map((result, i) =>
         <StackOverflowItem
           result={result}
           key={result.question.title}
           focusState={selectedIdx === i ? FocusState.None : FocusState.NoScroll}
-          onHeaderClick={() => { }}
-          onTitleClick={() => { }}
+          openModalForResult={openModalForResult}
+          idx={i}
         />
       )}
     </Container>

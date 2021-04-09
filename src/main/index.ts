@@ -20,7 +20,6 @@ if (isDev) {
   app.setPath('userData', path.resolve(app.getPath('userData'), '..', appDataFolder));
 }
 
-
 import MainIPCService, { IPCInvokeChannel, IPCOnChannel, IPCSendChannel } from '@main/services/mainIPC.service'
 import MainAnalyticsService, { AnalyticsEvent } from '@main/services/mainAnalytics.service';
 import Tray from '@main/Tray';
@@ -32,7 +31,6 @@ import MainSyncService, { StorageKey } from '@main/services/mainSync.service';
 import { UpdateLocation } from '@renderer/services/appWindow';
 import { AppWindow } from '@renderer/services/appWindow';
 import { PreferencesPage } from '@renderer/Preferences/preferencesPage';
-import { SearchMode } from '@renderer/services/search.service/searchMode';
 import { GlobalShortcut } from '@renderer/services/globalShortcut';
 
 const port = 3000;
@@ -215,11 +213,6 @@ function trySetGlobalShortcut(shortcut: GlobalShortcut) {
   MainSyncService.set(StorageKey.GlobalShortcut, shortcut);
 }
 
-function trySetSearchMode(mode: SearchMode) {
-  MainSyncService.set(StorageKey.SearchMode, mode);
-  MainIPCService.send(IPCOnChannel.OnPinModeChange, mainWindow?.window, { isEnabled: isPinModeEnabled });
-}
-
 /////////// App Events ///////////
 app.once('ready', async () => {
   if (isDev) {
@@ -241,8 +234,6 @@ app.once('ready', async () => {
   // If user registered a global shortcut from the previos session, load it and register again.
   const savedShortcut = MainSyncService.get(StorageKey.GlobalShortcut);
   if (savedShortcut) {
-    // TODO: Since we still don't offer for a user to change the shortcut after onboarding
-    // this might fail and user won't be able to show Devbook through a shortcut ever again.
     trySetGlobalShortcut(savedShortcut);
   }
 
@@ -328,11 +319,6 @@ MainIPCService.on(IPCSendChannel.LoadAppClient, (_, { window }) => {
       );
     }
   }
-});
-
-MainIPCService.on(IPCSendChannel.UserDidChangeSearchMode, (_, { mode }) => {
-  trySetSearchMode(mode);
-  MainAnalyticsService.track(AnalyticsEvent.SearchModeChanged, { mode }, { searchWindow: mainWindow?.window });
 });
 
 MainIPCService.on(IPCSendChannel.FinishOnboarding, () => {

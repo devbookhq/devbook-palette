@@ -45,7 +45,11 @@ export enum HotkeyAction {
   DocsOpenModalFilter,
   DocsCloseModalFilter,
   DocsCancelSearchInPage,
-  DocsSearchInPage,
+  DocsOpenSearchInPage,
+  DocsSearchInPageUp,
+  DocsSearchInPageDown,
+  DocsScrollTop,
+  DocsScrollBottom,
 }
 
 export type HotKeysBinding = {
@@ -65,8 +69,48 @@ class UIStore {
   isFilterModalOpened = false;
   isSearchInPageOpened = false;
   _searchSource: SearchSource = SearchSource.StackOverflow;
+  _docSearchResultsDefaultWidth: number = 300;
+  _docsFilterModalQuery = '';
 
   hotkeys: HotKeysBinding = {
+    [HotkeyAction.DocsSearchInPageDown]: {
+      hotkey: 'enter',
+      label: [],
+      isActive: () => this.searchSource === SearchSource.Docs && this.isSearchInPageOpened,
+    },
+    [HotkeyAction.DocsSearchInPageUp]: {
+      hotkey: 'shift+enter',
+      label: [],
+      isActive: () => this.searchSource === SearchSource.Docs && this.isSearchInPageOpened,
+    },
+    [HotkeyAction.DocsScrollBottom]: {
+      ...ElectronService.platform === Platform.MacOS ? {
+        hotkey: 'cmd+down',
+      } : {
+        hotkey: 'ctrl+down',
+      },
+      label: [],
+      isActive: () => this.searchSource === SearchSource.Docs && !this.isFilterModalOpened,
+    },
+    [HotkeyAction.DocsScrollTop]: {
+      ...ElectronService.platform === Platform.MacOS ? {
+        hotkey: 'cmd+up',
+      } : {
+        hotkey: 'ctrl+up',
+      },
+      label: [],
+      isActive: () => this.searchSource === SearchSource.Docs && !this.isFilterModalOpened,
+    },
+    [HotkeyAction.DocsScrollDown]: {
+      hotkey: 'shift+down',
+      label: [],
+      isActive: () => this.searchSource === SearchSource.Docs && !this.isFilterModalOpened,
+    },
+    [HotkeyAction.DocsScrollUp]: {
+      hotkey: 'shift+up',
+      label: [],
+      isActive: () => this.searchSource === SearchSource.Docs && !this.isFilterModalOpened,
+    },
     [HotkeyAction.DocsOpenModalFilter]: {
       ...ElectronService.platform === Platform.MacOS ? {
         hotkey: 'cmd+d',
@@ -142,7 +186,7 @@ class UIStore {
       label: [Key.ArrowUp],
       isActive: () => this.searchSource === SearchSource.Docs && !this.isSearchInPageOpened && !this.isFilterModalOpened,
     },
-    [HotkeyAction.DocsSearchInPage]: {
+    [HotkeyAction.DocsOpenSearchInPage]: {
       ...ElectronService.platform === Platform.MacOS ? {
         hotkey: 'cmd+f',
         label: [Key.Command, 'F'],
@@ -255,13 +299,8 @@ class UIStore {
 
   constructor() {
     makeAutoObservable(this);
-    // autorun(() => {
-    //   console.log(toJS(this));
-    // });
     this.sync().then(() => this.backup());
   }
-
-  _docsFilterModalQuery = '';
 
   set docsFilterModalQuery(value: string) {
     this._docsFilterModalQuery = value;
@@ -269,6 +308,18 @@ class UIStore {
 
   get docsFilterModalQuery() {
     return this._docsFilterModalQuery;
+  }
+
+  get docSearchResultsDefaultWidth() {
+    return this._docSearchResultsDefaultWidth;
+  }
+
+  set docSearchResultsDefaultWidth(value: number) {
+    this._docSearchResultsDefaultWidth = value;
+  }
+
+  toggleSearchInPage() {
+    this.isSearchInPageOpened = !this.isSearchInPageOpened;
   }
 
   toggleModal() {

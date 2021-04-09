@@ -62,6 +62,10 @@ function SearchHistoryModal() {
     queryRef?.current?.scrollIntoView({ block: 'end' });
   }, [selectedQueryIdx]);
 
+  const toggleSearchHistory = useCallback(() => {
+    uiStore.toggleSeachHistory()
+  }, []);
+
   const changeHistoryResultUp = useCallback(() => {
     if (selectedQueryIdx > 0) setSelectedQueryIdx(selectedQueryIdx - 1);
   }, [selectedQueryIdx]);
@@ -102,7 +106,7 @@ function SearchHistoryModal() {
     >
       <TopBar>
         <Heading>Past queries</Heading>
-        <Hotkey hotkey={['Tab']} onClick={uiStore.toggleSeachHistory.bind(uiStore)}>to hide</Hotkey>
+        <Hotkey hotkey={['Tab']} onClick={toggleSearchHistory}>to hide</Hotkey>
       </TopBar>
 
       <Content>

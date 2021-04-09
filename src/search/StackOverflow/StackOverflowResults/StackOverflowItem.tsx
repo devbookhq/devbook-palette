@@ -177,15 +177,16 @@ const NoAnswer = styled.span`
 interface StackOverflowItemProps {
   result: StackOverflowResult;
   focusState: FocusState;
-  onHeaderClick: (e: any) => void;
-  onTitleClick: (e: any) => void;
+  idx: number;
+  openModalForResult: (i: number) => void;
+  setFocusResult: (i: number) => void;
 }
 
 function StackOverflowItem({
   result,
   focusState,
-  onHeaderClick,
-  onTitleClick,
+  idx,
+  openModalForResult,
 }: StackOverflowItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -199,6 +200,7 @@ function StackOverflowItem({
 
   function handleQuestionTitleClick(e: any) {
     onTitleClick(e);
+    setFocusResult()
     e.preventDefault();
   }
 
@@ -351,7 +353,7 @@ function StackOverflowItem({
       <Header
         id="so-header"
         isFocused={focusState !== FocusState.None}
-        onClick={onHeaderClick}
+        onClick={() => openModalForResult(idx)}
       >
         <QuestionTitleWrapper>
           <QuestionTitle

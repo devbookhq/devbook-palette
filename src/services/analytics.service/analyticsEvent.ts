@@ -1,5 +1,4 @@
 import { UpdateLocation } from 'services/appWindow';
-import { SearchMode } from 'services/search.service/searchMode';
 
 export enum AnalyticsEvent {
   ShowedApp = 'Showed app',
@@ -37,15 +36,12 @@ export enum AnalyticsEvent {
 
   OpenDocsFilter = 'Open documentation filter',
 
-  SearchModeChanged = 'Search mode changed',
-
   DismissBundleUpdate = 'Dismiss bundle update',
   PerformBundleUpdate = 'Perform bundle update'
 }
 
 export type AnalyticsPayload = {
   [AnalyticsEvent.ShortcutUsed]: { action: string, hotkey: string };
-  [AnalyticsEvent.SearchModeChanged]: { mode: SearchMode };
   [AnalyticsEvent.Search]: {};
   [AnalyticsEvent.ModalOpened]: {};
   [AnalyticsEvent.SignInModalOpened]: void;

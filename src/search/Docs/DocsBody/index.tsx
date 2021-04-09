@@ -1,16 +1,20 @@
-import React, {
+import {
   useRef,
   useState,
   useEffect,
+  useMemo,
+  useCallback,
 } from 'react';
 import styled from 'styled-components';
 import Prism from 'prismjs';
-
-import { useHotkeys } from 'react-hotkeys-hook';
+import { observer } from 'mobx-react-lite';
 
 import ElectronService from 'services/electron.service';
 import { DocResult } from 'services/search.service';
 import { ReactComponent as chevronImg } from 'img/chevron.svg';
+import { HotkeyAction, useUIStore } from 'ui/ui.store';
+import DocsContent from './DocsContent';
+import useHotkey from 'hooks/useHotkey';
 
 const SearchInputWrapper = styled.div`
   position: absolute;
@@ -186,97 +190,51 @@ interface Highlight {
   nodes: Node[];
 }
 
+function highlightCode(html: string) {
+  const el = document.createElement('html');
+  el.innerHTML = html;
+
+  const pres = el.getElementsByTagName('pre');
+  for (const pre of pres) {
+    const codeText = (pre as HTMLElement).innerText;
+    if (codeText) {
+      const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
+      pre.innerHTML = codeHTML;
+    }
+  }
+  return el.outerHTML || '<html></html>';
+}
+
+function handleLinkClick(e: MouseEvent, link: string, pageURL: string | undefined) {
+  if (!link) {
+    console.warn('Clicked link had empty href.');
+    e.preventDefault();
+    return;
+  }
+  if (!link.startsWith('http://') && !link.startsWith('https://')) {
+    link = new URL(link, pageURL).href; // Convert relative links to absolute.
+  }
+  ElectronService.openLink(link);
+  e.preventDefault();
+}
+
 interface DocsBodyProps {
   searchInputRef: any;
-  isDocsFilterModalOpened: boolean;
-  isSearchingInDocPage: boolean;
-  isSearchHistoryOpened: boolean;
-
-  docResult: DocResult;
+  result: DocResult;
 }
 
 function DocsBody({
   searchInputRef,
-  isDocsFilterModalOpened,
-  isSearchingInDocPage,
-  isSearchHistoryOpened,
-  docResult,
+  result,
 }: DocsBodyProps) {
-  const { pageURL, html, anchor } = docResult.page;
+  const { pageURL, html, anchor } = result.page;
+  const uiStore = useUIStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [selectedIdx, setSelectedIdx] = useState(0);
-
-  function handleLinkClick(e: MouseEvent, link: string) {
-    if (!link) {
-      console.warn('Clicked link had empty href.');
-      e.preventDefault();
-      return;
-    }
-    if (!link.startsWith('http://') && !link.startsWith('https://')) {
-      link = new URL(link, pageURL).href; // Convert relative links to absolute.
-    }
-    ElectronService.openLink(link);
-    e.preventDefault();
-  }
-
-  function highlightCode(html: string) {
-    const el = document.createElement('html');
-    el.innerHTML = html;
-
-    const pres = el.getElementsByTagName('pre');
-    for (const pre of pres) {
-      const codeText = (pre as HTMLElement).innerText;
-      if (codeText) {
-        // TODO: We could use the correct langague highlight based on the documentation.
-        const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
-        pre.innerHTML = codeHTML;
-      }
-    }
-
-    // TODO: Load TEX language.
-    /*
-    const maths = el.getElementsByTagName('math');
-    for (const math of maths) {
-      //console.log('math', math);
-      const mathText = (math as HTMLElement).innerText;
-      //console.log('mathText', mathText);
-      //console.log('Prism', Prism.languages)
-      if (mathText) {
-        // TODO: We could use the correct langague highlight based on the documentation.
-        const mathHTML = Prism.highlight(mathText, Prism.languages.tex, 'tex');
-        math.innerHTML = mathHTML;
-      }
-    }
-    */
-
-    return el.outerHTML || '<html></html>';
-  }
-
-  function selectNextHighlight() {
-    deselectHighlight(highlights[selectedIdx]);
-    if (selectedIdx < highlights.length - 1) {
-      selectHighlight(highlights[selectedIdx + 1]);
-      setSelectedIdx(c => c += 1);
-    } else {
-      selectHighlight(highlights[0]);
-      setSelectedIdx(0);
-    }
-  }
-
-  function selectPreviousHighlight() {
-    deselectHighlight(highlights[selectedIdx]);
-    if (selectedIdx > 0) {
-      selectHighlight(highlights[selectedIdx - 1]);
-      setSelectedIdx(c => c -= 1);
-    } else {
-      selectHighlight(highlights[highlights.length - 1]);
-      setSelectedIdx(highlights.length - 1);
-    }
-  }
 
   function handleSearchInputKeyDown(e: any) {
     // Enter pressed.
@@ -289,37 +247,58 @@ function DocsBody({
     }
   }
 
-  useHotkeys('shift+up', () => {
-    if (isSearchHistoryOpened || isSearchingInDocPage || isDocsFilterModalOpened) return;
+  const selectNextHighlight = useCallback(() => {
+    setSelectedIdx(c => {
+      deselectHighlight(highlights[c]);
+      const idx = c < highlights.length - 1 ? c + 1 : 0
+      selectHighlight(highlights[idx]);
+      return idx;
+    });
+  }, [highlights]);
 
-    if (containerRef?.current) {
-      containerRef.current.scrollBy(0, -15);
-    }
-  }, { filter: () => true }, [isSearchHistoryOpened, isSearchingInDocPage, isDocsFilterModalOpened]);
+  const selectPreviousHighlight = useCallback(() => {
+    setSelectedIdx(c => {
+      deselectHighlight(highlights[c]);
+      const idx = c > 0 ? c - 1 : highlights.length - 1;
+      selectHighlight(highlights[idx]);
+      return idx;
+    });
+  }, [highlights]);
 
-  useHotkeys('shift+down', () => {
-    if (isSearchHistoryOpened || isSearchingInDocPage || isDocsFilterModalOpened) return;
+  const toggleSearchInPage = useCallback(() => {
+    uiStore.toggleSearchInPage();
+  }, []);
 
-    if (containerRef?.current) {
-      containerRef.current.scrollBy(0, 15);
-    }
-  }, { filter: () => true }, [isSearchHistoryOpened, isSearchingInDocPage, isDocsFilterModalOpened]);
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.DocsOpenSearchInPage, toggleSearchInPage);
+    uiStore.registerHotkeyHandler(HotkeyAction.DocsCancelSearchInPage, toggleSearchInPage);
+  }, [toggleSearchInPage]);
 
-  // useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+up' : 'ctrl+up', () => {
-  //   if (isSearchingInDocPage || isDocsFilterModalOpened) return;
+  useHotkey(uiStore.hotkeys[HotkeyAction.DocsSearchInPageUp], selectPreviousHighlight);
+  useHotkey(uiStore.hotkeys[HotkeyAction.DocsSearchInPageDown], selectNextHighlight);
 
-  //   if (containerRef?.current) {
-  //     containerRef.current.scrollTo(0, 0);
-  //   }
-  // }, { filter: () => true }, [isSearchingInDocPage, isDocsFilterModalOpened]);
+  const scrollUp = useCallback(() => {
+    containerRef?.current?.scrollBy(0, -15);
+  }, [containerRef]);
 
-  // useHotkeys(electron.remote.process.platform === 'darwin' ? 'Cmd+down' : 'ctrl+down', () => {
-  //   if (isSearchingInDocPage || isDocsFilterModalOpened) return;
+  const scrollDown = useCallback(() => {
+    containerRef?.current?.scrollBy(0, 15);
+  }, [containerRef]);
 
-  //   if (containerRef?.current) {
-  //     containerRef.current.scrollTo(0, containerRef.current.scrollHeight);
-  //   }
-  // }, { filter: () => true }, [isSearchingInDocPage, isDocsFilterModalOpened]);
+  const scrollTop = useCallback(() => {
+    containerRef?.current?.scrollTo(0, 0);
+  }, [containerRef]);
+
+  const scrollBottom = useCallback(() => {
+    containerRef?.current?.scrollTo(0, containerRef.current.scrollHeight);
+  }, [containerRef]);
+
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.DocsScrollUp, scrollUp);
+    uiStore.registerHotkeyHandler(HotkeyAction.DocsScrollDown, scrollDown);
+    uiStore.registerHotkeyHandler(HotkeyAction.DocsScrollTop, scrollTop);
+    uiStore.registerHotkeyHandler(HotkeyAction.DocsScrollBottom, scrollBottom);
+  }, [scrollUp, scrollDown, scrollTop, scrollBottom]);
 
   useEffect(() => {
     highlights.forEach(h => {
@@ -365,7 +344,7 @@ function DocsBody({
     const links = containerRef.current.getElementsByTagName('a');
     for (const link of links) {
       const href = link.getAttribute('href');
-      link.onclick = e => handleLinkClick(e, href ?? '');
+      link.onclick = e => handleLinkClick(e, href ?? '', pageURL);
     }
     const imgs = containerRef.current.getElementsByTagName('img');
     for (const img of imgs) {
@@ -376,11 +355,13 @@ function DocsBody({
     if (!anchorEl) return;
 
     anchorEl.scrollIntoView();
-  }, [html, anchor]);
+  }, [html, anchor, pageURL]);
+
+  const highlightedHTML = useMemo(() => highlightCode(html), []);
 
   return (
     <>
-      {isSearchingInDocPage &&
+      {uiStore.isSearchInPageOpened &&
         <SearchInputWrapper>
           <SearchInput
             ref={searchInputRef}
@@ -420,13 +401,12 @@ function DocsBody({
           </SearchControls>
         </SearchInputWrapper>
       }
-      <div
-        id="doc-page"
-        ref={containerRef}
-        dangerouslySetInnerHTML={{ __html: highlightCode(html) as string }}
+      <DocsContent
+        containerRef={containerRef}
+        html={highlightedHTML}
       />
     </>
   );
 }
 
-export default React.memo(DocsBody);
+export default observer(DocsBody);

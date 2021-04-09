@@ -5,6 +5,7 @@ import { HotkeyAction, useUIStore } from 'ui/ui.store';
 import { SearchSource } from 'services/search.service/searchSource';
 import Hotkey from 'components/Hotkey';
 import useHotkey from 'hooks/useHotkey';
+import { useCallback } from 'react';
 
 const Container = styled.div`
   width: 100%;
@@ -60,8 +61,12 @@ function DocsFilter() {
 
   const selectedFilter = searchStore.filters[SearchSource.Docs].selectedFilter;
 
+  const toggleFilterModal = useCallback(() => {
+    uiStore.toggleFilterModal();
+  }, []);
+
   const openModalFilter = useHotkey(uiStore.hotkeys[HotkeyAction.DocsOpenModalFilter],
-    uiStore.toggleFilterModal.bind(uiStore),
+    toggleFilterModal,
   );
 
   return (

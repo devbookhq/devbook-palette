@@ -1,8 +1,9 @@
-import React, {
+import {
   useRef,
   useMemo,
   memo,
   useEffect,
+  useCallback,
 } from 'react';
 import styled from 'styled-components';
 
@@ -69,13 +70,15 @@ const Summary = styled.div`
 interface DocsItemProps {
   result: DocResult;
   focusState: FocusState;
-  onClick: (e: any) => void;
+  idx: number;
+  selectIdx: (i: number) => void;
 }
 
 function DocsItem({
   result,
   focusState,
-  onClick,
+  idx,
+  selectIdx,
 }: DocsItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const truncatedSummary = useMemo(() => {
@@ -88,11 +91,15 @@ function DocsItem({
     if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView({ block: 'nearest' });
   }, [focusState]);
 
+  const handleOnClick = useCallback(() => {
+    selectIdx(idx);
+  }, [selectIdx, idx]);
+
   return (
     <Container
       ref={containerRef}
       isFocused={focusState !== FocusState.None}
-      onClick={onClick}
+      onClick={handleOnClick}
     >
       <DocumentationName>{result.page.breadcrumbs.join(' / ')}</DocumentationName>
       <PageName>{result.page.name}</PageName>

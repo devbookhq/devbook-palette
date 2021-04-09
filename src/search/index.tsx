@@ -9,12 +9,15 @@ import { useSearchStore } from './search.store';
 import InfoMessage from 'components/InfoMessage';
 import InfoText from 'components/InfoMessage/InfoText';
 import HotkeyText from 'components/HotkeyText';
+import { useCallback } from 'react';
 
 const Container = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
+  margin-bottom: 50px;
 `;
 
 const InfoTextLeft = styled(InfoText)`
@@ -29,13 +32,21 @@ function Search() {
   const uiStore = useUIStore();
   const searchStore = useSearchStore();
 
+  const toggleModal = useCallback(() => {
+    uiStore.toggleModal();
+  }, []);
+
+  const toggleFilterModal = useCallback(() => {
+    uiStore.toggleFilterModal();
+  }, []);
+
   return (
     <Container>
       {uiStore.searchSource === SearchSource.StackOverflow &&
         <StackOverflow
           results={searchStore.results.stackOverflow.results}
           isModalOpened={uiStore.isModalOpened}
-          onCloseModalRequest={uiStore.toggleModal.bind(uiStore)}
+          toggleModal={toggleModal}
         />
       }
 
@@ -43,7 +54,7 @@ function Search() {
         <Docs
           results={searchStore.results.docs.results}
           isFilterModalOpened={uiStore.isFilterModalOpened}
-          onCloseFilterModalRequest={uiStore.toggleFilterModal.bind(uiStore)}
+          toggleFilterModal={toggleFilterModal}
         />
       }
 

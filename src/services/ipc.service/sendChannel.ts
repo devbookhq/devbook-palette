@@ -1,5 +1,4 @@
 // We are not using path aliases here, because when we import this file from the main the aliases stop working.
-import { SearchMode } from 'services/search.service/searchMode';
 import { AuthInfo } from 'user/authInfo';
 import { User } from 'user/user';
 import { AppWindow, UpdateLocation } from 'services/appWindow';
@@ -15,7 +14,6 @@ export enum IPCSendChannel {
   SetAuthInOtherWindows = 'SetAuthInOtherWindows',
   ReloadMainWindow = 'ReloadMainWindow',
   UserDidChangeShortcut = 'UserDidChangeShortcut',
-  UserDidChangeSearchMode = 'UserDidChangeSearchMode',
   FinishOnboarding = 'FinishOnboarding',
   OpenSignInModal = 'OpenSignInModal',
   SignOut = 'SignOut',
@@ -38,7 +36,6 @@ export type IPCSendPayload<T extends StorageKey = StorageKey, U extends Analytic
   [IPCSendChannel.UserDidChangeShortcut]: { shortcut: GlobalShortcut };
   [IPCSendChannel.FinishOnboarding]: void;
   [IPCSendChannel.OpenSignInModal]: void;
-  [IPCSendChannel.UserDidChangeSearchMode]: { mode: SearchMode };
   [IPCSendChannel.SignOut]: void;
   [IPCSendChannel.LoadAppClient]: { window: AppWindow };
   [IPCSendChannel.HideWindow]: void;

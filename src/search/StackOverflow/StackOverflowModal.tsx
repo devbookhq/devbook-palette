@@ -17,7 +17,7 @@ import {
 
 import Modal from 'components/Modal';
 
-import StackOverflowBody from './StackOverflowBody';
+import StackOverflowBody from './StackOverflowResults/StackOverflowBody';
 import { useUIStore } from 'ui/ui.store';
 
 const marginTop = 67;
