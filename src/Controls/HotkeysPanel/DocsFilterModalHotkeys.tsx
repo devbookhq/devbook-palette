@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 
 import { Key } from 'components/HotkeyText';
 import Hotkey from 'components/Hotkey';
@@ -24,7 +25,7 @@ function DocsFilterModalHotkeys() {
 
   useHotkey(uiStore.hotkeys[HotkeyAction.DocsModalFilterUp]);
   useHotkey(uiStore.hotkeys[HotkeyAction.DocsModalFilterDown]);
-  const modalSelect = useHotkey(uiStore.hotkeys[HotkeyAction.DocsModalSelect]);
+  const modalSelect = useHotkey(uiStore.hotkeys[HotkeyAction.DocsModalFilterSelect]);
 
   const closeModal = useHotkey(uiStore.hotkeys[HotkeyAction.DocsCloseModalFilter]);
 
@@ -41,4 +42,4 @@ function DocsFilterModalHotkeys() {
   );
 }
 
-export default DocsFilterModalHotkeys;
+export default observer(DocsFilterModalHotkeys);

@@ -5,6 +5,7 @@ import {
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { observer } from 'mobx-react-lite';
 
 import ElectronService from 'services/electron.service';
 import useOnClickOutside from 'hooks/useOnClickOutside';
@@ -15,9 +16,9 @@ import {
 } from 'services/search.service';
 
 import Modal from 'components/Modal';
-// import StackOverflowModalHotkeysPanel from 'Home/HotkeysPanel/StackOverflow/ModalHotkeysPanel';
 
 import StackOverflowBody from './StackOverflowBody';
+import { useUIStore } from 'ui/ui.store';
 
 const marginTop = 67;
 
@@ -172,19 +173,19 @@ const AnswersHeading = styled.span`
 interface StackOverflowModalProps {
   result: StackOverflowResult;
   onCloseRequest: () => void;
-  onOpenInBrowserClick: (e: any) => void,
 }
 
 function StackOverflowModal({
   result,
   onCloseRequest,
-  onOpenInBrowserClick,
 }: StackOverflowModalProps) {
+
   const modalRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const [sortedAnswers, setSortedAnswers] = useState<StackOverflowAnswer[]>([]);
   const [mostUpvotedIdx, setMostUpvotedIdx] = useState(-1);
+
   useOnClickOutside(modalRef, onCloseRequest);
 
   function handleQuestionTitleClick(e: any) {
@@ -293,11 +294,6 @@ function StackOverflowModal({
           ))}
         </Answers>
       </ScrollingContent>
-
-      {/* <StackOverflowModalHotkeysPanel
-        onOpenInBrowserClick={onOpenInBrowserClick}
-        onCloseClick={onCloseRequest}
-      /> */}
     </StyledModal>
   );
 }

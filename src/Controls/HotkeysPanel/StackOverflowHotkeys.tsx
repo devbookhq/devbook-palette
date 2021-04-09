@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 
 import { Key } from 'components/HotkeyText';
 import Hotkey from 'components/Hotkey';
@@ -45,4 +46,4 @@ function StackOverflowHotkeys() {
   );
 }
 
-export default StackOverflowHotkeys;
+export default observer(StackOverflowHotkeys);

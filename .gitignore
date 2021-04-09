@@ -14,9 +14,6 @@
 /build
 /dist
 
-sidekick.zip
-Sidekick.zip
-
 # misc
 .DS_Store
 .env.local

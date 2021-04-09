@@ -24,26 +24,32 @@ axios.interceptors.response.use((value) => {
 });
 
 class ReconnectionService {
-  private constructor() { }
-  static _isConnected = false;
+  private static _instance: ReconnectionService;
+
+  static get instance() {
+    return ReconnectionService._instance || (ReconnectionService._instance = new ReconnectionService())
+  }
+
+  _isConnected = true;
 
   static get isConnected() {
-    return ReconnectionService._isConnected;
+    return ReconnectionService.instance._isConnected;
+  }
+
+  private contructor() {
+    makeAutoObservable(this, {
+      _isConnected: false,
+    });
   }
 
   static reportDisconnection() {
-    this._isConnected = false;
+    ReconnectionService.instance._isConnected = false;
   }
 
   static reportConnection() {
-    this._isConnected = true;
+    ReconnectionService.instance._isConnected = true;
   }
 }
 
-// makeAutoObservable(ReconnectionService, {
-//   isConnected: false,
-//   reportConnection: false,
-//   reportDisconnection: false,
-// });
 
 export default ReconnectionService;

@@ -1,12 +1,15 @@
 import {
+  autorun,
   makeAutoObservable,
+  toJS,
 } from 'mobx';
 import { useRootStore } from 'App/RootStore';
 import IPCService, { IPCSendChannel } from 'services/ipc.service';
 import ElectronService from 'services/electron.service';
 import { Platform } from 'services/electron.service/platform';
 import { Key } from 'components/HotkeyText';
-import { SearchSource } from 'services/search.service';
+import { SearchSource } from 'services/search.service/searchSource';
+import SyncService, { StorageKey } from 'services/sync.service';
 
 export function useUIStore() {
   const { uiStore } = useRootStore();
@@ -38,7 +41,7 @@ export enum HotkeyAction {
   DocsResultsDown,
   DocsModalFilterDown,
   DocsModalFilterUp,
-  DocsModalSelect,
+  DocsModalFilterSelect,
   DocsOpenModalFilter,
   DocsCloseModalFilter,
   DocsCancelSearchInPage,
@@ -72,7 +75,7 @@ class UIStore {
         hotkey: 'ctrl+d',
         label: ['Ctrl', 'D'],
       },
-      isActive: () => this.searchSource === SearchSource.Docs && !this.isFilterModalOpened,
+      isActive: () => this.searchSource === SearchSource.Docs,
     },
     [HotkeyAction.StackOverflowOpenInBrowser]: {
       ...ElectronService.platform === Platform.MacOS ? {
@@ -99,7 +102,7 @@ class UIStore {
       label: ['Esc'],
       isActive: () => this.searchSource === SearchSource.Docs && this.isSearchInPageOpened && !this.isFilterModalOpened,
     },
-    [HotkeyAction.DocsModalSelect]: {
+    [HotkeyAction.DocsModalFilterSelect]: {
       hotkey: 'enter',
       label: ['Enter'],
       isActive: () => this.searchSource === SearchSource.Docs && this.isFilterModalOpened && !this.isSearchInPageOpened,
@@ -252,6 +255,20 @@ class UIStore {
 
   constructor() {
     makeAutoObservable(this);
+    // autorun(() => {
+    //   console.log(toJS(this));
+    // });
+    this.sync().then(() => this.backup());
+  }
+
+  _docsFilterModalQuery = '';
+
+  set docsFilterModalQuery(value: string) {
+    this._docsFilterModalQuery = value;
+  }
+
+  get docsFilterModalQuery() {
+    return this._docsFilterModalQuery;
   }
 
   toggleModal() {
@@ -259,7 +276,7 @@ class UIStore {
   }
 
   toggleFilterModal() {
-    this.isModalOpened = !this.isModalOpened;
+    this.isFilterModalOpened = !this.isFilterModalOpened;
   }
 
   toggleSignInModal() {
@@ -282,6 +299,16 @@ class UIStore {
   get searchSource() {
     return this._searchSource;
   }
+
+  private async sync() {
+    const searchSource = await SyncService.get(StorageKey.SearchFilter);
+    this.searchSource = searchSource;
+  }
+
+  private backup() {
+    SyncService.registerBackup(StorageKey.SearchFilter, () => this.searchSource);
+  }
+
 }
 
 export default UIStore;

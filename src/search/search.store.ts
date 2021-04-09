@@ -2,11 +2,14 @@ import {
   makeAutoObservable,
   IReactionDisposer,
   reaction,
+  toJS,
 } from 'mobx';
 import RootStore, { useRootStore } from 'App/RootStore';
-import SearchService, { SearchSource, SearchFilterTypings, SearchResult } from 'services/search.service';
+import SearchService, { SearchFilterTypings, SearchResult } from 'services/search.service';
+import { SearchSource } from 'services/search.service/searchSource';
 import { SearchMode } from 'services/search.service/searchMode';
 import SyncService, { StorageKey } from 'services/sync.service';
+import { HistoryEntry } from './historyEntry';
 
 export function useSearchStore() {
   const { searchStore } = useRootStore();
@@ -20,12 +23,8 @@ export type SourceFilters = {
   };
 }
 
-export interface HistoryEntry {
-  query: string;
-}
-
 export type SourceResults = {
-  [source in SearchSource]: SearchResult[source][];
+  [source in SearchSource]: { results: SearchResult[source][], selectedIdx: number };
 }
 
 export type SourceResultsSelection = {
@@ -37,8 +36,6 @@ type SearchInvocation = Promise<void>;
 class SearchStore {
   readonly _maxHistorySize = 20;
 
-  autosaveHandler: IReactionDisposer;
-
   _isSearching = false;
   _query: string = '';
   _lastQuery: string = '';
@@ -47,13 +44,8 @@ class SearchStore {
   _lastSearchInvocation?: SearchInvocation;
 
   readonly results: SourceResults = {
-    [SearchSource.Docs]: [],
-    [SearchSource.StackOverflow]: [],
-  };
-
-  readonly selectedResults: SourceResultsSelection = {
-    [SearchSource.Docs]: 0,
-    [SearchSource.StackOverflow]: 0,
+    [SearchSource.Docs]: { results: [], selectedIdx: 0 },
+    [SearchSource.StackOverflow]: { results: [], selectedIdx: 0 },
   };
 
   readonly filters: SourceFilters = {
@@ -89,7 +81,7 @@ class SearchStore {
     this._isSearching = value;
   }
 
-  setSelectedFilter<T extends SearchSource>(source: T, value: SearchFilterTypings[T]) {
+  setSelectedFilter<T extends SearchSource>(source: T, value: SearchFilterTypings[T] | undefined) {
     this.filters[source].selectedFilter = value;
   }
 
@@ -100,35 +92,13 @@ class SearchStore {
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
       _maxHistorySize: false,
-      autosaveHandler: false,
       _lastSearchInvocation: false,
     });
-    this.autosaveHandler = reaction(
-      () => this.asJSON,
-      json => {
-        // TODO: Save with syncService.
-      },
-    );
-    this.refreshSearchFilters();
-    // this.sync();
-    // setInterval(() => this.backup(), 20000);
-  }
-
-  dispose() {
-    this.autosaveHandler();
+    this.sync().then(() => this.backup());
   }
 
   private setResults<T extends SearchSource>(source: T, results: SearchResult[T][]) {
-    this.results[source] = results as any;
-  }
-
-  private hasSelectedResult<T extends SearchSource>(source: T) {
-    return this.results[source].length > 0 && this.results[source].length > this.selectedResults[source];
-  }
-
-  getSelectedResult<T extends SearchSource>(source: T) {
-    if (this.hasSelectedResult(source)) return this.results[source][this.selectedResults[source]];
-    throw new Error(`No selected result in ${source}`);
+    this.results[source].results = results as any;
   }
 
   get asJSON() {
@@ -185,6 +155,10 @@ class SearchStore {
     return searchInvocation;
   }
 
+  set history(value: HistoryEntry[]) {
+    this._history = value;
+  }
+
   get history() {
     return this._history
       .slice(-10)
@@ -211,21 +185,20 @@ class SearchStore {
   private async sync() {
     const query = await SyncService.get(StorageKey.LastQuery);
     const searchMode = await SyncService.get(StorageKey.SearchMode);
-    // const docsFilter = await SyncService.get(StorageKey.ActiveDocSource);
-    // const searchSource = await SyncService.get(StorageKey.SearchFilter);
-
+    const docsSelectedFilter = await SyncService.get(StorageKey.ActiveDocSource);
+    const history = await SyncService.get(StorageKey.SearchHistoryEntries);
     this.query = query;
+    this.history = history;
     this.searchMode = searchMode;
-    // this.filters[SearchSource.Docs].selectedFilter = docsFilter;
-
-    // TODO: Load values using syncService.
+    this.setSelectedFilter(SearchSource.Docs, docsSelectedFilter);
+    await this.refreshSearchFilters();
   }
 
   private backup() {
-    SyncService.set(StorageKey.LastQuery, this.query);
-    SyncService.set(StorageKey.SearchMode, this.searchMode);
-    // SyncService.set(StorageKey.ActiveDocSource, this.filters.docs.selectedFilter);
-    // SyncService.set(StorageKey.SearchFilter, this.sea);
+    SyncService.registerBackup(StorageKey.LastQuery, () => this.query);
+    SyncService.registerBackup(StorageKey.SearchMode, () => this.searchMode);
+    SyncService.registerBackup(StorageKey.ActiveDocSource, () => toJS(this.filters[SearchSource.Docs].selectedFilter));
+    SyncService.registerBackup(StorageKey.SearchHistoryEntries, () => toJS(this._history));
   }
 }
 

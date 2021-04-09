@@ -2,6 +2,7 @@ import * as electron from 'electron';
 import { BrowserWindow } from 'electron';
 import Analytics from 'analytics-node';
 import { app } from 'electron';
+import { v4 as uuidv4 } from 'uuid';
 
 import isDev from '@main/utils/isDev';
 import MainSyncService, { StorageKey } from '@main/services/mainSync.service';
@@ -23,7 +24,7 @@ class MainAnalyticsService {
   private static anonymousID = MainAnalyticsService.initializeAnonymousID();
 
   private static initializeAnonymousID() {
-    const anonymousID = MainSyncService.get(StorageKey.UserID);
+    const anonymousID = MainSyncService.get(StorageKey.UserID) || uuidv4();
     MainSyncService.set(StorageKey.UserID, anonymousID);
     return anonymousID;
   }

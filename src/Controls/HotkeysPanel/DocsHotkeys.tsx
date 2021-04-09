@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 
 import { Key } from 'components/HotkeyText';
 import Hotkey from 'components/Hotkey';
@@ -43,4 +44,4 @@ function DocsHotkeys() {
   );
 }
 
-export default DocsHotkeys;
+export default observer(DocsHotkeys);

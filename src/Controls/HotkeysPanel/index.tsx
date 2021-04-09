@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { HotkeyType } from 'components/HotkeyText';
 import { observer } from 'mobx-react-lite';
 
-import { SearchSource } from 'services/search.service';
+import { SearchSource } from 'services/search.service/searchSource';
 import { useUIStore } from 'ui/ui.store';
 import StackOverflowHotkeys from './StackOverflowHotkeys';
 import StackOverflowModalHotkeys from './StackOverflowModalHotkeys';
@@ -15,6 +15,8 @@ const Container = styled.div`
   padding: 5px 10px 5px;
   z-index: 10;
   display: flex;
+  position: absolute;
+  bottom: 0;
   align-items: center;
   justify-content: space-between;
   background: #2E303D;

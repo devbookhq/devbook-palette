@@ -1,6 +1,7 @@
 import React, {
   useRef,
   useMemo,
+  memo,
   useEffect,
 } from 'react';
 import styled from 'styled-components';
@@ -100,4 +101,4 @@ function DocsItem({
   );
 }
 
-export default React.memo(DocsItem);
+export default memo(DocsItem);

@@ -10,8 +10,8 @@ esbuild.build({
   tsconfig: './src/main/tsconfig.json',
   platform: 'node',
   outdir: 'build/electron/main',
-  minify: true,
-  bundle: true,
+  minify: false,
+  bundle: true ,
   entryPoints: ['./src/main/index.ts'],
   sourcemap: true,
   loader: {

@@ -1,27 +1,34 @@
-import { useSearchStore } from 'Search/search.store';
-import { observer } from 'mobx-react-lite';
+import { useState } from 'react';
 
-import { useUIStore } from 'ui/ui.store';
 import DocsSearchResults from './DocsResults';
 import DocsFilterModal from './DocsFilterModal';
+import { DocResult } from 'services/search.service';
 
-function DocsSearch() {
-  const searchStore = useSearchStore();
-  const uiStore = useUIStore();
+interface DocsProps {
+  results: DocResult[];
+  isFilterModalOpened: boolean;
+  onCloseFilterModalRequest: () => void;
+}
 
+function Docs({ results, isFilterModalOpened, onCloseFilterModalRequest }: DocsProps) {
+  const [selectedIdx, setSelectedIdx] = useState(0);
   return (
     <>
-      {uiStore.isFilterModalOpened &&
+      {isFilterModalOpened &&
         <DocsFilterModal
-          onCloseRequest={uiStore.toggleFilterModal}
+          onCloseRequest={onCloseFilterModalRequest}
         />
       }
-      <DocsSearchResults
-        results={searchStore.results.docs}
-        selectedIdx={searchStore.selectedResults.docs}
-      />
+      {results.length !== 0 &&
+        <>
+          <DocsSearchResults
+            results={results}
+            selectedIdx={selectedIdx}
+          />
+        </>
+      }
     </>
   );
 }
 
-export default observer(DocsSearch);
+export default Docs;

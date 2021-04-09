@@ -1,6 +1,7 @@
-import React, {
+import {
   useEffect,
   useRef,
+  memo,
   useState,
 } from 'react';
 import styled from 'styled-components';
@@ -398,4 +399,4 @@ function StackOverflowItem({
   );
 }
 
-export default React.memo(StackOverflowItem);
+export default memo(StackOverflowItem);

@@ -1,23 +1,23 @@
 import styled from 'styled-components';
-import { observer } from 'mobx-react-lite';
 
-import { SearchSource } from 'services/search.service'
+import { SearchSource } from 'services/search.service/searchSource';
 import DocsFilter from './DocsFilter';
-import { useUIStore } from 'ui/ui.store';
 
 const Container = styled.div`
 `;
 
-function QueryFilters() {
-  const uiStore = useUIStore();
+interface QueryFiltersProps {
+  source: SearchSource;
+}
 
+function QueryFilters({ source }: QueryFiltersProps) {
   return (
     <Container>
-      {uiStore.searchSource === SearchSource.Docs &&
+      {source === SearchSource.Docs &&
         <DocsFilter />
       }
     </Container>
   );
 }
 
-export default observer(QueryFilters);
+export default QueryFilters;

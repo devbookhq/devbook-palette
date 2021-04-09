@@ -13,7 +13,7 @@ import useHotkey from 'hooks/useHotkey';
 
 const Container = styled.div`
   width: 100%;
-  padding: 5px 15px;
+  padding: 5px 15px 5px 10px;
   display: flex;
   justify-content: space-between;
 `;
@@ -60,7 +60,7 @@ function SettingsPanel() {
 
   return (
     <Container>
-      <QueryFilters />
+      <QueryFilters source={uiStore.searchSource} />
       <ButtonsWrapper>
         <Hotkey
           onClick={togglePinMode}

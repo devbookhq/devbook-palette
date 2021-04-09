@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useSearchStore } from 'Search/search.store';
 import { observer } from 'mobx-react-lite';
 import { HotkeyAction, useUIStore } from 'ui/ui.store';
-import { SearchSource } from 'services/search.service';
+import { SearchSource } from 'services/search.service/searchSource';
 import Hotkey from 'components/Hotkey';
 import useHotkey from 'hooks/useHotkey';
 

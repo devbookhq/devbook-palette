@@ -7,7 +7,7 @@ import StackOverflowItem from './StackOverflowItem';
 interface StackOverflowSeachResultsProps {
   results: StackOverflowResult[];
   selectedIdx: number;
-  ref: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement>;
 }
 
 const Container = styled.div`
@@ -17,9 +17,9 @@ const Container = styled.div`
   overflow-y: overlay;
 `;
 
-function StackOverflowItems({ results, selectedIdx, ref }: StackOverflowSeachResultsProps) {
+function StackOverflowItems({ results, selectedIdx, containerRef }: StackOverflowSeachResultsProps) {
   return (
-    <Container ref={ref}>
+    <Container ref={containerRef}>
       {results.map((result, i) =>
         <StackOverflowItem
           result={result}

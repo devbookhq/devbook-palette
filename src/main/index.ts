@@ -401,10 +401,6 @@ MainIPCService.on(IPCSendChannel.PostponeUpdate, () => {
   }
 });
 
-MainIPCService.on(IPCSendChannel.SaveActiveDocSource, (_, { docSource }) => {
-  MainSyncService.set(StorageKey.ActiveDocSource, docSource);
-});
-
 MainIPCService.on(IPCSendChannel.TogglePinMode, (_, { isEnabled }: { isEnabled: boolean }) => {
   if (mainWindow) {
     isPinModeEnabled = isEnabled;

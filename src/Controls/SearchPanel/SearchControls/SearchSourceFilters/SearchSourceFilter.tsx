@@ -1,15 +1,13 @@
 import { useCallback } from 'react';
 import { observer } from 'mobx-react-lite';
 
-import { SearchSource } from 'services/search.service';
+import { SearchSource } from 'services/search.service/searchSource';
 import Hotkey from 'components/Hotkey';
 import useHotkey from 'hooks/useHotkey';
 import { useUIStore, HotkeyAction } from 'ui/ui.store';
 
 interface SearchSourceFilterProps {
   source: SearchSource;
-  onSelect: (source: SearchSource) => void;
-  isSelected: boolean;
 }
 
 const searchSourceNames: { [source in SearchSource]: string } = {
@@ -17,30 +15,28 @@ const searchSourceNames: { [source in SearchSource]: string } = {
   [SearchSource.StackOverflow]: 'Stack Overflow',
 }
 
-const searchSourceHotkeyActions = {
+const searchSourceHotkeyActions: { [source in SearchSource]: HotkeyAction } = {
   [SearchSource.StackOverflow]: HotkeyAction.SelectStackOverflowSource,
   [SearchSource.Docs]: HotkeyAction.SelectDocsSource,
 }
 
-function SearchSourceFilter({ source, onSelect, isSelected }: SearchSourceFilterProps) {
+function SearchSourceFilter({ source }: SearchSourceFilterProps) {
   const uiStore = useUIStore();
 
-  const hotkeyOptions = uiStore.hotkeys[searchSourceHotkeyActions[source]];
-
   const changeFilter = useCallback(() => {
-    onSelect(source);
-  }, [source, onSelect]);
+    uiStore.searchSource = source;
+  }, [source, uiStore.searchSource]);
 
-  useHotkey(hotkeyOptions,
+  const selectSource = useHotkey(uiStore.hotkeys[searchSourceHotkeyActions[source]],
     changeFilter,
   );
 
   return (
     <Hotkey
-      onClick={changeFilter}
+      onClick={selectSource.handler}
       reverseContent={true}
-      isHighlightedText={isSelected}
-      hotkey={hotkeyOptions.label!}
+      isHighlightedText={source === uiStore.searchSource}
+      hotkey={selectSource.label}
     >
       {searchSourceNames[source]}
     </Hotkey>

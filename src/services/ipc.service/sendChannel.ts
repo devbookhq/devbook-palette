@@ -25,11 +25,9 @@ export enum IPCSendChannel {
   RestartAndUpdate = 'RestartAndUpdate',
   GetAuthFromMainWindow = 'GetAuthFromMainWindow',
   PostponeUpdate = 'PostponeUpdate',
-  SaveActiveDocSource = 'SaveActiveDocSource',
   TogglePinMode = 'TogglePinMode',
 
   StorageSet = 'StorageSet',
-
   AnalyticsTrack = 'AnalyticsTrack',
 }
 
@@ -48,7 +46,6 @@ export type IPCSendPayload<T extends StorageKey = StorageKey, U extends Analytic
   [IPCSendChannel.RestartAndUpdate]: { location: UpdateLocation };
   [IPCSendChannel.GetAuthFromMainWindow]: void;
   [IPCSendChannel.PostponeUpdate]: void;
-  [IPCSendChannel.SaveActiveDocSource]: { docSource: string };
   [IPCSendChannel.TogglePinMode]: { isEnabled: boolean };
 
   [IPCSendChannel.StorageSet]: { key: T, value: StorageValue[T] };

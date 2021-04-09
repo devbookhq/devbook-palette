@@ -32,5 +32,3 @@ Run `npm run build:electron:prod` to build macOS, Windows, and Linux versions WI
 ## How to release
 
 Go to https://app.todesktop.com/apps/2102273jsy18baz, and click on the "Release" button in the corresponding successful build.
-
-

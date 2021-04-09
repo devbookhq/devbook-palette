@@ -1,7 +1,6 @@
 import { useRef, useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
 
-import { HistoryEntry } from 'Search/search.store';
+import { HistoryEntry } from "Search/historyEntry";
 import SearchHistoryQuery from './SearchHistoryQuery';
 
 interface SearchHistoryQueriesProps {
@@ -11,8 +10,6 @@ interface SearchHistoryQueriesProps {
 }
 
 function SearchHistoryQueries({ history, onQueryClick, selectedQueryIdx }: SearchHistoryQueriesProps) {
-
-
   return (
     <>
       {history.map((h, i) => (
@@ -27,4 +24,4 @@ function SearchHistoryQueries({ history, onQueryClick, selectedQueryIdx }: Searc
   );
 }
 
-export default observer(SearchHistoryQueries);
+export default SearchHistoryQueries;

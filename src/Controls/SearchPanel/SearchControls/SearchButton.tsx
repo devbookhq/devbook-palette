@@ -13,7 +13,7 @@ function SearchButton() {
 
   const searchCurrentQuery = useCallback(() => {
     searchStore.executeSearch();
-  }, [uiStore]);
+  }, []);
 
   useHotkey(
     uiStore.hotkeys[HotkeyAction.Search],

@@ -1,11 +1,8 @@
 import axios from 'axios';
 import ElectronService from 'services/electron.service';
 import { APIVersion } from 'services/api.service';
-
-export enum SearchSource {
-  StackOverflow = 'stackOverflow',
-  Docs = 'docs',
-}
+import { SearchSource } from './searchSource';
+import { DocSource } from './docSource';
 
 export type SearchFilterTypings = {
   [SearchSource.Docs]: DocSource;
@@ -26,13 +23,6 @@ export interface DocResult {
   score: number;
   id: string;
   page: Page;
-}
-
-export interface DocSource {
-  slug: string;
-  name: string;
-  version: APIVersion;
-  iconURL: string;
 }
 
 export enum AnswerType {

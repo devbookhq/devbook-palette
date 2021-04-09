@@ -4,7 +4,7 @@ import { HotkeyAction, HotKeysBinding } from 'ui/ui.store';
 function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], handler?: () => void) {
   useHotkeys(hotkeyOptions.hotkey, (event) => {
     if (hotkeyOptions.isActive()) {
-      console.log('Triggered', hotkeyOptions.hotkey);
+      console.log('Triggered', hotkeyOptions.hotkey, hotkeyOptions.isActive());
       if (handler) {
         event.preventDefault();
         handler();
@@ -12,7 +12,7 @@ function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], han
         event.preventDefault();
         hotkeyOptions.handler();
       } else {
-        throw new Error(`No provided or registered handler for the hotkey action ${hotkeyOptions}`)
+        throw new Error(`No provided or registered handler for the hotkey action ${hotkeyOptions.label}`)
       }
     }
   }, {
@@ -20,7 +20,6 @@ function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], han
     enableOnTags: ['TEXTAREA', 'INPUT', 'SELECT'],
   }, [
     hotkeyOptions.isActive(),
-    hotkeyOptions.handler,
     hotkeyOptions.hotkey,
     handler,
   ]);
