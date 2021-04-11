@@ -8,8 +8,6 @@ import MainIPCService from 'services/ipc.service/mainIPC.service';
 import { IPCOnChannel } from 'services/ipc.service/onChannel';
 import { PreferencesPage } from 'Preferences/preferencesPage';
 
-
-
 class PreferencesWindow {
   public window: electron.BrowserWindow | undefined;
 
