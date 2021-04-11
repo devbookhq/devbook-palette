@@ -78,7 +78,7 @@ class SearchStore {
     this._lastQuery = query;
   }
 
-  constructor(readonly rootStore: RootStore) {
+  constructor() {
     makeAutoObservable(this, {
       _maxHistorySize: false,
       _lastSearchInvocation: false,

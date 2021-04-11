@@ -1,6 +1,5 @@
 import * as electron from 'electron';
 import * as process from 'process';
-import * as path from 'path';
 import { debounce } from 'debounce';
 
 import isDev from '@main/utils/isDev';

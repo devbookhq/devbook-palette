@@ -54,10 +54,8 @@ class UserStore {
     return this._auth.state === AuthState.UserSignedIn;
   }
 
-  constructor(readonly _rootStore: RootStore) {
-    makeAutoObservable(this, {
-      _rootStore: false,
-    });
+  constructor() {
+    makeAutoObservable(this);
 
     autorun(() => {
       // console.log('Authentication:', this.auth);
