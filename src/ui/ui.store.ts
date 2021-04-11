@@ -4,7 +4,7 @@ import {
   toJS,
 } from 'mobx';
 import { useRootStore } from 'App/RootStore';
-import IPCService, { IPCSendChannel } from 'services/ipc.service';
+import IPCService, { IPCOnChannel, IPCSendChannel } from 'services/ipc.service';
 import ElectronService from 'services/electron.service';
 import { Platform } from 'services/electron.service/platform';
 import { Key } from 'components/HotkeyText';
@@ -299,6 +299,11 @@ class UIStore {
 
   constructor() {
     makeAutoObservable(this);
+
+    IPCService.on(IPCOnChannel.OpenSignInModal, () => {
+      this.isSignInModalOpened = true;
+    });
+
     this.sync().then(() => this.backup());
   }
 

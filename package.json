@@ -30,15 +30,17 @@
     "node": "14.16.0"
   },
   "scripts": {
-    "start:client": "craco start",
-    "start": "concurrently \"npm run start:client\" \"./scripts/esbuild-watch-electron.sh\" \"wait-on http://localhost:3000 && npm run start:electron\"",
-    "start:electron": "MINIFY=\"--noMinify\" npm run bundle:electron && electron --enable-logging .",
-    "bundle:client": "./scripts/bundle-client.sh",
-    "bundle:electron": "./scripts/esbuild-bundle-electron.sh",
     "postinstall": "electron-rebuild",
-    "build:electron": "npm run bundle:electron && todesktop build --code-sign=false",
-    "build:electron:prod": "npm run bundle:electron && todesktop build",
-    "deploy:client": "./scripts/deploy-client.sh"
+    "bundle:client:staging": "./scripts/bundle-client.sh",
+    "bundle:client:prod": "./scripts/bundle-client.sh --env=prod",
+    "deploy:client:staging": "./scripts/deploy-client.sh",
+    "deploy:client:prod": "./scripts/deploy-client.sh --env=prod",
+    "bundle:electron": "./scripts/esbuild-bundle-electron.sh",
+    "build:electron:staging": "npm run bundle:electron -- --env=staging && todesktop build --code-sign=false",
+    "build:electron:prod": "npm run bundle:electron -- --env=prod && todesktop build",
+    "start:client": "craco start",
+    "start:electron": "npm run bundle:electron && electron --enable-logging .",
+    "start": "concurrently \"npm run start:client\" \"npm run bundle:electron -- --watch=true --minify=false\" \"wait-on http://localhost:3000 && npm run start:electron\""
   },
   "dependencies": {
     "@todesktop/runtime": "^0.5.4",

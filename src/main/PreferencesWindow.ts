@@ -2,11 +2,12 @@ import * as electron from 'electron';
 import * as process from 'process';
 import { app } from 'electron';
 
-import { isDev } from './utils/environment';
+import { isDev, isStaging, isProd } from './utils/environment';
 import MainIPCService from 'services/ipc.service/mainIPC.service';
 
 import { IPCOnChannel } from 'services/ipc.service/onChannel';
 import { PreferencesPage } from 'Preferences/preferencesPage';
+
 
 class PreferencesWindow {
   public window: electron.BrowserWindow | undefined;
@@ -53,7 +54,12 @@ class PreferencesWindow {
 
     if (isDev) {
       this.window.loadURL(`http://localhost:${this.port}/index.html#/preferences` + (page ? `/${page}` : ''));
-    } else {
+    } else if (isStaging) {
+      this.window.webContents.loadURL(
+        `https://client-staging.usedevbook.com/${app.getVersion()}#/preferences` + (page ? `/${page}` : ''),
+        { extraHeaders: 'pragma: no-cache\n' },
+      );
+    } else if (isProd) {
       this.window.webContents.loadURL(
         `https://client.usedevbook.com/${app.getVersion()}#/preferences` + (page ? `/${page}` : ''),
         { extraHeaders: 'pragma: no-cache\n' },

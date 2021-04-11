@@ -41,9 +41,10 @@ const SignInAgainButton = styled(Button)`
 
 interface SignInProps {
   isLoading: boolean;
+  isSigningInUser: boolean;
 }
 
-function SignIn({ isLoading }: SignInProps) {
+function SignIn({ isLoading, isSigningInUser }: SignInProps) {
   const uiStore = useUIStore();
 
   const openSignInModal = useCallback(() => {
@@ -56,7 +57,7 @@ function SignIn({ isLoading }: SignInProps) {
         <SignInModal />
       }
       {!uiStore.isSignInModalOpened &&
-        isLoading &&
+        isSigningInUser &&
         <SignInRequest>
           <InfoMessage>
             <InfoText>

@@ -5,6 +5,7 @@ import { AuthState } from 'user/authState';
 import Button from 'components/Button';
 import Loader from 'components/Loader';
 import Base from './Base';
+import IPCService, { IPCSendChannel } from 'services/ipc.service';
 
 const Container = styled.div`
   width: 100%;
@@ -67,6 +68,15 @@ const SignInButton = styled(Button)``;
 function Account() {
   const userStore = useUserStore();
 
+  const openSignInModal = () => {
+    IPCService.send(IPCSendChannel.OpenSignInModal, undefined);
+  };
+
+  const signOut = () => {
+    IPCService.send(IPCSendChannel.SignOut, undefined);
+  };
+
+
   return (
     <Base title="Account">
       {userStore.isReconnecting &&
@@ -88,7 +98,7 @@ function Account() {
               <Email>
                 {userStore.auth.user?.email}
               </Email>
-              <SignOutButton onClick={() => { throw new Error('Not implemented') }}>
+              <SignOutButton onClick={signOut}>
                 Sign Out
               </SignOutButton>
             </>
@@ -101,7 +111,7 @@ function Account() {
                 You are not signed in
             </SignInText>
 
-              <SignInButton onClick={() => { throw new Error('Not implemented') }}>
+              <SignInButton onClick={openSignInModal}>
                 Sign in to Devbook
             </SignInButton>
             </SignInWrapper>

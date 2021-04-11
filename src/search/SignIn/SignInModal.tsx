@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 
@@ -9,8 +9,6 @@ import Loader from 'components/Loader';
 import { ReactComponent as checkIcon } from 'img/check-circle.svg';
 import { useUIStore } from 'ui/ui.store';
 import { useUserStore } from 'user/user.store';
-import InfoText from 'components/InfoMessage/InfoText'
-import InfoMessage from 'components/InfoMessage'
 
 const StyledModal = styled(Modal)`
   padding: 15px;
@@ -136,10 +134,6 @@ function SignInModal() {
     setEmail(e.target.value);
   }
 
-  const toggleSignInModal = useCallback(() => {
-    uiStore.toggleSignInModal();
-  }, []);
-
   async function handleCloseRequest() {
     uiStore.toggleSignInModal();
   }
@@ -186,95 +180,75 @@ function SignInModal() {
     <StyledModal
       onCloseRequest={handleCloseRequest}
     >
-      {userStore.isReconnecting
-        &&
-        <InfoMessage>
-          <InfoText>Contacting Devbook servers failed.</InfoText>
-          <InfoText>Reconnecting...</InfoText>
-        </InfoMessage>
-      }
-
-      {!userStore.isReconnecting &&
+      {!userStore.user && !userStore.isLoading &&
         <>
-          {!userStore.user
-            && !userStore.isLoading
-            &&
-            <>
-              <Title>
-                Sign in with your email
-          </Title>
-
-              <Description>
-                Click on the sign-in button to receive an email with a sign-in link.
-          </Description>
-
-              <InputWrapper>
-                <InputTitle>EMAIL</InputTitle>
-                <EmailInput
-                  autoFocus
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={handleEmailInputChange}
-                  onKeyDown={handleEmailInputOnKeyDown}
-                />
-              </InputWrapper>
-
-              {error &&
-                <Error>
-                  {error}
-                </Error>
-              }
-              <SignInButton
-                onClick={handleSignInButtonClick}
-              >
-                Sign in to Devbook
-         </SignInButton>
-            </>
-          }
-
-          {!userStore.user
-            && userStore.isLoading
-            && !userStore.error
-            &&
-            <>
-              <Title>
-                Check your email
-          </Title>
-
-              <Description>
-                We just sent an email with the sign-in link to the following email address:
-            <br />
-                <strong>{email}</strong>
+          <Title>
+            Sign in with your email
+              </Title>
+          <Description>
+            Click on the sign-in button to receive an email with a sign-in link.
               </Description>
-
-              <Description>
-                Click on the link and you'll be signed-in in a few seconds...
-          </Description>
-
-              <Loader />
-
-              <SignInAgainButton
-                onClick={handleSignInAgainButtonClick}
-              >
-                Sign in again
-         </SignInAgainButton>
-            </>
+          <InputWrapper>
+            <InputTitle>EMAIL</InputTitle>
+            <EmailInput
+              autoFocus
+              placeholder="your@email.com"
+              value={email}
+              onChange={handleEmailInputChange}
+              onKeyDown={handleEmailInputOnKeyDown}
+            />
+          </InputWrapper>
+          {error &&
+            <Error>
+              {error}
+            </Error>
           }
-
-          {userStore.user &&
-            <>
-              <Title>
-                You are signed in!
-          </Title>
-              <CheckIcon />
-              <ContinueIntoAppButton onClick={handleContinueIntoAppButtonClick}>
-                Continue into the app
-          </ContinueIntoAppButton>
-            </>
-          }
+          <SignInButton
+            onClick={handleSignInButtonClick}
+          >
+            Sign in to Devbook
+              </SignInButton>
         </>
       }
-    </StyledModal>
+
+      {!userStore.user && userStore.isLoading && !userStore.error &&
+        <>
+          <Title>
+            Check your email
+              </Title>
+
+          <Description>
+            We just sent an email with the sign-in link to the following email address:
+                <br />
+            <strong>{email}</strong>
+          </Description>
+
+          <Description>
+            Click on the link and you'll be signed-in in a few seconds...
+              </Description>
+
+          <Loader />
+
+          <SignInAgainButton
+            onClick={handleSignInAgainButtonClick}
+          >
+            Sign in again
+              </SignInAgainButton>
+        </>
+      }
+
+      {userStore.user &&
+        <>
+          <Title>
+            You are signed in!
+              </Title>
+          <CheckIcon />
+          <ContinueIntoAppButton onClick={handleContinueIntoAppButtonClick}>
+            Continue into the app
+          </ContinueIntoAppButton>
+        </>
+      }
+    </StyledModal >
   );
 }
 

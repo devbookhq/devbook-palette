@@ -6,7 +6,7 @@ import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 import AutoLaunch from 'auto-launch';
 
-import { isDev } from './utils/environment';
+import { isDev, isStaging, isProd } from './utils/environment';
 // Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.
 // Top-level property 'productName' in the package.json overwrites top-level property 'name' as an app identifier.
 // At the same time, the 'productName' is required to be top-level by ToDesktop - we used 'productName' in a 'build' property before.
@@ -304,7 +304,21 @@ MainIPCService.on(IPCSendChannel.LoadAppClient, (_, { window }) => {
         { extraHeaders: 'pragma: no-cache\n' },
       );
     }
-  } else {
+  } else if (isStaging) {
+    if (window === AppWindow.Main) {
+      mainWindow?.window?.webContents.loadURL(
+        `https://client-staging.usedevbook.com/${app.getVersion()}`,
+        { extraHeaders: 'pragma: no-cache\n' },
+      );
+    }
+
+    if (window === AppWindow.Onboarding) {
+      onboardingWindow?.window?.webContents.loadURL(
+        `https://client-staging.usedevbook.com/${app.getVersion()}#/onboarding`,
+        { extraHeaders: 'pragma: no-cache\n' },
+      );
+    }
+  } else if (isProd) {
     if (window === AppWindow.Main) {
       mainWindow?.window?.webContents.loadURL(
         `https://client.usedevbook.com/${app.getVersion()}`,

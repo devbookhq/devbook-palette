@@ -153,31 +153,10 @@ function App() {
       <Container>
         <Router>
           <Switch>
-            <Route
-              path='/onboarding'
-              exact
-            >
-              <Onboarding />
-            </Route>
-
-            <Route
-              path='/preferences'
-            >
-              <Preferences />
-            </Route>
-
-            <Route
-              path='/'
-              exact
-            >
-              <Redirect to='/home' />
-            </Route>
-
-            <Route
-              path='/home'
-            >
-              <Home />
-            </Route>
+            <Route exact path='/onboarding' component={Onboarding} />
+            <Route path='/preferences' component={Preferences} />
+            <Route path='/home' component={Home} />
+            <Redirect exact from='/' to='/home' />
           </Switch>
         </Router>
       </Container>

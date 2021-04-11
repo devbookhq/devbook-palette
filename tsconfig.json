@@ -29,9 +29,6 @@
     "src"
   ],
   "exclude": [
-    "src/main",
-    "src/services/analytics.service/mainAnalytics.service.ts",
-    "sec/services/ipc.service/mainIPC.service.ts",
-    "sec/services/sync.service/mainSync.service.ts",
-  ]
+    "src/main"
+  ],
 }

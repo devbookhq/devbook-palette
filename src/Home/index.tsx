@@ -32,13 +32,11 @@ function Home() {
         </VerticalInfoMessage>
       }
       {!userStore.isReconnecting &&
-        <>
-          < Container >
-            <SearchPanel />
-            <SearchResults />
-            <HotkeysPanel />
-          </Container >
-        </>
+        <Container>
+          <SearchPanel />
+          <SearchResults />
+          <HotkeysPanel />
+        </Container >
       }
     </>
   );

@@ -2,10 +2,40 @@
 
 set -e
 
+export ENV='staging'
+
+while test $# -gt 0; do
+  case "$1" in
+    -h|--help)
+      echo "Deploys the client side of Devbook into CDN. Default behavior is to deploy to the staging environment."
+      echo " "
+      echo "options:"
+      echo "-h, --help       show brief help"
+      echo "--env=prod       deploy to production"
+      exit 0
+      ;;
+    --env*)
+      export ENV=`echo $1 | sed -e 's/^[^=]*=//g'`
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
 BUNDLE=`git rev-parse --short HEAD` # Bundle is a hash value of the current commit.
-BUCKET_URL="gs://client-releases-prod"
 VERSION=`cat package.json | jq -r '.version'`
 BUILD_PATH=build/client/$VERSION-$BUNDLE
+
+BUCKET_URL="gs://client-releases-staging"
+# KV namespace ID for APP_CLIENT-staging.
+NAMESPACE_ID="fd89f4a75738463888a9b41b64d5d105"
+if [ "$ENV" = "prod" ]; then
+  BUCKET_URL="gs://client-releases-prod"
+  # KV namespace ID for APP_CLIENT.
+  NAMESPACE_ID="6c08f450925342c3b0d066b77eedbf25"
+fi
 
 if [ -z "$CLOUDFLARE_AUTH_EMAIL" ]; then
   echo "CLOUDFLARE_AUTH_EMAIL env var is empty"
@@ -28,7 +58,7 @@ if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
 fi
 
 
-read -p "🚨 You are about to deploy client v$VERSION-$BUNDLE. Press enter to continue."
+read -p "🚨 You are about to deploy client v$VERSION-$BUNDLE to the **$ENV** environment. Press enter to continue."
 
 gsutil -m -h "Cache-Control:no-cache, max-age=0" rsync -r $BUILD_PATH $BUCKET_URL/$VERSION
 
@@ -57,10 +87,9 @@ if [ $success = "false" ]; then
 fi
 
 echo "\n\n"
-read -p ">>> 💾 Will save the latest bundle version. Pres enter to continue."
+read -p ">>> 💾 Will save the latest bundle version to the **$ENV** environment. Pres enter to continue."
 
 # Save the latest bundle version into KV in Cloudflare.
-NAMESPACE_ID="6c08f450925342c3b0d066b77eedbf25"
 response=`curl "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/storage/kv/namespaces/$NAMESPACE_ID/values/${VERSION}"\
   -X PUT\
   -H "Content-Type: text/plain"\
@@ -79,5 +108,5 @@ if [ $success = "false" ]; then
   exit 1
 fi
 
-echo "\n\n ✅ The client v$VERSION-$BUNDLE is deployed"
+echo "\n\n ✅ The client v$VERSION-$BUNDLE is deployed to the **$ENV** environment"
 

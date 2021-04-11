@@ -11,6 +11,7 @@ import InfoText from 'components/InfoMessage/InfoText';
 import HotkeyText from 'components/HotkeyText';
 import { useUserStore } from 'user/user.store';
 import SignIn from './SignIn';
+import { AuthState } from 'user/authState';
 
 const Container = styled.div`
   height: 100%;
@@ -52,15 +53,15 @@ function Search() {
       {uiStore.searchSource === SearchSource.Docs &&
         !userStore.user &&
         <SignIn
+          isSigningInUser={userStore.state === AuthState.SigningInUser}
           isLoading={userStore.isLoading}
         />
       }
 
-      {((searchStore.results.docs.results.length === 0 && uiStore.searchSource === SearchSource.Docs) ||
+      {((searchStore.results.docs.results.length === 0 && uiStore.searchSource === SearchSource.Docs && userStore.user) ||
         (searchStore.results.docs.results.length === 0 && uiStore.searchSource === SearchSource.StackOverflow)) &&
         <>
-          {
-            searchStore.isQueryDirty &&
+          {searchStore.isQueryDirty &&
             <InfoMessage>
               <InfoTextLeft>
                 Type your search query and press
