@@ -2,9 +2,8 @@ import ElectronStore from 'electron-store';
 
 import MainIPCService, { IPCInvokeChannel, IPCSendChannel } from '@main/services/mainIPC.service';
 
-import { HistoryEntry } from '@renderer/Search/historyEntry';
 import { StorageKey, StorageValue, Storage } from '@renderer/services/sync.service/storage';
-import isDev from '@main/utils/isDev';
+import { isDev } from '@main/utils/environment';
 import { app } from 'electron';
 import path from 'path';
 

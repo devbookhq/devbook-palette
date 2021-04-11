@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 
@@ -11,6 +10,7 @@ import InfoMessage from 'components/InfoMessage';
 import InfoText from 'components/InfoMessage/InfoText';
 import HotkeyText from 'components/HotkeyText';
 import { useUserStore } from 'user/user.store';
+import SignIn from './SignIn';
 
 const Container = styled.div`
   height: 100%;
@@ -43,9 +43,16 @@ function Search() {
       }
 
       {uiStore.searchSource === SearchSource.Docs &&
-        // userStore.user &&
+        userStore.user &&
         <Docs
           results={searchStore.results.docs.results}
+        />
+      }
+
+      {uiStore.searchSource === SearchSource.Docs &&
+        !userStore.user &&
+        <SignIn
+          isLoading={userStore.isLoading}
         />
       }
 
@@ -77,7 +84,7 @@ function Search() {
           }
         </>
       }
-    </Container >
+    </Container>
   );
 }
 

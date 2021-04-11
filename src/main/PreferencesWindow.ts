@@ -2,7 +2,7 @@ import * as electron from 'electron';
 import * as process from 'process';
 import { app } from 'electron';
 
-import isDev from '@main/utils/isDev';
+import { isDev } from '@main/utils/environment';
 import MainIPCService from '@main/services/mainIPC.service';
 
 import { IPCOnChannel } from '@renderer/services/ipc.service/onChannel';

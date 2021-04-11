@@ -13,7 +13,7 @@ const HotkeyWrapper = styled.div<{ isHighlighted?: boolean, reverseContent?: boo
   background: ${props => props.isHighlighted ? '#535BD7' : 'transparent'};
   box-shadow: ${props => props.isHighlighted ? '0px 0px 8px 5px rgba(83, 91, 215, 0.15)' : 'none'};
   :hover {
-    transition: background 90ms ease-in;
+    transition: background 70ms ease-in;
     cursor: pointer;
     background: ${props => props.isHighlighted ? '#535BD7' : '#434252'};
   }
@@ -28,7 +28,7 @@ const HotkeyText = styled.div<{ isHighlighted?: boolean }>`
   margin: 0px 5px 0px;
   font-size: 12px;
   color: #616171;
-  transition: color 90ms ease-in;
+  transition: color 70ms ease-in;
   color: ${props => props.isHighlighted ? '#fff' : 'auto'};
 `;
 
