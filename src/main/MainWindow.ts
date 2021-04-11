@@ -2,13 +2,13 @@ import * as electron from 'electron';
 import * as process from 'process';
 import { debounce } from 'debounce';
 
-import { isDev } from '@main/utils/environment';
-import MainSyncService, { StorageKey } from '@main/services/mainSync.service';
-import MainAnalyticsService, { AnalyticsEvent } from '@main/services/mainAnalytics.service';
-import MainIPCService from '@main/services/mainIPC.service';
+import { isDev } from './utils/environment';
+import MainSyncService, { StorageKey } from 'services/sync.service/mainSync.service';
+import MainAnalyticsService, { AnalyticsEvent } from 'services/analytics.service/mainAnalytics.service';
+import MainIPCService from 'services/ipc.service/mainIPC.service';
 
-import { AppWindow } from '@renderer/services/appWindow';
-import { IPCOnChannel } from '@renderer/services/ipc.service/onChannel';
+import { AppWindow } from 'services/appWindow';
+import { IPCOnChannel } from 'services/ipc.service/onChannel';
 
 class MainWindow {
   public window: electron.BrowserWindow | undefined;

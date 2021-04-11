@@ -1,7 +1,7 @@
 import * as electron from 'electron';
 import * as process from 'process';
 
-import { AppWindow } from '@renderer/services/appWindow';
+import { AppWindow } from 'services/appWindow';
 
 class OnboardingWindow {
   public window: electron.BrowserWindow | undefined;

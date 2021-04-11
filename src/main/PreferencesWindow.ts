@@ -2,11 +2,11 @@ import * as electron from 'electron';
 import * as process from 'process';
 import { app } from 'electron';
 
-import { isDev } from '@main/utils/environment';
-import MainIPCService from '@main/services/mainIPC.service';
+import { isDev } from './utils/environment';
+import MainIPCService from 'services/ipc.service/mainIPC.service';
 
-import { IPCOnChannel } from '@renderer/services/ipc.service/onChannel';
-import { PreferencesPage } from '@renderer/Preferences/preferencesPage';
+import { IPCOnChannel } from 'services/ipc.service/onChannel';
+import { PreferencesPage } from 'Preferences/preferencesPage';
 
 class PreferencesWindow {
   public window: electron.BrowserWindow | undefined;

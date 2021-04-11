@@ -11,22 +11,11 @@
     "skipLibCheck": true,
     "outDir": "../../build/electron",
     "rootDir": "../",
-    "noEmitOnError": true, 
+    "noEmitOnError": true,
     "esModuleInterop": true,
-    "baseUrl": ".",
-    "rootDirs": [
-      ".",
-    ],
-    "paths": {
-      "@renderer/*": [
-        "../*"
-      ],
-      "@main/*": [
-        "./*"
-      ],
-    },
+    "baseUrl": "../",
   },
   "include": [
-    ".",
+    "."
   ]
 }

@@ -4,17 +4,17 @@ import Analytics from 'analytics-node';
 import { app } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 
-import { isDev } from '@main/utils/environment';
-import MainSyncService, { StorageKey } from '@main/services/mainSync.service';
-import MainIPCService, { IPCSendChannel } from '@main/services/mainIPC.service';
+import { isDev } from 'main/utils/environment';
+import MainSyncService, { StorageKey } from 'services/sync.service/mainSync.service';
+import MainIPCService, { IPCSendChannel } from 'services/ipc.service/mainIPC.service';
 
-import { User } from '@renderer/user/user';
-import { AnalyticsEvent, AnalyticsPayload } from '@renderer/services/analytics.service/analyticsEvent';
+import { User } from 'user/user';
+import { AnalyticsEvent, AnalyticsPayload } from 'services/analytics.service/analyticsEvent';
 
 class MainAnalyticsService {
   private constructor() { }
   private static readonly writeKey = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
-  private static readonly flushAt = isDev ? 1 : 5;
+  private static readonly flushAt = isDev ? 1 : 10;
   private static readonly analytics = new Analytics(MainAnalyticsService.writeKey, { flushAt: MainAnalyticsService.flushAt });
   private static readonly appVersion = app.getVersion();
   private static readonly platform = process.platform;

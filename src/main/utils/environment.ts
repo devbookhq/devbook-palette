@@ -1,4 +1,4 @@
-import { Environment } from '@renderer/services/electron.service/environment';
+import { Environment } from 'services/electron.service/environment';
 
 declare var ENVIRONMENT: Environment;
 
