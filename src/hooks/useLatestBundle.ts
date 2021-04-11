@@ -10,8 +10,6 @@ type CBType = (response: Response) => void;
 
 function useLatestBundle(callback: CBType, version: string, interval: number, deps: any[] = []) {
   const savedCb = useRef<CBType | null>(null);
-        const url = `${process.env.REACT_APP_CLIENT_URL}/__latest-bundle?version=${encodeURIComponent(version)}`;
-        console.log('URL', url);
 
   useEffect(() => {
     savedCb.current = callback;
@@ -20,7 +18,7 @@ function useLatestBundle(callback: CBType, version: string, interval: number, de
   useEffect(() => {
     async function tick() {
       // Don't do bundle checks during a local development. Because the client is running locally on localhost.
-      //if (ElectronService.isDev) return;
+      if (ElectronService.isDev) return;
 
       try {
         const url = `${process.env.REACT_APP_CLIENT_URL}/__latest-bundle?version=${encodeURIComponent(version)}`;
