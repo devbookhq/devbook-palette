@@ -4,7 +4,7 @@ import Analytics from 'analytics-node';
 import { app } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 
-import isDev from '@main/utils/isDev';
+import { isDev } from '@main/utils/environment';
 import MainSyncService, { StorageKey } from '@main/services/mainSync.service';
 import MainIPCService, { IPCSendChannel } from '@main/services/mainIPC.service';
 

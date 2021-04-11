@@ -2,7 +2,7 @@ import {
   makeAutoObservable,
   toJS,
 } from 'mobx';
-import RootStore, { useRootStore } from 'App/RootStore';
+import { useRootStore } from 'App/RootStore';
 import SearchService, { SearchFilterTypings, SearchResult } from 'services/search.service';
 import { SearchSource } from 'services/search.service/searchSource';
 import SyncService, { StorageKey } from 'services/sync.service';

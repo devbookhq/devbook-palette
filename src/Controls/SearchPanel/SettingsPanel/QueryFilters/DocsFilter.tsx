@@ -19,7 +19,7 @@ const Container = styled.div`
 
   background: #25252E;
   :hover {
-    transition: background 90ms ease-in;
+    transition: background 70ms ease-in;
     cursor: pointer;
     background: #434252;
     > div {

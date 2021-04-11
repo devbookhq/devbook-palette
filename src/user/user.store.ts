@@ -4,7 +4,7 @@ import {
   makeAutoObservable,
 } from 'mobx';
 
-import RootStore, { useRootStore } from 'App/RootStore';
+import { useRootStore } from 'App/RootStore';
 import SyncService, { StorageKey } from 'services/sync.service';
 import AuthenticationService from 'services/authentication.service';
 import ReconnectionService from 'services/reconnection.service';
@@ -58,21 +58,21 @@ class UserStore {
     makeAutoObservable(this);
 
     autorun(() => {
-      // console.log('Authentication:', this.auth);
-      console.log('isReconnecting:', ReconnectionService);
+      console.log('Authentication:', this.auth);
+      console.log('isReconnecting:', ReconnectionService.isConnected);
     });
 
-    IPCService.on(IPCOnChannel.GetAuthFromMainWindow, () => {
-      IPCService.send(IPCSendChannel.SetAuthInOtherWindows, { auth: this.auth });
-    });
+    IPCService.on(IPCOnChannel.GetAuthFromMainWindow, () =>
+      IPCService.send(IPCSendChannel.SetAuthInOtherWindows, { auth: this.auth })
+    );
 
-    IPCService.on(IPCOnChannel.SetAuthInOtherWindows, (_, { auth }) => {
-      this.updateAuth(auth);
-    });
+    IPCService.on(IPCOnChannel.SetAuthInOtherWindows, (_, { auth }) =>
+      this.updateAuth(auth)
+    );
 
-    IPCService.on(IPCOnChannel.SignOut, () => {
-      this.signOut();
-    });
+    IPCService.on(IPCOnChannel.SignOut, () =>
+      this.signOut()
+    );
 
     this.refreshAuth();
   }

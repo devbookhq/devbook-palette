@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {
+  autorun,
   makeAutoObservable,
 } from 'mobx';
 
@@ -24,7 +25,7 @@ axios.interceptors.response.use((value) => {
 });
 
 class ReconnectionService {
-  private static _instance: ReconnectionService;
+  private static _instance: ReconnectionService = new ReconnectionService();
 
   static get instance() {
     return ReconnectionService._instance || (ReconnectionService._instance = new ReconnectionService());
@@ -38,6 +39,7 @@ class ReconnectionService {
 
   private contructor() {
     makeAutoObservable(this);
+    console.log('reconnection');
   }
 
   static reportDisconnection() {
@@ -48,6 +50,5 @@ class ReconnectionService {
     ReconnectionService.instance._isConnected = true;
   }
 }
-
 
 export default ReconnectionService;

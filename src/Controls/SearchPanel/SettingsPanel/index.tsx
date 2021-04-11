@@ -10,6 +10,7 @@ import { PreferencesPage } from 'Preferences/preferencesPage';
 import QueryFilters from './QueryFilters';
 import { ReactComponent as preferencesIcon } from 'img/preferences.svg';
 import useHotkey from 'hooks/useHotkey';
+import { useUserStore } from 'user/user.store';
 
 const Container = styled.div`
   width: 100%;
@@ -45,6 +46,7 @@ const PreferencesButton = styled.div`
 
 function SettingsPanel() {
   const uiStore = useUIStore();
+  const userStore = useUserStore();
 
   const openPreferences = useCallback(() => {
     IPCServices.send(IPCSendChannel.OpenPreferences, { page: PreferencesPage.General });
@@ -60,7 +62,10 @@ function SettingsPanel() {
 
   return (
     <Container>
-      <QueryFilters source={uiStore.searchSource} />
+      <QueryFilters
+        source={uiStore.searchSource}
+        user={userStore.user}
+      />
       <ButtonsWrapper>
         <Hotkey
           onClick={togglePinMode}

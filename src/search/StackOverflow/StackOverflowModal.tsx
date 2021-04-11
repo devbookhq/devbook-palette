@@ -18,16 +18,15 @@ import {
 import Modal from 'components/Modal';
 
 import StackOverflowBody from './StackOverflowResults/StackOverflowBody';
-import { useUIStore } from 'ui/ui.store';
 
 const marginTop = 67;
 
 const StyledModal = styled(Modal)`
   position: relative;
-  bottom: 0px;
+  bottom: 45px;
   width: 100%;
-  height: calc(100vh - ${marginTop}px);
-  margin-top: ${marginTop}px;
+  height: calc(100vh - ${marginTop}px - 45px);
+  margin-top: calc(${marginTop}px + 45px);
 
   display: flex;
   flex-direction: column;
@@ -172,21 +171,20 @@ const AnswersHeading = styled.span`
 
 interface StackOverflowModalProps {
   result: StackOverflowResult;
-  onCloseRequest: () => void;
+  toggleModal: () => void;
 }
 
 function StackOverflowModal({
   result,
-  onCloseRequest,
+  toggleModal,
 }: StackOverflowModalProps) {
-
   const modalRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const [sortedAnswers, setSortedAnswers] = useState<StackOverflowAnswer[]>([]);
   const [mostUpvotedIdx, setMostUpvotedIdx] = useState(-1);
 
-  useOnClickOutside(modalRef, onCloseRequest);
+  useOnClickOutside(modalRef, toggleModal);
 
   function handleQuestionTitleClick(e: any) {
     ElectronService.openLink(result?.question.link);
@@ -241,7 +239,6 @@ function StackOverflowModal({
 
   return (
     <StyledModal
-      onCloseRequest={onCloseRequest}
       ref={modalRef}
       tabIndex={0}
     >

@@ -1,8 +1,5 @@
 import * as electron from 'electron';
-import * as path from 'path';
 import * as process from 'process';
-
-import isDev from '@main/utils/isDev';
 
 import { AppWindow } from '@renderer/services/appWindow';
 

@@ -69,51 +69,45 @@ function Account() {
 
   return (
     <Base title="Account">
-      <Container>
+      {userStore.isReconnecting &&
+        <InfoWrapper>
+          <InfoMessage>Contacting Devbook servers failed.</InfoMessage>
+          <InfoMessage>Reconnecting...</InfoMessage>
+        </InfoWrapper>
+      }
 
-        {userStore.isReconnecting
-          &&
-          <InfoWrapper>
-            <InfoMessage>Contacting Devbook servers failed.</InfoMessage>
-            <InfoMessage>Reconnecting...</InfoMessage>
-          </InfoWrapper>
-        }
+      {!userStore.isReconnecting &&
+        <Container>
+          {userStore.isLoading &&
+            <StyledLoader />
+          }
 
-        {userStore.isLoading
-          && !userStore.isReconnecting
-          &&
-          < StyledLoader />
-        }
+          {userStore.user &&
+            !userStore.isLoading &&
+            <>
+              <Email>
+                {userStore.auth.user?.email}
+              </Email>
+              <SignOutButton onClick={() => { throw new Error('Not implemented') }}>
+                Sign Out
+              </SignOutButton>
+            </>
+          }
 
-        {!userStore.isLoading
-          && userStore.auth.state === AuthState.UserSignedIn
-          && !userStore.isReconnecting
-          &&
-          <>
-            <Email>
-              {userStore.auth.user?.email}
-            </Email>
-            <SignOutButton onClick={() => { throw new Error('Not implemented') }}>
-              Sign Out
-            </SignOutButton>
-          </>
-        }
-
-        {!userStore.isLoading
-          && userStore.auth.state === AuthState.NoUser
-          && !userStore.isReconnecting
-          &&
-          <SignInWrapper>
-            <SignInText>
-              You are not signed in
+          {!userStore.user &&
+            !userStore.isLoading &&
+            <SignInWrapper>
+              <SignInText>
+                You are not signed in
             </SignInText>
 
-            <SignInButton onClick={() => { throw new Error('Not implemented') }}>
-              Sign in to Devbook
+              <SignInButton onClick={() => { throw new Error('Not implemented') }}>
+                Sign in to Devbook
             </SignInButton>
-          </SignInWrapper>
-        }
-      </Container>
+            </SignInWrapper>
+          }
+        </Container>
+      }
     </Base>
   );
 }

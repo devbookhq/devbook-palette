@@ -5,10 +5,8 @@ import { app } from 'electron';
 import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 import AutoLaunch from 'auto-launch';
-import { Environment } from '@renderer/services/electron.service/environment';
-declare var ENVIRONMENT: Environment;
 
-import isDev from '@main/utils/isDev';
+import { isDev } from '@main/utils/environment';
 // Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.
 // Top-level property 'productName' in the package.json overwrites top-level property 'name' as an app identifier.
 // At the same time, the 'productName' is required to be top-level by ToDesktop - we used 'productName' in a 'build' property before.

@@ -9,6 +9,7 @@ import StackOverflowHotkeys from './StackOverflowHotkeys';
 import StackOverflowModalHotkeys from './StackOverflowModalHotkeys';
 import DocsHotkeys from './DocsHotkeys';
 import DocsFilterModalHotkeys from './DocsFilterModalHotkeys';
+import { useUserStore } from 'user/user.store';
 
 const Container = styled.div`
   width: 100%;
@@ -23,39 +24,34 @@ const Container = styled.div`
   border-top: 1px solid #3B3A4A;
 `;
 
-export interface HotkeyWithText {
-  text: string;
-  hotkey: HotkeyType;
-  isSeparated?: boolean; // Separates hotkey's symbols that are listed in the 'hotkey' property.
-  onClick?: (e: any) => void;
-}
-
 function HotkeysPanel() {
   const uiStore = useUIStore();
+  const userStore = useUserStore();
 
   return (
-    <Container>
+    <>
       {uiStore.searchSource === SearchSource.StackOverflow &&
-        <>
+        <Container>
           {!uiStore.isModalOpened &&
             <StackOverflowHotkeys />
           }
           {uiStore.isModalOpened &&
             <StackOverflowModalHotkeys />
           }
-        </>
+        </Container>
       }
       {uiStore.searchSource === SearchSource.Docs &&
-        <>
+        userStore.user &&
+        <Container>
           {!uiStore.isFilterModalOpened &&
             <DocsHotkeys />
           }
           {uiStore.isFilterModalOpened &&
             <DocsFilterModalHotkeys />
           }
-        </>
+        </Container>
       }
-    </Container>
+    </>
   );
 }
 

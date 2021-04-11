@@ -2,7 +2,7 @@ import * as electron from 'electron';
 import * as process from 'process';
 import { debounce } from 'debounce';
 
-import isDev from '@main/utils/isDev';
+import { isDev } from '@main/utils/environment';
 import MainSyncService, { StorageKey } from '@main/services/mainSync.service';
 import MainAnalyticsService, { AnalyticsEvent } from '@main/services/mainAnalytics.service';
 import MainIPCService from '@main/services/mainIPC.service';
@@ -135,7 +135,7 @@ class MainWindow {
     });
 
     this.window.loadURL(`file://${__dirname}/assets/loading.html?window=${AppWindow.Main}`);
-    
+
     if (isDev) {
       this.webContents?.openDevTools();
     }

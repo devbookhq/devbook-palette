@@ -4,11 +4,11 @@ import {
   useEffect,
   useCallback,
 } from 'react';
+import { observer } from 'mobx-react-lite';
 
 import { StackOverflowResult } from 'services/search.service';
 import StackOverflowResults from './StackOverflowResults';
 import StackOverflowModal from './StackOverflowModal';
-import { FocusState } from 'Search/focusState';
 import { HotkeyAction, useUIStore } from 'ui/ui.store';
 import useHotkey from 'hooks/useHotkey';
 
@@ -51,8 +51,8 @@ function StackOverflow({ results }: StackOverflowProps) {
   useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowOpenModal], toggleModal);
 
   const openModalForResult = useCallback((i: number) => {
-    setSelectedIdx(i)
-    toggleModal()
+    setSelectedIdx(i);
+    toggleModal();
   }, [toggleModal]);
 
   return (
@@ -61,7 +61,7 @@ function StackOverflow({ results }: StackOverflowProps) {
         <>
           {uiStore.isModalOpened &&
             <StackOverflowModal
-              onCloseRequest={toggleModal}
+              toggleModal={toggleModal}
               result={results[selectedIdx]}
             />
           }
@@ -77,4 +77,4 @@ function StackOverflow({ results }: StackOverflowProps) {
   );
 }
 
-export default StackOverflow;
+export default observer(StackOverflow);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 
@@ -9,6 +9,8 @@ import Loader from 'components/Loader';
 import { ReactComponent as checkIcon } from 'img/check-circle.svg';
 import { useUIStore } from 'ui/ui.store';
 import { useUserStore } from 'user/user.store';
+import InfoText from 'components/InfoMessage/InfoText'
+import InfoMessage from 'components/InfoMessage'
 
 const StyledModal = styled(Modal)`
   padding: 15px;
@@ -81,22 +83,6 @@ const SignInAgainButton = styled(Button)`
   }
 `;
 
-const InfoWrapper = styled.div`
-  padding: 5px;
-  height: 100%;
-  display: flex;
-  margin: auto;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-`;
-
-const InfoMessage = styled.div`
-  color: #5A5A6F;
-  font-size: 16px;
-  font-weight: 600;
-`;
-
 const InputWrapper = styled.div`
   margin-bottom: 20px;
   width: 100%;
@@ -150,6 +136,10 @@ function SignInModal() {
     setEmail(e.target.value);
   }
 
+  const toggleSignInModal = useCallback(() => {
+    uiStore.toggleSignInModal();
+  }, []);
+
   async function handleCloseRequest() {
     uiStore.toggleSignInModal();
   }
@@ -198,10 +188,10 @@ function SignInModal() {
     >
       {userStore.isReconnecting
         &&
-        <InfoWrapper>
-          <InfoMessage>Contacting Devbook servers failed.</InfoMessage>
-          <InfoMessage>Reconnecting...</InfoMessage>
-        </InfoWrapper>
+        <InfoMessage>
+          <InfoText>Contacting Devbook servers failed.</InfoText>
+          <InfoText>Reconnecting...</InfoText>
+        </InfoMessage>
       }
 
       {!userStore.isReconnecting &&
