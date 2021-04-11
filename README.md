@@ -21,7 +21,6 @@ Go to https://app.todesktop.com/apps/2102273jsy18baz, and click on the "Release"
 ## Deploy to staging
 You must deploy the client and electron part separately.
 
-### Deploy client
 1. Bundle client
 ```
 npm run bundle:client:staging
@@ -42,7 +41,6 @@ npm run build:electron:staging
 ## Deploy to production
 You must deploy the client and electron part separately.
 
-### Deploy client
 1. Bundle client
 ```
 npm run bundle:client:prod
