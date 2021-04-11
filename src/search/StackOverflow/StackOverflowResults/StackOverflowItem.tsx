@@ -179,7 +179,7 @@ interface StackOverflowItemProps {
   focusState: FocusState;
   idx: number;
   openModalForResult: (i: number) => void;
-  setFocusResult: (i: number) => void;
+  // setFocusResult: (i: number) => void;
 }
 
 function StackOverflowItem({
@@ -199,8 +199,8 @@ function StackOverflowItem({
   const [copySnippetEls, setCopySnippetEls] = useState<HTMLElement[]>([]);
 
   function handleQuestionTitleClick(e: any) {
-    onTitleClick(e);
-    setFocusResult()
+    // onTitleClick(e);
+    // setFocusResult()
     e.preventDefault();
   }
 

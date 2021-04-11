@@ -13,15 +13,15 @@ const appDataFolder = 'com.foundrylabs.devbook';
 const historyStore = new ElectronStore<Pick<Storage, StorageKey.SearchHistoryEntries>>({
   cwd: path.resolve(app.getPath('userData'), '..', `${appDataFolder}${isDev ? '.dev' : ''}`),
   name: 'history',
-  schema: {
-    searchHistoryEntries: {
-      type: 'array',
-      properties: {
-        query: { type: 'string' },
-      },
-      default: [] as HistoryEntry[],
-    },
-  },
+  // schema: {
+  //   searchHistoryEntries: {
+  //     type: 'array',
+  //     properties: {
+  //       query: { type: 'string' },
+  //     },
+  //     default: [] as HistoryEntry[],
+  //   },
+  // },
 });
 
 const electronStore = new ElectronStore<Storage>({

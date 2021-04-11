@@ -20,10 +20,12 @@ export function useUserStore() {
 
 class UserStore {
   readonly _auth: AuthInfo = { state: AuthState.NoUser, error: undefined, user: undefined };
-  readonly _reconnectionService = ReconnectionService;
+  readonly _reconnectionService = ReconnectionService.instance;
 
   get isReconnecting() {
-    return !this._reconnectionService.isConnected;
+    const r = ReconnectionService.isConnected;
+    console.log('isConnected', r);
+    return !ReconnectionService.isConnected;
   }
 
   get isLoading() {
@@ -58,7 +60,8 @@ class UserStore {
     });
 
     autorun(() => {
-      console.log('Authentication:', this.auth);
+      // console.log('Authentication:', this.auth);
+      console.log('isReconnecting:', ReconnectionService);
     });
 
     IPCService.on(IPCOnChannel.GetAuthFromMainWindow, () => {

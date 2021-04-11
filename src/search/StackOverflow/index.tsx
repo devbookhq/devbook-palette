@@ -13,16 +13,18 @@ import { HotkeyAction, useUIStore } from 'ui/ui.store';
 import useHotkey from 'hooks/useHotkey';
 
 interface StackOverflowProps {
-  isModalOpened: boolean;
   results: StackOverflowResult[];
-  toggleModal: () => void;
 }
 
-function StackOverflow({ results, isModalOpened, toggleModal }: StackOverflowProps) {
+function StackOverflow({ results }: StackOverflowProps) {
   const uiStore = useUIStore();
 
   const [selectedIdx, setSelectedIdx] = useState(0);
   const searchResultsWrapperRef = useRef<HTMLDivElement>(null);
+
+  const toggleModal = useCallback(() => {
+    uiStore.toggleModal();
+  }, []);
 
   const resultsUpHandler = useCallback(() => {
     setSelectedIdx(c => c > 0 ? c - 1 : c);
@@ -48,8 +50,6 @@ function StackOverflow({ results, isModalOpened, toggleModal }: StackOverflowPro
 
   useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowOpenModal], toggleModal);
 
-  
-
   const openModalForResult = useCallback((i: number) => {
     setSelectedIdx(i)
     toggleModal()
@@ -59,7 +59,7 @@ function StackOverflow({ results, isModalOpened, toggleModal }: StackOverflowPro
     <>
       {results.length !== 0 &&
         <>
-          {isModalOpened &&
+          {uiStore.isModalOpened &&
             <StackOverflowModal
               onCloseRequest={toggleModal}
               result={results[selectedIdx]}

@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 
@@ -9,15 +10,15 @@ import { useSearchStore } from './search.store';
 import InfoMessage from 'components/InfoMessage';
 import InfoText from 'components/InfoMessage/InfoText';
 import HotkeyText from 'components/HotkeyText';
-import { useCallback } from 'react';
+import { useUserStore } from 'user/user.store';
 
 const Container = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   overflow: hidden;
-  margin-bottom: 50px;
+  margin-bottom: 45px;
 `;
 
 const InfoTextLeft = styled(InfoText)`
@@ -31,30 +32,20 @@ const InfoTextRight = styled(InfoText)`
 function Search() {
   const uiStore = useUIStore();
   const searchStore = useSearchStore();
-
-  const toggleModal = useCallback(() => {
-    uiStore.toggleModal();
-  }, []);
-
-  const toggleFilterModal = useCallback(() => {
-    uiStore.toggleFilterModal();
-  }, []);
+  const userStore = useUserStore();
 
   return (
     <Container>
       {uiStore.searchSource === SearchSource.StackOverflow &&
         <StackOverflow
           results={searchStore.results.stackOverflow.results}
-          isModalOpened={uiStore.isModalOpened}
-          toggleModal={toggleModal}
         />
       }
 
       {uiStore.searchSource === SearchSource.Docs &&
+        // userStore.user &&
         <Docs
           results={searchStore.results.docs.results}
-          isFilterModalOpened={uiStore.isFilterModalOpened}
-          toggleFilterModal={toggleFilterModal}
         />
       }
 

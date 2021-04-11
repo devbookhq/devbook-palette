@@ -45,8 +45,6 @@ function FilterItem({ itemRef, isSelected, selectSource, sourceFilter }: FilterI
     selectSource(sourceFilter);
   }, [sourceFilter, selectSource]);
 
-  console.log('rer');
-
   return (
     <DocRow
       ref={itemRef}

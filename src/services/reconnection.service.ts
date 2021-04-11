@@ -27,7 +27,7 @@ class ReconnectionService {
   private static _instance: ReconnectionService;
 
   static get instance() {
-    return ReconnectionService._instance || (ReconnectionService._instance = new ReconnectionService())
+    return ReconnectionService._instance || (ReconnectionService._instance = new ReconnectionService());
   }
 
   _isConnected = true;
@@ -37,9 +37,7 @@ class ReconnectionService {
   }
 
   private contructor() {
-    makeAutoObservable(this, {
-      _isConnected: false,
-    });
+    makeAutoObservable(this);
   }
 
   static reportDisconnection() {

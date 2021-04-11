@@ -8,6 +8,11 @@ import DocsSidebar from './DocsSidebar';
 import DocsFilterModal from './DocsFilterModal';
 import { useUIStore } from 'ui/ui.store';
 
+const Container = styled.div`
+  display: flex;
+  overflow: hidden;
+`;
+
 interface Docs {
   results: DocResult[];
 }
@@ -30,7 +35,7 @@ function Docs({ results }: Docs) {
         />
       }
       {results.length !== 0 &&
-        <>
+        <Container>
           <DocsSidebar
             results={results}
             selectedIdx={selectedIdx}
@@ -40,7 +45,7 @@ function Docs({ results }: Docs) {
             searchInputRef={docPageSearchInputRef}
             result={results[selectedIdx]}
           />
-        </>
+        </Container>
       }
     </>
   );

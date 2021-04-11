@@ -66,7 +66,8 @@ function DocsSidebar({ results, selectIdx, selectedIdx }: DocsSidebarProps) {
               idx={i}
               selectIdx={selectIdx}
               result={result}
-              focusState={activeFocusedIdx.idx === i ? activeFocusedIdx.focusState : FocusState.None}
+              focusState={FocusState.None}
+              // focusState={activeFocusedIdx.idx === i ? activeFocusedIdx.focusState : FocusState.None}
             />
           ))}
         </DocSearchResults>

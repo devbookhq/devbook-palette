@@ -1,8 +1,12 @@
 import styled from 'styled-components';
+import { observer } from 'mobx-react-lite';
 
 import SearchPanel from 'Controls/SearchPanel';
 import SearchResults from 'Search';
 import HotkeysPanel from 'Controls/HotkeysPanel';
+import { useUserStore } from 'user/user.store';
+import InfoMessage from 'components/InfoMessage';
+import InfoText from 'components/InfoMessage/InfoText';
 
 const Container = styled.div`
   flex: 1;
@@ -12,14 +16,32 @@ const Container = styled.div`
   overflow: hidden;
 `;
 
+const VerticalInfoMessage = styled(InfoMessage)`
+  flex-direction: column;
+`;
+
 function Home() {
+  const userStore = useUserStore();
+
   return (
-    <Container>
-      <SearchPanel />
-      <SearchResults />
-      <HotkeysPanel />
-    </Container>
+    <>
+      {userStore.isReconnecting &&
+        <VerticalInfoMessage>
+          <InfoText>Contacting Devbook servers failed.</InfoText>
+          <InfoText>Reconnecting...</InfoText>
+        </VerticalInfoMessage>
+      }
+      {!userStore.isReconnecting &&
+        <>
+          < Container >
+            <SearchPanel />
+            <SearchResults />
+            <HotkeysPanel />
+          </Container >
+        </>
+      }
+    </>
   );
 }
 
-export default Home;
+export default observer(Home);

@@ -71,11 +71,11 @@ function DocsFilter() {
 
   return (
     <Container
-      onClick={openModalFilter.handler}>
+      onClick={openModalFilter.handler}
+    >
       {selectedFilter &&
         <>
           <DocsetNameLogo
-            onClick={openModalFilter.handler}
           >
             <DocsetIcon src={selectedFilter?.iconURL} />
             <ActiveDocsetName>

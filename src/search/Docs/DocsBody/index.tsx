@@ -357,7 +357,7 @@ function DocsBody({
     anchorEl.scrollIntoView();
   }, [html, anchor, pageURL]);
 
-  const highlightedHTML = useMemo(() => highlightCode(html), []);
+  const highlightedHTML = useMemo(() => highlightCode(html), [html]);
 
   return (
     <>
