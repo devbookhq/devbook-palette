@@ -4,7 +4,7 @@ import Analytics from 'analytics-node';
 import { app } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 
-import { isDev } from 'main/utils/environment';
+import { isDev, isStaging } from 'main/utils/environment';
 import MainSyncService, { StorageKey } from 'services/sync.service/mainSync.service';
 import MainIPCService, { IPCSendChannel } from 'services/ipc.service/mainIPC.service';
 
@@ -13,8 +13,8 @@ import { AnalyticsEvent, AnalyticsPayload } from 'services/analytics.service/ana
 
 class MainAnalyticsService {
   private constructor() { }
-  private static readonly writeKey = isDev ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
-  private static readonly flushAt = isDev ? 1 : 10;
+  private static readonly writeKey = isDev || isStaging ? 'g0PqvygVRpBCVkPF78LCP9gidnwPKo7s' : 'BBXIANCzegnEoaL8k1YWN6HPqb3z0yaf';
+  private static readonly flushAt = isDev || isStaging ? 1 : 10;
   private static readonly analytics = new Analytics(MainAnalyticsService.writeKey, { flushAt: MainAnalyticsService.flushAt });
   private static readonly appVersion = app.getVersion();
   private static readonly platform = process.platform;

@@ -3,14 +3,14 @@ import ElectronStore from 'electron-store';
 import MainIPCService, { IPCInvokeChannel, IPCSendChannel } from 'services/ipc.service/mainIPC.service';
 
 import { StorageKey, StorageValue, Storage } from 'services/sync.service/storage';
-import { isDev } from 'main/utils/environment';
+import { isDev, isStaging } from 'main/utils/environment';
 import { app } from 'electron';
 import path from 'path';
 
 const appDataFolder = 'com.foundrylabs.devbook';
 
 const historyStore = new ElectronStore<Pick<Storage, StorageKey.SearchHistoryEntries>>({
-  cwd: path.resolve(app.getPath('userData'), '..', `${appDataFolder}${isDev ? '.dev' : ''}`),
+  cwd: path.resolve(app.getPath('userData'), '..', `${appDataFolder}${isDev || isStaging ? '.dev' : ''}`),
   name: 'history',
   // schema: {
   //   searchHistoryEntries: {
@@ -24,7 +24,7 @@ const historyStore = new ElectronStore<Pick<Storage, StorageKey.SearchHistoryEnt
 });
 
 const electronStore = new ElectronStore<Storage>({
-  cwd: path.resolve(app.getPath('userData'), '..', `${appDataFolder}${isDev ? '.dev' : ''}`),
+  cwd: path.resolve(app.getPath('userData'), '..', `${appDataFolder}${isDev || isStaging ? '.dev' : ''}`),
   schema: {
     searchHistoryEntries: {
       type: 'array',
