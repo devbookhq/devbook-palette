@@ -31,9 +31,9 @@
   },
   "scripts": {
     "postinstall": "electron-rebuild",
-    "bundle:client:staging": "./scripts/bundle-client.sh",
+    "bundle:client:staging": "./scripts/bundle-client.sh --env=staging",
     "bundle:client:prod": "./scripts/bundle-client.sh --env=prod",
-    "deploy:client:staging": "./scripts/deploy-client.sh",
+    "deploy:client:staging": "./scripts/deploy-client.sh --env=staging",
     "deploy:client:prod": "./scripts/deploy-client.sh --env=prod",
     "bundle:electron": "./scripts/esbuild-bundle-electron.sh",
     "build:electron:staging": "npm run bundle:electron -- --env=staging && todesktop build --code-sign=false",
