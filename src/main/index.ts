@@ -5,6 +5,8 @@ import { app } from 'electron';
 import toDesktop from '@todesktop/runtime';
 import contextMenu from 'electron-context-menu';
 import AutoLaunch from 'auto-launch';
+import { Environment } from '@renderer/services/electron.service/environment';
+declare var ENVIRONMENT: Environment;
 
 import isDev from '@main/utils/isDev';
 // Set the path to the application data to the 'com.foundrylabs.devbook' instead of the 'Devbook' directory.
