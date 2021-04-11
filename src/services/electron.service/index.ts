@@ -13,6 +13,8 @@ class ElectronService {
   static readonly appVersion = ElectronService.getVersion();
   static readonly environment = ElectronService.getEnvironment();
   static readonly isDev = ElectronService.environment === Environment.Development;
+  static readonly isProd = ElectronService.environment === Environment.Production;
+  static readonly isStaging = ElectronService.environment === Environment.Staging;
 
   private static getPlatform() {
     switch (electron.remote.process.platform) {
@@ -36,7 +38,15 @@ class ElectronService {
   }
 
   private static getEnvironment() {
-    return electron.remote.app.isPackaged ? Environment.Production : Environment.Development;
+    const environment = process.env.REACT_APP_ENVIRONMENT;
+    switch (environment) {
+      case Environment.Development:
+      case Environment.Production:
+      case Environment.Staging:
+        return environment;
+      default:
+        throw new Error(`Unknown environment ${environment}`);
+    }
   }
 }
 

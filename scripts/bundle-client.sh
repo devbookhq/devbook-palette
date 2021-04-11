@@ -2,7 +2,7 @@
 
 set -e
 
-export ENV='staging'
+export ENV='dev'
 
 while test $# -gt 0; do
   case "$1" in
@@ -37,11 +37,10 @@ fi
 
 rm -rf build/client
 
-echo "PUBLIC_URL=$PUBLIC_URL\nBUILD_PATH=$BUILD_PATH\nREACT_APP_BUNDLE=$BUNDLE\nREACT_APP_VERSION=$VERSION\nREACT_APP_CLIENT_URL=$CLIENT_URL"> .env.production
+echo "PUBLIC_URL=$PUBLIC_URL\nBUILD_PATH=$BUILD_PATH\nREACT_APP_BUNDLE=$BUNDLE\nREACT_APP_VERSION=$VERSION\nREACT_APP_CLIENT_URL=$CLIENT_URL\nREACT_APP_ENVIRONMENT=$ENV"> .env.production
 
 echo "Bundling client (**$ENV** mode) v$VERSION-$BUNDLE with PUBLIC_URL set to '$PUBLIC_URL'..."
 
 npx craco build
 
 echo "✅ Client  bundle v$VERSION-$BUNDLE done (**$ENV** mode)"
-
