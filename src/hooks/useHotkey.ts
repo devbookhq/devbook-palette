@@ -1,15 +1,16 @@
 import { useHotkeys } from 'react-hotkeys-hook';
+import { HotkeysEvent } from 'hotkeys-js';
 import { HotkeyAction, HotKeysBinding } from 'ui/ui.store';
 
-function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], handler?: () => void, filter?: (e: KeyboardEvent) => boolean) {
-  useHotkeys(hotkeyOptions.hotkey, (event) => {
+function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], handler?: (k?: KeyboardEvent, h?: HotkeysEvent) => void, filter?: (e: KeyboardEvent) => boolean) {
+  useHotkeys(hotkeyOptions.hotkey, (keyboardEvent, hotkeyEvent) => {
     if (hotkeyOptions.isActive()) {
       if (handler) {
-        event.preventDefault();
-        handler();
+        keyboardEvent.preventDefault();
+        handler(keyboardEvent, hotkeyEvent);
       } else if (hotkeyOptions.handler) {
-        event.preventDefault();
-        hotkeyOptions.handler();
+        keyboardEvent.preventDefault();
+        hotkeyOptions.handler(keyboardEvent, hotkeyEvent);
       } else {
         throw new Error(`No provided or registered handler for the hotkey action ${hotkeyOptions.label}.`)
       }
@@ -23,7 +24,7 @@ function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], han
     handler,
   ]);
   return {
-    handler, 
+    handler,
     ...hotkeyOptions,
   }
 }

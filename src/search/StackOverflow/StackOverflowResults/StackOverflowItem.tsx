@@ -349,7 +349,10 @@ function StackOverflowItem({
         }, 180);
         AnalyticsService.track(AnalyticsEvent.CopyCodeSnippetStackOverflow, undefined);
       }
-    }, { filter: () => true }, [focusState, codeSnippets]);
+    }, {
+    filter: () => true,
+    enableOnTags: ['TEXTAREA', 'INPUT', 'SELECT'],
+  }, [focusState, codeSnippets]);
 
   return (
     <Container

@@ -71,7 +71,7 @@ function DocsFilter() {
 
   return (
     <Container
-      onClick={openModalFilter.handler}
+      onClick={toggleFilterModal}
     >
       {selectedFilter &&
         <>

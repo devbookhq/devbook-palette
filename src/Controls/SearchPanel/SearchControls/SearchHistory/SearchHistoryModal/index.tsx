@@ -88,6 +88,11 @@ function SearchHistoryModal() {
     uiStore,
   ]);
 
+
+  const toggleSearchHistorySearch = useCallback(() => {
+    searchHistory();
+  }, [searchHistory]);
+
   useHotkey(
     uiStore.hotkeys[HotkeyAction.HistoryUp],
     changeHistoryResultUp,
@@ -100,7 +105,7 @@ function SearchHistoryModal() {
 
   useHotkey(
     uiStore.hotkeys[HotkeyAction.SearchHistory],
-    searchHistory,
+    toggleSearchHistorySearch,
   );
 
   return (

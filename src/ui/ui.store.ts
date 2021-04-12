@@ -1,4 +1,6 @@
 import { makeAutoObservable } from 'mobx';
+import { HotkeysEvent } from 'hotkeys-js';
+
 import { useRootStore } from 'App/RootStore';
 import IPCService, { IPCOnChannel, IPCSendChannel } from 'services/ipc.service';
 import ElectronService from 'services/electron.service';
@@ -54,7 +56,7 @@ export type HotKeysBinding = {
     hotkey: string,
     isActive: () => boolean,
     label: string[],
-    handler?: () => void,
+    handler?: (k?: KeyboardEvent, h?: HotkeysEvent) => void,
   };
 }
 
