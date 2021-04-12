@@ -9,7 +9,8 @@ import { useUIStore, HotkeyAction } from 'ui/ui.store';
 import InfoMessage from 'components/InfoMessage';
 import InfoText from 'components/InfoMessage/InfoText';
 import IPCService, { IPCSendChannel } from 'services/ipc.service';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
+import useHotkey from 'hooks/useHotkey';
 
 const Container = styled.div`
   flex: 1;
@@ -31,10 +32,7 @@ function Home() {
     IPCService.send(IPCSendChannel.HideWindow, undefined);
   }, []);
 
-  useEffect(() => {
-    console.log('register handler');
-    uiStore.registerHotkeyHandler(HotkeyAction.Hide, hideWindow);
-  }, [uiStore, hideWindow]);
+  useHotkey(uiStore.hotkeys[HotkeyAction.Hide], hideWindow);
 
   return (
     <>

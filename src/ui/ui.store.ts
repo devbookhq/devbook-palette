@@ -77,10 +77,10 @@ class UIStore {
     [HotkeyAction.Hide]: {
       hotkey: 'esc',
       label: [],
-      isActive: () => true
-      // !this.isSearchInPageOpened &&
-      // !this.isFilterModalOpened &&
-      // !this.isModalOpened,
+      isActive: () =>
+        !this.isSearchInPageOpened &&
+        !this.isFilterModalOpened &&
+        !this.isModalOpened,
     },
     [HotkeyAction.DocsSearchInPageDown]: {
       hotkey: 'enter',
