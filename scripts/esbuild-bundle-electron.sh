@@ -27,7 +27,6 @@ while test $# -gt 0; do
       ;;
     --minify*)
       export val=`echo $1 | sed -e 's/^[^=]*=//g'`
-      echo $val
       if [ $val = "false" ]; then
           MINIFY='--noMinify'
       fi

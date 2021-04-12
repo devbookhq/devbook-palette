@@ -58,18 +58,18 @@ function SignIn({ isLoading, isSigningInUser }: SignInProps) {
       }
       {!uiStore.isSignInModalOpened &&
         isSigningInUser &&
-        <SignInRequest>
-          <InfoMessage>
+        <InfoMessage>
+          <SignInRequest>
             <InfoText>
               You're being signed in. Please check your email.
             </InfoText>
-          </InfoMessage>
-          <SignInAgainButton
-            onClick={openSignInModal}
-          >
-            Sign in with a different email
-      </SignInAgainButton>
-        </SignInRequest>
+            <SignInAgainButton
+              onClick={openSignInModal}
+            >
+              Sign in with a different email
+            </SignInAgainButton>
+          </SignInRequest>
+        </InfoMessage>
       }
       {!uiStore.isSignInModalOpened &&
         !isLoading &&
@@ -80,7 +80,7 @@ function SignIn({ isLoading, isSigningInUser }: SignInProps) {
               onClick={openSignInModal}
             >
               Sign in to Devbook
-        </SignInButton>
+          </SignInButton>
           </SignInRequest>
         </InfoMessage>
       }
