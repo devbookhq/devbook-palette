@@ -14,7 +14,7 @@ class SyncService {
       if (backup.isDirty) backup.call?.();
       backup.isDirty = false;
     }
-  }, 30000);
+  }, 6000);
 
   static async get<T extends StorageKey>(key: T): Promise<StorageValue[T]> {
     return IPCService.invoke(IPCInvokeChannel.StorageGet, { key }) as unknown as StorageValue[T];
