@@ -67,7 +67,7 @@ class UserStore {
   constructor() {
     makeAutoObservable(this);
 
-    // Handle unreachable server by waiting a trying the request again.
+    // Handle unreachable server by waiting and trying the request again.
     // We may want to move this into a separate store, because if affects all axios requests.
     axios.interceptors.response.use((value) => {
       this.reportConnection();
