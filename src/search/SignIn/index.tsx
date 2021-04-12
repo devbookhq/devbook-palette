@@ -75,7 +75,7 @@ function SignIn({ isLoading, isSigningInUser }: SignInProps) {
         !isLoading &&
         <InfoMessage>
           <SignInRequest>
-            <InfoText>You need to sign in to search documentations</InfoText>
+            <InfoText>You need to sign in to search documentation</InfoText>
             <SignInButton
               onClick={openSignInModal}
             >
