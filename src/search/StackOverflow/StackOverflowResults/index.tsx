@@ -30,6 +30,7 @@ function StackOverflowItems({ results, openModalForResult, selectResult, contain
       {results.map((result, idx) =>
         <StackOverflowItem
           result={result}
+          idx={idx}
           key={result.question.title}
           focusState={selection.idx === idx ? selection.focusState : FocusState.None}
           openModalForResult={openModalForResult}

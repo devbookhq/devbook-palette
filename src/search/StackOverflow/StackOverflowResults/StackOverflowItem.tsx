@@ -184,12 +184,14 @@ interface StackOverflowItemProps {
   selection: ResultSelection;
   openModalForResult: (idx: number) => void;
   selectResult: (idx: number) => void;
+  idx: number;
 }
 
 function StackOverflowItem({
   result,
   focusState,
   selection,
+  idx,
   selectResult,
   openModalForResult,
 }: StackOverflowItemProps) {
@@ -205,12 +207,12 @@ function StackOverflowItem({
   const [copySnippetEls, setCopySnippetEls] = useState<HTMLElement[]>([]);
 
   function handleQuestionHeaderClick(e: any) {
-    selectResult(selection.idx);
+    selectResult(idx);
     e.preventDefault();
   }
 
   function handleQuestionTitleClick(e: any) {
-    openModalForResult(selection.idx);
+    openModalForResult(idx);
     e.preventDefault();
   }
 
