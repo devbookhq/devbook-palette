@@ -71,14 +71,14 @@ interface DocsItemProps {
   result: DocResult;
   focusState: FocusState;
   idx: number;
-  selectIdx: (i: number) => void;
+  selectResult: (idx: number) => void;
 }
 
 function DocsItem({
   result,
   focusState,
   idx,
-  selectIdx,
+  selectResult,
 }: DocsItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const truncatedSummary = useMemo(() => {
@@ -92,8 +92,8 @@ function DocsItem({
   }, [focusState]);
 
   const handleOnClick = useCallback(() => {
-    selectIdx(idx);
-  }, [selectIdx, idx]);
+    selectResult(idx);
+  }, [selectResult, idx]);
 
   return (
     <Container

@@ -7,6 +7,7 @@ import SearchService, { SearchFilterTypings, SearchResult } from 'services/searc
 import { SearchSource } from 'services/search.service/searchSource';
 import SyncService, { StorageKey } from 'services/sync.service';
 import { HistoryEntry } from './historyEntry';
+import AnalyticsService, { AnalyticsEvent } from 'services/analytics.service';
 
 export function useSearchStore() {
   const { searchStore } = useRootStore();
@@ -86,6 +87,9 @@ class SearchStore {
     this.sync().then(() => {
       this.executeSearch();
       this.backup();
+      setInterval(async () => {
+        await this.refreshSearchFilters();
+      }, 60000);
     });
   }
 
@@ -114,6 +118,7 @@ class SearchStore {
     this.setLastQuery(this.query);
     this.isSearching = true;
 
+
     const searchInvocation = new Promise<void>(async (resolve, reject) => {
       try {
         const stackOverflowResultsPromise = SearchService.search(SearchSource.StackOverflow, { query: this.query });
@@ -134,6 +139,7 @@ class SearchStore {
         return reject(error);
       }
     });
+    AnalyticsService.track(AnalyticsEvent.Search, { query: this.query });
     this._lastSearchInvocation = searchInvocation;
     return searchInvocation;
   }
@@ -143,7 +149,11 @@ class SearchStore {
   }
 
   get history() {
-    return this._history
+    return this._history;
+  }
+
+  get historyQueries() {
+    return this.history
       .slice(-10)
       .filter(h => h.query !== this.query)
       .reverse();
@@ -170,15 +180,15 @@ class SearchStore {
     const docsSelectedFilter = await SyncService.get(StorageKey.ActiveDocSource);
     const history = await SyncService.get(StorageKey.SearchHistoryEntries);
     this.query = query;
-    this.history = history;
-    this.setSelectedFilter(SearchSource.Docs, docsSelectedFilter);
+    this._history = history;
+    this.filters.docs.selectedFilter = docsSelectedFilter;
     await this.refreshSearchFilters();
   }
 
   private backup() {
     SyncService.registerBackup(StorageKey.LastQuery, () => this.query);
     SyncService.registerBackup(StorageKey.ActiveDocSource, () => toJS(this.filters[SearchSource.Docs].selectedFilter));
-    SyncService.registerBackup(StorageKey.SearchHistoryEntries, () => toJS(this._history));
+    SyncService.registerBackup(StorageKey.SearchHistoryEntries, () => toJS(this.history));
   }
 }
 

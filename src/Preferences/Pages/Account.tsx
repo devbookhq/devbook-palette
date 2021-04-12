@@ -1,36 +1,19 @@
 import styled from 'styled-components';
-import { useUserStore } from 'user/user.store';
 import { AuthState } from 'user/authState';
 
 import Button from 'components/Button';
 import Loader from 'components/Loader';
 import Base from './Base';
-import IPCService, { IPCSendChannel } from 'services/ipc.service';
+import IPCService, { IPCOnChannel, IPCSendChannel } from 'services/ipc.service';
+import { useEffect, useState } from 'react';
+import { AuthInfo } from 'user/authInfo';
+import AnalyticsService, { AnalyticsEvent } from 'services/analytics.service';
 
 const Container = styled.div`
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-`;
-
-const Email = styled.span`
-`;
-
-const InfoWrapper = styled.div`
-  padding: 5px;
-  height: 100%;
-  display: flex;
-  margin: auto;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-`;
-
-const InfoMessage = styled.div`
-  color: #5A5A6F;
-  font-size: 16px;
-  font-weight: 600;
 `;
 
 const SignOutButton = styled.div`
@@ -66,58 +49,60 @@ const StyledLoader = styled(Loader)`
 const SignInButton = styled(Button)``;
 
 function Account() {
-  const userStore = useUserStore();
+  const [auth, setAuth] = useState<AuthInfo>();
 
   const openSignInModal = () => {
     IPCService.send(IPCSendChannel.OpenSignInModal, undefined);
   };
 
   const signOut = () => {
+    AnalyticsService.track(AnalyticsEvent.SignOutButtonClicked, undefined);
     IPCService.send(IPCSendChannel.SignOut, undefined);
   };
 
+  useEffect(() => {
+    IPCService.on(IPCOnChannel.SetAuthInOtherWindows, (_, payload) => {
+      setAuth(payload.auth);
+    });
+    IPCService.send(IPCSendChannel.GetAuthFromMainWindow, undefined);
+  }, []);
+
+  const isLoading = auth?.state === AuthState.LookingForStoredUser
+    || auth?.state === AuthState.SigningInUser
+    || auth?.state === AuthState.SigningOutUser;
 
   return (
     <Base title="Account">
-      {userStore.isReconnecting &&
-        <InfoWrapper>
-          <InfoMessage>Contacting Devbook servers failed.</InfoMessage>
-          <InfoMessage>Reconnecting...</InfoMessage>
-        </InfoWrapper>
-      }
+      <Container>
+        {isLoading &&
+          <StyledLoader />
+        }
+        {!isLoading &&
+          <>
+            {auth?.user &&
+              <>
+                <span>
+                  {auth?.user?.email}
+                </span>
+                <SignOutButton onClick={signOut}>
+                  Sign Out
+                </SignOutButton>
+              </>
+            }
+            {!auth?.user &&
+              <SignInWrapper>
+                <SignInText>
+                  You are not signed in
+                </SignInText>
 
-      {!userStore.isReconnecting &&
-        <Container>
-          {userStore.isLoading &&
-            <StyledLoader />
-          }
-
-          {userStore.user &&
-            !userStore.isLoading &&
-            <>
-              <Email>
-                {userStore.auth.user?.email}
-              </Email>
-              <SignOutButton onClick={signOut}>
-                Sign Out
-              </SignOutButton>
-            </>
-          }
-
-          {!userStore.user &&
-            !userStore.isLoading &&
-            <SignInWrapper>
-              <SignInText>
-                You are not signed in
-            </SignInText>
-
-              <SignInButton onClick={openSignInModal}>
-                Sign in to Devbook
-            </SignInButton>
-            </SignInWrapper>
-          }
-        </Container>
-      }
+                <SignInButton onClick={openSignInModal}>
+                  Sign in to Devbook
+                </SignInButton>
+              </SignInWrapper>
+            }
+          </>
+        }
+      </Container>
     </Base>
   );
 }

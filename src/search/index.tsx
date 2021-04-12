@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
+import { useCallback } from 'react';
 
 import { useUIStore } from 'ui/ui.store';
 import { SearchSource } from 'services/search.service/searchSource';
@@ -12,12 +13,13 @@ import HotkeyText from 'components/HotkeyText';
 import { useUserStore } from 'user/user.store';
 import SignIn from './SignIn';
 import { AuthState } from 'user/authState';
+import { useEffect } from 'react';
+import DocsFilterModal from './Docs/DocsFilterModal';
 
 const Container = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  /* align-items: center; */
   overflow: hidden;
   margin-bottom: 45px;
 `;
@@ -35,16 +37,39 @@ function Search() {
   const searchStore = useSearchStore();
   const userStore = useUserStore();
 
+  useEffect(() => {
+    if (userStore.auth.user) {
+      uiStore.isSignInModalOpened = false;
+    }
+  }, [userStore.auth.user]);
+
+  const toggleFilterModal = useCallback(() => {
+    uiStore.toggleFilterModal();
+  }, []);
+
+
   return (
     <Container>
       {uiStore.searchSource === SearchSource.StackOverflow &&
+        searchStore.results.stackOverflow.results.length !== 0 &&
         <StackOverflow
           results={searchStore.results.stackOverflow.results}
         />
       }
 
       {uiStore.searchSource === SearchSource.Docs &&
+        uiStore.isFilterModalOpened &&
         userStore.user &&
+        <DocsFilterModal
+          onCloseRequest={toggleFilterModal}
+        />
+      }
+
+
+      {uiStore.searchSource === SearchSource.Docs &&
+        searchStore.results.docs.results.length !== 0 &&
+        userStore.user &&
+        !uiStore.isSignInModalOpened &&
         <Docs
           results={searchStore.results.docs.results}
         />
@@ -59,9 +84,9 @@ function Search() {
       }
 
       {((searchStore.results.docs.results.length === 0 && uiStore.searchSource === SearchSource.Docs && userStore.user) ||
-        (searchStore.results.docs.results.length === 0 && uiStore.searchSource === SearchSource.StackOverflow)) &&
+        (searchStore.results.stackOverflow.results.length === 0 && uiStore.searchSource === SearchSource.StackOverflow)) &&
         <>
-          {searchStore.isQueryDirty &&
+          {(searchStore.isQueryDirty || !searchStore.query) &&
             <InfoMessage>
               <InfoTextLeft>
                 Type your search query and press
@@ -72,7 +97,7 @@ function Search() {
               </InfoTextRight>
             </InfoMessage>
           }
-          {!searchStore.isQueryDirty &&
+          {!searchStore.isQueryDirty && searchStore.query && !searchStore.isSearching &&
             <InfoMessage>
               <InfoTextLeft>
                 Nothing found. Try a different query and then press

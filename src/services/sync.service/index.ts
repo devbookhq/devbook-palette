@@ -12,7 +12,7 @@ class SyncService {
     for (const backupCall of SyncService.registeredBackups) {
       backupCall();
     }
-  }, 20000);
+  }, 2000);
 
   static async get<T extends StorageKey>(key: T): Promise<StorageValue[T]> {
     return IPCService.invoke(IPCInvokeChannel.StorageGet, { key }) as unknown as StorageValue[T];
@@ -23,7 +23,10 @@ class SyncService {
   }
 
   static registerBackup<T extends StorageKey>(key: T, getter: () => StorageValue[T]) {
-    const backupCall = () => SyncService.set(key, getter());
+    const backupCall = () => {
+      const value = getter();
+      SyncService.set(key, value);
+    }
     this.registeredBackups.push(backupCall);
   }
 }

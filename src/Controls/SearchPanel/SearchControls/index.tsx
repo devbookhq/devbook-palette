@@ -4,6 +4,8 @@ import SearchInput from './SearchInput';
 import SearchButton from './SearchButton';
 import SearchHistory from './SearchHistory';
 import SearchSourceFilters from './SearchSourceFilters';
+import SearchLoader from './SearchLoader';
+
 
 const Container = styled.div`
   width: 100%;
@@ -29,6 +31,7 @@ function SearchControls() {
     <Container>
       <SearchInput />
       <SearchOptionsWrapper>
+        <SearchLoader />
         <SearchButton />
         <SearchHistory />
       </SearchOptionsWrapper >

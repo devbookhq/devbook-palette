@@ -178,14 +178,15 @@ interface StackOverflowItemProps {
   result: StackOverflowResult;
   focusState: FocusState;
   idx: number;
-  openModalForResult: (i: number) => void;
-  // setFocusResult: (i: number) => void;
+  openModalForResult: (idx: number) => void;
+  selectResult: (idx: number) => void;
 }
 
 function StackOverflowItem({
   result,
   focusState,
   idx,
+  selectResult,
   openModalForResult,
 }: StackOverflowItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -198,9 +199,13 @@ function StackOverflowItem({
   const [codeSnippetEls, setCodeSnippetEls] = useState<HTMLElement[]>([]);
   const [copySnippetEls, setCopySnippetEls] = useState<HTMLElement[]>([]);
 
+  function handleQuestionHeaderClick(e: any) {
+    selectResult(idx);
+    e.preventDefault();
+  }
+
   function handleQuestionTitleClick(e: any) {
-    // onTitleClick(e);
-    // setFocusResult()
+    openModalForResult(idx);
     e.preventDefault();
   }
 
@@ -353,7 +358,7 @@ function StackOverflowItem({
       <Header
         id="so-header"
         isFocused={focusState !== FocusState.None}
-        onClick={() => openModalForResult(idx)}
+        onClick={handleQuestionHeaderClick}
       >
         <QuestionTitleWrapper>
           <QuestionTitle

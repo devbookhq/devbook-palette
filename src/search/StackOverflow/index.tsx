@@ -10,7 +10,9 @@ import { StackOverflowResult } from 'services/search.service';
 import StackOverflowResults from './StackOverflowResults';
 import StackOverflowModal from './StackOverflowModal';
 import { HotkeyAction, useUIStore } from 'ui/ui.store';
-import useHotkey from 'hooks/useHotkey';
+import { ResultSelection } from 'Search/resultSelection';
+import { FocusState } from 'Search/focusState';
+import ElectronService from 'services/electron.service';
 
 interface StackOverflowProps {
   results: StackOverflowResult[];
@@ -19,60 +21,146 @@ interface StackOverflowProps {
 function StackOverflow({ results }: StackOverflowProps) {
   const uiStore = useUIStore();
 
-  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [selection, setSelection] = useState<ResultSelection>({ idx: 0, focusState: FocusState.WithScroll });
   const searchResultsWrapperRef = useRef<HTMLDivElement>(null);
+  const modalResultWrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSelection({
+      idx: 0,
+      focusState: FocusState.WithScroll,
+    });
+  }, [results]);
 
   const toggleModal = useCallback(() => {
     uiStore.toggleModal();
   }, []);
 
+  const openSelectedResultInBrowser = useCallback(() => {
+    ElectronService.openLink(results[selection.idx].question.link);
+  }, [selection, results]);
+
   const resultsUpHandler = useCallback(() => {
-    setSelectedIdx(c => c > 0 ? c - 1 : c);
+    setSelection(s => {
+      const idx = s.idx > 0 ? s.idx - 1 : s.idx;
+      return {
+        idx,
+        focusState: FocusState.WithScroll,
+      }
+    });
     searchResultsWrapperRef?.current?.scrollIntoView({ block: 'start' });
   }, [searchResultsWrapperRef]);
 
   const resultsDownHandler = useCallback(() => {
-    setSelectedIdx(c => c < results.length - 1 ? c + 1 : c);
+    setSelection(s => {
+      const idx = s.idx < results.length - 1 ? s.idx + 1 : s.idx;
+      return {
+        idx,
+        focusState: FocusState.WithScroll,
+      };
+    });
     searchResultsWrapperRef?.current?.scrollIntoView({ block: 'start' });
   }, [results, searchResultsWrapperRef]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowResultsUp, resultsUpHandler);
-  }, [
-    resultsUpHandler,
-  ]);
+  }, [resultsUpHandler]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowResultsDown, resultsDownHandler);
-  }, [
-    resultsDownHandler,
-  ]);
+  }, [resultsDownHandler]);
 
-  useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowOpenModal], toggleModal);
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowOpenModal, toggleModal);
+  }, [toggleModal]);
 
-  const openModalForResult = useCallback((i: number) => {
-    setSelectedIdx(i);
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowCloseModal, toggleModal);
+  }, [toggleModal]);
+
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowOpenInBrowser, openSelectedResultInBrowser);
+  }, [openSelectedResultInBrowser]);
+
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowModalOpenInBrowser, openSelectedResultInBrowser);
+  }, [openSelectedResultInBrowser]);
+
+  const openModalForResult = useCallback((idx: number) => {
+    setSelection({
+      idx,
+      focusState: FocusState.NoScroll,
+    });
     toggleModal();
   }, [toggleModal]);
 
+  const selectResult = useCallback((idx: number) => {
+    setSelection({
+      idx,
+      focusState: FocusState.NoScroll,
+    });
+  }, []);
+
+  const scrollUp = useCallback(() => {
+    searchResultsWrapperRef?.current?.scrollBy({
+      top: -25,
+      behavior: 'auto',
+    });
+  }, [searchResultsWrapperRef]);
+
+  const scrollDown = useCallback(() => {
+    searchResultsWrapperRef?.current?.scrollBy({
+      top: 25,
+      behavior: 'auto'
+    });
+  }, [searchResultsWrapperRef]);
+
+  const modalScrollUp = useCallback(() => {
+    modalResultWrapperRef?.current?.scrollBy({
+      top: -25,
+      behavior: 'auto',
+    });
+  }, [modalResultWrapperRef]);
+
+  const modalScrollDown = useCallback(() => {
+    modalResultWrapperRef?.current?.scrollBy({
+      top: 25,
+      behavior: 'auto'
+    });
+  }, [modalResultWrapperRef]);
+
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowScrollDown, scrollDown);
+  }, [scrollDown]);
+
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowScrollUp, scrollUp);
+  }, [scrollUp]);
+
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowModalScrollDown, modalScrollDown);
+  }, [modalScrollDown]);
+
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowModalScrollUp, modalScrollUp);
+  }, [modalScrollUp]);
+
   return (
     <>
-      {results.length !== 0 &&
-        <>
-          {uiStore.isModalOpened &&
-            <StackOverflowModal
-              toggleModal={toggleModal}
-              result={results[selectedIdx]}
-            />
-          }
-          <StackOverflowResults
-            containerRef={searchResultsWrapperRef}
-            results={results}
-            openModalForResult={openModalForResult}
-            selectedIdx={selectedIdx}
-          />
-        </>
+      {uiStore.isModalOpened &&
+        <StackOverflowModal
+          toggleModal={toggleModal}
+          result={results[selection.idx]}
+          containerRef={modalResultWrapperRef}
+        />
       }
+      <StackOverflowResults
+        containerRef={searchResultsWrapperRef}
+        results={results}
+        selection={selection}
+        openModalForResult={openModalForResult}
+        selectResult={selectResult}
+      />
     </>
   );
 }

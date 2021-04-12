@@ -1,12 +1,13 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { observer } from 'mobx-react-lite';
 
 import { DocResult } from 'services/search.service';
 import DocsBody from './DocsBody';
 import DocsSidebar from './DocsSidebar';
-import DocsFilterModal from './DocsFilterModal';
-import { useUIStore } from 'ui/ui.store';
+import { HotkeyAction, useUIStore } from 'ui/ui.store';
+import { ResultSelection } from 'Search/resultSelection';
+import { FocusState } from 'Search/focusState';
 
 const Container = styled.div`
   display: flex;
@@ -20,33 +21,65 @@ interface Docs {
 function Docs({ results }: Docs) {
   const uiStore = useUIStore();
 
-  const docPageSearchInputRef = useRef<HTMLInputElement>(null);
-  const [selectedIdx, setSelectedIdx] = useState(0);
+  const [selection, setSelection] = useState<ResultSelection>({ idx: 0, focusState: FocusState.WithScroll });
+  const docPageSearchInputRef = useRef<HTMLDivElement>(null);
 
-  const toggleFilterModal = useCallback(() => {
-    uiStore.toggleFilterModal();
+  useEffect(() => {
+    setSelection({
+      idx: 0,
+      focusState: FocusState.WithScroll,
+    });
+  }, [results]);
+
+  const resultsUpHandler = useCallback(() => {
+    setSelection(s => {
+      const idx = s.idx > 0 ? s.idx - 1 : s.idx;
+      return {
+        idx,
+        focusState: FocusState.WithScroll,
+      }
+    });
+    docPageSearchInputRef?.current?.scrollIntoView({ block: 'start' });
+  }, [docPageSearchInputRef]);
+
+  const resultsDownHandler = useCallback(() => {
+    setSelection(s => {
+      const idx = s.idx < results.length - 1 ? s.idx + 1 : s.idx;
+      return {
+        idx,
+        focusState: FocusState.WithScroll,
+      };
+    });
+    docPageSearchInputRef?.current?.scrollIntoView({ block: 'start' });
+  }, [results, docPageSearchInputRef]);
+
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.DocsResultsUp, resultsUpHandler);
+  }, [resultsUpHandler]);
+
+  useEffect(() => {
+    uiStore.registerHotkeyHandler(HotkeyAction.DocsResultsDown, resultsDownHandler);
+  }, [resultsDownHandler]);
+
+  const selectResult = useCallback((idx: number) => {
+    setSelection({
+      idx,
+      focusState: FocusState.NoScroll,
+    });
   }, []);
 
   return (
     <>
-      {uiStore.isFilterModalOpened &&
-        <DocsFilterModal
-          onCloseRequest={toggleFilterModal}
+      <Container>
+        <DocsSidebar
+          results={results}
+          selection={selection}
+          selectResult={selectResult}
         />
-      }
-      {results.length !== 0 &&
-        <Container>
-          <DocsSidebar
-            results={results}
-            selectedIdx={selectedIdx}
-            selectIdx={setSelectedIdx}
-          />
-          <DocsBody
-            searchInputRef={docPageSearchInputRef}
-            result={results[selectedIdx]}
-          />
-        </Container>
-      }
+        <DocsBody
+          result={results[selection.idx]}
+        />
+      </Container>
     </>
   );
 }

@@ -172,14 +172,15 @@ const AnswersHeading = styled.span`
 interface StackOverflowModalProps {
   result: StackOverflowResult;
   toggleModal: () => void;
+  containerRef: React.RefObject<HTMLDivElement>;
 }
 
 function StackOverflowModal({
   result,
   toggleModal,
+  containerRef,
 }: StackOverflowModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   const [sortedAnswers, setSortedAnswers] = useState<StackOverflowAnswer[]>([]);
   const [mostUpvotedIdx, setMostUpvotedIdx] = useState(-1);
@@ -225,25 +226,13 @@ function StackOverflowModal({
     }
   }, [result.answers]);
 
-  useHotkeys('up', () => {
-    if (contentRef?.current) {
-      contentRef.current.scrollBy(0, -15);
-    }
-  }, { filter: () => true }, [result.answers]);
-
-  useHotkeys('down', () => {
-    if (contentRef?.current) {
-      contentRef.current.scrollBy(0, 15);
-    }
-  }, { filter: () => true }, [result.answers]);
-
   return (
     <StyledModal
       ref={modalRef}
       tabIndex={0}
     >
       <ScrollingContent
-        ref={contentRef}
+        ref={containerRef}
       >
 
         {result &&

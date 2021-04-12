@@ -5,6 +5,7 @@ import Hotkey from 'components/Hotkey';
 import { useSearchStore } from 'Search/search.store';
 import { useUIStore, HotkeyAction } from 'ui/ui.store';
 import useHotkey from 'hooks/useHotkey';
+import AnalyticsService, { AnalyticsEvent } from 'services/analytics.service';
 
 function SearchButton() {
   const searchStore = useSearchStore();
@@ -19,11 +20,13 @@ function SearchButton() {
     searchCurrentQuery,
   );
 
+  const isHighlighted = searchStore.isQueryDirty && !!searchStore.query;
+
   return (
     <Hotkey
       onClick={searchCurrentQuery}
-      isHighlighted={searchStore.isQueryDirty}
-      isHighlightedText={searchStore.isQueryDirty}
+      isHighlighted={isHighlighted}
+      isHighlightedText={isHighlighted}
       hotkey={['Enter']}
     >
       to search

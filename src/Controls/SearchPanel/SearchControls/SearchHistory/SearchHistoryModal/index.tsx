@@ -60,7 +60,7 @@ function SearchHistoryModal() {
 
   useEffect(() => {
     queryRef?.current?.scrollIntoView({ block: 'end' });
-  }, [selectedQueryIdx]);
+  }, [selectedQueryIdx, queryRef]);
 
   const toggleSearchHistory = useCallback(() => {
     uiStore.toggleSeachHistory()
@@ -71,18 +71,18 @@ function SearchHistoryModal() {
   }, [selectedQueryIdx]);
 
   const changeHistoryResultDown = useCallback(() => {
-    if (selectedQueryIdx < searchStore.history.length - 1) setSelectedQueryIdx(selectedQueryIdx + 1);
-  }, [selectedQueryIdx, searchStore.history]);
+    if (selectedQueryIdx < searchStore.historyQueries.length - 1) setSelectedQueryIdx(selectedQueryIdx + 1);
+  }, [selectedQueryIdx, searchStore.historyQueries]);
 
   const searchHistory = useCallback((query?: string) => {
-    if (searchStore.history.length - 1 < selectedQueryIdx) return;
-    searchStore.executeSearch(query || searchStore.history[selectedQueryIdx].query);
+    if (searchStore.historyQueries.length - 1 < selectedQueryIdx) return;
+    searchStore.executeSearch(query || searchStore.historyQueries[selectedQueryIdx].query);
     uiStore.toggleSeachHistory();
   }, [
     selectedQueryIdx,
-    searchStore.history,
+    searchStore.historyQueries,
     uiStore.isSearchHistoryVisible,
-    searchStore.history,
+    searchStore.historyQueries,
     uiStore.isSearchHistoryVisible,
   ]);
 
@@ -110,8 +110,9 @@ function SearchHistoryModal() {
       </TopBar>
 
       <Content>
-        {searchStore.history.map((h, i) => (
+        {searchStore.historyQueries.map((h, i) => (
           <SearchHistoryQuery
+            queryRef={selectedQueryIdx === i ? queryRef : undefined}
             key={h.query}
             query={h.query}
             isSelected={selectedQueryIdx === i}

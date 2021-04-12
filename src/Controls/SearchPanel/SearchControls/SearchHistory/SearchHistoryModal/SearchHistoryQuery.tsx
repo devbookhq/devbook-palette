@@ -24,12 +24,14 @@ interface SearchHistoryQuery {
   query: string;
   isSelected: boolean;
   onClick: (query: string) => void;
+  queryRef?: React.RefObject<HTMLDivElement>;
 }
 
 
-function SearchHistoryQuery({ query, isSelected, onClick }: SearchHistoryQuery) {
+function SearchHistoryQuery({ query, isSelected, onClick, queryRef }: SearchHistoryQuery) {
   return (
     <Container
+      ref={queryRef}
       isSelected={isSelected}
       onClick={() => onClick(query)}
     >

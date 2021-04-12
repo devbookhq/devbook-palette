@@ -7,6 +7,7 @@ import { observer } from 'mobx-react-lite';
 import DocsSidebarItem from './DocsSidebarItem';
 import { useUIStore } from 'ui/ui.store';
 import { useRef } from 'react';
+import { ResultSelection } from 'Search/resultSelection';
 
 const Container = styled.div`
   height: 100%;
@@ -40,11 +41,11 @@ const DocSearchResults = styled.div`
 
 interface DocsSidebarProps {
   results: DocResult[];
-  selectedIdx: number;
-  selectIdx: (i: number) => void;
+  selectResult: (idx: number) => void;
+  selection: ResultSelection;
 }
 
-function DocsSidebar({ results, selectIdx, selectedIdx }: DocsSidebarProps) {
+function DocsSidebar({ results, selectResult, selection }: DocsSidebarProps) {
   const uiStore = useUIStore();
 
   return (
@@ -60,14 +61,13 @@ function DocsSidebar({ results, selectIdx, selectedIdx }: DocsSidebarProps) {
     >
       <DocsResultsWrapper>
         <DocSearchResults>
-          {results.map((result, i) => (
+          {results.map((result, idx) => (
             <DocsSidebarItem
               key={result.id}
-              idx={i}
-              selectIdx={selectIdx}
+              idx={idx}
               result={result}
-              focusState={FocusState.None}
-              // focusState={activeFocusedIdx.idx === i ? activeFocusedIdx.focusState : FocusState.None}
+              focusState={selection.idx === idx ? selection.focusState : FocusState.None}
+              selectResult={selectResult}
             />
           ))}
         </DocSearchResults>

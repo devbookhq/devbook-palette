@@ -149,7 +149,6 @@ class UserStore {
     this.updateAuthEverywhere({ state: AuthState.SigningInUser });
     try {
       const { refreshToken, user } = await AuthenticationService.signIn(email);
-      console.log(user, refreshToken);
       SyncService.set(StorageKey.RefreshToken, refreshToken);
       this.updateAuthEverywhere({ state: AuthState.UserSignedIn, user });
     } catch (error) {

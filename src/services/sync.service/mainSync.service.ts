@@ -6,6 +6,7 @@ import { StorageKey, StorageValue, Storage } from 'services/sync.service/storage
 import { isDev, isStaging } from 'main/utils/environment';
 import { app } from 'electron';
 import path from 'path';
+import { SearchSource } from 'services/search.service/searchSource';
 
 const appDataFolder = 'com.foundrylabs.devbook';
 
@@ -65,7 +66,7 @@ const electronStore = new ElectronStore<Storage>({
     },
     searchFilter: {
       type: 'string',
-      default: '',
+      default: SearchSource.StackOverflow,
     },
     docSearchResultsDefaultWidth: {
       type: 'integer',

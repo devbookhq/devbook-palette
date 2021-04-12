@@ -219,38 +219,27 @@ function handleLinkClick(e: MouseEvent, link: string, pageURL: string | undefine
 }
 
 interface DocsBodyProps {
-  searchInputRef: any;
   result: DocResult;
 }
 
 function DocsBody({
-  searchInputRef,
   result,
 }: DocsBodyProps) {
   const { pageURL, html, anchor } = result.page;
   const uiStore = useUIStore();
 
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const [highlights, setHighlights] = useState<Highlight[]>([]);
   const [selectedIdx, setSelectedIdx] = useState(0);
 
-  function handleSearchInputKeyDown(e: any) {
-    // Enter pressed.
-    if (searchQuery && e.keyCode === 13) {
-      if (e.shiftKey) {
-        selectPreviousHighlight();
-      } else {
-        selectNextHighlight();
-      }
-    }
-  }
-
   const selectNextHighlight = useCallback(() => {
     setSelectedIdx(c => {
+      if (highlights.length === 0) return c;
       deselectHighlight(highlights[c]);
-      const idx = c < highlights.length - 1 ? c + 1 : 0
+      const idx = c < highlights.length - 1 ? c + 1 : 0;
       selectHighlight(highlights[idx]);
       return idx;
     });
@@ -258,6 +247,7 @@ function DocsBody({
 
   const selectPreviousHighlight = useCallback(() => {
     setSelectedIdx(c => {
+      if (highlights.length === 0) return c;
       deselectHighlight(highlights[c]);
       const idx = c > 0 ? c - 1 : highlights.length - 1;
       selectHighlight(highlights[idx]);
@@ -278,11 +268,11 @@ function DocsBody({
   useHotkey(uiStore.hotkeys[HotkeyAction.DocsSearchInPageDown], selectNextHighlight);
 
   const scrollUp = useCallback(() => {
-    containerRef?.current?.scrollBy(0, -15);
+    containerRef?.current?.scrollBy(0, -25);
   }, [containerRef]);
 
   const scrollDown = useCallback(() => {
-    containerRef?.current?.scrollBy(0, 15);
+    containerRef?.current?.scrollBy(0, 25);
   }, [containerRef]);
 
   const scrollTop = useCallback(() => {
@@ -357,7 +347,7 @@ function DocsBody({
     anchorEl.scrollIntoView();
   }, [html, anchor, pageURL]);
 
-  const highlightedHTML = useMemo(() => highlightCode(html), [html]);
+  // const highlightedHTML = useMemo(() => highlightCode(html), [html]);
 
   return (
     <>
@@ -369,7 +359,7 @@ function DocsBody({
             placeholder="Search in page"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            onKeyDown={handleSearchInputKeyDown}
+          // onKeyDown={handleSearchInputKeyDown}
           />
           <HitCount>
             <>
@@ -403,7 +393,8 @@ function DocsBody({
       }
       <DocsContent
         containerRef={containerRef}
-        html={highlightedHTML}
+        html={highlightCode(html)}
+      // html={highlightedHTML}
       />
     </>
   );
