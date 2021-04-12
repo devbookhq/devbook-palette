@@ -196,7 +196,6 @@ const StackOverflowBody = React.forwardRef<HTMLDivElement, StackOverflowBodyProp
     for (const pre of pres) {
       const codeText = (pre as HTMLElement).innerText;
       if (codeText) {
-        // TODO: We could use the correct langague highlight based on the documentation.
         const codeHTML = Prism.highlight(codeText, Prism.languages.clike, 'clike');
         pre.innerHTML = codeHTML;
       }

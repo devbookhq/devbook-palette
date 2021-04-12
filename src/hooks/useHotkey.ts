@@ -11,7 +11,7 @@ function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], han
         event.preventDefault();
         hotkeyOptions.handler();
       } else {
-        throw new Error(`No provided or registered handler for the hotkey action ${hotkeyOptions.label}`)
+        throw new Error(`No provided or registered handler for the hotkey action ${hotkeyOptions.label}.`)
       }
     }
   }, {

@@ -6,17 +6,7 @@ import { observer } from 'mobx-react-lite';
 
 import DocsSidebarItem from './DocsSidebarItem';
 import { useUIStore } from 'ui/ui.store';
-import { useRef } from 'react';
 import { ResultSelection } from 'Search/resultSelection';
-
-const Container = styled.div`
-  height: 100%;
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-  overflow: overlay;
-`;
 
 const DocsResultsWrapper = styled.div`
   width: 100%;

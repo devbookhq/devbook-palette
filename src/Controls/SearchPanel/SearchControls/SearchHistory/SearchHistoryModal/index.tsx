@@ -60,19 +60,23 @@ function SearchHistoryModal() {
 
   useEffect(() => {
     queryRef?.current?.scrollIntoView({ block: 'end' });
-  }, [selectedQueryIdx, queryRef]);
+  }, [queryRef]);
 
   const toggleSearchHistory = useCallback(() => {
     uiStore.toggleSeachHistory()
-  }, []);
+  }, [uiStore]);
 
   const changeHistoryResultUp = useCallback(() => {
-    if (selectedQueryIdx > 0) setSelectedQueryIdx(selectedQueryIdx - 1);
-  }, [selectedQueryIdx]);
+    setSelectedQueryIdx(c => {
+      return c > 0 ? c - 1 : 0;
+    });
+  }, []);
 
   const changeHistoryResultDown = useCallback(() => {
-    if (selectedQueryIdx < searchStore.historyQueries.length - 1) setSelectedQueryIdx(selectedQueryIdx + 1);
-  }, [selectedQueryIdx, searchStore.historyQueries]);
+    setSelectedQueryIdx(c => {
+      return c > searchStore.historyQueries.length - 1 ? c + 1 : 0;
+    });
+  }, [searchStore.historyQueries.length]);
 
   const searchHistory = useCallback((query?: string) => {
     if (searchStore.historyQueries.length - 1 < selectedQueryIdx) return;
@@ -80,10 +84,8 @@ function SearchHistoryModal() {
     uiStore.toggleSeachHistory();
   }, [
     selectedQueryIdx,
-    searchStore.historyQueries,
-    uiStore.isSearchHistoryVisible,
-    searchStore.historyQueries,
-    uiStore.isSearchHistoryVisible,
+    searchStore,
+    uiStore,
   ]);
 
   useHotkey(

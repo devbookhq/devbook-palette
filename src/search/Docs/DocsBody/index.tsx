@@ -2,7 +2,6 @@ import {
   useRef,
   useState,
   useEffect,
-  useMemo,
   useCallback,
 } from 'react';
 import styled from 'styled-components';
@@ -95,8 +94,8 @@ function getTextNodeChildren(node: Node) {
 }
 
 function removeHighlight(node: Node) {
-  if (!node.parentNode) throw new Error('Cannot remove highlight on a node without parent');
-  if (node.childNodes.length === 0) throw new Error('Cannot remove highlight on a node without children');
+  if (!node.parentNode) throw new Error('Cannot remove highlight on a node without parent.');
+  if (node.childNodes.length === 0) throw new Error('Cannot remove highlight on a node without children.');
   const textNode = node.childNodes[0];
   if (textNode.nodeType !== Node.TEXT_NODE || !textNode.nodeValue)
     throw new Error('Cannot remove highlight on a node that does not have a text node.');
@@ -106,7 +105,7 @@ function removeHighlight(node: Node) {
 }
 
 function highlightNode(textNode: Node, startIdx: number, endIdx: number) {
-  if (textNode.nodeType !== Node.TEXT_NODE) throw new Error('Cannot highlight a node that is not of type TEXT_NODE');
+  if (textNode.nodeType !== Node.TEXT_NODE) throw new Error('Cannot highlight a node that is not of type TEXT_NODE.');
   if (!textNode.nodeValue) return;
 
   const nodes: Node[] = [];
@@ -257,12 +256,12 @@ function DocsBody({
 
   const toggleSearchInPage = useCallback(() => {
     uiStore.toggleSearchInPage();
-  }, []);
+  }, [uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.DocsOpenSearchInPage, toggleSearchInPage);
     uiStore.registerHotkeyHandler(HotkeyAction.DocsCancelSearchInPage, toggleSearchInPage);
-  }, [toggleSearchInPage]);
+  }, [toggleSearchInPage, uiStore]);
 
   useHotkey(uiStore.hotkeys[HotkeyAction.DocsSearchInPageUp], selectPreviousHighlight);
   useHotkey(uiStore.hotkeys[HotkeyAction.DocsSearchInPageDown], selectNextHighlight);
@@ -288,7 +287,7 @@ function DocsBody({
     uiStore.registerHotkeyHandler(HotkeyAction.DocsScrollDown, scrollDown);
     uiStore.registerHotkeyHandler(HotkeyAction.DocsScrollTop, scrollTop);
     uiStore.registerHotkeyHandler(HotkeyAction.DocsScrollBottom, scrollBottom);
-  }, [scrollUp, scrollDown, scrollTop, scrollBottom]);
+  }, [scrollUp, scrollDown, scrollTop, scrollBottom, uiStore]);
 
   useEffect(() => {
     highlights.forEach(h => {
@@ -312,7 +311,6 @@ function DocsBody({
     let match: RegExpExecArray | null;
     let highlightIndex = 0;
     while ((match = re.exec(wholeText.toLowerCase())) !== null) {
-      // TODO: highlightPattern sometimes returns an empty array
       const nodes = highlightPattern([...textNodes], match.index, searchQuery);
       if (nodes.length > 0) {
         const highlight: Highlight = { index: highlightIndex++, nodes };

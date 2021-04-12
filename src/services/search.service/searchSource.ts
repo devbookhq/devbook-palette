@@ -1,4 +1,4 @@
 export enum SearchSource {
-  StackOverflow = 'stackOverflow',
-  Docs = 'docs'
+  StackOverflow = 'StackOverflow',
+  Docs = 'Docs'
 }

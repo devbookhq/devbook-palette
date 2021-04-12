@@ -74,7 +74,7 @@ export type SearchResultMap = {
 
 class SearchService {
   private constructor() { }
-  private static readonly baseURL = ElectronService.isDev || ElectronService.isStaging ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
+  private static readonly baseURL = ElectronService.isDev ? 'https://dev.usedevbook.com' : 'https://api.usedevbook.com';
   private static readonly apiVersion = APIVersion.V1;
   private static readonly baseURLWithVersion = `${SearchService.baseURL}/${SearchService.apiVersion}`;
 

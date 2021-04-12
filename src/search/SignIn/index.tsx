@@ -49,7 +49,7 @@ function SignIn({ isLoading, isSigningInUser }: SignInProps) {
 
   const openSignInModal = useCallback(() => {
     uiStore.toggleSignInModal();
-  }, []);
+  }, [uiStore]);
 
   return (
     <>

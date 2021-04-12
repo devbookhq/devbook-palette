@@ -283,7 +283,7 @@ function StackOverflowItem({
         const snippet = target.getAttribute('data-snippet');
         const idxString = target.getAttribute('data-snippet-idx');
         if (!idxString) {
-          console.error(`Could not get snippet element's idx`);
+          console.error(`Could not get snippet element's idx.`);
           return;
         }
         const idx = parseInt(idxString, 10);

@@ -36,7 +36,7 @@ import { GlobalShortcut } from 'services/globalShortcut';
 const port = 3000;
 let isPinModeEnabled = isDev ? true : false;
 
-app.disableHardwareAcceleration();
+// app.disableHardwareAcceleration();
 
 // Default right-click context menu for all Electron windows.
 contextMenu();
@@ -239,7 +239,6 @@ app.once('ready', async () => {
 
   tray = new Tray(trayIcon, {
     onShowDevbookClick: toggleVisibilityOnMainWindow,
-    // TODO: What if the main window is undefined?
     onOpenAtLoginClick: () => {
       const currentVal = MainSyncService.get(StorageKey.OpenAtLogin);
       MainSyncService.set(StorageKey.OpenAtLogin, !currentVal);

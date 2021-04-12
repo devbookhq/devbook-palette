@@ -1,8 +1,4 @@
-import {
-  autorun,
-  makeAutoObservable,
-  toJS,
-} from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import { useRootStore } from 'App/RootStore';
 import IPCService, { IPCOnChannel, IPCSendChannel } from 'services/ipc.service';
 import ElectronService from 'services/electron.service';
@@ -142,7 +138,7 @@ class UIStore {
         label: [Key.Command, 'O'],
       } : {
         hotkey: 'alt+o',
-        label: [Key.Alt, 'O'],
+        label: ['Alt', 'O'],
       },
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
@@ -154,7 +150,7 @@ class UIStore {
         label: [Key.Command, 'O'],
       } : {
         hotkey: 'alt+o',
-        label: [Key.Alt, 'O'],
+        label: ['Alt', 'O'],
       },
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
@@ -224,7 +220,7 @@ class UIStore {
         label: [Key.Command, 'F'],
       } : {
         hotkey: 'ctrl+o',
-        label: ['Control', 'F'],
+        label: ['Ctrl', 'F'],
       },
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
@@ -332,7 +328,7 @@ class UIStore {
         label: [Key.Command, Key.Shift, 'P'],
       } : {
         hotkey: 'alt+shift+p',
-        label: [Key.Alt, Key.Shift, 'P'],
+        label: ['Alt', Key.Shift, 'P'],
       },
       isActive: () => true,
     },
@@ -342,7 +338,7 @@ class UIStore {
         label: [Key.Command, '1'],
       } : {
         hotkey: 'alt+1',
-        label: [Key.Alt, '1'],
+        label: ['Alt', '1'],
       },
       isActive: () => !this.isSignInModalOpened,
     },
@@ -352,7 +348,7 @@ class UIStore {
         label: [Key.Command, '2'],
       } : {
         hotkey: 'alt+2',
-        label: [Key.Alt, '2'],
+        label: ['Alt', '2'],
       },
       isActive: () => !this.isSignInModalOpened,
     },
@@ -369,7 +365,9 @@ class UIStore {
       this.isSignInModalOpened = true;
     });
 
-    this.sync().then(() => this.backup());
+    this.sync().then(() => {
+      this.backup();
+    });
   }
 
   set docsFilterModalQuery(value: string) {
@@ -434,6 +432,7 @@ class UIStore {
 
   set searchSource(value: SearchSource) {
     this._searchSource = value;
+    SyncService.markDirtyKey(StorageKey.SearchFilter);
   }
 
   get searchSource() {

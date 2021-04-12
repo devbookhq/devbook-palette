@@ -67,9 +67,6 @@ function Onboarding() {
   });
 
   useEffect(() => {
-    // TODO: 'Alt+Space' - the initial value for a selected shortcut - is defined in the ShortcutPage.
-    // We should unify who handles the full state. Probably this component.
-
     // Tell the main proces to register the default shortcut before user chooses any shortcut.
     IPCService.send(IPCSendChannel.UserDidChangeShortcut, { shortcut: GlobalShortcut.AltSpace });
   }, []);

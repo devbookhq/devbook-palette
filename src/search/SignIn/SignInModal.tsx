@@ -144,7 +144,7 @@ function SignInModal() {
     setError('');
 
     if (!email) {
-      setError('Email is empty')
+      setError('Email is empty.')
       return;
     }
 

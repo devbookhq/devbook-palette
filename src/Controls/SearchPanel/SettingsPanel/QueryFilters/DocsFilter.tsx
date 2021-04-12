@@ -63,7 +63,7 @@ function DocsFilter() {
 
   const toggleFilterModal = useCallback(() => {
     uiStore.toggleFilterModal();
-  }, []);
+  }, [uiStore]);
 
   const openModalFilter = useHotkey(uiStore.hotkeys[HotkeyAction.DocsOpenModalFilter],
     toggleFilterModal,

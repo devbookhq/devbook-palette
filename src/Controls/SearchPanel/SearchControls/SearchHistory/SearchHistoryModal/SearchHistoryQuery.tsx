@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div<{ isSelected?: boolean, isFullWidth?: boolean }>`
@@ -20,15 +20,14 @@ const Container = styled.div<{ isSelected?: boolean, isFullWidth?: boolean }>`
   }
 `;
 
-interface SearchHistoryQuery {
+interface SearchHistoryQueryProps {
   query: string;
   isSelected: boolean;
   onClick: (query: string) => void;
   queryRef?: React.RefObject<HTMLDivElement>;
 }
 
-
-function SearchHistoryQuery({ query, isSelected, onClick, queryRef }: SearchHistoryQuery) {
+function SearchHistoryQuery({ query, isSelected, onClick, queryRef }: SearchHistoryQueryProps) {
   return (
     <Container
       ref={queryRef}
@@ -40,4 +39,4 @@ function SearchHistoryQuery({ query, isSelected, onClick, queryRef }: SearchHist
   );
 }
 
-export default React.memo(SearchHistoryQuery);
+export default memo(SearchHistoryQuery);

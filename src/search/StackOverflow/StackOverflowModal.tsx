@@ -4,8 +4,6 @@ import {
   useState,
 } from 'react';
 import styled from 'styled-components';
-import { useHotkeys } from 'react-hotkeys-hook';
-import { observer } from 'mobx-react-lite';
 
 import ElectronService from 'services/electron.service';
 import useOnClickOutside from 'hooks/useOnClickOutside';

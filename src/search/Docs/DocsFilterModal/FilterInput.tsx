@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import styled from 'styled-components';
 import { ReactComponent as searchImg } from 'img/search.svg';
 import { observer } from 'mobx-react-lite';
@@ -57,7 +57,7 @@ function FilterInput() {
   const handleQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const q = e.target.value.toLowerCase();
     uiStore.docsFilterModalQuery = q;
-  }, []);
+  }, [uiStore]);
 
   return (
     <SearchWrapper>

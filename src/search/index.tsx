@@ -41,19 +41,19 @@ function Search() {
     if (userStore.auth.user) {
       uiStore.isSignInModalOpened = false;
     }
-  }, [userStore.auth.user]);
+  }, [userStore.auth.user, uiStore]);
 
   const toggleFilterModal = useCallback(() => {
     uiStore.toggleFilterModal();
-  }, []);
+  }, [uiStore]);
 
 
   return (
     <Container>
       {uiStore.searchSource === SearchSource.StackOverflow &&
-        searchStore.results.stackOverflow.results.length !== 0 &&
+        searchStore.results.StackOverflow.results.length !== 0 &&
         <StackOverflow
-          results={searchStore.results.stackOverflow.results}
+          results={searchStore.results.StackOverflow.results}
         />
       }
 
@@ -67,11 +67,11 @@ function Search() {
 
 
       {uiStore.searchSource === SearchSource.Docs &&
-        searchStore.results.docs.results.length !== 0 &&
+        searchStore.results.Docs.results.length !== 0 &&
         userStore.user &&
         !uiStore.isSignInModalOpened &&
         <Docs
-          results={searchStore.results.docs.results}
+          results={searchStore.results.Docs.results}
         />
       }
 
@@ -83,8 +83,8 @@ function Search() {
         />
       }
 
-      {((searchStore.results.docs.results.length === 0 && uiStore.searchSource === SearchSource.Docs && userStore.user) ||
-        (searchStore.results.stackOverflow.results.length === 0 && uiStore.searchSource === SearchSource.StackOverflow)) &&
+      {((searchStore.results.Docs.results.length === 0 && uiStore.searchSource === SearchSource.Docs && userStore.user) ||
+        (searchStore.results.StackOverflow.results.length === 0 && uiStore.searchSource === SearchSource.StackOverflow)) &&
         <>
           {(searchStore.isQueryDirty || !searchStore.query) &&
             <InfoMessage>

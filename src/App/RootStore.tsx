@@ -20,7 +20,7 @@ export function RootStoreProvider({ children }: { children: React.ReactNode }) {
 export function useRootStore() {
   const context = useContext(StoreContext);
   if (!context) {
-    throw new Error('useRootStore must be used within RootStoreProvider');
+    throw new Error('useRootStore must be used within RootStoreProvider.');
   }
   return context;
 }

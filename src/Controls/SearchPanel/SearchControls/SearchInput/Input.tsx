@@ -47,7 +47,7 @@ function SearchInput({ inputRef }: SearchInputProps) {
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     searchStore.query = e.target.value;
-  }, []);
+  }, [searchStore]);
 
   return (
     <Input

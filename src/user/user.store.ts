@@ -1,5 +1,4 @@
 import {
-  autorun,
   toJS,
   makeAutoObservable,
 } from 'mobx';
@@ -84,10 +83,6 @@ class UserStore {
         return await axios.request(error.config);
       }
       return Promise.reject(error);
-    });
-
-    autorun(() => {
-      console.log('Authentication:', this.auth);
     });
 
     IPCService.on(IPCOnChannel.GetAuthFromMainWindow, () =>

@@ -34,7 +34,7 @@ function StackOverflow({ results }: StackOverflowProps) {
 
   const toggleModal = useCallback(() => {
     uiStore.toggleModal();
-  }, []);
+  }, [uiStore]);
 
   const openSelectedResultInBrowser = useCallback(() => {
     ElectronService.openLink(results[selection.idx].question.link);
@@ -64,27 +64,27 @@ function StackOverflow({ results }: StackOverflowProps) {
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowResultsUp, resultsUpHandler);
-  }, [resultsUpHandler]);
+  }, [resultsUpHandler, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowResultsDown, resultsDownHandler);
-  }, [resultsDownHandler]);
+  }, [resultsDownHandler, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowOpenModal, toggleModal);
-  }, [toggleModal]);
+  }, [toggleModal, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowCloseModal, toggleModal);
-  }, [toggleModal]);
+  }, [toggleModal, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowOpenInBrowser, openSelectedResultInBrowser);
-  }, [openSelectedResultInBrowser]);
+  }, [openSelectedResultInBrowser, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowModalOpenInBrowser, openSelectedResultInBrowser);
-  }, [openSelectedResultInBrowser]);
+  }, [openSelectedResultInBrowser, uiStore]);
 
   const openModalForResult = useCallback((idx: number) => {
     setSelection({
@@ -131,19 +131,19 @@ function StackOverflow({ results }: StackOverflowProps) {
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowScrollDown, scrollDown);
-  }, [scrollDown]);
+  }, [scrollDown, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowScrollUp, scrollUp);
-  }, [scrollUp]);
+  }, [scrollUp, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowModalScrollDown, modalScrollDown);
-  }, [modalScrollDown]);
+  }, [modalScrollDown, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.StackOverflowModalScrollUp, modalScrollUp);
-  }, [modalScrollUp]);
+  }, [modalScrollUp, uiStore]);
 
   return (
     <>

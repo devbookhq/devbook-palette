@@ -40,7 +40,7 @@ function FilterResults({ onCloseRequest }: FilterResultsProps) {
   const selectedDocRow = useRef<HTMLDivElement>(null);
 
   const availableFilters = useMemo(() => searchStore.filters[SearchSource.Docs].availableFilters, [
-    searchStore.filters[SearchSource.Docs].availableFilters,
+    searchStore.filters,
   ]);
 
   const filteredSourceFilters = useMemo(() => filterSourceFilters(uiStore.docsFilterModalQuery, availableFilters),
@@ -53,7 +53,7 @@ function FilterResults({ onCloseRequest }: FilterResultsProps) {
   const selectSourceFilter = useCallback((sourceFilter: DocSource) => {
     searchStore.setSelectedFilter(SearchSource.Docs, sourceFilter);
     onCloseRequest();
-  }, [onCloseRequest]);
+  }, [onCloseRequest, searchStore]);
 
   const modalFilterUpHandler = useCallback(() => {
     setSelectedIdx(c => c > 0 ? c - 1 : c);
@@ -71,21 +71,15 @@ function FilterResults({ onCloseRequest }: FilterResultsProps) {
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.DocsModalFilterUp, modalFilterUpHandler);
-  }, [
-    modalFilterUpHandler,
-  ]);
+  }, [modalFilterUpHandler, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.DocsModalFilterDown, modalFilterDownHandler);
-  }, [
-    modalFilterDownHandler,
-  ]);
+  }, [modalFilterDownHandler, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.DocsModalFilterSelect, modalFilterSelectHandler);
-  }, [
-    modalFilterSelectHandler,
-  ]);
+  }, [modalFilterSelectHandler, uiStore]);
 
   return (
     <Container>

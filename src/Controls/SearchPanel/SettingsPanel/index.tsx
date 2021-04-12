@@ -54,7 +54,7 @@ function SettingsPanel() {
 
   const togglePinMode = useCallback(() => {
     uiStore.togglePinMode();
-  }, [uiStore.togglePinMode]);
+  }, [uiStore]);
 
   useHotkey(uiStore.hotkeys[HotkeyAction.TogglePinMode],
     togglePinMode,

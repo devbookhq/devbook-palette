@@ -1,11 +1,10 @@
 import { useCallback } from 'react';
-
 import { observer } from 'mobx-react-lite';
-import Hotkey from 'components/Hotkey';
+
 import { useSearchStore } from 'Search/search.store';
 import { useUIStore, HotkeyAction } from 'ui/ui.store';
+import Hotkey from 'components/Hotkey';
 import useHotkey from 'hooks/useHotkey';
-import AnalyticsService, { AnalyticsEvent } from 'services/analytics.service';
 
 function SearchButton() {
   const searchStore = useSearchStore();
@@ -13,7 +12,7 @@ function SearchButton() {
 
   const searchCurrentQuery = useCallback(() => {
     searchStore.executeSearch();
-  }, []);
+  }, [searchStore]);
 
   useHotkey(
     uiStore.hotkeys[HotkeyAction.Search],

@@ -3,7 +3,7 @@ import ElectronStore from 'electron-store';
 import MainIPCService, { IPCInvokeChannel, IPCSendChannel } from 'services/ipc.service/mainIPC.service';
 
 import { StorageKey, StorageValue, Storage } from 'services/sync.service/storage';
-import { isDev, isStaging } from 'main/utils/environment';
+import { isDev } from 'main/utils/environment';
 import { app } from 'electron';
 import path from 'path';
 import { SearchSource } from 'services/search.service/searchSource';
@@ -11,21 +11,21 @@ import { SearchSource } from 'services/search.service/searchSource';
 const appDataFolder = 'com.foundrylabs.devbook';
 
 const historyStore = new ElectronStore<Pick<Storage, StorageKey.SearchHistoryEntries>>({
-  cwd: path.resolve(app.getPath('userData'), '..', `${appDataFolder}${isDev || isStaging ? '.dev' : ''}`),
+  cwd: path.resolve(app.getPath('userData'), '..', `${appDataFolder}${isDev ? '.dev' : ''}`),
   name: 'history',
-  // schema: {
-  //   searchHistoryEntries: {
-  //     type: 'array',
-  //     properties: {
-  //       query: { type: 'string' },
-  //     },
-  //     default: [] as HistoryEntry[],
-  //   },
-  // },
+  schema: {
+    searchHistoryEntries: {
+      type: 'array',
+      properties: {
+        query: { type: 'string' },
+      },
+      default: [],
+    },
+  },
 });
 
 const electronStore = new ElectronStore<Storage>({
-  cwd: path.resolve(app.getPath('userData'), '..', `${appDataFolder}${isDev || isStaging ? '.dev' : ''}`),
+  cwd: path.resolve(app.getPath('userData'), '..', `${appDataFolder}${isDev ? '.dev' : ''}`),
   schema: {
     searchHistoryEntries: {
       type: 'array',
@@ -111,7 +111,6 @@ class MainSyncService {
   private static delete<T extends StorageKey>(key: T) {
     if (key === StorageKey.SearchHistoryEntries) return historyStore.delete(StorageKey.SearchHistoryEntries);
     return electronStore.delete(key);
-
   }
 
   static set<T extends StorageKey>(key: T, value: StorageValue[T]) {

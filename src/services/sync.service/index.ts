@@ -6,13 +6,15 @@ type BackupCall = () => void;
 class SyncService {
   private constructor() { }
 
-  static registeredBackups: BackupCall[] = [];
+  static registeredBackups: { [key in StorageKey]?: { call?: BackupCall, isDirty?: boolean } } = {};
 
   private static backupInterval = setInterval(() => {
-    for (const backupCall of SyncService.registeredBackups) {
-      backupCall();
+    for (const backup of Object.values(SyncService.registeredBackups)) {
+      if (!backup) return;
+      if (backup.isDirty) backup.call?.();
+      backup.isDirty = false;
     }
-  }, 2000);
+  }, 30000);
 
   static async get<T extends StorageKey>(key: T): Promise<StorageValue[T]> {
     return IPCService.invoke(IPCInvokeChannel.StorageGet, { key }) as unknown as StorageValue[T];
@@ -23,11 +25,18 @@ class SyncService {
   }
 
   static registerBackup<T extends StorageKey>(key: T, getter: () => StorageValue[T]) {
-    const backupCall = () => {
+    const call = () => {
       const value = getter();
       SyncService.set(key, value);
     }
-    this.registeredBackups.push(backupCall);
+    this.registeredBackups[key] = { call };
+  }
+
+  static markDirtyKey(key: StorageKey) {
+    SyncService.registeredBackups[key] = {
+      ...SyncService.registeredBackups[key],
+      isDirty: true,
+    }
   }
 }
 

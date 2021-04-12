@@ -14,11 +14,11 @@ const Container = styled.div`
   overflow: hidden;
 `;
 
-interface Docs {
+interface DocsProps {
   results: DocResult[];
 }
 
-function Docs({ results }: Docs) {
+function Docs({ results }: DocsProps) {
   const uiStore = useUIStore();
 
   const [selection, setSelection] = useState<ResultSelection>({ idx: 0, focusState: FocusState.WithScroll });
@@ -55,11 +55,11 @@ function Docs({ results }: Docs) {
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.DocsResultsUp, resultsUpHandler);
-  }, [resultsUpHandler]);
+  }, [resultsUpHandler, uiStore]);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.DocsResultsDown, resultsDownHandler);
-  }, [resultsDownHandler]);
+  }, [resultsDownHandler, uiStore]);
 
   const selectResult = useCallback((idx: number) => {
     setSelection({

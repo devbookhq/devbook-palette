@@ -25,7 +25,7 @@ function SearchSourceFilter({ source }: SearchSourceFilterProps) {
 
   const changeFilter = useCallback(() => {
     uiStore.searchSource = source;
-  }, [source, uiStore.searchSource]);
+  }, [source, uiStore]);
 
   const selectSource = useHotkey(uiStore.hotkeys[searchSourceHotkeyActions[source]],
     changeFilter,

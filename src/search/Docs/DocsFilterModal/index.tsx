@@ -80,6 +80,7 @@ function DocsFilterModal({ onCloseRequest }: DocsFilterModalProps) {
     uiStore.registerHotkeyHandler(HotkeyAction.DocsCloseModalFilter, onCloseRequest);
   }, [
     onCloseRequest,
+    uiStore,
   ]);
 
   return (
