@@ -217,9 +217,9 @@ function trySetGlobalShortcut(shortcut: GlobalShortcut) {
 app.once('ready', async () => {
   if (isDev) {
     // Load react dev tools.
-    // await electron.session.defaultSession.loadExtension(
-    //   path.join(__dirname, '..', '..', '..', 'react-dev-tools-4.9.0_26'),
-    // );
+    await electron.session.defaultSession.loadExtension(
+      path.join(__dirname, '..', '..', '..', 'react-dev-tools-4.9.0_26'),
+    );
 
     // Enable Electron hot reloading
     require('electron-reload')(__dirname, {
