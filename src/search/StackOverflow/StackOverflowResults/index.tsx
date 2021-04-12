@@ -23,8 +23,6 @@ interface StackOverflowSeachResultsProps {
 }
 
 function StackOverflowItems({ results, openModalForResult, selectResult, containerRef, selection }: StackOverflowSeachResultsProps) {
-  console.log('selection', selection);
-
   return (
     <Container
       ref={containerRef}
@@ -36,7 +34,7 @@ function StackOverflowItems({ results, openModalForResult, selectResult, contain
           focusState={selection.idx === idx ? selection.focusState : FocusState.None}
           openModalForResult={openModalForResult}
           selectResult={selectResult}
-          idx={idx}
+          selection={selection}
         />
       )}
     </Container>
