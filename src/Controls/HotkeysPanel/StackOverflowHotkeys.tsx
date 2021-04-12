@@ -26,7 +26,7 @@ function StackOverflowHotkeys() {
   const resultsUp = useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowResultsUp]);
   const resultsDown = useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowResultsDown]);
   const openModal = useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowOpenModal]);
-  const openInBrowser = useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowModalOpenInBrowser]);
+  const openInBrowser = useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowOpenInBrowser]);
 
   useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowScrollUp]);
   useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowScrollDown]);

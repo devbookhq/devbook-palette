@@ -345,8 +345,6 @@ function DocsBody({
     anchorEl.scrollIntoView();
   }, [html, anchor, pageURL]);
 
-  // const highlightedHTML = useMemo(() => highlightCode(html), [html]);
-
   return (
     <>
       {uiStore.isSearchInPageOpened &&
@@ -357,7 +355,6 @@ function DocsBody({
             placeholder="Search in page"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-          // onKeyDown={handleSearchInputKeyDown}
           />
           <HitCount>
             <>
