@@ -238,7 +238,7 @@ class UIStore {
         hotkey: 'cmd+f',
         label: [Key.Command, 'F'],
       } : {
-        hotkey: 'ctrl+o',
+        hotkey: 'ctrl+f',
         label: ['Ctrl', 'F'],
       },
       isActive: () =>
