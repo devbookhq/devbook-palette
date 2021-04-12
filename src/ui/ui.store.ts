@@ -32,6 +32,7 @@ export enum HotkeyAction {
   StackOverflowResultsDown,
   StackOverflowOpenModal,
   StackOverflowCloseModal,
+  StackOverflowCopyCode,
   StackOverflowModalOpenInBrowser,
   StackOverflowOpenInBrowser,
   DocsScrollUp,
@@ -115,6 +116,12 @@ class UIStore {
         this.searchSource === SearchSource.Docs &&
         !this.isSearchHistoryVisible &&
         !this.isFilterModalOpened,
+    },
+    [HotkeyAction.StackOverflowCopyCode]: {
+      hotkey: 'alt+shift+1,alt+shift+2,alt+shift+3,alt+shift+4,alt+shift+5,alt+shift+6,alt+shift+7,alt+shift+8,alt+shift+9',
+      label: [],
+      isActive: () =>
+        this.searchSource === SearchSource.StackOverflow,
     },
     [HotkeyAction.DocsScrollUp]: {
       hotkey: 'shift+up',

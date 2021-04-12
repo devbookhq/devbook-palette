@@ -1,11 +1,13 @@
 import {
   useEffect,
   useRef,
-  memo,
   useState,
+  useCallback,
 } from 'react';
 import styled from 'styled-components';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { HotkeysEvent } from 'hotkeys-js';
+import { observer } from 'mobx-react-lite';
 
 import {
   StackOverflowResult,
@@ -19,6 +21,8 @@ import StackOverflowBody from './StackOverflowBody';
 
 import { ReactComponent as externalLinkImg } from 'img/external-link.svg';
 import { ResultSelection } from 'Search/resultSelection';
+import useHotkey from 'hooks/useHotkey';
+import { useUIStore, HotkeyAction } from 'ui/ui.store';
 
 const Container = styled.div<{ isFocused?: boolean }>`
   width: 100%;
@@ -192,6 +196,7 @@ function StackOverflowItem({
 }: StackOverflowItemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const uiStore = useUIStore();
 
   const [activeAnswer, setActiveAnswer] = useState<StackOverflowAnswer | undefined>();
   const [answerTypes, setAnswerTypes] = useState<AnswerType[]>([]);
@@ -334,25 +339,22 @@ function StackOverflowItem({
     if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
   }, [focusState]);
 
-  useHotkeys(
-    'alt+shift+1,alt+shift+2,alt+shift+3,alt+shift+4,alt+shift+5,alt+shift+6,alt+shift+7,alt+shift+8,alt+shift+9',
-    (event, handler) => {
-      event.preventDefault();
-      if (focusState === FocusState.None) return;
-      const num = parseInt(handler.shortcut.split('+').slice(-1)[0], 10); // 'shortcut' is a string 'ctrl+<num>'.
-      if (num - 1 < codeSnippets.length) {
-        ElectronService.writeClipboard(codeSnippets[num - 1]);
-        const snippetEl = codeSnippetEls[num - 1];
-        snippetEl.classList.add('highlight');
-        setTimeout(() => {
-          snippetEl.classList.remove('highlight');
-        }, 180);
-        AnalyticsService.track(AnalyticsEvent.CopyCodeSnippetStackOverflow, undefined);
-      }
-    }, {
-    filter: () => true,
-    enableOnTags: ['TEXTAREA', 'INPUT', 'SELECT'],
+  const copyCodeHandler = useCallback((keyboardEvent?: KeyboardEvent, hotkeysEvent?: HotkeysEvent) => {
+    if (!keyboardEvent || !hotkeysEvent) return;
+    if (focusState === FocusState.None) return;
+    const num = parseInt(hotkeysEvent.shortcut.split('+').slice(-1)[0], 10); // 'shortcut' is a string 'ctrl+<num>'.
+    if (num - 1 < codeSnippets.length) {
+      ElectronService.writeClipboard(codeSnippets[num - 1]);
+      const snippetEl = codeSnippetEls[num - 1];
+      snippetEl.classList.add('highlight');
+      setTimeout(() => {
+        snippetEl.classList.remove('highlight');
+      }, 180);
+      AnalyticsService.track(AnalyticsEvent.CopyCodeSnippetStackOverflow, undefined);
+    }
   }, [focusState, codeSnippets]);
+
+  useHotkey(uiStore.hotkeys[HotkeyAction.StackOverflowCopyCode], copyCodeHandler);
 
   return (
     <Container
@@ -410,4 +412,4 @@ function StackOverflowItem({
   );
 }
 
-export default memo(StackOverflowItem);
+export default observer(StackOverflowItem);
