@@ -6,7 +6,6 @@ import SearchHistory from './SearchHistory';
 import SearchSourceFilters from './SearchSourceFilters';
 import SearchLoader from './SearchLoader';
 
-
 const Container = styled.div`
   width: 100%;
   display: flex;
@@ -23,7 +22,9 @@ const FilterMenuWrapper = styled.div`
 
 const SearchOptionsWrapper = styled.div`
   display: flex;
+  align-items: center;
   padding: 0px 5px 0px 0px;
+  min-height: 40px;
 `;
 
 function SearchControls() {
