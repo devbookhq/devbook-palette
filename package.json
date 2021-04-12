@@ -40,7 +40,9 @@
     "build:electron:prod": "npm run bundle:electron -- --env=prod && todesktop build",
     "start:client": "craco start",
     "start:electron": "npm run bundle:electron && electron --enable-logging .",
-    "start": "concurrently \"npm run start:client\" \"npm run bundle:electron -- --watch=true --minify=false\" \"wait-on http://localhost:3000 && npm run start:electron\""
+    "start:electron:inspect": "npm run bundle:electron && electron --enable-logging --inspect-brk .",
+    "start": "concurrently \"npm run start:client\" \"npm run bundle:electron -- --watch=true --minify=false\" \"wait-on http://localhost:3000 && npm run start:electron\"",
+    "start:inspect": "concurrently \"npm run start:client\" \"npm run bundle:electron -- --watch=true --minify=false\" \"wait-on http://localhost:3000 && npm run start:electron:inspect\""
   },
   "dependencies": {
     "@todesktop/runtime": "^0.5.4",
