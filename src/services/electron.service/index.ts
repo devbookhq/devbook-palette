@@ -45,7 +45,7 @@ class ElectronService {
       case Environment.Staging:
         return environment;
       default:
-        throw new Error(`Unknown environment ${environment}`);
+        throw new Error(`Unknown environment: '${environment}'.`);
     }
   }
 }
