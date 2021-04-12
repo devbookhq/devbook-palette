@@ -58,6 +58,7 @@ export type HotKeysBinding = {
     hotkey: string,
     isActive: () => boolean,
     label: string[],
+    action?: string;
     handler?: (k?: KeyboardEvent, h?: HotkeysEvent) => void,
   };
 }
@@ -129,6 +130,7 @@ class UIStore {
     [HotkeyAction.StackOverflowCopyCode]: {
       hotkey: 'alt+shift+1,alt+shift+2,alt+shift+3,alt+shift+4,alt+shift+5,alt+shift+6,alt+shift+7,alt+shift+8,alt+shift+9',
       label: [],
+      action: 'Copy code snippet',
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow,
     },
@@ -148,6 +150,7 @@ class UIStore {
         hotkey: 'ctrl+d',
         label: ['Ctrl', 'D'],
       },
+      action: 'Open docs modal filter',
       isActive: () => this.searchSource === SearchSource.Docs,
     },
     [HotkeyAction.StackOverflowOpenInBrowser]: {
@@ -158,6 +161,7 @@ class UIStore {
         hotkey: 'alt+o',
         label: ['Alt', 'O'],
       },
+      action: 'Open SO in browser',
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
         !this.isModalOpened,
@@ -170,6 +174,7 @@ class UIStore {
         hotkey: 'alt+o',
         label: ['Alt', 'O'],
       },
+      action: 'Open SO in browser',
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
         this.isModalOpened,
@@ -241,6 +246,7 @@ class UIStore {
         hotkey: 'ctrl+f',
         label: ['Ctrl', 'F'],
       },
+      action: 'Search in docs page',
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
         !this.isSearchInPageOpened &&
@@ -317,6 +323,7 @@ class UIStore {
     [HotkeyAction.SearchHistory]: {
       hotkey: 'Enter',
       label: ['Enter'],
+      action: 'Use search history',
       isActive: () =>
         this.isSearchHistoryVisible &&
         !this.isSearchInPageOpened &&
@@ -325,6 +332,7 @@ class UIStore {
     [HotkeyAction.ToggleHistory]: {
       hotkey: 'Tab',
       label: ['Tab'],
+      action: 'Toggle search history',
       isActive: () =>
         !this.isModalOpened &&
         !this.isFilterModalOpened,
@@ -349,6 +357,7 @@ class UIStore {
         hotkey: 'alt+shift+p',
         label: ['Alt', Key.Shift, 'P'],
       },
+      action: 'Toggle pin mode',
       isActive: () => true,
     },
     [HotkeyAction.SelectStackOverflowSource]: {

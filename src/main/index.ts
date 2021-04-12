@@ -36,7 +36,9 @@ import { GlobalShortcut } from 'services/globalShortcut';
 const port = 3000;
 let isPinModeEnabled = MainSyncService.get(StorageKey.IsPinModeEnabled);
 
-// app.disableHardwareAcceleration();
+MainIPCService.on(IPCSendChannel.AnalyticsTrack, (_, payload) => {
+  MainAnalyticsService.track(payload.event, payload.payload, { searchWindow: mainWindow?.window });
+});
 
 // Default right-click context menu for all Electron windows.
 contextMenu();
@@ -79,6 +81,7 @@ toDesktop.autoUpdater.on('update-downloaded', () => {
 });
 
 async function restartAndUpdate(location: UpdateLocation) {
+  console.log('update');
   try {
     await MainAnalyticsService.trackAndFlush(AnalyticsEvent.UpdateClicked, { location });
   } catch (error) { }

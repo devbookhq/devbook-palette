@@ -41,7 +41,7 @@ export enum AnalyticsEvent {
 }
 
 export type AnalyticsPayload = {
-  [AnalyticsEvent.ShortcutUsed]: { action: string, hotkey: string };
+  [AnalyticsEvent.ShortcutUsed]: { action: string };
   [AnalyticsEvent.Search]: { query: string };
   [AnalyticsEvent.ModalOpened]: void;
   [AnalyticsEvent.SignInModalOpened]: void;

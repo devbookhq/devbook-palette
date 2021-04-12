@@ -296,7 +296,7 @@ function StackOverflowItem({
         const idx = parseInt(idxString, 10);
         const snippetEl = bodyRef.current?.getElementsByClassName(`code-snippet-${idx}`)[0];
         if (snippet && snippetEl) {
-          ElectronService.writeClipboard(snippet);
+          ElectronService.writeClipboard(snippet.trim());
 
           snippetEl.classList.add('highlight');
           setTimeout(() => {

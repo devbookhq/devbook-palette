@@ -1,10 +1,14 @@
 import { useHotkeys } from 'react-hotkeys-hook';
 import { HotkeysEvent } from 'hotkeys-js';
 import { HotkeyAction, HotKeysBinding } from 'ui/ui.store';
+import AnalyticsService, { AnalyticsEvent } from 'services/analytics.service';
 
 function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], handler?: (k?: KeyboardEvent, h?: HotkeysEvent) => void, filter?: (e: KeyboardEvent) => boolean) {
   useHotkeys(hotkeyOptions.hotkey, (keyboardEvent, hotkeyEvent) => {
     if (hotkeyOptions.isActive()) {
+      if (hotkeyOptions.action) {
+        AnalyticsService.track(AnalyticsEvent.ShortcutUsed, { action: hotkeyOptions.action })
+      }
       if (handler) {
         keyboardEvent.preventDefault();
         handler(keyboardEvent, hotkeyEvent);

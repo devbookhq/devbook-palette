@@ -79,7 +79,7 @@ class MainWindow {
       if (!this.window) { return; }
     })
 
-    this.window.on('resize', debounce(() => this.resizeHandler(), 1000));
+    this.window.on('resize', debounce(() => this.resizeHandler(), 3000));
 
     this.window.on('moved', () => {
       if (this.window) {

@@ -103,9 +103,5 @@ class MainAnalyticsService {
   }
 }
 
-MainIPCService.on(IPCSendChannel.AnalyticsTrack, (_, payload) => {
-  MainAnalyticsService.track(payload.event, payload.payload);
-});
-
 export { AnalyticsEvent };
 export default MainAnalyticsService;
