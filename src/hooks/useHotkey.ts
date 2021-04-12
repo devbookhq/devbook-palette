@@ -4,6 +4,7 @@ import { HotkeyAction, HotKeysBinding } from 'ui/ui.store';
 
 function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], handler?: (k?: KeyboardEvent, h?: HotkeysEvent) => void, filter?: (e: KeyboardEvent) => boolean) {
   useHotkeys(hotkeyOptions.hotkey, (keyboardEvent, hotkeyEvent) => {
+    console.log('trigger', hotkeyOptions.hotkey);
     if (hotkeyOptions.isActive()) {
       if (handler) {
         keyboardEvent.preventDefault();

@@ -156,6 +156,8 @@ MainAnalyticsService.identify({});
 function hideMainWindow() {
   mainWindow?.hide();
 
+  console.log('hiding window');
+
   if (!onboardingWindow?.window?.isVisible() && !preferencesWindow?.window?.isVisible() && process.platform === 'darwin') {
     // This action would hide the onboarding and preferences window too, but it is necessary for restoring focus when hiding mainWindow.
     electron.Menu.sendActionToFirstResponder('hide:');

@@ -17,6 +17,7 @@ export function useUIStore() {
 
 export enum HotkeyAction {
   Search,
+  Hide,
   ToggleHistory,
   HistoryUp,
   HistoryDown,
@@ -73,6 +74,14 @@ class UIStore {
   _docsFilterModalQuery = '';
 
   hotkeys: HotKeysBinding = {
+    [HotkeyAction.Hide]: {
+      hotkey: 'esc',
+      label: [],
+      isActive: () => true
+      // !this.isSearchInPageOpened &&
+      // !this.isFilterModalOpened &&
+      // !this.isModalOpened,
+    },
     [HotkeyAction.DocsSearchInPageDown]: {
       hotkey: 'enter',
       label: [],
@@ -364,7 +373,7 @@ class UIStore {
     },
   };
 
-  registerHotkeyHandler(action: HotkeyAction, handler: () => void) {
+  registerHotkeyHandler(action: HotkeyAction, handler: (k?: KeyboardEvent, h?: HotkeysEvent) => void) {
     this.hotkeys[action].handler = handler;
   }
 

@@ -5,8 +5,11 @@ import SearchPanel from 'Controls/SearchPanel';
 import SearchResults from 'Search';
 import HotkeysPanel from 'Controls/HotkeysPanel';
 import { useUserStore } from 'user/user.store';
+import { useUIStore, HotkeyAction } from 'ui/ui.store';
 import InfoMessage from 'components/InfoMessage';
 import InfoText from 'components/InfoMessage/InfoText';
+import IPCService, { IPCSendChannel } from 'services/ipc.service';
+import { useCallback, useEffect } from 'react';
 
 const Container = styled.div`
   flex: 1;
@@ -22,6 +25,16 @@ const VerticalInfoMessage = styled(InfoMessage)`
 
 function Home() {
   const userStore = useUserStore();
+  const uiStore = useUIStore();
+
+  const hideWindow = useCallback(() => {
+    IPCService.send(IPCSendChannel.HideWindow, undefined);
+  }, []);
+
+  useEffect(() => {
+    console.log('register handler');
+    uiStore.registerHotkeyHandler(HotkeyAction.Hide, hideWindow);
+  }, [uiStore, hideWindow]);
 
   return (
     <>
