@@ -34,7 +34,7 @@ import { PreferencesPage } from 'Preferences/preferencesPage';
 import { GlobalShortcut } from 'services/globalShortcut';
 
 const port = 3000;
-let isPinModeEnabled = isDev ? true : false;
+let isPinModeEnabled = MainSyncService.get(StorageKey.IsPinModeEnabled);
 
 // app.disableHardwareAcceleration();
 
