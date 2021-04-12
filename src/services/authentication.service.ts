@@ -7,7 +7,7 @@ import ElectronService from './electron.service';
 import { APIVersion } from 'services/api.service';
 import { User } from 'user/user';
 
-const CredentialPingPeriod = 100; // In ms. We ping server every N ms.
+const credentialPingPeriod = 500; // In ms. We ping server every N ms.
 
 class AuthenticationService {
   private constructor() { }
@@ -61,7 +61,7 @@ class AuthenticationService {
             break;
           }
         }
-        await timeout(CredentialPingPeriod);
+        await timeout(credentialPingPeriod);
       }
 
       if (isCancelled) {

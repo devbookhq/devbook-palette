@@ -1,7 +1,7 @@
 import { useHotkeys } from 'react-hotkeys-hook';
 import { HotkeyAction, HotKeysBinding } from 'ui/ui.store';
 
-function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], handler?: () => void) {
+function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], handler?: () => void, filter?: (e: KeyboardEvent) => boolean) {
   useHotkeys(hotkeyOptions.hotkey, (event) => {
     if (hotkeyOptions.isActive()) {
       if (handler) {
@@ -15,15 +15,15 @@ function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], han
       }
     }
   }, {
-    filter: () => true,
+    filter: filter || (() => true),
     enableOnTags: ['TEXTAREA', 'INPUT', 'SELECT'],
   }, [
-    hotkeyOptions.isActive(),
+    hotkeyOptions.isActive,
     hotkeyOptions.hotkey,
     handler,
   ]);
   return {
-    handler,
+    handler, 
     ...hotkeyOptions,
   }
 }

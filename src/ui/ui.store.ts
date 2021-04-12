@@ -194,6 +194,7 @@ class UIStore {
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
         this.isFilterModalOpened &&
+        !this.isSearchHistoryVisible &&
         !this.isSearchInPageOpened,
     },
     [HotkeyAction.DocsResultsDown]: {

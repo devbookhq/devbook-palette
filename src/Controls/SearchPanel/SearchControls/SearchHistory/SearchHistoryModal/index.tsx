@@ -60,7 +60,7 @@ function SearchHistoryModal() {
 
   useEffect(() => {
     queryRef?.current?.scrollIntoView({ block: 'end' });
-  }, [queryRef]);
+  }, [queryRef, selectedQueryIdx]);
 
   const toggleSearchHistory = useCallback(() => {
     uiStore.toggleSeachHistory()
@@ -74,7 +74,7 @@ function SearchHistoryModal() {
 
   const changeHistoryResultDown = useCallback(() => {
     setSelectedQueryIdx(c => {
-      return c > searchStore.historyQueries.length - 1 ? c + 1 : 0;
+      return c < searchStore.historyQueries.length - 1 ? c + 1 : 0;
     });
   }, [searchStore.historyQueries.length]);
 

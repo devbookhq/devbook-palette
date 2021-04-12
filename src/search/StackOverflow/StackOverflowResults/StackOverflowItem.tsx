@@ -241,6 +241,8 @@ function StackOverflowItem({
       return;
     }
 
+    console.log('HIGHLIGHTING COPY');
+
     if (!bodyRef?.current) return;
     copySnippetEls.forEach(el => {
       el.onclick = null;
@@ -332,6 +334,8 @@ function StackOverflowItem({
   useEffect(() => {
     if (focusState === FocusState.WithScroll) containerRef?.current?.scrollIntoView();
   }, [focusState]);
+
+  console.log('copy result', focusState, idx);
 
   useHotkeys(
     'alt+shift+1,alt+shift+2,alt+shift+3,alt+shift+4,alt+shift+5,alt+shift+6,alt+shift+7,alt+shift+8,alt+shift+9',

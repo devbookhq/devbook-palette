@@ -15,7 +15,6 @@ import IPCService, { IPCOnChannel, IPCSendChannel } from 'services/ipc.service';
 
 import timeout from 'utils/timeout';
 
-
 export function useUserStore() {
   return useRootStore().userStore;
 }
@@ -56,11 +55,11 @@ class UserStore {
   }
 
   reportDisconnection() {
-    this._isConnected = false;
+    if (this._isConnected) this._isConnected = false;
   }
 
   reportConnection() {
-    this._isConnected = true;
+    if (!this._isConnected) this._isConnected = true;
   }
 
   constructor() {
@@ -79,7 +78,7 @@ class UserStore {
 
       if (error.request) {
         this.reportDisconnection();
-        await timeout(1000);
+        await timeout(2500);
         return await axios.request(error.config);
       }
       return Promise.reject(error);

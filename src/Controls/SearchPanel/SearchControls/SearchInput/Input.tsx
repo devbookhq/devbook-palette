@@ -21,7 +21,7 @@ const Input = styled.input`
   }
 `;
 
-function handleInputKeyDown(e: any) {
+function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
   // We want to prevent cursor from moving when the up or down arrow is pressed.
   // The default behavior is that cursor moves either to the start or to the end.
   // 38 - up arrow

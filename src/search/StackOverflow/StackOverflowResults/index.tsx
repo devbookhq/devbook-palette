@@ -23,6 +23,8 @@ interface StackOverflowSeachResultsProps {
 }
 
 function StackOverflowItems({ results, openModalForResult, selectResult, containerRef, selection }: StackOverflowSeachResultsProps) {
+  console.log('selection', selection);
+
   return (
     <Container
       ref={containerRef}

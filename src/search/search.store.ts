@@ -103,7 +103,7 @@ class SearchStore {
   private async refreshSearchFilters() {
     return Promise.all((Object.values(SearchSource) as SearchSource[]).map(async (source) => {
       const availableFilters = await SearchService.listFilters(source);
-      const selectedFilter = this.filters[source]?.selectedFilter || availableFilters[0];
+      const selectedFilter = availableFilters.find(f => this.filters[source]?.selectedFilter?.slug === f.slug) || availableFilters[0];
       this.setFilter(source, {
         availableFilters,
         selectedFilter,
