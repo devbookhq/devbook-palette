@@ -391,6 +391,7 @@ class UIStore {
 
     IPCService.on(IPCOnChannel.OpenSignInModal, () => {
       this.isSignInModalOpened = true;
+      this.searchSource = SearchSource.Docs;
     });
 
     this.sync().then(() => {
