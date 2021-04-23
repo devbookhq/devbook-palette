@@ -74,6 +74,7 @@ class SearchStore {
   setSelectedFilter<T extends SearchSource>(source: T, value: SearchFilterTypings[T] | undefined) {
     this.filters[source].selectedFilter = value;
     this.executeSearch();
+    SyncService.markDirtyKey(StorageKey.ActiveDocSource);
   }
 
   private setLastQuery(query: string) {
