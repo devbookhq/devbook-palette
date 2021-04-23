@@ -391,6 +391,7 @@ class UIStore {
 
     IPCService.on(IPCOnChannel.OpenSignInModal, () => {
       this.isSignInModalOpened = true;
+      AnalyticsService.track(AnalyticsEvent.SignInModalOpened, undefined);
       this.searchSource = SearchSource.Docs;
     });
 
