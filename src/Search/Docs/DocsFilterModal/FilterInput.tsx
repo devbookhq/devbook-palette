@@ -52,7 +52,11 @@ function handleInputKeyDown(e: any) {
   }
 }
 
-function FilterInput() {
+interface FilterInputProps {
+  inputRef: React.RefObject<HTMLInputElement>;
+}
+
+function FilterInput({ inputRef }: FilterInputProps) {
   const uiStore = useUIStore();
   const handleQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const q = e.target.value.toLowerCase();
@@ -63,6 +67,7 @@ function FilterInput() {
     <SearchWrapper>
       <SearchImg />
       <SearchInput
+        ref={inputRef}
         autoFocus
         placeholder="Python, JavaScript, Docker, etc"
         value={uiStore.docsFilterModalQuery}

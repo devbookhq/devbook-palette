@@ -73,8 +73,16 @@ interface DocsFilterModalProps {
 function DocsFilterModal({ onCloseRequest }: DocsFilterModalProps) {
   const uiStore = useUIStore();
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(modalRef, onCloseRequest);
+
+  useEffect(() => {
+    if (!inputRef.current) return;
+    // Focus modal's input and select text inside of it
+    inputRef.current.focus();
+    inputRef.current.setSelectionRange(0, 999999);
+  }, []);
 
   useEffect(() => {
     uiStore.registerHotkeyHandler(HotkeyAction.DocsCloseModalFilter, onCloseRequest);
@@ -88,7 +96,9 @@ function DocsFilterModal({ onCloseRequest }: DocsFilterModalProps) {
       onCloseRequest={onCloseRequest}
       ref={modalRef}
     >
-      <FilterInput />
+      <FilterInput
+        inputRef={inputRef}
+      />
       <Content>
         <HeaderText>
           Select active documentation
