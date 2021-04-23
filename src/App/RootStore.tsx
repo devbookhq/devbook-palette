@@ -29,9 +29,9 @@ class RootStore {
   private contructor() { }
   private static _instance: RootStore;
 
-  readonly searchStore = new SearchStore();
   readonly uiStore = new UIStore();
   readonly userStore = new UserStore();
+  readonly searchStore = new SearchStore(this.uiStore);
 
   static get instance() {
     return RootStore._instance || (RootStore._instance = new RootStore())

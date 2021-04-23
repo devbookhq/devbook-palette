@@ -4,9 +4,8 @@ import Analytics from 'analytics-node';
 import { app } from 'electron';
 import { v4 as uuidv4 } from 'uuid';
 
-import { isDev, isStaging } from 'main/utils/environment';
+import { isDev } from 'main/utils/environment';
 import MainSyncService, { StorageKey } from 'services/sync.service/mainSync.service';
-import MainIPCService, { IPCSendChannel } from 'services/ipc.service/mainIPC.service';
 
 import { User } from 'user/user';
 import { AnalyticsEvent, AnalyticsPayload } from 'services/analytics.service/analyticsEvent';
@@ -29,11 +28,11 @@ class MainAnalyticsService {
     return anonymousID;
   }
 
-  static track<T extends AnalyticsEvent>(event: T, payload: AnalyticsPayload[T], options?: { userID?: string, searchWindow?: electron.BrowserWindow }) {
+  static track<T extends AnalyticsEvent>(event: T, payload: AnalyticsPayload[T], options?: { searchWindow?: electron.BrowserWindow }) {
     return MainAnalyticsService.analytics.track({
       event,
       anonymousId: MainAnalyticsService.anonymousID,
-      userId: options?.userID,
+      userId: MainAnalyticsService.userID,
       properties: {
         ...payload,
         isSignedIn: MainAnalyticsService.isSignedIn,
@@ -47,7 +46,7 @@ class MainAnalyticsService {
     });
   }
 
-  static trackAndFlush<T extends AnalyticsEvent>(event: T, payload: AnalyticsPayload[T], options?: { userID?: string, anonymousID: string, searchWindow?: electron.BrowserWindow }) {
+  static trackAndFlush<T extends AnalyticsEvent>(event: T, payload: AnalyticsPayload[T], options?: { searchWindow?: electron.BrowserWindow }) {
     return new Promise<void>((resolve, reject) => {
       MainAnalyticsService.track(event, payload, options)
         .flush((error) => {

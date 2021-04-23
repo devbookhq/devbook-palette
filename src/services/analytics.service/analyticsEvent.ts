@@ -1,4 +1,6 @@
 import { UpdateLocation } from 'services/appWindow';
+import { DocSource } from 'services/search.service/docSource';
+import { SearchSource } from 'services/search.service/searchSource';
 
 export enum AnalyticsEvent {
   ShowedApp = 'Showed app',
@@ -42,7 +44,7 @@ export enum AnalyticsEvent {
 
 export type AnalyticsPayload = {
   [AnalyticsEvent.ShortcutUsed]: { action: string };
-  [AnalyticsEvent.Search]: { query: string };
+  [AnalyticsEvent.Search]: { query: string, activeFilter: SearchSource, activeDocSource?: DocSource };
   [AnalyticsEvent.ModalOpened]: void;
   [AnalyticsEvent.SignInModalOpened]: void;
   [AnalyticsEvent.SignInModalClosed]: void;

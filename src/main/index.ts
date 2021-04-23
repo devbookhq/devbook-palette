@@ -81,7 +81,6 @@ toDesktop.autoUpdater.on('update-downloaded', () => {
 });
 
 async function restartAndUpdate(location: UpdateLocation) {
-  console.log('update');
   try {
     await MainAnalyticsService.trackAndFlush(AnalyticsEvent.UpdateClicked, { location });
   } catch (error) { }

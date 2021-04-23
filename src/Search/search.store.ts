@@ -8,6 +8,7 @@ import { SearchSource } from 'services/search.service/searchSource';
 import SyncService, { StorageKey } from 'services/sync.service';
 import { HistoryEntry } from './historyEntry';
 import AnalyticsService, { AnalyticsEvent } from 'services/analytics.service';
+import UIStore from 'ui/ui.store';
 
 export function useSearchStore() {
   const { searchStore } = useRootStore();
@@ -80,7 +81,7 @@ class SearchStore {
     SyncService.markDirtyKey(StorageKey.LastQuery);
   }
 
-  constructor() {
+  constructor(private _uiStore: UIStore) {
     makeAutoObservable(this, {
       _maxHistorySize: false,
       _lastSearchInvocation: false,
@@ -137,7 +138,11 @@ class SearchStore {
         return reject(error);
       }
     });
-    AnalyticsService.track(AnalyticsEvent.Search, { query: this.query });
+    AnalyticsService.track(AnalyticsEvent.Search, {
+      query: this.query,
+      activeFilter: this._uiStore.searchSource,
+      activeDocSource: toJS(this.filters.Docs.selectedFilter),
+    });
     this._lastSearchInvocation = searchInvocation;
     return searchInvocation;
   }
