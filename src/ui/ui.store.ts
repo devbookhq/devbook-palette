@@ -64,11 +64,11 @@ export type HotKeysBinding = {
 }
 
 class UIStore {
-  isModalOpened = false;
+  isStackOverflowModalOpened = false;
   _isSignInModalOpened = false;
   isSearchHistoryVisible = false;
   isPinModeEnabled = false;
-  isFilterModalOpened = false;
+  isDocsFilterModalOpened = false;
   isSearchInPageOpened = false;
   _searchSource: SearchSource = SearchSource.StackOverflow;
   _docSearchResultsDefaultWidth: number = 300;
@@ -80,8 +80,8 @@ class UIStore {
       label: [],
       isActive: () =>
         !this.isSearchInPageOpened &&
-        !this.isFilterModalOpened &&
-        !this.isModalOpened,
+        !this.isDocsFilterModalOpened &&
+        !this.isStackOverflowModalOpened,
     },
     [HotkeyAction.DocsSearchInPageDown]: {
       hotkey: 'enter',
@@ -106,7 +106,7 @@ class UIStore {
       label: [],
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
-        !this.isFilterModalOpened,
+        !this.isDocsFilterModalOpened,
     },
     [HotkeyAction.DocsScrollTop]: {
       ...ElectronService.platform === Platform.MacOS ? {
@@ -117,7 +117,7 @@ class UIStore {
       label: [],
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
-        !this.isFilterModalOpened,
+        !this.isDocsFilterModalOpened,
     },
     [HotkeyAction.DocsScrollDown]: {
       hotkey: 'shift+down',
@@ -125,7 +125,7 @@ class UIStore {
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
         !this.isSearchHistoryVisible &&
-        !this.isFilterModalOpened,
+        !this.isDocsFilterModalOpened,
     },
     [HotkeyAction.StackOverflowCopyCode]: {
       hotkey: 'alt+shift+1,alt+shift+2,alt+shift+3,alt+shift+4,alt+shift+5,alt+shift+6,alt+shift+7,alt+shift+8,alt+shift+9',
@@ -140,7 +140,7 @@ class UIStore {
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
         !this.isSearchHistoryVisible &&
-        !this.isFilterModalOpened,
+        !this.isDocsFilterModalOpened,
     },
     [HotkeyAction.DocsOpenModalFilter]: {
       ...ElectronService.platform === Platform.MacOS ? {
@@ -164,7 +164,7 @@ class UIStore {
       action: 'Open SO in browser',
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
-        !this.isModalOpened,
+        !this.isStackOverflowModalOpened,
     },
     [HotkeyAction.StackOverflowModalOpenInBrowser]: {
       ...ElectronService.platform === Platform.MacOS ? {
@@ -177,7 +177,7 @@ class UIStore {
       action: 'Open SO in browser',
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
-        this.isModalOpened,
+        this.isStackOverflowModalOpened,
     },
     [HotkeyAction.DocsCancelSearchInPage]: {
       hotkey: 'esc',
@@ -185,14 +185,14 @@ class UIStore {
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
         this.isSearchInPageOpened &&
-        !this.isFilterModalOpened,
+        !this.isDocsFilterModalOpened,
     },
     [HotkeyAction.DocsModalFilterSelect]: {
       hotkey: 'enter',
       label: ['Enter'],
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
-        this.isFilterModalOpened &&
+        this.isDocsFilterModalOpened &&
         !this.isSearchInPageOpened,
     },
     [HotkeyAction.DocsCloseModalFilter]: {
@@ -200,14 +200,14 @@ class UIStore {
       label: ['Esc'],
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
-        this.isFilterModalOpened,
+        this.isDocsFilterModalOpened,
     },
     [HotkeyAction.DocsModalFilterDown]: {
       hotkey: 'down',
       label: [Key.ArrowDown],
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
-        this.isFilterModalOpened &&
+        this.isDocsFilterModalOpened &&
         !this.isSearchInPageOpened &&
         !this.isSearchHistoryVisible,
     },
@@ -216,7 +216,7 @@ class UIStore {
       label: [Key.ArrowUp],
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
-        this.isFilterModalOpened &&
+        this.isDocsFilterModalOpened &&
         !this.isSearchHistoryVisible &&
         !this.isSearchInPageOpened,
     },
@@ -225,7 +225,7 @@ class UIStore {
       label: [Key.ArrowDown],
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
-        !this.isFilterModalOpened &&
+        !this.isDocsFilterModalOpened &&
         !this.isSearchHistoryVisible &&
         !this.isSearchInPageOpened,
     },
@@ -235,7 +235,7 @@ class UIStore {
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
         !this.isSearchHistoryVisible &&
-        !this.isFilterModalOpened &&
+        !this.isDocsFilterModalOpened &&
         !this.isSearchInPageOpened,
     },
     [HotkeyAction.DocsOpenSearchInPage]: {
@@ -250,21 +250,21 @@ class UIStore {
       isActive: () =>
         this.searchSource === SearchSource.Docs &&
         !this.isSearchInPageOpened &&
-        !this.isFilterModalOpened,
+        !this.isDocsFilterModalOpened,
     },
     [HotkeyAction.StackOverflowOpenModal]: {
       hotkey: 'shift+enter',
       label: [Key.Shift, Key.Enter],
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
-        !this.isModalOpened,
+        !this.isStackOverflowModalOpened,
     },
     [HotkeyAction.StackOverflowCloseModal]: {
       hotkey: 'esc',
       label: ['Esc'],
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
-        this.isModalOpened,
+        this.isStackOverflowModalOpened,
     },
     [HotkeyAction.StackOverflowScrollUp]: {
       hotkey: 'shift+up',
@@ -272,7 +272,7 @@ class UIStore {
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
         !this.isSearchHistoryVisible &&
-        !this.isModalOpened,
+        !this.isStackOverflowModalOpened,
     },
     [HotkeyAction.StackOverflowScrollDown]: {
       hotkey: 'shift+down',
@@ -280,7 +280,7 @@ class UIStore {
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
         !this.isSearchHistoryVisible &&
-        !this.isModalOpened,
+        !this.isStackOverflowModalOpened,
     },
     [HotkeyAction.StackOverflowResultsUp]: {
       hotkey: 'up',
@@ -288,7 +288,7 @@ class UIStore {
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
         !this.isSearchHistoryVisible &&
-        !this.isModalOpened,
+        !this.isStackOverflowModalOpened,
     },
     [HotkeyAction.StackOverflowResultsDown]: {
       hotkey: 'down',
@@ -296,21 +296,21 @@ class UIStore {
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
         !this.isSearchHistoryVisible &&
-        !this.isModalOpened,
+        !this.isStackOverflowModalOpened,
     },
     [HotkeyAction.StackOverflowModalScrollUp]: {
       hotkey: 'up',
       label: [Key.ArrowUp],
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
-        this.isModalOpened,
+        this.isStackOverflowModalOpened,
     },
     [HotkeyAction.StackOverflowModalScrollDown]: {
       hotkey: 'down',
       label: [Key.ArrowDown],
       isActive: () =>
         this.searchSource === SearchSource.StackOverflow &&
-        this.isModalOpened,
+        this.isStackOverflowModalOpened,
     },
     [HotkeyAction.Search]: {
       hotkey: 'Enter',
@@ -318,7 +318,7 @@ class UIStore {
       isActive: () =>
         !this.isSearchHistoryVisible &&
         !this.isSearchInPageOpened &&
-        !this.isFilterModalOpened,
+        !this.isDocsFilterModalOpened,
     },
     [HotkeyAction.SearchHistory]: {
       hotkey: 'Enter',
@@ -327,15 +327,15 @@ class UIStore {
       isActive: () =>
         this.isSearchHistoryVisible &&
         !this.isSearchInPageOpened &&
-        !this.isFilterModalOpened,
+        !this.isDocsFilterModalOpened,
     },
     [HotkeyAction.ToggleHistory]: {
       hotkey: 'Tab',
       label: ['Tab'],
       action: 'Toggle search history',
       isActive: () =>
-        !this.isModalOpened &&
-        !this.isFilterModalOpened,
+        !this.isStackOverflowModalOpened &&
+        !this.isDocsFilterModalOpened,
     },
     [HotkeyAction.HistoryUp]: {
       hotkey: 'up',
@@ -428,16 +428,16 @@ class UIStore {
     this.isSearchInPageOpened = !this.isSearchInPageOpened;
   }
 
-  toggleModal() {
-    this.isModalOpened = !this.isModalOpened;
+  toggleStackOverflowModal() {
+    this.isStackOverflowModalOpened = !this.isStackOverflowModalOpened;
 
-    if (this.isModalOpened) AnalyticsService.track(AnalyticsEvent.ModalOpened, undefined);
+    if (this.isStackOverflowModalOpened) AnalyticsService.track(AnalyticsEvent.ModalOpened, undefined);
   }
 
-  toggleFilterModal() {
-    this.isFilterModalOpened = !this.isFilterModalOpened;
+  toggleDocsFilterModal() {
+    this.isDocsFilterModalOpened = !this.isDocsFilterModalOpened;
 
-    if (this.isFilterModalOpened) AnalyticsService.track(AnalyticsEvent.OpenDocsFilter, undefined);
+    if (this.isDocsFilterModalOpened) AnalyticsService.track(AnalyticsEvent.OpenDocsFilter, undefined);
   }
 
   toggleSignInModal() {

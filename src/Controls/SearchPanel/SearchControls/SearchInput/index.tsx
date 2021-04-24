@@ -12,9 +12,9 @@ function SearchInputWrapper() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (uiStore.isModalOpened) inputRef?.current?.blur();
+    if (uiStore.isStackOverflowModalOpened) inputRef?.current?.blur();
     else inputRef?.current?.focus();
-  }, [uiStore.isModalOpened]);
+  }, [uiStore.isStackOverflowModalOpened]);
 
   useEffect(() => {
     if (uiStore.isSignInModalOpened) inputRef?.current?.blur();
@@ -22,17 +22,17 @@ function SearchInputWrapper() {
   }, [uiStore.isSignInModalOpened]);
 
   useEffect(() => {
-    if (uiStore.isFilterModalOpened) inputRef?.current?.blur();
+    if (uiStore.isDocsFilterModalOpened) inputRef?.current?.blur();
     else inputRef?.current?.focus();
-  }, [uiStore.isFilterModalOpened]);
+  }, [uiStore.isDocsFilterModalOpened]);
 
   useIPCRenderer(IPCOnChannel.DidShowMainWindow, () => {
-    if (!uiStore.isModalOpened && inputRef.current) {
+    if (!uiStore.isStackOverflowModalOpened && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.setSelectionRange(0, 999999);
     }
   }, [
-    uiStore.isModalOpened,
+    uiStore.isStackOverflowModalOpened,
     inputRef.current,
   ]);
 

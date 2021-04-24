@@ -31,10 +31,10 @@ function HotkeysPanel() {
     <>
       {uiStore.searchSource === SearchSource.StackOverflow &&
         <Container>
-          {!uiStore.isModalOpened &&
+          {!uiStore.isStackOverflowModalOpened &&
             <StackOverflowHotkeys />
           }
-          {uiStore.isModalOpened &&
+          {uiStore.isStackOverflowModalOpened &&
             <StackOverflowModalHotkeys />
           }
         </Container>
@@ -42,10 +42,10 @@ function HotkeysPanel() {
       {uiStore.searchSource === SearchSource.Docs &&
         userStore.user &&
         <Container>
-          {!uiStore.isFilterModalOpened &&
+          {!uiStore.isDocsFilterModalOpened &&
             <DocsHotkeys />
           }
-          {uiStore.isFilterModalOpened &&
+          {uiStore.isDocsFilterModalOpened &&
             <DocsFilterModalHotkeys />
           }
         </Container>

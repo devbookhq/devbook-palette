@@ -62,7 +62,7 @@ function DocsFilter() {
   const selectedFilter = searchStore.filters[SearchSource.Docs].selectedFilter;
 
   const toggleFilterModal = useCallback(() => {
-    uiStore.toggleFilterModal();
+    uiStore.toggleDocsFilterModal();
   }, [uiStore]);
 
   const openModalFilter = useHotkey(uiStore.hotkeys[HotkeyAction.DocsOpenModalFilter],

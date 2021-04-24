@@ -44,7 +44,7 @@ function Search() {
   }, [userStore.auth.user, uiStore]);
 
   const toggleFilterModal = useCallback(() => {
-    uiStore.toggleFilterModal();
+    uiStore.toggleDocsFilterModal();
   }, [uiStore]);
 
 
@@ -58,7 +58,7 @@ function Search() {
       }
 
       {uiStore.searchSource === SearchSource.Docs &&
-        uiStore.isFilterModalOpened &&
+        uiStore.isDocsFilterModalOpened &&
         userStore.user &&
         <DocsFilterModal
           onCloseRequest={toggleFilterModal}

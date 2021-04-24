@@ -33,7 +33,7 @@ function StackOverflow({ results }: StackOverflowProps) {
   }, [results]);
 
   const toggleModal = useCallback(() => {
-    uiStore.toggleModal();
+    uiStore.toggleStackOverflowModal();
   }, [uiStore]);
 
   const openSelectedResultInBrowser = useCallback(() => {
@@ -147,7 +147,7 @@ function StackOverflow({ results }: StackOverflowProps) {
 
   return (
     <>
-      {uiStore.isModalOpened &&
+      {uiStore.isStackOverflowModalOpened &&
         <StackOverflowModal
           toggleModal={toggleModal}
           result={results[selection.idx]}
