@@ -79,7 +79,6 @@ function DocsFilterModal({ onCloseRequest }: DocsFilterModalProps) {
 
   useEffect(() => {
     if (!inputRef.current) return;
-    // Focus modal's input and select text inside of it
     inputRef.current.focus();
     inputRef.current.setSelectionRange(0, 999999);
   }, []);

@@ -27,7 +27,7 @@ function SearchInputWrapper() {
   }, [uiStore.isFilterModalOpened]);
 
   useIPCRenderer(IPCOnChannel.DidShowMainWindow, () => {
-    if (!uiStore.isModalOpened && inputRef.current) {
+    if (!uiStore.isModalOpened && !uiStore.isFilterModalOpened && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.setSelectionRange(0, 999999);
     }
