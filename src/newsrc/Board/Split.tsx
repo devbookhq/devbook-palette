@@ -32,16 +32,21 @@ const Split = observer(({ splitNode }: SplitProps) => {
     setTileSizes(sizes);
   }, [splitNode.children]);
 
-  const handleDidResizeSplit = useCallback((_, newSizes) => {
-    setTileSizes(newSizes);
-    splitNode.children.forEach((c, idx) => c.size = newSizes[idx]);
-  }, [splitNode.children]);
+  // const handleDidResizeSplit = useCallback((_, newSizes) => {
+  //   setTileSizes(newSizes);
+  //   splitNode.children.forEach((c, idx) => c.size = newSizes[idx]);
+  // }, [splitNode.children]);
+
+  function handleDidResizeSplit(idx: number, newSizes: number[]) {
+    console.log(idx, newSizes)
+  }
+
 
   return (
     <ReactSplit
       direction={direction}
       onDidResize={handleDidResizeSplit}
-      initialSizes={tileSizes}
+      // initialSizes={tileSizes}
     >
       {splitNode.children.map(c => (
         <React.Fragment key={c.key}>
