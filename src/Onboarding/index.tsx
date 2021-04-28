@@ -79,6 +79,23 @@ function Onboarding() {
     IPCService.send(IPCSendChannel.FinishOnboarding, undefined);
   }
 
+
+  useEffect(() => {
+    function handleGlobalKeyPress(e: any) {
+      if (e.key === 'Enter') {
+        if (pageIndex < 1) {
+          setPageIndex(c => c += 1);
+        } else if (pageIndex === 1 && didShowMainWindow) {
+          handleFinishButtonClick();
+        }
+      }
+    }
+    window.addEventListener('keypress', handleGlobalKeyPress);
+    return () => {
+      window.removeEventListener('keypress', handleGlobalKeyPress)
+    }
+  }, [pageIndex, didShowMainWindow]);
+
   return (
     <Container>
       <PageContent>
