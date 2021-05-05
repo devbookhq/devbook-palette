@@ -275,7 +275,7 @@ function DocsBody({
   }, [containerRef]);
 
   const scrollTop = useCallback(() => {
-    containerRef?.current?.scrollTo(0, 0);
+    if (containerRef?.current?.scrollTop !== 0) containerRef?.current?.scrollTo(0, 0);
   }, [containerRef]);
 
   const scrollBottom = useCallback(() => {
@@ -344,6 +344,10 @@ function DocsBody({
 
     anchorEl.scrollIntoView();
   }, [html, anchor, pageURL]);
+
+  useEffect(() => {
+    scrollTop();
+  }, [result, scrollTop]);
 
   return (
     <>
