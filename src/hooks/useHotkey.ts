@@ -5,10 +5,7 @@ import AnalyticsService, { AnalyticsEvent } from 'services/analytics.service';
 
 function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], handler?: (k?: KeyboardEvent, h?: HotkeysEvent) => void, filter?: (e: KeyboardEvent) => boolean) {
   useHotkeys(hotkeyOptions.hotkey, (keyboardEvent, hotkeyEvent) => {
-    if (keyboardEvent.repeat && hotkeyOptions?.noRepeat) {
-      return;
-    }
-
+    if (keyboardEvent.repeat && hotkeyOptions?.noRepeat) return;
     if (hotkeyOptions.isActive()) {
       if (hotkeyOptions.action) {
         AnalyticsService.track(AnalyticsEvent.ShortcutUsed, { action: hotkeyOptions.action })
