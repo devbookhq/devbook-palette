@@ -117,7 +117,6 @@ class SearchStore {
   readonly executeThrottledSearch = throttle(this.executeSearch, 300);
 
   async executeSearch(query?: string) {
-    console.log('x')
     if (query !== undefined) this.query = query;
     if (!this.query) return;
     this.setLastQuery(this.query);
