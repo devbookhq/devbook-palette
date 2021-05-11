@@ -22,6 +22,7 @@ function useHotkey<T extends HotkeyAction>(hotkeyOptions: HotKeysBinding[T], han
   }, {
     filter: filter || (() => true),
     enableOnTags: ['TEXTAREA', 'INPUT', 'SELECT'],
+    keydown: true,
   }, [
     hotkeyOptions.isActive,
     hotkeyOptions.hotkey,

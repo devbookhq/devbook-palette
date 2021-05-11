@@ -6,12 +6,13 @@ import { useUIStore, HotkeyAction } from 'ui/ui.store';
 import Hotkey from 'components/Hotkey';
 import useHotkey from 'hooks/useHotkey';
 
+
 function SearchButton() {
   const searchStore = useSearchStore();
   const uiStore = useUIStore();
 
   const searchCurrentQuery = useCallback(() => {
-    searchStore.executeSearch();
+    searchStore.executeThrottledSearch();
   }, [searchStore]);
 
   useHotkey(

@@ -9,6 +9,7 @@ import SyncService, { StorageKey } from 'services/sync.service';
 import { HistoryEntry } from './historyEntry';
 import AnalyticsService, { AnalyticsEvent } from 'services/analytics.service';
 import UIStore from 'ui/ui.store';
+import throttle from 'utils/throttle';
 
 export function useSearchStore() {
   const { searchStore } = useRootStore();
@@ -113,7 +114,10 @@ class SearchStore {
     }));
   }
 
+  readonly executeThrottledSearch = throttle(this.executeSearch, 300);
+
   async executeSearch(query?: string) {
+    console.log('x')
     if (query !== undefined) this.query = query;
     if (!this.query) return;
     this.setLastQuery(this.query);
