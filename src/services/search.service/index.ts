@@ -107,35 +107,36 @@ class SearchService {
           return stackOverflowResults.data.results;
 
         case SearchSource.Docs:
-          const { filter } = options as SearchOptionsMap[SearchSource.Docs];
+          // const { filter } = options as SearchOptionsMap[SearchSource.Docs];
 
-          const docsVersion = filter.version ? filter.version : version;
-          const docsBaseURL = docsVersion ? `${SearchService.baseURL}/${docsVersion}` : SearchService.baseURLWithVersion;
-          const docsFilter = docsVersion === APIVersion.V0 ? [filter.slug] : filter.slug;
+          // const docsVersion = filter.version ? filter.version : version;
+          // const docsBaseURL = docsVersion ? `${SearchService.baseURL}/${docsVersion}` : SearchService.baseURLWithVersion;
+          // const docsFilter = docsVersion === APIVersion.V0 ? [filter.slug] : filter.slug;
 
           const docsResults = await axios.post('/search/docs',
             {
               query,
-              filter: docsFilter,
+              // filter: docsFilter,
             },
             {
-              baseURL: docsBaseURL,
+              baseURL: 'http://localhost:8000/v2',
+              // baseURL: docsBaseURL,
             },
           );
 
-          if (version || SearchService.apiVersion >= APIVersion.V2) {
-            const results = docsResults.data.results as DocResult[];
-            const pages = docsResults.data.pages as { content: string; url_without_anchor: string }[];
-            const style = docsResults.data.style as string;
-            return results.map(r => ({
-              ...r,
-              page: {
-                ...r.page,
-                html: `${style}${pages.find(p => p.url_without_anchor === r.page.urlWithoutAnchor)}`,
-              },
-            })) as any;
-          }
-          return docsResults.data.results;
+          // if (version || SearchService.apiVersion >= APIVersion.V2) {
+          const results = docsResults.data.results as DocResult[];
+          const pages = docsResults.data.pages as { content: string; url_without_anchor: string }[];
+          const style = docsResults.data.style as string;
+          return results.map(r => ({
+            ...r,
+            page: {
+              ...r.page,
+              html: `<style>${style}</style>${pages.find(p => p.url_without_anchor === r.page.urlWithoutAnchor)?.content}`,
+            },
+          })) as any;
+        // }
+        // return docsResults.data.results;
 
         default:
           throw new Error(`Invalid search source ${source}.`);
