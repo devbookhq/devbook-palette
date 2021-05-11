@@ -114,7 +114,7 @@ class SearchStore {
     }));
   }
 
-  readonly executeThrottledSearch = throttle(this.executeSearch, 300);
+  readonly executeThrottledSearch = throttle(this.executeSearch, 100);
 
   async executeSearch(query?: string) {
     if (query !== undefined) this.query = query;

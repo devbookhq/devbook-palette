@@ -58,6 +58,7 @@ export type HotKeysBinding = {
     hotkey: string,
     isActive: () => boolean,
     label: string[],
+    noRepeat?: boolean,
     action?: string;
     handler?: (k?: KeyboardEvent, h?: HotkeysEvent) => void,
   };
@@ -315,6 +316,7 @@ class UIStore {
     [HotkeyAction.Search]: {
       hotkey: 'Enter',
       label: ['Enter'],
+      noRepeat: true,
       isActive: () =>
         !this.isSearchHistoryVisible &&
         !this.isSearchInPageOpened &&
