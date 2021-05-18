@@ -61,7 +61,7 @@ class SearchStore {
   }
 
   get isQueryDirty() {
-    return this._query !== this._lastQuery;
+    return (this._query.trim() !== this._lastQuery.trim()) && !!this._query.trim();
   }
 
   get isSearching() {
@@ -119,6 +119,7 @@ class SearchStore {
   async executeSearch(query?: string) {
     if (query !== undefined) this.query = query;
     if (!this.query) return;
+    if (!this.query.trim()) return;
     this.setLastQuery(this.query);
     this.isSearching = true;
 
