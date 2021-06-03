@@ -89,7 +89,6 @@ class SearchStore {
       _lastSearchInvocation: false,
     });
     this.sync().then(() => {
-      this.executeSearch();
       this.backup();
     });
   }
@@ -114,7 +113,7 @@ class SearchStore {
     }));
   }
 
-  readonly executeThrottledSearch = throttle(this.executeSearch, 100);
+  readonly executeThrottledSearch = throttle(this.executeSearch, 250);
 
   async executeSearch(query?: string) {
     if (query !== undefined) this.query = query;
