@@ -9,14 +9,12 @@ const Container = styled.div`
 
 interface QueryFiltersProps {
   source: SearchSource;
-  user: User | undefined;
 }
 
-function QueryFilters({ source, user }: QueryFiltersProps) {
+function QueryFilters({ source }: QueryFiltersProps) {
   return (
     <Container>
       {source === SearchSource.Docs &&
-        user &&
         <DocsFilter />
       }
     </Container>

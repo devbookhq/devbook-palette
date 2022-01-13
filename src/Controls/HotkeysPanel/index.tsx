@@ -8,7 +8,6 @@ import StackOverflowHotkeys from './StackOverflowHotkeys';
 import StackOverflowModalHotkeys from './StackOverflowModalHotkeys';
 import DocsHotkeys from './DocsHotkeys';
 import DocsFilterModalHotkeys from './DocsFilterModalHotkeys';
-import { useUserStore } from 'user/user.store';
 
 const Container = styled.div`
   width: 100%;
@@ -25,7 +24,6 @@ const Container = styled.div`
 
 function HotkeysPanel() {
   const uiStore = useUIStore();
-  const userStore = useUserStore();
 
   return (
     <>
@@ -40,7 +38,6 @@ function HotkeysPanel() {
         </Container>
       }
       {uiStore.searchSource === SearchSource.Docs &&
-        userStore.user &&
         <Container>
           {!uiStore.isDocsFilterModalOpened &&
             <DocsHotkeys />

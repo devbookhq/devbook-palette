@@ -11,8 +11,6 @@ import InfoMessage from 'components/InfoMessage';
 import InfoText from 'components/InfoMessage/InfoText';
 import HotkeyText from 'components/HotkeyText';
 import { useUserStore } from 'user/user.store';
-import SignIn from './SignIn';
-import { AuthState } from 'user/authState';
 import { useEffect } from 'react';
 import DocsFilterModal from './Docs/DocsFilterModal';
 
@@ -59,7 +57,6 @@ function Search() {
 
       {uiStore.searchSource === SearchSource.Docs &&
         uiStore.isDocsFilterModalOpened &&
-        userStore.user &&
         <DocsFilterModal
           onCloseRequest={toggleFilterModal}
         />
@@ -68,22 +65,13 @@ function Search() {
 
       {uiStore.searchSource === SearchSource.Docs &&
         searchStore.results.Docs.results.length !== 0 &&
-        userStore.user &&
         !uiStore.isSignInModalOpened &&
         <Docs
           results={searchStore.results.Docs.results}
         />
       }
 
-      {uiStore.searchSource === SearchSource.Docs &&
-        !userStore.user &&
-        <SignIn
-          isSigningInUser={userStore.state === AuthState.SigningInUser}
-          isLoading={userStore.isLoading}
-        />
-      }
-
-      {((searchStore.results.Docs.results.length === 0 && uiStore.searchSource === SearchSource.Docs && userStore.user) ||
+      {((searchStore.results.Docs.results.length === 0 && uiStore.searchSource === SearchSource.Docs) ||
         (searchStore.results.StackOverflow.results.length === 0 && uiStore.searchSource === SearchSource.StackOverflow)) &&
         <>
           {(searchStore.isQueryDirty || !searchStore.query) &&
