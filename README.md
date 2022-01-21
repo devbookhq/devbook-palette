@@ -1,4 +1,6 @@
-⚠️ **The Devbook app is officially deprecated. We keep servers running for now but there won't be any new features.** ⚠️
+⚠️ **Devbook app is officially deprecated. We keep servers running for now but there won't be any new features.** ⚠️
+
+👉 Check out the [new SDK](https://github.com/DevbookHQ/sdk) we are working on.
 
 # Devbook
 The app has two parts.
