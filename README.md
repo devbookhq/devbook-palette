@@ -1,3 +1,4 @@
+# DEPRECATED
 ⚠️ **Devbook app is officially deprecated. We keep servers running for now but there won't be any new features.** ⚠️
 
 👉 Check out the [new SDK](https://usedevbook.com) we are working on.
