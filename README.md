@@ -1,3 +1,5 @@
+⚠️ **The Devbook app is officially deprecated. We keep servers running for now but there won't be any new features.** ⚠️
+
 # Devbook
 The app has two parts.
 - The client part. That's the frontend of the app that is done in React. Client is distributed through the CDN `https://client.usedevbook.com/<version>`. The electron part then loads it's content from this URL. The `version` in the URL must match the version of the app.
